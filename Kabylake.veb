@@ -525,8 +525,7 @@
 "UefiCpuPkg\Universal\Acpi\S3Resume2Pei\S3Resume.cif"= "SS: AptioV;$/AptioV/Source/Modules/ACPI/S3Resume;ACPI_14"
 "AmiModulePkg\AmiGopPolicy\AmiGopPolicy.cif"= "SS: AptioV;$/AptioV/Source/Modules/AmiGopPolicy;AmiGopPolicy_07"
 "AmiModulePkg\BcpBootOrder\BcpBootOrder.cif"= "SS: AptioV;$/AptioV/Source/Modules/BootOptionPolicies/BcpBootOrder;BcpBootOrder_07"
-"AmiModulePkg\EC\EC.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/Embedded Controller;EC_032"
-"KabylakePlatSamplePkg\EC\EC.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/Embedded Controller/EC Dxe;EC_032"
+
 "AmiModulePkg\EfiOsBootOptionNames\EfiOsBootOptionNames.cif"= "SS: AptioV;$/AptioV/Source/Modules/BootOptionPolicies/EfiOsBootOptionNames;EfiOsBootOptionNames_10"
 "AmiModulePkg\EfiOsBootOptionNames\EobonPriorityMap\EobonPriorityMap.cif"= "SS: AptioV;$/AptioV/Source/Modules/BootOptionPolicies/EfiOsBootOptionNames/EobonPriorityMap;EfiOsBootOptionNames_10"
 "AmiModulePkg\GenericSio\GenericSio.cif"= "SS: AptioV;$/AptioV/Source/Modules/GenericSio;GenericSio_09"

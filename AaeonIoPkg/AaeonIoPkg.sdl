@@ -344,9 +344,10 @@ ELINK
 	InvokeOrder = AfterParent
 End
 
-ELINK
-	Name  = "$(BUILD_DIR)\Sio1HwmStrings.uni"
-	Parent  = "SetupStringFiles"
-	InvokeOrder = AfterParent
-End
-
+##ray_override / [XI-BringUp] Disable Unused Feature / Aaeon BFPI / removed >>
+##ELINK
+##	Name  = "$(BUILD_DIR)\Sio1HwmStrings.uni"
+##	Parent  = "SetupStringFiles"
+##	InvokeOrder = AfterParent
+##End
+##ray_override / [XI-BringUp] Disable Unused Feature / Aaeon BFPI / removed <<
