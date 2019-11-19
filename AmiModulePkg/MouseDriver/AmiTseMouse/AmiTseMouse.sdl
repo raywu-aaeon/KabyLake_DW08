@@ -1,0 +1,145 @@
+TOKEN
+    Name  = AmiTseMouse_SUPPORT
+    Value  = 1
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+    Help  = "Main switch to enable AmiTseMouse support in Project"
+End
+
+PATH
+    Name  = "AMITSE_MOUSE_DIR"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEMouseInit"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEMouseInit function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEMouseStop"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEMouseStop function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEIsMouseClickedonSoftkbd"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEIsMouseClickedonSoftkbd function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEMouseRefresh"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEMouseRefresh function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEMouseStart"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEMouseStart function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEMouseFreeze"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEMouseFreeze function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEGetCoordinates"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEGetCoordinates function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEMouseReadInfo"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEMouseReadInfo function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEMouseDestroy"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEMouseDestroy function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSEGetactualScreentop"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSEGetactualScreentop function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSENumericSoftKbdInit"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSENumericSoftKbdInit function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "OVERRIDE_TSENumericSoftKbdExit"
+    Value  = "1"
+    Help  = "set to 1 if OEM wants to override the TSENumericSoftKbdExit function from Board module."
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "TSE_MOUSE_POST_TRIGGER_TIME"
+    Value  = "200000"
+    Help  = "The number of 100ns in which mouse event is checked in POST"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+    Token = "MINISETUP_MOUSE_SUPPORT" "=" "1"
+End
+
+ELINK
+    Name  = "$(AMITSE_MOUSE_DIR)/AmiTseMouse.c"
+    Parent  = "TSE_SOURCE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "gEfiTimerArchProtocolGuid"
+    Parent  = "ADDITIONAL_AMITSE_Protocols"
+    InvokeOrder = AfterParent
+    Token = "CHANGE_TIMER_TICK_INTERVAL" "=" "1"
+End

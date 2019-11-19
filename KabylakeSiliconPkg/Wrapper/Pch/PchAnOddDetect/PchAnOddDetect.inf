@@ -1,0 +1,33 @@
+[Defines]
+  INF_VERSION       = 0x00010015
+  VERSION_STRING    = 1.0
+  BASE_NAME         = PchAnOddDetect
+  MODULE_TYPE       = DXE_DRIVER
+  FILE_GUID         = AC44EB5B-286B-4a41-BF5C-B75B8286454B
+  ENTRY_POINT       = PchAnOddInitEntry
+	
+[Sources]
+  PchAnOddDetect.c
+
+[LibraryClasses]
+  BaseLib
+  UefiLib
+  MmPciLib
+  IoLib
+  DebugLib
+  PchInfoLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Packages]
+  MdePkg/MdePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+
+[Protocols]
+  gEfiAtaPassThruProtocolGuid
+
+[Depex]
+  gEfiAtaPassThruProtocolGuid

@@ -1,0 +1,10 @@
+<component>
+	name = "Mobile CometLake uCode Patches (806EX)"
+	category = ModulePart
+	LocalRoot = "AmiIntelCpuPkg\Microcode\Mobile\"
+	RefName = "CometLakeMobileUc"
+[files]
+"CometLakeMobileUc.sdl"
+"M94806EC_000000B8.mcb" = "MOBILE MICROCODE UPDATES" 
+"M80A0660_000000AC.mcb" = "MOBILE MICROCODE UPDATES" 
+<endComponent>

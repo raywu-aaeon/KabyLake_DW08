@@ -1,0 +1,39 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = LegacyRegionDxe
+  FILE_GUID                      = FAEA0786-FF3E-4091-A895-98E4E9114892
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = LegacyRegionInit
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  LegacyRegionDxe.c
+  LegacyRegionDxe.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+#  ClarkdaleUncorePkg/ClarkdaleUncorePkg.dec
+
+[LibraryClasses]
+  PciLib
+#  PcdLib
+  DebugLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+
+[Protocols]
+  gEfiLegacyRegion2ProtocolGuid
+
+#[Pcd]
+#  gEfiMchTokenSpaceGuid.PcdMchPciExpressAreaSize
+
+[Depex]
+  TRUE

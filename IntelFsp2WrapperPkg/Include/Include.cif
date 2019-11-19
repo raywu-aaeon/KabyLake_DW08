@@ -1,0 +1,9 @@
+<component>
+	name = "Include"
+	category = ModulePart
+	LocalRoot = "IntelFsp2WrapperPkg\Include\"
+	RefName = "IntelFsp2WrapperPkg.Include"
+[parts]
+"IntelFsp2WrapperPkg.Include.Library"
+"IntelFsp2WrapperPkg.Include.Ppi"
+<endComponent>

@@ -1,0 +1,11 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "IntelFsp2WrapperPkg\Library\"
+	RefName = "IntelFsp2WrapperPkg.Library"
+[INF]
+"BaseFspWrapperApiLib\BaseFspWrapperApiLib.inf"
+"PeiFspWrapperApiTestLib\PeiFspWrapperApiTestLib.inf"
+[files]
+"Library.sdl"	
+<endComponent>

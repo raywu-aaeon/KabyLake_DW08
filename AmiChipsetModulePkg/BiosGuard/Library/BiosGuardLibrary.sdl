@@ -1,0 +1,56 @@
+TOKEN
+    Name  = "BIOS_GUARD_LIBRARY_SUPPORT"
+    Value  = "1"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+PATH
+    Name  = "BIOS_GUARD_LIBRARY_PATH"
+End
+
+INFComponent
+    Name  = "AmiBiosGuardMiscLib"
+    File  = "AmiBiosGuardMiscLib/AmiBiosGuardMiscLib.inf"
+    Package  = "AmiChipsetModulePkg"
+End
+
+LibraryMapping
+    Class  = "AmiBiosGuardMiscLib"
+    Instance  = "AmiChipsetModulePkg.AmiBiosGuardMiscLib"
+End
+
+INFComponent
+    Name  = "AmiBiosGuardVerifyRomPeiLib"
+    File  = "AmiBiosGuardVerifyRomPeiLib/AmiBiosGuardVerifyRomPeiLib.inf"
+    Package  = "AmiChipsetModulePkg"
+End
+
+LibraryMapping
+    Class  = "AmiBiosGuardVerifyRomPeiLib"
+    Instance  = "AmiChipsetModulePkg.AmiBiosGuardVerifyRomPeiLib"
+End
+
+INFComponent
+    Name  = "AmiBiosGuardVerifyOemBinLib"
+    File  = "AmiBiosGuardVerifyOemBinLib/AmiBiosGuardVerifyOemBinLib.inf"
+    Package  = "AmiChipsetModulePkg"
+End
+
+LibraryMapping
+    Class  = "AmiBiosGuardVerifyOemBinLib"
+    Instance  = "AmiChipsetModulePkg.AmiBiosGuardVerifyOemBinLib"
+End
+
+INFComponent
+    Name  = "BgtCheckMeStateLib"
+    File  = "BgtCheckMeStateLib/BgtCheckMeStateLib.inf"
+    Package  = "AmiChipsetModulePkg"
+End
+
+LibraryMapping
+    Class  = "BgtCheckMeStateLib"
+    Instance  = "AmiChipsetModulePkg.BgtCheckMeStateLib"
+End

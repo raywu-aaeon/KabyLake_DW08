@@ -1,0 +1,131 @@
+CxImage
+
+This copy of the CxImage notices is provided for your convenience. In case of any discrepancy between this copy and the notices in the file ximage.h that is included in the CxImage distribution, the latter shall prevail. If you modify CxImage you may insert additional notices immediately following this sentence. -------------------------------------------------------------------------------- COPYRIGHT NOTICE, DISCLAIMER, and LICENSE: CxImage version 6.0.0 02/Feb/2008 CxImage : Copyright (C) 2001 - 2008, Davide Pizzolato Original CImage and CImageIterator implementation are: Copyright (C) 1995, Alejandro Aguilar Sierra (asierra(at)servidor(dot)unam(dot)mx) Covered code is provided under this license on an "as is" basis, without warranty of any kind, either expressed or implied, including, without limitation, warranties that the covered code is free of defects, merchantable, fit for a particular purpose or non-infringing. The entire risk as to the quality and performance of the covered code is with you. Should any covered code prove defective in any respect, you (not the initial developer or any other contributor) assume the cost of any necessary servicing, repair or correction. This disclaimer of warranty constitutes an essential part of this license. No use of any covered code is authorized hereunder except under this disclaimer. Permission is hereby granted to use, copy, modify, and distribute this source code, or portions hereof, for any purpose, including commercial applications, freely and without fee, subject to the following restrictions: 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required. 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software. 3. This notice may not be removed or altered from any source distribution. -------------------------------------------------------------------------------- Other information: about CxImage, and the latest version, can be found at the CxImage home page: http://www.xdp.it --------------------------------------------------------------------------------
+
+
+Libpng
+
+This copy of the libpng notices is provided for your convenience.  In case of
+any discrepancy between this copy and the notices in the file png.h that is included in the libpng distribution, the latter shall prevail.
+
+COPYRIGHT NOTICE, DISCLAIMER, and LICENSE:
+If you modify libpng you may insert additional notices immediately following this sentence. libpng versions 1.2.6, August 15, 2004, through 1.2.24, December 14, 2007, are
+Copyright (c) 2004, 2006-2007 Glenn Randers-Pehrson, and are distributed according to the same disclaimer and license as libpng-1.2.5 with the following individual added to the list of Contributing Authors
+   Cosmin Truta
+libpng versions 1.0.7, July 1, 2000, through 1.2.5 - October 3, 2002, are
+Copyright (c) 2000-2002 Glenn Randers-Pehrson, and are distributed according to the same disclaimer and license as libpng-1.0.6 with the following individuals added to the list of Contributing Authors
+   Simon-Pierre Cadieux
+   Eric S. Raymond
+   Gilles Vollant 
+and with the following additions to the disclaimer:
+There is no warranty against interference with your enjoyment of the library or against infringement.  There is no warranty that our efforts or the library will fulfill any of your particular purposes or needs.  This library is provided with all faults, and the entire risk of satisfactory quality, performance, accuracy, and effort is with the user. libpng versions 0.97, January 1998, through 1.0.6, March 20, 2000, are
+Copyright (c) 1998, 1999 Glenn Randers-Pehrson, and are distributed according to the same disclaimer and license as libpng-0.96, with the following individuals added to the list of Contributing Authors:
+
+   Tom Lane
+   Glenn Randers-Pehrson
+   Willem van Schaik 
+ libpng versions 0.89, June 1996, through 0.96, May 1997, are
+Copyright (c) 1996, 1997 Andreas Dilger
+Distributed according to the same disclaimer and license as libpng-0.88, with the following individuals added to the list of Contributing Authors:
+
+   John Bowler
+   Kevin Bracey
+   Sam Bushell
+   Magnus Holmgren
+   Greg Roelofs
+   Tom Tanner
+
+libpng versions 0.5, May 1995, through 0.88, January 1996, are
+Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.
+
+For the purposes of this copyright and license, "Contributing Authors" is defined as the following set of individuals:
+
+   Andreas Dilger
+   Dave Martindale
+   Guy Eric Schalnat
+   Paul Schmidt
+   Tim Wegner
+
+The PNG Reference Library is supplied "AS IS".  The Contributing Authors and Group 42, Inc. disclaim all warranties, expressed or implied, including, without limitation, the warranties of merchantability and of fitness for any purpose.  The Contributing Authors and Group 42, Inc. assume no liability for direct, indirect, incidental, special, exemplary, or consequential damages, which may result from the use of the PNG
+Reference Library, even if advised of the possibility of such damage.
+
+Permission is hereby granted to use, copy, modify, and distribute this source code, or portions hereof, for any purpose, without fee, subject to the following restrictions:
+
+1. The origin of this source code must not be misrepresented.
+
+2. Altered versions must be plainly marked as such and must not be misrepresented as being the original source.
+
+3. This Copyright notice may not be removed or altered from an source or altered source distribution.
+
+The Contributing Authors and Group 42, Inc. specifically permit, without fee, and encourage the use of this source code as a component to supporting the PNG file format in commercial products.  If you use this source code in a product, acknowledgment is not required but would be appreciated.
+
+
+A "png_get_copyright" function is available, for convenient use in "about" boxes and the like:
+
+   printf("%s",png_get_copyright(NULL));
+
+Also, the PNG logo (in PNG format, of course) is supplied in the files "pngbar.png" and "pngbar.jpg (88x31) and "pngnow.png" (98x31).
+
+Libpng is OSI Certified Open Source Software.  OSI Certified Open Source is a certification mark of the Open Source Initiative.
+
+Glenn Randers-Pehrson
+glennrp at users.sourceforge.net
+December 14, 2007
+
+ZLIB DATA COMPRESSION LIBRARY
+
+zlib 1.2.3 is a general purpose data compression library.  All the code is
+thread safe.  The data format used by the zlib library is described by RFCs
+(Request for Comments) 1950 to 1952 in the files
+http://www.ietf.org/rfc/rfc1950.txt (zlib format), rfc1951.txt (deflate format)
+and rfc1952.txt (gzip format). These documents are also available in other
+formats from ftp://ftp.uu.net/graphics/png/documents/zlib/zdoc-index.html
+
+All functions of the compression library are documented in the file zlib.h
+(volunteer to write man pages welcome, contact zlib@gzip.org). A usage example
+of the library is given in the file example.c which also tests that the library
+is working correctly. Another example is given in the file minigzip.c. The
+compression library itself is composed of all source files except example.c and
+minigzip.c.
+
+To compile all files and run the test program, follow the instructions given at
+the top of Makefile. In short "make test; make install" should work for most
+machines. For Unix: "./configure; make test; make install". For MSDOS, use one
+of the special makefiles such as Makefile.msc. For VMS, use make_vms.com.
+
+Questions about zlib should be sent to <zlib@gzip.org>, or to Gilles Vollant
+<info@winimage.com> for the Windows DLL version. The zlib home page is
+http://www.zlib.org or http://www.gzip.org/zlib/ Before reporting a problem,
+please check this site to verify that you have the latest version of zlib;
+otherwise get the latest version and check whether the problem still exists or
+not.
+
+PLEASE read the zlib FAQ http://www.gzip.org/zlib/zlib_faq.html before asking
+for help.
+
+Mark Nelson <markn@ieee.org> wrote an article about zlib for the Jan. 1997
+issue of  Dr. Dobb's Journal; a copy of the article is available in
+http://dogma.net/markn/articles/zlibtool/zlibtool.htm
+
+The changes made in version 1.2.3 are documented in the file ChangeLog.
+
+Unsupported third party contributions are provided in directory "contrib".
+
+A Java implementation of zlib is available in the Java Development Kit
+http://java.sun.com/j2se/1.4.2/docs/api/java/util/zip/package-summary.html
+See the zlib home page http://www.zlib.org for details.
+
+A Perl interface to zlib written by Paul Marquess <pmqs@cpan.org> is in the
+CPAN (Comprehensive Perl Archive Network) sites
+http://www.cpan.org/modules/by-module/Compress/
+
+A Python interface to zlib written by A.M. Kuchling <amk@amk.ca> is
+available in Python 1.5 and later versions, see
+http://www.python.org/doc/lib/module-zlib.html
+
+A zlib binding for TCL written by Andreas Kupries <a.kupries@westend.com> is
+availlable at http://www.oche.de/~akupries/soft/trf/trf_zip.html
+
+An experimental package to read and write files in .zip format, written on top
+of zlib by Gilles Vollant <info@winimage.com>, is available in
+

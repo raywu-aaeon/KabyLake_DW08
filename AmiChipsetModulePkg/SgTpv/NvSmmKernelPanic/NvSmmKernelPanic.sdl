@@ -1,0 +1,82 @@
+TOKEN
+    Name  = "NvSmmKernelPanic_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable NvSmmKernelPanic support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+    Master = Yes
+    Token = "SGOEMSSDT_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "NVSR_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable NVSR support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "NV_L_EVENT_FBEN_PIN"
+    Value  = "_L29"
+    Help  = "Need to adjust the L-event number for FBEN pin"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+PATH
+    Name  = "NvJT_DIR"
+End
+
+INFComponent
+    Name  = "NvSmmKernelPanic"
+    File  = "NvSmmKernelPanic.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+End
+
+TOKEN
+	Name  = "SWSMI_JT_IO_TRAP_EN"
+	Value  = "0xB6"
+	Help  = "Value to be written into SMI command register \to write AcpiNvs->AudioCodec to CMOS"
+	TokenType = Integer
+	TargetH = Yes
+	Range  = "0-0xff"
+End
+
+TOKEN
+	Name  = "SWSMI_JT_IO_TRAP_DIS"
+	Value  = "0xB7"
+	Help  = "Value to be written into SMI command register \to write CMOS:AudioCodec to AcpiNvs->AudioCodec"
+	TokenType = Integer
+	TargetH = Yes
+	Range  = "0-0xff"
+End
+
+PCIDEVICE
+	Title  = "PEG Port Slot x16"
+	Parent  = "PEG Root Port D1F0"
+	Attribute  = "0x0"
+	Dev_type  = "PciDevice"
+	Dev  = 00h
+	Slot  = 010h
+	Fun  = 00h
+	SleepNum  = 01h
+        ASLfile  = "'Build\OEMNvWake.asl'"
+	ASLdeviceName  = "PEGP"
+	IntA = 	LNKA; 16
+	IntB = 	LNKB; 17
+	IntC = 	LNKC; 18
+	IntD = 	LNKD; 19        	
+	DeviceType = Slot
+	PCIBusSize = 32bit
+	ROMMain = No
+	ASL_WAK  = "Method;\_SB.PCI0.PEG0.PEGP.PWAK(Arg0)"
+End
+
+OUTPUTREGISTER
+    Name = "NvSmmKernelPanicAsl"
+    Path = "Build"
+    File = "NvSmmKernelPanic.asl"
+    Template = "NvSmmKernelPanicSample.asl"
+End

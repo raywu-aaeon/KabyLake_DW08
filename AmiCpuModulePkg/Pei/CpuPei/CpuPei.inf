@@ -1,0 +1,57 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CpuPei
+  FILE_GUID                      = e60a79d5-dc9b-47f1-87d3-51bf697b6121
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = CpuPeiEntry
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  HOB Guid C Name: gEfiHtBistHobGuid Hob Type: GUID_EXTENSION
+#
+
+[Sources]
+  CpuPei.c  
+  CpuPei.h
+  CpuPeiInterface.h
+
+[Packages]
+  MdePkg/MdePkg.dec  
+  MdeModulePkg/MdeModulePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiCpuModulePkg/AmiCpuModulePkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+
+[LibraryClasses]
+  PeimEntryPoint
+  AmiNbMiscLib
+  AmiPeiLib
+  HobLib
+  LockBoxLib
+  CpuCspPeiLib
+  DebugLib
+
+[Ppis]
+  gEfiPeiMasterBootModePpiGuid	# PPI_NOTIFY SOMETIMES_CONSUMED
+  gEfiPeiStallPpiGuid
+  gEfiPeiReadOnlyVariable2PpiGuid
+
+[Guids]
+  gEfiHtBistHobGuid
+
+[Depex]
+  gEfiPeiMemoryDiscoveredPpiGuid AND
+  gEfiPeiMasterBootModePpiGuid AND
+  gEfiPeiCpuIoPpiInstalledGuid AND		#MdePkg.dec
+  gEfiPciCfg2PpiGuid AND			#MdePkg.dec
+  gEfiPeiReadOnlyVariable2PpiGuid		#MdePkg.dec
+
+
+[BuildOptions.IA32]
+*_*_IA32_CC_FLAGS = -DPEI_COMPILE 
+

@@ -1,0 +1,59 @@
+## @file
+#  Component description file for AcpiDebug ACPI table.
+#
+#@copyright
+# Copyright (c) 2014 Intel Corporation. All rights reserved
+# This software and associated documentation (if any) is furnished
+# under a license and may only be used or copied in accordance
+# with the terms of the license. Except as permitted by the
+# license, no part of this software or documentation may be
+# reproduced, stored in a retrieval system, or transmitted in any
+# form or by any means without the express written consent of
+# Intel Corporation.
+# This file contains a 'Sample Driver' and is licensed as such
+# under the terms of your license agreement with Intel or your
+# vendor. This file may be modified by the user, subject to
+# the additional terms of the license agreement.
+#
+#@par Specification Reference:
+##
+
+[Defines]
+INF_VERSION          = 0x00010005
+BASE_NAME            = SsdtAcpiDebug
+FILE_GUID            = a54c760e-415d-4157-a74a-f74941873f65
+MODULE_TYPE          = USER_DEFINED
+VERSION_STRING       = 1.0
+
+[Sources.common]
+  SsdtAcpiDebug.asl
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+################################################################################
+#
+# Library Class Section - list of Library Classes that are required for
+#                         this module.
+#
+################################################################################
+
+[LibraryClasses]
+
+################################################################################
+#
+# Protocol C Name Section - list of Protocol and Protocol Notify C Names
+#                           that this module uses or produces.
+#
+################################################################################
+
+[Pcd]
+
+[Protocols]
+
+[PPIs]
+
+[Guids]
+
+[Depex]
+

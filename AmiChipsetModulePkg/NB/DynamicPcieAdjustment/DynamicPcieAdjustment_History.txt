@@ -1,0 +1,104 @@
+****************************************************************************
+**                                                                        **
+**                  LABEL DynamicPcieAdjustment_001                       **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+Fixed when Enable PCIE_DYNAMIC_SUPPORT, the feature will failure on Kabylake CRB30.
+[Solution]
+Change DynamicPcieAdjustment from Module Part to eModule.
+[Files]
+DynamicPcieAdjustment.cif
+
+###################################################################################
+
+********************************************************************************
+**                                                                            **
+**                  (RETIRED) DynamicPcieAdjustment_003                       **
+**                                                                            **
+********************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+Get PCIEX_LENGTH value by PCI IO instead of gSiPkgTokenSpaceGuid.PcdPciExpressRegionLength.
+PcdPciExpressRegionLength is not a generic PCD.
+[Files]
+AmiChipsetModulePkg\NB\DynamicPcieAdjustment\DynamicPcieAdjustment.sdl
+
+
+********************************************************************************
+**                                                                            **
+**                  (RETIRED) DynamicPcieAdjustment_002                       **
+**                                                                            **
+********************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+Created "*_*_*_ASM_FLAGS = AMI_PCIE_DYNAMIC_SUPPORT_FLAG" for assembly code modification.
+[Files]
+AmiChipsetModulePkg\NB\DynamicPcieAdjustment\DynamicPcieAdjustment.sdl
+AmiCpuModulePkg\Library\ProcessorStartup\Ia32\Platform.inc
+KabylakeSiliconPkg\SampleCode\Library\PlatformSecLib\Ia32\Flat32.asm
+KabylakeSiliconPkg\SampleCode\Library\PlatformSecLib\FspTPlatformSecLib.inf
+KabylakeSiliconPkg\SampleCode\Library\PlatformSecLib\PlatformSecLib.inf
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\Ia32\SecSaLib.asm
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\SecSaLib.inf
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fixed system may can't boot to OS or hang up, 
+when used the BasePciLibPciExpress. (SMM driver)
+[Files]
+AmiChipsetModulePkg\NB\DynamicPcieAdjustment\DynamicSmmPciExpressLib\DynamicSmmPciExpressLib.inf
+AmiChipsetModulePkg\NB\DynamicPcieAdjustment\DynamicSmmPciExpressLib\PciExpressLib.c
+AmiChipsetModulePkg\NB\DynamicPcieAdjustment\DynamicSmmBasePciLibPciExpress\DynamicSmmBasePciLibPciExpress.inf
+AmiChipsetModulePkg\NB\DynamicPcieAdjustment\DynamicSmmBasePciLibPciExpress\PciLib.c
+AmiChipsetModulePkg\NB\DynamicPcieAdjustment\DynamicPcieAdjustment.sdl
+
+********************************************************************************
+**                                                                            **
+**                  (RETIRED) DynamicPcieAdjustment_001                       **
+**                                                                            **
+********************************************************************************
+[Tag] EIP256229 (AMI_OVERRIDE_SA0023)
+[Category] Improvement
+[Severity] Normal
+[Description] 
+[Kabylake] Dynamic PCIE_BASE_ADDRESS feature implementation
+[Files]
+AmiChipsetModulePkg\Include\NbSetupData.h
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.c
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.inf
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.c
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.inf
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.inf
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.inf
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+AmiChipsetModulePkg\NB\NbSetup\Nb.sd
+AmiChipsetModulePkg\NB\NbSetup\Nb.uni
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.inf
+AmiChipsetModulePkg\AmiCspLib.mak
+AmiCpuModulePkg\Library\ProcessorStartup\Ia32\Platform.inc
+KabylakePlatSamplePkg\EC\EC.C
+KabylakePlatSamplePkg\EC\EC.inf
+KabylakePlatSamplePkg\Setup\SaSetup.hfr
+KabylakeSiliconPkg\SampleCode\Library\SecPlatformLib\Ia32\Flat32.asm
+KabylakeSiliconPkg\SampleCode\SecCore\Ia32\TempRamInit.asm
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\Ia32\SecSaLib.asm
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\SecSaLib.inf
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+KabylakeSiliconPkg\Wrapper\Library\SaLinkLib\SaLinkLib.c
+KabylakeSiliconPkg\Wrapper\Library\SystemAgentHookLib\AmiSaPolicyUpdatePei.c

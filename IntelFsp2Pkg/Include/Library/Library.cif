@@ -1,0 +1,14 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "IntelFsp2Pkg\Include\Library\"
+	RefName = "IntelFsp2Pkg.Include.Library"
+[files]
+"CacheAsRamLib.h"	
+"CacheLib.h"	
+"DebugDeviceLib.h"	
+"FspCommonLib.h"	
+"FspPlatformLib.h"	
+"FspSecPlatformLib.h"	
+"FspSwitchStackLib.h"	
+<endComponent>

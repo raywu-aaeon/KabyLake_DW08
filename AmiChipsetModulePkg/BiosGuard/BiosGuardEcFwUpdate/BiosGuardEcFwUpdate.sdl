@@ -1,0 +1,68 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**     5555 Oakbrook Pkwy, Suite 200, Norcross, GA 30093            **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+#**********************************************************************
+#<AMI_FHDR_START>
+#
+# Name:	BiosGuardMeud.sdl
+#
+# Description: SDL file for BiosGuardMeud
+#
+#<AMI_FHDR_END>
+#**********************************************************************
+
+TOKEN
+     Name = "BIOS_GUARD_ECFW_UPDATE_SUPPORT"
+     Value = "1"
+     TokenType = Boolean
+     TargetEQU = Yes
+     TargetMAK = Yes
+     TargetH = Yes
+     Master = Yes
+     Help = "Main switch to enable BiosGuard EC Firmware update support in Project"
+     Token = "BIOS_GUARD_MEUD_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name = "EC_FIRMWARE_BIN_SIZE"
+    Value = "0x40000"
+    Help = "Third party firmware size"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name = "EC_FIRMWARE_BIN_PATH"
+    Value = "$(BIOS_GUARD_ECFW_UPDATE_PATH)$(PATH_SLASH)DummyEcFw.bin"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+PATH
+    Name  = "BIOS_GUARD_ECFW_UPDATE_PATH"
+End
+
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**     5555 Oakbrook Pkwy, Suite 200, Norcross, GA 30093            **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************

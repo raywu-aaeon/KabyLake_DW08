@@ -1,0 +1,17 @@
+TOKEN
+    Name = "FspDebugInit_SUPPORT"
+    Value = "1"
+    Help  = "Main switch to enable FspDebugInit support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+    Token = "DEBUG_MODE" "=" "1"    
+End
+
+INFComponent
+    Name  = "FspDebugServicePei"
+    File  = "Pei\FspDebugServicePei.inf"
+    Package  = "KabylakeFspPkg"
+    ModuleTypes  = "PEIM"
+End

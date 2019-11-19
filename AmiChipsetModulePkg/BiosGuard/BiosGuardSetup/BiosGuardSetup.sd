@@ -1,0 +1,109 @@
+//**********************************************************************
+//**********************************************************************
+//**                                                                  **
+//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**                                                                  **
+//**                       All Rights Reserved.                       **
+//**                                                                  **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+//**                                                                  **
+//**                       Phone: (770)-246-8600                      **
+//**                                                                  **
+//**********************************************************************
+//**********************************************************************
+
+//**********************************************************************
+//<AMI_FHDR_START>
+//
+// Name: BiosGuardSetup.sd
+//
+// Description:	Create the setup item for BiosGuardSetup.
+//
+//<AMI_FHDR_END>
+//**********************************************************************
+
+#ifdef SETUP_DATA_DEFINITION
+//---------------------------------------------------------------------------
+// Put NVRAM data definitions here.
+// For example: UINT8 Data1;
+// These definitions will be converted by the build process
+// to a definitions of SETUP_DATA fields.
+//---------------------------------------------------------------------------
+    UINT8   BiosGuard;
+#endif
+
+#if defined(VFRCOMPILE) && !defined(CONTROLS_ARE_DEFINED)
+#define CONTROL_DEFINITION
+#endif
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+#ifdef CONTROL_DEFINITION
+
+#define BIOS_GUARD_ONEOF_STATEENABLE\
+       oneof varid   = SETUP_DATA.BiosGuard,\
+         prompt      = STRING_TOKEN(STR_BIOS_GUARD_CONFIGURATION_PROMPT),\
+         help        = STRING_TOKEN(STR_BIOS_GUARD_CONFIGURATION_HELP),\
+         default     = DEFAULT_BIOS_GUARD_STATE,\
+         option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = MANUFACTURING | RESET_REQUIRED;\
+         option text = STRING_TOKEN(STR_ENABLED), value = 1, flags =  RESET_REQUIRED;\
+       endoneof;       
+
+#endif // CONTROL_DEFINITION
+
+#ifdef CONTROLS_WITH_DEFAULTS
+    BIOS_GUARD_ONEOF_STATEENABLE
+#endif // CONTROLS_WITH_DEFAULTS
+
+//---------------------------------------------------------------------------
+//                ADVANCED - CRB Configuration Form
+//---------------------------------------------------------------------------
+#ifdef ADVANCED_FORM_SET
+
+  #ifndef SUPPRESS_GRAYOUT_ENDIF //old Core
+    #define SUPPRESS_GRAYOUT_ENDIF endif;
+  #endif
+
+  #ifdef FORM_SET_TYPEDEF        
+    #include <SetupVariable.h>
+  #endif
+
+  #ifdef FORM_SET_GOTO
+   // Define goto commands for the forms defined in this file
+       goto BIOS_GUARD_CONFIGURATION_FORM_ID,
+       prompt = STRING_TOKEN(STR_BIOS_GUARD_CONFIGURATION_FORM),
+       help = STRING_TOKEN(STR_BIOS_GUARD_CONFIGURATION_HELP);
+  #endif
+
+  #ifdef FORM_SET_FORM
+  // Define forms
+    #ifndef BIOS_GUARD_CONFIGURATION_FORM_SETUP
+    #define BIOS_GUARD_CONFIGURATION_FORM_SETUP
+
+    form formid = AUTO_ID(BIOS_GUARD_CONFIGURATION_FORM_ID),
+          title = STRING_TOKEN(STR_BIOS_GUARD_CONFIGURATION_FORM);
+
+    grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+      BIOS_GUARD_ONEOF_STATEENABLE
+    endif;
+
+    endform;  // BIOS_GUARD_FORM_ID
+
+    #endif // BIOS_GUARD_CONFIGURATION_FORM_SETUP
+  #endif  // FORM_SET_FORM
+
+#endif  // ADVANCED_FORM_SET
+
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************

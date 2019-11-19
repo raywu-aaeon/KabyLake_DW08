@@ -1,0 +1,27 @@
+TOKEN
+    Name = "BIOS_GUARD_FLASH_INTERFACE_SUPPORT"
+    Value = "1"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    Master = Yes
+    Help = "Main switch to enable BIOS_GUARD_FLASH_INTERFACE_SUPPORT support in Project"
+    Token = "SECURE_FLASH_SUPPORT" "=" "1"
+End
+
+INFComponent
+    Name  = "BiosGuardSecSMIFlash"
+    File  = "BiosGuardSecSMIFlash/BiosGuardSecSMIFlash.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+    Token = "SMM_SUPPORT" "=" "1"    
+End
+
+TOKEN
+    Name = "BIOS_GUARD_REVISION_CHECK_SUPPORT"
+    Value = "0"
+    Help = "Enable to support bios revision check."
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End

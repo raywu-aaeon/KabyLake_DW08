@@ -1,0 +1,22 @@
+[Defines]
+INF_VERSION = 0x00010005
+VERSION_STRING = 1.0
+BASE_NAME = TCG2OemTpm12PeiCommLib
+MODULE_TYPE = PEIM
+LIBRARY_CLASS = TCG2OemTpm12PeiCommLib
+FILE_GUID = B58495B9-0F93-44bb-8472-B5C3C298BD47
+
+[Sources]
+Tpm12Comm.c
+Tpm12Comm.h
+
+[LibraryClasses]
+DebugLib
+
+[Packages]
+AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+MdePkg/MdePkg.dec
+AmiModulePkg/AmiModulePkg.dec
+
+[BuildOptions]
+*_*_*_CC_FLAGS = -DPEI_INTERNAL_PROTOCOL

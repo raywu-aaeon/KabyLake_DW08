@@ -1,0 +1,111 @@
+//**********************************************************************
+//**********************************************************************
+//**                                                                  **
+//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**                                                                  **
+//**                       All Rights Reserved.                       **
+//**                                                                  **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+//**                                                                  **
+//**                       Phone: (770)-246-8600                      **
+//**                                                                  **
+//**********************************************************************
+//**********************************************************************
+
+//**********************************************************************
+//<AMI_FHDR_START>
+//
+// Name:  SaddleBrookeSetup.sd
+//
+// Description:	Saddle Brooke setup form
+//
+//<AMI_FHDR_END>
+//**********************************************************************
+
+#if defined(VFRCOMPILE) && !defined(CONTROLS_ARE_DEFINED)
+#define CONTROL_DEFINITION
+#endif
+#ifdef CONTROL_DEFINITION
+
+//---------------------------------------------------------------------------
+// SA Setup config 
+//---------------------------------------------------------------------------
+#ifdef SA_ONEOF_SAIMGUENABLE 
+#undef SA_ONEOF_SAIMGUENABLE
+#define SA_ONEOF_SAIMGUENABLE\
+  oneof varid   =  SA_SETUP.SaImguEnable,\
+      prompt   = STRING_TOKEN(STR_SA_SKYCAM_DEVICE_PROMPT),\
+      help     = STRING_TOKEN(STR_SA_SKYCAM_DEVICE_HELP),\
+      option text = STRING_TOKEN (STR_ENABLED_STRING),  value = 1, flags = RESET_REQUIRED;\
+      option text = STRING_TOKEN (STR_DISABLED_STRING), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    endoneof;
+#endif
+
+    
+//---------------------------------------------------------------------------
+// PCH Setup config 
+//---------------------------------------------------------------------------
+#ifdef PCH_ONEOF_PCHSERIALIODEVICE_SERIAL_IO_I2C0_
+#undef PCH_ONEOF_PCHSERIALIODEVICE_SERIAL_IO_I2C0_
+#define PCH_ONEOF_PCHSERIALIODEVICE_SERIAL_IO_I2C0_\
+  oneof varid  = PCH_SETUP.PchSerialIoDevice[SERIAL_IO_I2C0],\
+    prompt   = STRING_TOKEN(STR_PCH_SERIAL_IO_I2C0),\
+    help     = STRING_TOKEN(STR_PCH_SERIAL_IO_DEVICE_HELP),\
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+#endif
+
+#ifdef PCH_ONEOF_PCHSERIALIODEVICE_SERIAL_IO_I2C1_ 
+#undef PCH_ONEOF_PCHSERIALIODEVICE_SERIAL_IO_I2C1_
+#define PCH_ONEOF_PCHSERIALIODEVICE_SERIAL_IO_I2C1_\
+  oneof varid  = PCH_SETUP.PchSerialIoDevice[SERIAL_IO_I2C1],\
+    prompt   = STRING_TOKEN(STR_PCH_SERIAL_IO_I2C1),\
+    help     = STRING_TOKEN(STR_PCH_SERIAL_IO_DEVICE_HELP),\
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+#endif
+
+#ifdef PCH_ONEOF_PCHSKYCAMCIO2ENABLE 
+#undef PCH_ONEOF_PCHSKYCAMCIO2ENABLE
+#define PCH_ONEOF_PCHSKYCAMCIO2ENABLE\
+  oneof varid  = PCH_SETUP.PchSkyCamCio2Enable,\
+    prompt   = STRING_TOKEN(STR_SKYCAM_CIO2_DEVICE_ENABLE),\
+    help     = STRING_TOKEN(STR_SKYCAM_CIO2_DEVICE_ENABLE_HELP),\
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+#endif
+
+
+//---------------------------------------------------------------------------
+// Acpi Setup config 
+//---------------------------------------------------------------------------
+#ifdef ACPI_ONEOF_USBTYPECAICSUPPORT 
+#undef ACPI_ONEOF_USBTYPECAICSUPPORT
+#define ACPI_ONEOF_USBTYPECAICSUPPORT\
+  oneof varid = SETUP_DATA.UsbTypeCAicSupport,\
+    prompt   = STRING_TOKEN(STR_USB_TYPE_C_SUPPORT),\
+    help     = STRING_TOKEN(STR_USB_TYPE_C_SUPPORT_HELP),\
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+#endif
+
+//---------------------------------------------------------------------------
+#endif // #ifdef CONTROL_DEFINITION
+
+//**********************************************************************
+//**********************************************************************
+//**                                                                  **
+//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**                                                                  **
+//**                       All Rights Reserved.                       **
+//**                                                                  **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+//**                                                                  **
+//**                       Phone: (770)-246-8600                      **
+//**                                                                  **
+//**********************************************************************
+//**********************************************************************

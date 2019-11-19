@@ -1,0 +1,97 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+#<AMI_FHDR_START>
+#
+# Name: BootGuardPei.sdl
+#
+# Description: SDL file for BootGuardPei
+#
+#<AMI_FHDR_END>
+#**********************************************************************
+
+TOKEN
+        Name  = "BOOT_GUARD_PEI_SUPPORT"
+        Value  = "1"
+        Help  = "Main switch to enable BOOT_GUARD_PEI_SUPPORT in Project"
+        TokenType = Boolean
+        TargetMAK = Yes
+        TargetH = Yes
+        Master = Yes
+        Token = "INTEL_BOOT_GUARD_CHAIN_OF_TRUST_SUPPORT" "=" "1"
+End
+
+TOKEN
+        Name  = "BOOT_GUARD_TPM_CHAIN_OF_TRUST"
+        Value  = "1"
+        Help  = "Main switch to enable TPM Boot Guard Chanin of Trust in Project"
+        TokenType = Boolean
+        TargetMAK = Yes
+        TargetH = Yes
+End
+
+INFComponent
+        Name = "BootGuardPei"
+        File = "BootGuardPei.inf"
+        Package = "AmiChipsetModulePkg"
+        Arch = "IA32"
+        ModuleTypes = "PEIM"
+        Token = "INTEL_BOOT_GUARD_SECURITY_FUNCTION_SUPPORT" "=" "1"
+End
+
+#INFComponent
+#        Name = "BootGuardPeiMemDetect"
+#        File = "BootGuardPeiMemDetect.inf"
+#        Package = "AmiChipsetModulePkg"
+#        Arch = "IA32"
+#        ModuleTypes = "PEIM"
+#End
+
+#FFS_FILE
+#    Name  = "BootGuardPeiMemDetect"
+#    FD_AREA  = "FV_BB"
+#    INFComponent  = "AmiChipsetModulePkg.BootGuardPeiMemDetect"
+#    Apriori_Index  = "1"
+#End
+
+INFComponent
+        Name = "BootGuardPeiBeforeFvPublish"
+        File = "BootGuardPeiBeforeFvPublish.inf"
+        Package = "AmiChipsetModulePkg"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "AmiChipsetModulePkg.BootGuardPeiBeforeFvPublish"
+    Override  = "AmiModulePkg.RomLayoutPei"
+End
+
+ELINK
+    Name  = "BtGFtFvBeforePublishing"
+    Parent  = "PeiProcessFvBeforePublishing"
+    InvokeOrder = ReplaceParent
+End
+
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************

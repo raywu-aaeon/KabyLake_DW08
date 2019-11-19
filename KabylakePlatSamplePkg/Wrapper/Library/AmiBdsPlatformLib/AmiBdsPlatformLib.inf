@@ -1,0 +1,52 @@
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = AmiBdsPlatformLib
+  FILE_GUID                      = e48a4420-57c7-48fa-940f-2e9503e990c4
+  VERSION_STRING                 = 1.0  
+  MODULE_TYPE                    = DXE_DRIVER
+  LIBRARY_CLASS                  = AmiBdsPlatformLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#  
+  
+[Sources]
+  AmiBdsPlatformLib.c
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec 
+  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec 
+  AmiModulePkg/AmiModulePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses]
+  BaseLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  DebugLib
+  PciLib
+  UefiLib
+
+[Guids]
+  gEfiEndOfDxeEventGroupGuid
+  gEfiGlobalVariableGuid
+  gSetupVariableGuid
+
+[Protocols]
+  gEfiAcpiS3SaveProtocolGuid
+  gEfiFirmwareVolume2ProtocolGuid
+  gEfiDxeSmmReadyToLockProtocolGuid
+  gEfiLoadFileProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiPciIoProtocolGuid
+  
+[Pcd]
+  gEfiIntelFrameworkModulePkgTokenSpaceGuid.PcdShellFile  
+
+[Depex]
+  gEfiVariableArchProtocolGuid

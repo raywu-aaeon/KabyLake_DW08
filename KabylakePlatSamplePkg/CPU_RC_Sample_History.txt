@@ -1,0 +1,18 @@
+****************************************************************************
+**                                                                        **                      
+**                   LABEL KabylakePlatPkg_050_001                        **
+**                                                                        **   
+****************************************************************************
+[Tag] AMI_OVERRIDE_CPU0001_START
+[Category] Bug Fix
+[Severity] Important
+[Symptom] Rc search microcode method may cause system hang.
+[Root Cause] Search wrong address range.
+[Solution] Return NULL directly. MicrocodePatchAddress policy will be override in AMI CPU wrap.
+[Files] KabylakePlatSamplePkg\Library\PeiPolicyUpdateLib\PeiCpuPolicyUpdate.c
+
+[Tag] AMI_OVERRIDE_CPU0000_START
+[Category] Improvement
+[Severity] Normal 
+[Description] Fixed build error when OPTIMIZATION = 0
+[Files] KabylakePlatSamplePkg\Library\PeiPolicyUpdateLib\PeiCpuPolicyUpdate.c

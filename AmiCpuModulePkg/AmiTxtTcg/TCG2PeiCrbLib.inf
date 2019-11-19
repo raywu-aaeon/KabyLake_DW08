@@ -1,0 +1,19 @@
+[Defines]
+INF_VERSION = 0x00010005
+VERSION_STRING = 1.0
+BASE_NAME = TCG2CrbLib
+MODULE_TYPE = PEIM
+LIBRARY_CLASS = TCG2PeiCrbLib
+FILE_GUID = 3994f472-60a5-4f46-b834-f369578068e4
+
+[Sources]
+  TPM2Interface/TpmCrbLib.c
+  TPM2Interface/TpmCrbLib.h
+  TPM2Interface/TpmCrbReg.h
+
+[LibraryClasses]
+
+[Packages]
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  MdePkg/MdePkg.dec
+  AmiModulePkg/AmiModulePkg.dec

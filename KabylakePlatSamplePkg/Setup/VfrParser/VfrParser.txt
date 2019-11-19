@@ -1,0 +1,47 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2015, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+
+Prepare: $(AMI_LIST_OF_VfI)
+
+ifeq ($(BUILD_OS), $(BUILD_OS_WINDOWS))
+ifeq ($(HFR_FILES_SORTING), 1)
+SETUP_DEFINITIONS := $(foreach DIR, $(notdir $(filter %.vfi %.hfr, $(subst \,/,$(SETUP_DEFINITIONS)))), $(BUILD_DIR)/$(DIR)) $(filter-out %.vfi %.hfr,$(subst \,/,$(SETUP_DEFINITIONS)))
+else 
+SETUP_DEFINITIONS := $(foreach SETUP_DEFINITIONS2, $(SETUP_DEFINITIONS), \
+                       $(foreach DIR, $(notdir $(filter %.vfi %.hfr, $(subst \,/,$(SETUP_DEFINITIONS2)))), $(BUILD_DIR)/$(DIR)) $(filter-out %.vfi %.hfr,$(subst \,/,$(SETUP_DEFINITIONS2)))  \
+                     )
+endif
+
+# Let Main.hfr to the latest for Setup Main menu.
+SETUP_DEFINITIONS := $(filter-out %Main.hfr,$(SETUP_DEFINITIONS)) $(filter %Main.hfr,$(SETUP_DEFINITIONS))
+endif #
+
+AMI_LIST_OF_VfI:=@Elink(PLATFORM_VFR_FILES_LIST, "$(BUILD_DIR)/@Child ", "", "")
+AMI_LIST_OF_VfI2:=@Elink(PLATFORM_VFR_FILES_LIST, "$(RC_SETUP_DIR)/@Child ", "", "")
+
+$(AMI_LIST_OF_VfI): $(AMI_LIST_OF_VfI2)
+ifeq ($(BUILD_OS), $(BUILD_OS_WINDOWS))
+	$(ECHO) $(VFR_FILES_OF_READY_TOTRANSLATE_LIST) > $(BUILD_DIR)\FileMapping.txt 
+	$(ECHO) $(foreach DIR, $(notdir $(filter %.vfi %.hfr, $(subst \,/,$(SETUP_DEFINITIONS)))), $(RC_SETUP_DIR)/$(DIR)$(EOL)) > $(BUILD_DIR)\listOfVfi.txt
+	$(VFR_PARSER)\win\VfrGen.bat $(BUILD_DIR)\listOfVfi.txt  $(BUILD_DIR)\FileMapping.txt $(BUILD_DIR)
+	del $(BUILD_DIR)\listOfVfi.txt
+	del $(BUILD_DIR)\FileMapping.txt    
+else
+	$(ECHO) $(VFR_FILES_OF_READY_TOTRANSLATE_LIST) > $(BUILD_DIR)/FileMapping.txt 
+	$(ECHO) $(foreach DIR, $(notdir $(filter %.vfi %.hfr, $(subst \,/,$(SETUP_DEFINITIONS)))), $(RC_SETUP_DIR)/$(DIR)\$(EOL)) > $(BUILD_DIR)/listOfVfi.txt
+	chmod +x $(VFR_PARSER)/linux/VfrGen.sh
+	chmod +x $(VFR_PARSER)/linux/VfrParser.exe
+	$(VFR_PARSER)/linux/VfrGen.sh $(BUILD_DIR)/listOfVfi.txt  $(BUILD_DIR)/FileMapping.txt $(BUILD_DIR)/
+endif
+

@@ -1,0 +1,9 @@
+<component>
+	name = "Guid"
+	category = ModulePart
+	LocalRoot = "IntelFsp2Pkg\Include\Guid\"
+	RefName = "IntelFsp2Pkg.Include.Guid"
+[files]
+"FspHeaderFile.h"	
+"GuidHobFspEas.h"	
+<endComponent>

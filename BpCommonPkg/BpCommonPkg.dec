@@ -1,0 +1,162 @@
+#
+# This file contains 'Framework Code' and is licensed as such
+# under the terms of your license agreement with Intel or your
+# vendor.  This file may not be modified, except as allowed by
+# additional terms of your license agreement.
+#
+## @file
+# BpCommonPkg Package
+#
+# This package provides common modules on Bailey Park.
+# Copyright (c) 2011 - 2016, Intel Corporation. All rights reserved.<BR>
+#
+#    This software and associated documentation (if any) is furnished
+#    under a license and may only be used or copied in accordance
+#    with the terms of the license. Except as permitted by such
+#    license, no part of this software or documentation may be
+#    reproduced, stored in a retrieval system, or transmitted in any
+#    form or by any means without the express written consent of
+#    Intel Corporation.
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = BpCommonPkg
+  PACKAGE_GUID                   = 09AE2397-B177-41ad-A6BA-FA4483A7E85A
+  PACKAGE_VERSION                = 0.1
+
+[Includes]
+  Include
+
+# AMI_OVERRIDE_START >>>
+  # All CSM related things in Csm dir. Then we can remove it after CSM is retired.
+#  Csm/Include
+# AMI_OVERRIDE_END <<<  
+
+
+
+[LibraryClasses]
+  ##  @libraryclass    Provide services to send progress/error codes to Beep device.
+  BeepLib|Include/Library/BeepLib.h
+  
+  ##  @libraryclass    Provide platform beep map.
+  PlatformBeepMapLib|Include/Library/PlatformBeepMapLib.h
+  
+  ##  @libraryclass    Provide platform post code map.
+  PlatformPostCodeMapLib|Include/Library/PlatformPostCodeMapLib.h
+  
+  ##  @libraryclass    Provide common USB3 debug port functions.
+  PlatformPostCodeMapLib|Include/Library/Usb3DebugPortLib.h
+  
+  ##  @libraryclass    Provide capability to get/set USB3 debug port parameter.
+  Usb3DebugPortParameterLib|Include/Library/Usb3DebugPortParameterLib.h
+
+  ##  @libraryclass    Provide services to get BIOS ID information.
+  BiosIdLib|Include/Library/BiosIdLib.h
+
+  ##  @libraryclass    Provide services to write buffer to TraceHub.
+  TraceHubDebugLib|Include/Library/TraceHubDebugLib.h
+
+  ##  @libraryclass    Provide the specific hooks for TraceHub.
+  TraceHubHookLib|Include/Library/TraceHubHookLib.h
+
+  ##  @libraryclass    Provide services to access CMOS area.
+  CmosAccessLib|Include/Library/CmosAccessLib.h
+
+  ##  @libraryclass    Provide platform relevant services to access CMOS area.
+  PlatformCmosAccessLib|Include/Library/PlatformCmosAccessLib.h
+
+  ##  @libraryclass    Provide legacy interrupt reverse thunk support.
+  LegacyInterruptSupportLib|Include/Library/LegacyInterruptSupportLib.h
+
+[Guids]
+  gEfiBpCommonPkgTokenSpaceGuid  = { 0x26703ed8, 0x9171, 0x40a3, { 0x95, 0xc2, 0x56, 0x43, 0x6f, 0x8a, 0x5e, 0x56 } }  
+  gEfiUsb3DebugPortTokenSpaceGuid = { 0x87e7378b, 0xc59d, 0x4a16, { 0xa4, 0x21, 0x2c, 0xdb, 0x78, 0x26, 0xb1, 0xca } }
+  gEfiHddPasswordSecurityVariableGuid = { 0x5e22f4e2, 0x35ea, 0x421b, { 0x8f, 0xd1, 0xd4, 0xae, 0x85, 0x67, 0xa4, 0x51 }}
+  gVariableSmiGuid = { 0x1b838190, 0x4625, 0x4ead, { 0xab, 0xc9, 0xcd, 0x5e, 0x6a, 0xf1, 0x8f, 0xe0 }}
+
+  ## Include Include/Guid/BiosId.h
+  gBiosIdGuid = { 0xC3E36D09, 0x8294, 0x4b97, { 0xA8, 0x57, 0xD5, 0x28, 0x8F, 0xE3, 0x3E, 0x28 } }
+
+[PcdsFeatureFlag]
+  ## This PCD specifies whether StatusCode is reported via USB3 Serial port.
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdStatusCodeUseUsb3Serial|TRUE|BOOLEAN|0x10000003
+
+[PcdsFixedAtBuild, PcdsPatchableInModule]
+  ## This PCD specifies the boot option max size for variable check.
+  gEfiBpCommonPkgTokenSpaceGuid.PcdVarCheckBootOptionMaxSize|0x200|UINT32|0x0000000A
+  ## This PCD specifies the boot option max count for variable check.
+  # Then max size of BootOrder will be PcdVarCheckBootOptionMaxCount * sizeof (UINT16).
+  gEfiBpCommonPkgTokenSpaceGuid.PcdVarCheckBootOptionMaxCount|0x10|UINT32|0x0000000B
+  ## This PCD specifies the driver option max size for variable check.
+  gEfiBpCommonPkgTokenSpaceGuid.PcdVarCheckDriverOptionMaxSize|0x200|UINT32|0x0000000C
+  ## This PCD specifies the driver option max count for variable check.
+  # Then max size for DriverOrder will be PcdVarCheckDriverOptionMaxCount * sizeof (UINT16)
+  gEfiBpCommonPkgTokenSpaceGuid.PcdVarCheckDriverOptionMaxCount|0x10|UINT32|0x0000000D
+  ## This PCD specifies the SysPrep option max size for variable check.
+  gEfiBpCommonPkgTokenSpaceGuid.PcdVarCheckSysPrepOptionMaxSize|0x200|UINT32|0x00000010
+  ## This PCD specifies the SysPrep option max count for variable check.
+  # Then max size for SysPrepOrder will be PcdVarCheckSysPrepOptionMaxCount * sizeof (UINT16)
+  gEfiBpCommonPkgTokenSpaceGuid.PcdVarCheckSysPrepOptionMaxCount|0x10|UINT32|0x00000011
+  ## This PCD specifies the device path max size for variable check.
+  gEfiBpCommonPkgTokenSpaceGuid.PcdVarCheckDevicePathMaxSize|0x200|UINT32|0x0000000E
+
+  ## This PCD specifies Master of TraceHub device
+  gEfiBpCommonPkgTokenSpaceGuid.PcdTraceHubDebugLibMaster|0x0|UINT32|0x00000027
+  ## This PCD specifies Channel of TraceHub device
+  gEfiBpCommonPkgTokenSpaceGuid.PcdTraceHubDebugLibChannel|0x0|UINT32|0x00000028
+
+[PcdsFixedAtBuild,PcdsPatchableInModule,PcdsDynamic,PcdsDynamicEx]
+  ## This PCD specifies whether StatusCode is reported via PostCode
+  gEfiBpCommonPkgTokenSpaceGuid.PcdStatusCodeUsePostCode|FALSE|BOOLEAN|0x00000004
+
+  ## This PCD specifies whether StatusCode is reported via Beep
+  gEfiBpCommonPkgTokenSpaceGuid.PcdStatusCodeUseBeep|FALSE|BOOLEAN|0x00000005
+
+  ## This PCD specifies whether StatusCode is reported via Serial Port Plaftorm solution
+  gEfiBpCommonPkgTokenSpaceGuid.PcdStatusCodeUseSerialPortPlatform|FALSE|BOOLEAN|0x00000006
+
+  ## This PCD specifies whether unregister Serial Port StatusCode Handler
+  gEfiBpCommonPkgTokenSpaceGuid.PcdStatusCodeUnregisterSerialPort|TRUE|BOOLEAN|0x00000007
+
+  ## This PCD specifies whether StatusCode is reported via TraceHub
+  gEfiBpCommonPkgTokenSpaceGuid.PcdStatusCodeUseTraceHub|FALSE|BOOLEAN|0x00000029
+
+  ## This PCD specifies AcpiDebug feature is enable/disable.
+  gEfiBpCommonPkgTokenSpaceGuid.PcdAcpiDebugEnable|FALSE|BOOLEAN|0x00000012
+
+  ## This PCD specifies AcpiDebug buffer size.
+  gEfiBpCommonPkgTokenSpaceGuid.PcdAcpiDebugBufferSize|0x10000|UINT32|0x00000013
+
+[PcdsDynamic, PcdsDynamicEx]
+  ## This PCD specifies AcpiDebug buffer address
+  gEfiBpCommonPkgTokenSpaceGuid.PcdAcpiDebugAddress|0|UINT32|0x00000014
+
+[PcdsFixedAtBuild]
+  ## These PCD specify XHCI controller Bus/Device/Function, which are used to enable
+  #  XHCI debug device.
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdUsbSerialXhciBus|0x00|UINT8|0x00000016
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdUsbSerialXhciDev|0x14|UINT8|0x00000017
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdUsbSerialXhciFunc|0x00|UINT8|0x00000018
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdXhciDefaultBaseAddress|0xFEA10000|UINT32|0x00000019
+  
+  ## This PCD specifies the wait timeout value in microsecond if USB debug cable is detected but host not connected.
+  #  Default timeout value is 2000000 microseconds.
+  #  If user does not want system stall for long time, it can be set to small value.
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdXhciHostWaitTimeout|2000000|UINT64|0x00000020
+  
+  ## This PCD sepcifies the start index in CMOS, it will occupy 1 bytes space.
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdUsb3DebugPortBusIndex|0x59|UINT8|0x10000024
+  ## This PCD sepcifies the start index in CMOS, it will occupy 1 bytes space.
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdUsb3DebugPortDeviceIndex|0x5A|UINT8|0x10000025
+  ## This PCD sepcifies the start index in CMOS, it will occupy 1 bytes space.
+  gEfiUsb3DebugPortTokenSpaceGuid.PcdUsb3DebugPortFunctionIndex|0x5B|UINT8|0x10000026
+
+[Protocols]
+  gEfiLegacyInterruptHandlerProtocolGuid = { 0xd765bf98, 0x2f0b, 0x4e07, { 0xae, 0x77, 0x7e, 0x74, 0x1c, 0xb8, 0x9e, 0xff } }
+  gLegacyBiosReverseThunkProtocolGuid    = { 0xa7b41da5, 0x6667, 0x43c0, { 0x8c, 0xc6, 0x67, 0x89, 0xa6, 0x5c, 0x76, 0x67 } }
+  gTcgLegacyInt1AReadyProtocolGuid       = { 0x41e8252a, 0x9859, 0x4584, { 0xa0, 0x83, 0x2b, 0x6,  0x3,  0x3b, 0x5,  0x5c } }
+  gEfiHddPasswordNotifyProtocolGuid  = { 0x3cf71ad0, 0xd726, 0x4a26, { 0x8f, 0x68, 0x5c, 0x9b, 0x69, 0x91, 0x1a, 0xa3 } }
+
+

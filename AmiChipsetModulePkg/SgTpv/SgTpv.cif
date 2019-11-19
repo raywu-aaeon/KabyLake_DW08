@@ -1,0 +1,21 @@
+<component>
+	name = "SgTpv"
+	category = eModule
+	LocalRoot = "AmiChipsetModulePkg\SgTpv\"
+	RefName = "SgTpv"
+[INF]
+"SgTpvDxe.inf"
+"SgTpvPei.inf"
+[files]
+"SgTpv.sdl"	
+"SgTpv.sd"	
+"SgTpv.uni"	
+"SgTpv.chm"	
+[parts]
+"MXM_NBCI"
+"SgTpvAcpiTables"
+"SgTpvAcpiS3Save"
+"NvSmmKernelPanic"
+"Library"
+"AmiChipsetModulePkg.SgTpvInclude"
+<endComponent>

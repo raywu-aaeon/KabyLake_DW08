@@ -1,0 +1,17 @@
+<component>
+	name = "Include"
+	category = ModulePart
+	LocalRoot = "KabylakeFspBinPkg\Include\"
+	RefName = "KabylakeFspBinPkg.Include"
+[files]
+"FspmUpd.h"	
+"FspsUpd.h"	
+"FsptUpd.h"	
+"FspUpd.h"	
+"GpioConfig.h"
+"GpioSampleDef.h"
+"MemInfoHob.h"
+"SmbiosCacheInfoHob.h"
+"SmbiosProcessorInfoHob.h"
+"ConfigBlock\CpuConfigFspData.h"
+<endComponent>

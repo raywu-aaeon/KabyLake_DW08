@@ -1,0 +1,10 @@
+<component>
+    name = "AmiTseMouse"
+    category = ModulePart
+    LocalRoot = "AmiModulePkg/MouseDriver/AmiTseMouse/"
+    RefName = "AmiTseMouse"
+[files]
+"AmiTseMouse.sdl"	
+"AmiTseMouse.c"	
+"AmiTseMouse.h"	
+<endComponent>

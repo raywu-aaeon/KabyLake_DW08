@@ -1,0 +1,14 @@
+<component>
+  name = "I2cHid"
+  category = eModule
+  LocalRoot = "AmiModulePkg\I2cHid\"
+  RefName = "I2c_HID"
+[INF]
+  "I2cHid.inf"
+[files]
+  "I2cHid.sdl"
+  "I2cHId.chm"
+[parts]
+    "I2cProtocol"
+    "I2cController"
+<endComponent>

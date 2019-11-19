@@ -1,0 +1,39 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiMemoryInfoConfig
+  FILE_GUID                      = 1310BA34-D7B4-4A80-A645-8C0417C6AA55
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AmiMemoryInfoConfigEntryPoint
+
+[Sources]
+  AmiMemoryInfoConfig.c
+
+[Packages]
+  MdePkg/MdePkg.dec                             # base.h
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec   # efi.h
+  AmiChipsetPkg/AmiChipsetPkg.dec               # AmiMemInfo.h
+  KabylakeSiliconPkg/SiPkg.dec                  # SaRegs.h
+  ClientSiliconPkg/ClientSiliconPkg.dec         # ConfigBlockLib.h
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  PcdLib
+  BaseLib
+  AmiDxeLib
+  MemoryAllocationLib
+  HobLib
+  ConfigBlockLib
+
+[Protocols]
+  gAmiMemoryInfoGuid
+  gSaPolicyProtocolGuid
+
+[Guids]
+  gEfiHobListGuid 
+  gSiMemoryInfoDataGuid
+  gMemoryDxeConfigGuid
+
+[Depex]
+  gSaPolicyProtocolGuid AND
+  gMemInfoProtocolGuid

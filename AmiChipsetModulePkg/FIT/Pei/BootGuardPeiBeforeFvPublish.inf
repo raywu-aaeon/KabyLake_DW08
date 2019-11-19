@@ -1,0 +1,86 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = BootGuardPeiBeforeFvPublish
+  FILE_GUID                      = 3B032DA4-7F33-465B-96B0-655987E7F31C
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  
+[Sources]
+  BootGuardPeiMemDetect.c
+  BootGuardPei.h
+
+[Packages]
+  AmiCryptoPkg/AmiCryptoPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  KabylakeSiliconPkg/KabylakeSiliconPrivate.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  PeiServicesLib
+  MemoryAllocationLib
+  PeimEntryPoint
+  DebugLib
+  IoLib
+  HobLib
+  CpuLib
+  AmiPeiLib
+  BootGuardLib
+  BtGCryptLib
+  PcdLib
+  TimerLib
+  AmiCspFlashLib
+  AmiCspLib
+  MtrrLib
+  
+#
+# CryptoLib is required for SMRAM integrity check
+#
+
+
+[Ppis]
+gEfiPeiBootInRecoveryModePpiGuid
+gEfiPeiMemoryDiscoveredPpiGuid
+  
+[Pcd]
+  
+[Guids]
+  
+[Depex]
+  TRUE
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

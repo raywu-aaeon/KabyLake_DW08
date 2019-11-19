@@ -1,0 +1,27 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = FitPeiProcessFvBeforePublishing
+  FILE_GUID                      = 11AEC8BC-C409-4A05-A826-9DEF36FFD5F2
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = NULL
+
+[Sources]
+  FitPeiProcessFvBeforePublishing.c
+  FitPeiProcessFvBeforePublishing.h
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiCryptoPkg/AmiCryptoPkg.dec
+  
+[LibraryClasses]
+  AmiCspLib
+  AmiPeiLib
+  BootGuardLib
+  DebugLib
+  BaseCryptLib
+  
+[Protocols]

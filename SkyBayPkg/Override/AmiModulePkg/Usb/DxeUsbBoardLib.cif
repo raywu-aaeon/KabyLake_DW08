@@ -1,0 +1,10 @@
+<component>
+    name = "DxeUsbBoardLib"
+    category = ModulePart
+    LocalRoot = "SkyBayPkg\Override\AmiModulePkg\Usb"
+    RefName = "SkyBayPkg.Override.DxeUsbBoardLib"
+[INF]
+[files]
+"DxeUsbBoardLib.inf"
+"UsbPort2.c"
+<endComponent>

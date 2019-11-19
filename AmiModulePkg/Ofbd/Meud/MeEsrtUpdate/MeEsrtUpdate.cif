@@ -1,0 +1,10 @@
+<component>
+    name = "MeEsrtUpdate"
+    category = ModulePart
+    LocalRoot = "AmiModulePkg/Ofbd/Meud/MeEsrtUpdate"
+    RefName = "MeEsrtUpdate"
+[INF]
+"MeEsrtUpdate.inf"
+[files]
+"MeEsrtUpdate.sdl"
+<endComponent>

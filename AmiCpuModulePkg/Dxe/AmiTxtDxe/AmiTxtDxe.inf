@@ -1,0 +1,33 @@
+[Defines]
+	INF_VERSION = 0x00010015
+	VERSION_STRING = 1.0
+	BASE_NAME = AmiTxtDxe
+	FILE_GUID = 87D402CD-8B07-4B93-B38B-F8799F28B033
+    MODULE_TYPE = DXE_DRIVER
+	ENTRY_POINT = AmiTxtDxeEntry
+	
+[Sources]
+  AmiTxtDxe.c
+  AmiTxtDxe.h
+  TxtTcgService.h
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  SkyBayPkg/SkyBayPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses]
+  UefiDriverEntryPoint
+  BaseLib
+  DebugLib
+  IoLib
+  UefiBootServicesTableLib
+  AmiDxeLib
+  DebugLib
+
+[Guids]
+  gTxtInfoHobGuid
+
+[Depex]
+  gEfiMpServiceProtocolGuid

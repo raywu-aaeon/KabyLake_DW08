@@ -1,0 +1,56 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiBiosGuardVerifyRomPeiLib
+  FILE_GUID                      = a8e2c2d0-c40a-4a4d-9ab5-359c0ffbfd19  
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AmiBiosGuardVerifyRomPeiLib|PEIM
+
+[Sources]
+  AmiBiosGuardVerifyRomPeiLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  AmiCryptoPkg/AmiCryptoPkg.dec
+  Build/ChipsetReference.dec
+  
+[LibraryClasses]
+  BaseMemoryLib
+  HobLib
+  DebugLib
+  PeiCryptLib
+  BaseCryptLib
+  BaseMemoryLib
+
+[Guids]
+  gBiosGuardHobGuid
+  
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

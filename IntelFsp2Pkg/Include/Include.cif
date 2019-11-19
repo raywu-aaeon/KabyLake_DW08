@@ -1,0 +1,15 @@
+<component>
+	name = "Include"
+	category = ModulePart
+	LocalRoot = "IntelFsp2Pkg\Include\"
+	RefName = "IntelFsp2Pkg.Include"
+[files]
+"FspEas\FspApi.h"	
+"FspEas.h"	
+"FspGlobalData.h"	
+"FspMeasurePointId.h"	
+"FspStatusCode.h"	
+[parts]
+"IntelFsp2Pkg.Include.Guid"
+"IntelFsp2Pkg.Include.Library"
+<endComponent>

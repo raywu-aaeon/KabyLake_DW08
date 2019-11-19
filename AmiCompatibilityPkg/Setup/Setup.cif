@@ -1,0 +1,22 @@
+<component>
+	name = "Setup"
+	category = eModule
+	LocalRoot = "AmiCompatibilityPkg\Setup\"
+	RefName = "AmiCompatibilityPkg.Setup"
+[files]
+"Setup.sdl"	
+"Setup.mak"	
+"Setup.chm"
+"AmiBiosInfo.sd"
+"AmiBootOrder.sd"
+"AmiTse.sd"
+"setupheader.txt"	
+"Setup.c"
+"SetupHiiAccess.c"
+"Setup.uni"
+"Setup.vfr"
+"SetupLibrary.c"
+"SetupPrivate.h"
+"SetupDefaults.c"
+"SetupDefaults.vfr"
+<endComponent>

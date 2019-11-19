@@ -1,0 +1,12 @@
+<component>
+        name = "BiosGuardBinary"
+        category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/BiosGuard/BiosGuardBinary"
+        RefName = "BiosGuardBinary"
+
+[files]
+"BiosGuardBinary.sdl"
+"BIOSGuardModule_PV.2.0.3683.bin"
+"BIOSGuardModule_QS.2.0.4093.bin"
+"BiosGuardBinary_FdfFileStatement.txt"
+<endComponent>

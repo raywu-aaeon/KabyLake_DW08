@@ -1,0 +1,18 @@
+################################################################################
+#
+# Rules are use with the [FV] section's module INF type to define
+# how an FFS file is created for a given INF file. The following Rule are the default
+# rules for the different module type. User can add the customized rules to define the
+# content of the FFS file.
+#
+################################################################################
+
+[Rule.Common.SEC.RELOC]
+  FILE SEC = $(NAMED_GUID) {
+    $(UNCOMPRESSED_PEI_EXECUTABLE_SECTION) $(SEC_CORE_EXECUTABLE_ALIGNMENT) |.efi
+  }
+    
+[Rule.Common.USER_DEFINED.FSPHEADER]
+  FILE RAW = $(NAMED_GUID)               {
+     RAW BIN                  |.acpi
+  }

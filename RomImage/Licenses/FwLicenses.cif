@@ -1,0 +1,19 @@
+<component>
+	name = "3rd party Licenses in FW"
+	category = ModulePart
+	LocalRoot = "RomImage\Licenses\"
+	RefName = "FwLicenses"
+[files]
+"3rd party Licenses in FW\Apache Harmony Apache Version 2.0, January 2004 w header.txt"
+"3rd party Licenses in FW\Apache-Xerces-Java-XML-Parser.txt"
+"3rd party Licenses in FW\ConvertUTF unicode license.txt"
+"3rd party Licenses in FW\CxImage license complete.txt"
+"3rd party Licenses in FW\HTTP Client C MIT license.txt"
+"3rd party Licenses in FW\llvm.org University of Illinois_NCSA.txt"
+"3rd party Licenses in FW\Microsoft TPM 2.0 BSD Two Clause License.txt"
+"3rd party Licenses in FW\Minix 3.pdf"
+"3rd party Licenses in FW\MIT Kerberos for Windows.pdf"
+"3rd party Licenses in FW\newlib_licenses.txt"
+"3rd party Licenses in FW\wpa supplicant license.txt"
+"3rd party Licenses in FW\zlib license.txt"
+<endComponent>

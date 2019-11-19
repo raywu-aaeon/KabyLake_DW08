@@ -1,0 +1,35 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AcpiDebugTable
+  FILE_GUID                      = 83c30e53-7a4c-4273-a686-65e9dc09d75b
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = InstallADebTabl
+
+[Sources]
+  AcpiDebug.c
+  AcpiDebug.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+
+[LibraryClasses]
+  UefiLib
+  UefiDriverEntryPoint
+  DebugLib
+  UefiBootServicesTableLib
+  AmiDxeLib
+  
+[Guids]
+
+[Protocols]
+  gEfiFirmwareVolume2ProtocolGuid
+  gEfiAcpiTableProtocolGuid
+
+[Depex]
+  gEfiAcpiTableProtocolGuid AND
+  gEfiFirmwareVolume2ProtocolGuid AND
+  gEfiAcpiSupportProtocolGuid

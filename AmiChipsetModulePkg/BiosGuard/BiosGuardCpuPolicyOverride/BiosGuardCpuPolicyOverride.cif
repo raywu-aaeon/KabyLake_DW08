@@ -1,0 +1,11 @@
+<component>
+	name = "BiosGuardCpuPolicyOverride"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/BiosGuard/BiosGuardCpuPolicyOverride"
+	RefName = "BiosGuardCpuPolicyOverride"
+[INF]
+"BiosGuardCpuPolicyOverride.inf"
+
+[files]
+"BiosGuardCpuPolicyOverride.sdl"
+<endComponent>

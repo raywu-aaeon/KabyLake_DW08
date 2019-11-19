@@ -1,0 +1,11 @@
+<component>
+	name = "FspDescription"
+	category = ModulePart
+	LocalRoot = "KabylakeFspPkg\FspDescription\"
+	RefName = "KabylakeFspPkg.FspDescription"
+[INF]
+"FspDescription.inf"
+[files]
+"FspDescription.sdl"	
+"FspFdfFileStatements.txt"	
+<endComponent>

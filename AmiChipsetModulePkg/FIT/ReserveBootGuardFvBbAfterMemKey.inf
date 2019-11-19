@@ -1,0 +1,22 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2012, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+
+[Defines]
+  INF_VERSION                = 0x00010005
+  BASE_NAME                  = ReserveBootGuardFvBbAfterMemKey
+  FILE_GUID                  = 98db68e0-5ab6-4a48-80c8-eac6c51180fc
+  MODULE_TYPE                = USER_DEFINED
+
+[Binaries]
+  BIN|ReserveBootGuardFvBbAfterMemKey.bin

@@ -1,0 +1,11 @@
+<component>
+	name = "BiosGuardOfbdHook"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/BiosGuard/BiosGuardFlashInterface/BiosGuardOfbdHook"
+	RefName = "BiosGuardOfbdHook"
+
+[files]
+"BiosGuardOfbdHook.sdl"
+"BiosGuardOfbdHook.c"
+"BiosGuardOfbdHook.h"
+<endComponent>

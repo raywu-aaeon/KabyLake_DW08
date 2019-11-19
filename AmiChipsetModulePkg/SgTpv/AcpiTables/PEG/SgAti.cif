@@ -1,0 +1,10 @@
+<component>
+	name = "Ati"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/AcpiTables/PEG/"
+	RefName = "AtiSG"
+[files]
+"ATdGPU.asl"	
+"ATiGPU.asl"	
+"ATiGDmisc.asl"	
+<endComponent>

@@ -1,0 +1,52 @@
+#*************************************************************************
+#**                                                                     **
+#**   Copyright (c) 1985-2019, American Megatrends International LLC.   **
+#**                                                                     **
+#**      All rights reserved. Subject to AMI licensing agreement.       **
+#**                                                                     **
+#*************************************************************************
+#/** @file AmiCspGlobalNvs.sdl
+#
+#*/
+
+PCIDEVICE
+    Title  = "CspNvsPciHost"
+    Parent  = "PciHost (Virtual)"
+    Attribute  = "0x0"
+    Dev_type  = "Container"
+    Dev  = 00h
+    Fun  = 00h
+    SleepNum  = 01h
+    ASLfile  = "'AmiChipsetModulePkg/ASL/AmiCspGlobalNvs.asl;Before Pci Tree'"
+    DeviceType = OnBoard
+    PCIBusSize = 32bit
+    ROMMain = No
+    Virtual = Yes
+End
+
+TOKEN
+    Name  = "AMICSPGLOBALNVS_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable CSP Global Nvs support in Project"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    Master = Yes
+End
+
+PATH
+    Name  = "AmiCspGlobalNvs_DIR"
+End
+
+PATH
+    Name  = "CSP_GLOBALNVS_INIT_DIR"
+    Path  = "AmiChipsetModulePkg\AmiCspGlobalNvs"
+End
+
+INFComponent
+    Name  = "AmiCspGlobalNvsDxe"
+    File  = "AmiCspGlobalNvs/AmiCspGlobalNvsDxe.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+End
+

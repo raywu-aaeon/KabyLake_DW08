@@ -1,0 +1,4 @@
+@Elink("BCP_BOOT_GROUP_DETECTION", "UINT8 @Child(EFI_DEVICE_PATH_PROTOCOL *pDp);
+", "", "")
+#define BCP_BOOT_GROUP_DETECTION @Elink(BCP_BOOT_GROUP_DETECTION, "@Child,", "", "")
+

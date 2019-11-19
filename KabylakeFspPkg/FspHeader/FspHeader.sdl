@@ -1,0 +1,44 @@
+TOKEN
+	Name  = "FspHeader_SUPPORT"
+	Value  = "1"
+	Help  = "Main switch to enable FspHeader support in Project"
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+	Master = Yes
+End
+
+INFComponent
+	Name  = "FspHeader"
+	File  = "FspHeader.inf"
+	Package  = "KabylakeFspPkg"
+	ModuleTypes  = "USER_DEFINED"
+End
+
+#
+# FFS Definition
+#
+FFS_FILE
+	Name  = "FspHeaderT"
+	FD_AREA  = "FSP_T"
+	INFComponent  = "KabylakeFspPkg.FspHeader"
+	Index  = "1"
+	Rule_Override  = "FSPHEADER"
+End
+
+FFS_FILE
+	Name  = "FspHeaderM"
+	FD_AREA  = "FSP_M"
+	INFComponent  = "KabylakeFspPkg.FspHeader"
+	Index  = "1"	
+	Rule_Override  = "FSPHEADER"
+End
+
+FFS_FILE
+	Name  = "FspHeaderS"
+	FD_AREA  = "FSP_S"
+	INFComponent  = "KabylakeFspPkg.FspHeader"
+  	Index  = "1"	
+	Rule_Override  = "FSPHEADER"
+End
+

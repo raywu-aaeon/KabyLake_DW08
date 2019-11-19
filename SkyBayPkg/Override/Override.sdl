@@ -1,0 +1,548 @@
+#*************************************************************************
+#**                                                                     **
+#**   Copyright (c) 1985-2019, American Megatrends International LLC.   **
+#**                                                                     **
+#**      All rights reserved. Subject to AMI licensing agreement.       **
+#**                                                                     **
+#*************************************************************************
+
+TOKEN
+    Name  = "CRB_Override_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable Chipset Reference Board Override support in Project"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+INFComponent
+    Name  = "FvRebaseLib"
+    File  = "FvRebaseLib.inf"
+    Package  = "AmiModulePkg"
+    Disable = YES
+End
+
+INFComponent
+    Name  = "FvRebaseLib"
+    File  = "AmiModulePkg/Recovery/EnhancedFtRecovery/FvRebaseLib.inf"
+    Package  = "AmiModulePkg"
+    PreProcess = Yes
+    Token = "ENHANCED_FT_RECOVERY" "=" "1"
+End
+
+ELINK
+    Name = "FvRebaseLib_INF_SRC_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../AmiModulePkg/Recovery/EnhancedFtRecovery/FvLib.c"
+    Parent  = "FvRebaseLib_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+ELINK
+    Name  = "../SkyBayPkg/Override/AmiModulePkg/Recovery/EnhancedFtRecovery/FvRebaseLib.c"
+    Parent  = "FvRebaseLib_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 1
+End
+ELINK
+    Name  = "../AmiModulePkg/Recovery/EnhancedFtRecovery/EfiImageFormat.h"
+    Parent  = "FvRebaseLib_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 2
+End
+
+
+INFComponent
+    Name  = "CapsuleRuntimeDxe"
+    File  = "CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf"
+    Package  = "MdeModulePkg"
+    ModuleTypes  = "DXE_RUNTIME_DRIVER"
+    Disable = YES
+End
+
+INFComponent
+    Name  = "CapsuleRuntimeDxe"
+    File  = "MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf"
+    Package  = "MdeModulePkg"
+    ModuleTypes  = "DXE_RUNTIME_DRIVER"
+    PreProcess = Yes
+End
+
+ELINK
+    Name = "CapsuleRuntimeDxe_INF_SRC_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../SkyBayPkg/Override/MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleService.c"
+    Parent  = "CapsuleRuntimeDxe_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+
+ELINK
+    Name = "CapsuleRuntimeDxe_INF_SRC_IA32_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../MdeModulePkg/Universal/CapsuleRuntimeDxe/SaveLongModeContext.c"
+    Parent  = "CapsuleRuntimeDxe_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+
+ELINK
+    Name = "CapsuleRuntimeDxe_INF_SRC_X64_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../MdeModulePkg/Universal/CapsuleRuntimeDxe/X64/SaveLongModeContext.c"
+    Parent  = "CapsuleRuntimeDxe_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+
+INFComponent
+    Name  = "DxeUsbBoardLib"
+    File  = "DxeUsbBoardLib.inf"
+    Package  = "AmiModulePkg"
+    Disable = YES
+End
+
+INFComponent
+    Name  = "DxeUsbBoardLib"
+    File  = "AmiModulePkg/Usb/DxeUsbBoardLib.inf"
+    Package  = "AmiModulePkg"
+End
+
+INFComponent
+    Name  = "DxeAmiUsbBdsLib"
+    File  = "DxeAmiUsbBdsLib/DxeAmiUsbBdsLib.inf"
+    Package  = "AmiModulePkg"
+    Disable = YES
+End
+
+INFComponent
+    Name  = "DxeAmiUsbBdsLib"
+    File  = "AmiModulePkg/Usb/AmiUsbLib/DxeAmiUsbBdsLib/DxeAmiUsbBdsLib.inf"
+    Package  = "AmiModulePkg"
+    PreProcess = Yes
+End
+
+ELINK
+    Name = "DxeAmiUsbBdsLib_INF_SRC_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../SkyBayPkg/Override/AmiModulePkg/Usb/AmiUsbLib/DxeAmiUsbBdsLib/DxeAmiUsbBdsLib.c"
+    Parent  = "DxeAmiUsbBdsLib_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+ELINK
+    Name  = "../AmiModulePkg/Usb/UsbMemMisc.c"
+    Parent  = "DxeAmiUsbBdsLib_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 1
+End
+
+
+
+PCIDEVICE
+    Title  = "SATA Controller"
+    Parent  = "PciRoot"
+    Attribute  = "0x0"
+    Dev_type  = "PciDevice"
+    Dev  = 017h
+    Fun  = 00h
+    SleepNum  = 01h
+    ROMFile  = "AmiChipsetModulePkg/LegacyRom/Raid/RaidOrom.bin"
+    IntA =  LNKA; 16
+    DeviceType = OnBoard
+    PCIBusSize = 32bit
+    OptionROM = Yes
+    ROMMain = No
+    SuppressDeviceGeneration = Yes
+    LegacyRom = Yes
+    FFSFileName  = "ROM Storage"
+    ROMSectionGuid  = "d46346ca-82a1-4cde-9546-77c86f893888"
+    Token = "CFL_RAID_DRIVER_SUPPORT" "=" "0"
+    DISABLE = YES
+End
+PCIDEVICE
+    Title  = "SATA Controller"
+    Parent  = "PciRoot"
+    Attribute  = "0x0"
+    Dev_type  = "PciDevice"
+    Dev  = 017h
+    Fun  = 00h
+    SleepNum  = 01h
+    ROMFile  = "SkyBayPkg/Override/Raid17_7_0_1006/RaidOrom.bin"
+    IntA =  LNKA; 16
+    DeviceType = OnBoard
+    PCIBusSize = 32bit
+    OptionROM = Yes
+    ROMMain = No
+    SuppressDeviceGeneration = Yes
+    LegacyRom = Yes
+    FFSFileName  = "ROM Storage"
+    ROMSectionGuid  = "d46346ca-82a1-4cde-9546-77c86f893888"
+    Token = "CFL_RAID_DRIVER_SUPPORT" "=" "0"
+End
+INFComponent
+    Name  = "RaidDriver"
+    File  = "Raid17_7_0_1006/RaidDriver.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes  = "UEFI_DRIVER"
+    PreProcess = Yes
+    Token = "CFL_RAID_DRIVER_SUPPORT" "=" "0"
+End
+FFS_FILE
+   Name  = "RaidDriverSmm"
+   FD_AREA  = "FV_MAIN"
+   FILE_Stmt  = "SkyBayPkg/Override/Raid17_7_0_1006/RaidDriverSmm_FdfFileStatement.txt"
+   Token = "RAID_DRIVER_SMM_SUPPORT" "=" "1"
+End
+
+INFComponent
+	Name  = "BaseAcpiLib"
+	File  = "AcpiLib.inf"
+	Package  = "AmiModulePkg"
+    Disable = YES
+End
+
+INFComponent
+	Name  = "BaseAcpiLib"
+	File  = "AmiModulePkg/ACPI/AcpiLib.inf"
+	Package  = "AmiModulePkg"
+    PreProcess = Yes
+End
+
+ELINK
+    Name = "BaseAcpiLib_ARM_INF_SRC_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../AmiModulePkg/ACPI/ARM/AcpiBaseLib.c"
+    Parent  = "BaseAcpiLib_ARM_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+
+INFComponent
+    Name  = "OA3_SMM"
+    File  = "OA3_SMM.inf"
+    Package = "AmiModulePkg"
+    ModuleTypes = "DXE_SMM_DRIVER"
+    Disable = YES
+End
+
+INFComponent
+    Name  = "OA3_SMM"
+    File  = "AmiModulePkg/OemActivation/OA3/OA3_SMM.inf"
+    Package = "AmiModulePkg"
+    ModuleTypes = "DXE_SMM_DRIVER"
+End
+
+INFComponent
+    Name  = "PiSmmCpuDxeSmm"
+    File  = "UefiCpuPkg/PiSmmCpuDxeSmm/PiSmmCpuDxeSmm.inf"
+    Package  = "UefiCpuPkg"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+    PreProcess = Yes
+    Token = "SMM_SUPPORT" "=" "1"
+    Token = "UefiCpuPkg_Override_SUPPORT" "=" "0"
+End
+ELINK
+    Name = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/PiSmmCpuDxeSmm.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/PiSmmCpuDxeSmm.h"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 1
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/MpService.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 2
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/SyncTimer.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 3
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/CpuS3.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 4
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/CpuService.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 5
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/CpuService.h"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 6
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/SmmProfile.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 7
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/SmmProfile.h"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 8
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/SmmProfileInternal.h"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 9
+End
+ELINK
+    Name  = "../SkyBayPkg/Override/UefiCpuPkg/PiSmmCpuDxeSmm/SmramSaveState.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 10
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/SmmCpuMemoryManagement.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_FILES"
+    InvokeOrder = AfterParent
+    Priority = 11
+End
+
+ELINK
+    Name = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/Semaphore.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/PageTbl.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 1
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmmFuncsArch.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 2
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmmProfileArch.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 3
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmmProfileArch.h"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 4
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmmInit.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 5
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmiEntry.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 6
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmiException.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 7
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/MpFuncs.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 8
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmmInit.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 9
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmiEntry.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 10
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmiException.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 11
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/MpFuncs.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 12
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmmInit.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 13
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmiEntry.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 14
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/SmiException.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 15
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/Ia32/MpFuncs.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_IA32_FILES"
+    InvokeOrder = AfterParent
+    Priority = 16
+End
+
+ELINK
+    Name = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = ReplaceParent
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/Semaphore.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 0
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/PageTbl.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 1
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmmFuncsArch.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 2
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmmProfileArch.c"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 3
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmmProfileArch.h"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 4
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmmInit.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 5
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmiEntry.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 6
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmiException.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 7
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/MpFuncs.asm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 8
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmmInit.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 9
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmiEntry.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 10
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmiException.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 11
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/MpFuncs.nasm"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 12
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmmInit.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 13
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmiEntry.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 14
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/SmiException.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 15
+End
+ELINK
+    Name  = "../UefiCpuPkg/PiSmmCpuDxeSmm/X64/MpFuncs.S"
+    Parent  = "PiSmmCpuDxeSmm_INF_SRC_X64_FILES"
+    InvokeOrder = AfterParent
+    Priority = 16
+End

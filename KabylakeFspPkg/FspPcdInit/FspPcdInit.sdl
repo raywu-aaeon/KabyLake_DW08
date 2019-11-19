@@ -1,0 +1,17 @@
+TOKEN
+    Name = "FspPcdInit_SUPPORT"
+    Value = "1"
+    Help  = "Main switch to enable FspPcdInit support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+INFComponent
+    Name  = "FspPcdInit"
+    File  = "Pei\FspPcdInit.inf"
+    Package  = "KabylakeFspPkg"
+    ModuleTypes  = "PEIM"
+End
+

@@ -1,0 +1,61 @@
+## @file
+# Module Information for Base Timer Library which uses the Time Stamp Counter in the processor.
+#
+# Note: There will be 1ms penalty to get TSC frequency every time
+# by waiting for 3579 clocks of the ACPI timer, or 1ms.
+# 
+# A version of the Timer Library using the processor's TSC.
+# The time stamp counter in newer processors may support an enhancement, referred to as invariant TSC.
+# The invariant TSC runs at a constant rate in all ACPI P-, C-. and T-states.
+# This is the architectural behavior moving forward.
+# TSC reads are much more efficient and do not incur the overhead associated with a ring transition or
+# access to a platform resource.
+# 
+# @copyright
+# Copyright (c) 2011 - 2017 Intel Corporation. All rights reserved
+# This software and associated documentation (if any) is furnished
+# under a license and may only be used or copied in accordance
+# with the terms of the license. Except as permitted by the
+# license, no part of this software or documentation may be
+# reproduced, stored in a retrieval system, or transmitted in any
+# form or by any means without the express written consent of
+# Intel Corporation.
+# This file contains 'Framework Code' and is licensed as such
+# under the terms of your license agreement with Intel or your
+# vendor. This file may not be modified, except as allowed by
+# additional terms of your license agreement.
+# 
+# @par Specification Reference:
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = BaseTscAcpiTimerLib
+  FILE_GUID                      = B98BD2CF-CE68-42fb-AF0A-AC1F17A0F12A
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = TimerLib
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  TscTimerLibShare.c
+  BaseTscTimerLib.c
+  TscTimerLibInternal.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+
+[LibraryClasses]
+  PcdLib
+  IoLib
+  BaseLib
+  BasePlatformTimerLib
+
+[Pcd]
+gClientCommonModuleTokenSpaceGuid.PcdAcpiIoBaseAddress
+gClientCommonModuleTokenSpaceGuid.AcpiTimerLength

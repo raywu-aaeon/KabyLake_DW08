@@ -1,0 +1,70 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+## @file NvmeRecovery.inf
+#  Nvme Recovery driver
+##
+
+[Defines]
+  INF_VERSION        = 0x00010015
+  VERSION_STRING     = 1.0
+  BASE_NAME          = NvmeRecovery
+  MODULE_TYPE        = PEIM
+  FILE_GUID          = 00026AEB-F334-4c15-A7F0-E1E897E9FE91
+  ENTRY_POINT        = NvmeRecoveryPeimEntry
+
+[Sources]
+  NvmeRecovery.c
+  NvmeRecovery.h
+  NvmeCtrl.h
+  NvmeCtrl.c
+
+[Packages]
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  MdePkg/MdePkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+
+[LibraryClasses]
+  PeimEntryPoint
+  AmiPeiLib
+  DebugLib
+  HobLib
+
+[Ppis]
+  gEfiPeiVirtualBlockIoPpiGuid          ## PRODUCES
+  gEfiPeiStallPpiGuid                   ## CONSUMES
+  
+[Pcd]
+  gAmiModulePkgTokenSpaceGuid.AmiPcdPeiPciEnumerationLastBusNumber
+  gAmiModulePkgTokenSpaceGuid.AmiPcdPeiPciMmioTopAddress
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+
+[Depex]
+  gEfiPeiBootInRecoveryModePpiGuid AND
+  gEfiPeiMemoryDiscoveredPpiGuid AND
+  gEfiPciCfg2PpiGuid
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+  

@@ -1,0 +1,36 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbWdt
+  FILE_GUID                      = 6CF6C4A0-F3EA-4377-BE0F-FC9F40C918F1
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SbWdt
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  SbWdt.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  DebugLib
+  
+[Protocols]
+  gWdtProtocolGuid
+
+[Ppis]
+  gWdtPpiGuid

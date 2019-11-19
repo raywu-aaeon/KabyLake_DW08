@@ -1,0 +1,12 @@
+<component>
+	name = "nVidia API"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg\SgTpv\MXM30\"
+	RefName = "MXM_NBCI"
+[INF]
+"Mxm30Nbci.inf"
+"MxmDat.inf"
+[files]
+"MXM30.sdl"	
+"MxmInt15.csm16"	
+<endComponent>

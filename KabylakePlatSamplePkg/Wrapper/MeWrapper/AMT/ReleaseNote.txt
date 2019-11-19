@@ -1,0 +1,12 @@
+[TAG]   EIP188933
+[Category]  Improvement
+[Description]   Creating one AMI AMT files and declaring RC related definition
+[Files] AmtCompatiblityProtocol.cif
+AmtCompatiblity.h
+AmtCompatiblity.cif
+AmtCompatiblity.sdl
+AmtCompatiblity.inf
+AmtCompatiblity.c
+Amt.cif
+
+

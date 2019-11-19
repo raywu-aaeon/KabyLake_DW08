@@ -1,0 +1,67 @@
+
+[Tag] AMI_OVERRIDE_CPU0000
+[Description] Point to next array should add one instead of eight.
+[Files] KabylakeSiliconPkg\Cpu\LibraryPrivate\PeiTxtLib\TxtPeiLib.c
+
+[Tag] AMI_OVERRIDE_CPU0001
+[Description] Because we didn't use Ap fix up tool to fix offset address, the GDT table will point to incorrect address after build. 
+			  Since AP start up code location will not change, fill physical address in GDT table.
+[Files] KabylakeSiliconPkg\Cpu\TxtInit\Pei\Ia32\TxtPeiAp.asm16
+
+[Tag] AMI_OVERRIDE_CPU0002 (Removed)
+[Description] Although all Aps is in finish states, they may not in Mwait states yet. Add delay time to prevent Aps is not in Mwait states.
+[Files] KabylakeSiliconPkg\Cpu\CpuInit\Dxe\MpService.c
+
+[Tag] AMI_OVERRIDE_CPU0003
+[Description] Aps may not be waked up, call again till all Aps change address finish.
+[Files] KabylakeSiliconPkg\Cpu\CpuInit\Dxe\MpCommon.c
+
+[Tag] AMI_OVERRIDE_CPU0004 (Removed)
+[Description] Wait till all Aps finish its task and update states to finish, then Bsp can update Aps states to idle.
+[Files] KabylakeSiliconPkg\Cpu\CpuInit\Dxe\MpService.c
+
+[Tag] AMI_OVERRIDE_CPU0005 (Removed)
+[Description] EIP258131 System hang at post code 0xE02.
+[Files] KabylakeSiliconPkg\Cpu\Library\Private\PeiCpuInitLib\CpuInitPeim.h
+KabylakeSiliconPkg\Cpu\Library\Private\PeiCpuInitLib\CpuInitPeim.c
+KabylakeSiliconPkg\Cpu\Library\Private\PeiCpuInitLib\CachePeim.c
+KabylakeSiliconPkg\Cpu\Library\Private\PeiCpuInitLib\PeiCpuInitLib.inf
+
+[Tag] AMI_OVERRIDE_CPU0006 (Removed)
+[Description] System hangs at post code 0xE97 with CATERR. Clears the SPI_SYNC_SS bit before setting WPD in the BIOS CTRL register for current BIOS Guard Binary.
+              If Intel release new Bios Guard binary, this override maybe can be removed.
+[Files] KabylakeSiliconPkg\Cpu\BiosGuard\Smm\BiosGuardServices.c
+
+[Tag] AMI_OVERRIDE_CPU0007
+[Description] This search method may cause system hang. MicrocodePatchAddress policy will be override in AMI CPU wrap.
+[Files] KabylakeSiliconPkg\Cpu\Library\PeiCpuPolicyLib\PeiCpuPolicyLib.c
+
+[Tag] AMI_OVERRIDE_CPU0008
+[Description] Fix "error C2275 - illegal use of this type as an expression"
+Our compiler don' allow variable transfer before declare type.
+[Files] KabylakeSiliconPkg\Cpu\Library\PeiCpuPolicyLib\PeiCpuPolicyLib.c
+
+[Tag] AMI_OVERRIDE_CPU0010 (Removed) - RC 1.4.0
+[Description] Fix build error when INTEL_BOOT_GUARD_SUPPORT is disable.
+[Files] KabylakeSiliconPkg\Cpu\Library\PeiDxeSmmCpuPlatformLib\PeiDxeSmmCpuPlatformLib.inf
+
+[Tag] AMI_OVERRIDE_CPU0011 (Removed) - BiosGuard ACM released.
+[Description] BIOSGUARD_SVN and BIOSGUARD_SGX_SVN are not march the newest release BiosGuard ACM, roll back to the old version.
+[Files] KabylakeSiliconPkg\Cpu\Include\BiosGuard.h
+
+[Tag] AMI_OVERRIDE_CPU0012
+[Description] Fix Linux build error
+[Files] KabylakeSiliconPkg\Cpu\TxtInit\Pei\Ia32\TxtPeiAp.asm16
+KabylakeSiliconPkg\Cpu\TxtInit\Pei\Ia32\TxtPeiAp.inf
+
+[Tag] AMI_OVERRIDE_CPU0013 (Removed) - RC 1.6.0
+[Description] This variable should be PkgCStateUnDemotion, not PkgCStateDemotion.
+[Files]
+KabylakeFspPkg\Library\PeiPolicyUpdateLib\PeiCpuPolicyUpdate.c
+KabylakePlatSamplePkg\Library\PeiPolicyDebugLib\PeiCpuPolicyDebugLib.c
+
+[Tag] AMI_OVERRIDE_CPU0014
+[Description] EIP313811 System hang up 0xAE when run reboot long run
+[Files]
+KabylakeSiliconPkg\Cpu\CpuInit\Dxe\CpuInitDxe.inf
+KabylakeSiliconPkg\Cpu\CpuInit\Dxe\MpService.c

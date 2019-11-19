@@ -1,0 +1,167 @@
+### @file
+# Component information file for the Platform Init Pre-Memory PEI module.
+#
+# @copyright
+#  INTEL CONFIDENTIAL
+#  Copyright 2014 - 2019 Intel Corporation.
+#
+#  The source code contained or described herein and all documents related to the
+#  source code ("Material") are owned by Intel Corporation or its suppliers or
+#  licensors. Title to the Material remains with Intel Corporation or its suppliers
+#  and licensors. The Material may contain trade secrets and proprietary and
+#  confidential information of Intel Corporation and its suppliers and licensors,
+#  and is protected by worldwide copyright and trade secret laws and treaty
+#  provisions. No part of the Material may be used, copied, reproduced, modified,
+#  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+#  without Intel's prior express written permission.
+#
+#  No license under any patent, copyright, trade secret or other intellectual
+#  property right is granted to or conferred upon you by disclosure or delivery
+#  of the Materials, either expressly, by implication, inducement, estoppel or
+#  otherwise. Any license under such intellectual property rights must be
+#  express and approved by Intel in writing.
+#
+#  Unless otherwise agreed by Intel in writing, you may not remove or alter
+#  this notice or any other notice embedded in Materials by Intel or
+#  Intel's suppliers or licensors in any way.
+#
+#  This file contains a 'Sample Driver' and is licensed as such under the terms
+#  of your license agreement with Intel or your vendor. This file may be modified
+#  by the user, subject to the additional terms of the license agreement.
+#
+# @par Specification Reference:
+#
+# @par Glossary:
+###
+
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = PlatformInitPreMem
+  FILE_GUID                      = EEEE611D-F78F-4FB9-B868-55907F169280
+  VERSION_STRING                 = 1.0
+  MODULE_TYPE                    = PEIM
+  ENTRY_POINT                    = PlatformInitPreMemEntryPoint
+
+[LibraryClasses]
+  PeimEntryPoint
+  DebugLib
+  IoLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  HobLib
+  PeiServicesLib
+  PeiPlatformHookLib
+#
+# AdvancedFeaturesBegin
+#
+  MultiPlatSupportLib
+  PeiPlatformRecoveryLib
+  CmosAccessLib
+  PeiWdtAppLib
+  SetupDataCacheLib
+  BiosIdLib
+  PeiSwbpeLib
+  MeChipsetLib
+#
+# AdvancedFeaturesEnd
+#
+  PchCycleDecodingLib
+  PchPcrLib
+  PchPmcLib
+  PchSerialIoLib
+  EcMiscLib
+  MmPciLib
+  CpuPlatformLib
+  PeiPolicyInitLib
+  ConfigBlockLib
+  BoardConfigLib
+  MtrrLib
+  TimerLib
+
+[Packages]
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  BpCommonPkg/BpCommonPkg.dec # AdvancedFeaturesContent
+  ClientCommonPkg/ClientCommonPkg.dec # AdvancedFeaturesContent
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+#AMI_OVERRIDE_START - Install PPI after Gpio Config done
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+#AMI_OVERRIDE_END - Install PPI after Gpio Config done  
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress            ## CONSUMES
+  gSiPkgTokenSpaceGuid.PcdFlashAreaBaseAddress                 ## CONSUMES
+  gSiPkgTokenSpaceGuid.PcdPciExpressRegionLength               ## CONSUMES
+  gSiPkgTokenSpaceGuid.PcdFlashAreaSize                        ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdFlashTestMenuBase           ## CONSUMES # AdvancedFeaturesContent
+  gPlatformModuleTokenSpaceGuid.PcdFlashTestMenuSize           ## CONSUMES # AdvancedFeaturesContent
+  gPlatformModuleTokenSpaceGuid.PcdFlashFvRecovery3Base        ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdFlashFvRecovery3Size        ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdFlashFvMainBase             ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdFlashFvMainSize             ## CONSUMES
+  gSiPkgTokenSpaceGuid.PcdAcpiBaseAddress                      ## CONSUMES
+  gSiPkgTokenSpaceGuid.PcdTcoBaseAddress                       ## CONSUMES
+  gClientCommonModuleTokenSpaceGuid.PcdNct6776fHwMonBase       ## CONSUMES # AdvancedFeaturesContent
+  gBoardModuleTokenSpaceGuid.PcdIoExpanderPresent
+  gPlatformModuleTokenSpaceGuid.PcdFlashBiosGuardModuleFvBase  ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdFlashBiosGuardModuleFvSize  ## CONSUMES
+  gBoardModuleTokenSpaceGuid.PcdUsbcEcPdNegotiation            ## CONSUMES # AdvancedFeaturesContent
+
+[FixedPcd]
+  gSiPkgTokenSpaceGuid.PcdMchBaseAddress              ## CONSUMES
+  gSiPkgTokenSpaceGuid.PcdMchMmioSize                 ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdDmiBaseAddress     ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdDmiMmioSize        ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdEpBaseAddress      ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdEpMmioSize         ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdGdxcBaseAddress    ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdGdxcMmioSize       ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdApicLocalAddress   ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdApicLocalMmioSize  ## CONSUMES
+
+[Sources]
+  PlatformInitPreMem.c
+
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid               ## CONSUMES # AdvancedFeaturesContent
+  gEfiPeiMemoryDiscoveredPpiGuid
+  gEfiPeiRecoveryModulePpiGuid                  ## CONSUMES # AdvancedFeaturesContent
+  gEfiPeiDeviceRecoveryModulePpiGuid            ## CONSUMES # AdvancedFeaturesContent
+  gEfiPeiMasterBootModePpiGuid                  ## PRODUCES
+  gEfiPeiBootInRecoveryModePpiGuid              ## PRODUCES
+  gEfiPeiBootInNonS3ModePpiGuid                 ## PRODUCES # AdvancedFeaturesContent
+  gPeiCapsulePpiGuid                            ## CONSUMES
+  gEfiPeiResetPpiGuid                           ## PRODUCES
+  gWdtPpiGuid                                   ## CONSUMES # AdvancedFeaturesContent
+  gEfiPeiSmbus2PpiGuid                          ## CONSUMES
+# AMI_OVERRIDE_START -Install PPI after Gpio Config done >>>
+  gAmiSbGpioConfigDonePpiGuid
+# AMI_OVERRIDE_END -Install PPI after Gpio Config done <<<
+
+[Guids]
+  gPlatformInfoHobGuid                          ## CONSUMES
+#
+# AdvancedFeaturesBegin
+#
+  gBootStateGuid                                ## CONSUMES
+  gFastBootExceptionInfoHobGuid                 ## CONSUMES
+  gEfiGlobalVariableGuid                        ## CONSUMES
+  gFastBootFunctionEnabledHobGuid               ## CONSUMES
+#
+# AdvancedFeaturesEnd
+#
+  gTcoWdtHobGuid                                ## CONSUMES
+  gBiosIdGuid                                   ## CONSUMES # AdvancedFeaturesContent
+  gOsProfileGuid                                ## CONSUMES
+  gSetupVariableGuid                            ## CONSUMES
+  gSaSetupVariableGuid                          ## CONSUMES
+  gMeSetupVariableGuid                          ## CONSUMES
+  gCpuSetupVariableGuid                         ## CONSUMES
+  gPchSetupVariableGuid                         ## CONSUMES
+  gDebugConfigVariableGuid                      ## CONSUMES
+
+[Depex]
+  TRUE

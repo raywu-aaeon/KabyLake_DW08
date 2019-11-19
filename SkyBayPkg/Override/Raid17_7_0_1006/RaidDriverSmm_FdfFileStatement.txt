@@ -1,0 +1,5 @@
+FILE SMM = 4F4EA4C0-8603-4AB8-8C4B-C5145C8C86F6 {  
+    SECTION PE32 = SkyBayPkg/Override/Raid17_7_0_1006/RaidDriverSmm.efi
+    SECTION SMM_DEPEX = AmiChipsetModulePkg/SB/RaidDriver/RaidDriverSmm.depex
+    SECTION UI = "RaidDriverSmm"
+}

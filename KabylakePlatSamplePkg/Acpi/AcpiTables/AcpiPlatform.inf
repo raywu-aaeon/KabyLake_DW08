@@ -1,0 +1,329 @@
+### @file
+#  Component information file for AcpiPlatform module
+#
+# @copyright
+#  INTEL CONFIDENTIAL
+#  Copyright 2013 - 2019 Intel Corporation.
+#
+#  The source code contained or described herein and all documents related to the
+#  source code ("Material") are owned by Intel Corporation or its suppliers or
+#  licensors. Title to the Material remains with Intel Corporation or its suppliers
+#  and licensors. The Material may contain trade secrets and proprietary and
+#  confidential information of Intel Corporation and its suppliers and licensors,
+#  and is protected by worldwide copyright and trade secret laws and treaty
+#  provisions. No part of the Material may be used, copied, reproduced, modified,
+#  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+#  without Intel's prior express written permission.
+#
+#  No license under any patent, copyright, trade secret or other intellectual
+#  property right is granted to or conferred upon you by disclosure or delivery
+#  of the Materials, either expressly, by implication, inducement, estoppel or
+#  otherwise. Any license under such intellectual property rights must be
+#  express and approved by Intel in writing.
+#
+#  Unless otherwise agreed by Intel in writing, you may not remove or alter
+#  this notice or any other notice embedded in Materials by Intel or
+#  Intel's suppliers or licensors in any way.
+#
+#  This file contains a 'Sample Driver' and is licensed as such under the terms
+#  of your license agreement with Intel or your vendor. This file may be modified
+#  by the user, subject to the additional terms of the license agreement.
+#
+# @par Specification Reference:
+#
+# @par Glossary:
+###
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AcpiPlatform
+  FILE_GUID                      = FC90EB7A-3E0A-483C-A26C-484D36593FF4
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = InstallAcpiPlatform
+
+[Sources.common]
+  AcpiPlatform.h
+  AcpiPlatform.c
+  AcpiGnvsInit.c
+# AMI_OVERRIDE_START - AMI use AcpiRcSsdt.inf to build RC SSDT 
+#  Fadt/Fadt5.0.act
+#  Facs/Facs.act
+#  Hpet/Hpet.act
+#  Madt/Madt.act
+#  Mcfg/Mcfg.act
+#  Dsdt/DSDT.ASL
+  #
+  # AdvancedFeaturesBegin
+  #
+#  SsdtRvp/THERMAL.ASL 
+#  SsdtSds/ThermalSds.ASL
+#  SsdtRtd3/SdsRtd3.asl
+#  SsdtRtd3/Rvp10Rtd3.asl
+#  SsdtRtd3/Rvp3Rtd3.asl
+#  SsdtRtd3/Rvp3Rtd3TbtAic.asl
+#  SsdtRtd3/AmlRtd3TbtAic.asl
+#  SsdtRtd3/AmlY42Rtd3.asl
+#  SsdtRtd3/AmlY42Rtd3TbtAic.asl
+#  SsdtRtd3/AmlY42AepRtd3Tbt.asl
+#  SsdtRtd3/Rvp3Rtd3Wwan.asl
+#  SsdtRtd3/Rvp3Sku31Rtd3.asl
+#  SsdtRtd3/Rvp7Rtd3.asl
+#  SsdtRtd3/RvpRRtd3.asl
+#  SsdtRtd3/RvpKcRtd3.asl
+#  SsdtRtd3/Rvp11Rtd3.asl
+#  SsdtRtd3/SdlBrkRtd3.asl
+#  SsdtXhci/UsbPortXhciSds.asl
+#  SsdtXhci/UsbPortXhciRvp3.asl
+#  SsdtXhci/UsbPortXhciRvp3Aml.asl
+#  SsdtXhci/UsbPortXhciAmlY42.asl
+#  SsdtXhci/UsbPortXhciRvp3Skl.asl
+#  SsdtXhci/UsbPortXhciRvp7.asl
+#  SsdtXhci/UsbPortXhciRvp8.asl
+#  SsdtXhci/UsbPortXhciRvp10.asl
+#  SsdtXhci/UsbPortXhciRvp11.asl
+#  SsdtXhci/UsbPortXhciRvp16.asl
+#  SsdtXhci/UsbPortXhciKblSDdr4Udimm.asl
+#  SsdtXhci/UsbPortXhciKblSEvDdr4Udimm.asl
+#  SsdtXhci/UsbPortXhciKblR.asl
+#  SsdtXhci/UsbPortXhciAmlAep.asl
+  #
+  # AdvancedFeaturesEnd
+  #
+# AMI_OVERRIDE_END - AMI use AcpiRcSsdt.inf to build RC SSDT
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec # AdvancedFeaturesContent
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+# AMI_OVERRIDE_START - For AMI Chipset Setup
+  AmiModulePkg/AmiModulePkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+# AMI_OVERRIDE_END - For AMI Chipset Setup
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  BaseLib
+  DebugLib
+  IoLib
+  PcdLib
+  EcMiscLib
+  AslUpdateLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  BaseMemoryLib
+  S3BootScriptLib
+  PchCycleDecodingLib
+  PchInfoLib
+  PchPcieRpLib
+  MmPciLib
+  HobLib
+  PchSerialIoLib
+  GpioLib
+  GpioExpanderLib
+  CpuPlatformLib
+#
+# AdvancedFeaturesBegin
+#
+  TbtCommonLib
+#
+# AdvancedFeaturesEnd
+#
+# AMI_OVERRIDE_START - For AMI Chipset Setup
+  AmiCspLib
+  SbGetSetupData
+# AMI_OVERRIDE_END - For AMI Chipset Setup
+
+[Pcd]
+#
+# AdvancedFeaturesBegin
+#
+  gClientCommonModuleTokenSpaceGuid.PcdCsmEnable                    ## CONSUMES
+  gBoardModuleTokenSpaceGuid.PcdDsEndpointCamera                    ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdPercepDs4Camera                     ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdIvCamera                            ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdRealBattery1Control                 ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdRealBattery2Control                 ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdSkyCamSensor                        ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdHDAudioI2S                          ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdNCT6776FCOM                         ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdNCT6776FSIO                         ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdNCT6776FHWMON                       ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdH8S2113SIO                          ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdPowerParticipant                    ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEnablePbok                          ## PRODUCES # KblGContent
+  gBoardModuleTokenSpaceGuid.PcdSensorHubApp                        ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEInkApp                             ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdZPODD                               ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdSmcRuntimeSciPin                    ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdConvertableDockSupport              ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEcHotKeyF3Support                   ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEcHotKeyF4Support                   ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEcHotKeyF5Support                   ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEcHotKeyF6Support                   ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEcHotKeyF7Support                   ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdEcHotKeyF8Support                   ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdVirtualButtonVolumeUpSupport        ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdVirtualButtonVolumeDownSupport      ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdVirtualButtonHomeButtonSupport      ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdVirtualButtonRotationLockSupport    ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdSlateModeSwitchSupport              ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdAcDcAutoSwitchSupport               ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdPmPowerButtonGpioPin                ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdAcpiEnableAllButtonSupport          ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdAcpiHidDriverButtonSupport          ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdPowerButtonSciDisableSupport        ## PRODUCES
+  gBoardModuleTokenSpaceGuid.PcdIvcamDfuGpio
+  gBoardModuleTokenSpaceGuid.PcdIvcamPwrGpio
+  gBoardModuleTokenSpaceGuid.PcdDsPwrGpio
+  gBoardModuleTokenSpaceGuid.PcdIvcamPresent
+  gBoardModuleTokenSpaceGuid.PcdIvcamEpAddress
+  gBoardModuleTokenSpaceGuid.PcdDsPresent
+  gBoardModuleTokenSpaceGuid.PcdDsEpAddress
+  gBoardModuleTokenSpaceGuid.PcdVsctTableForSens                     ## CONSUMES
+#
+# AdvancedFeaturesEnd
+#
+  # DXE PCD
+  gBoardModuleTokenSpaceGuid.PcdXhciAcpiTableSignature
+  gBoardModuleTokenSpaceGuid.PcdPreferredPmProfile
+#
+# AdvancedFeaturesBegin
+#
+  gBoardModuleTokenSpaceGuid.PcdTherSdsTableEnable
+  gBoardModuleTokenSpaceGuid.PcdSpecificIoExpanderBus
+  gBoardModuleTokenSpaceGuid.PcdBatteryPresent
+
+  gBoardModuleTokenSpaceGuid.PcdFingerPrintSleepGpio
+  gBoardModuleTokenSpaceGuid.PcdFingerPrintIrqGpio
+  gBoardModuleTokenSpaceGuid.PcdGnssResetGpio
+  gBoardModuleTokenSpaceGuid.PcdBluetoothWakeGpio
+
+  gBoardModuleTokenSpaceGuid.PcdBluetoothRfKillGpio
+  gBoardModuleTokenSpaceGuid.PcdBluetoothIrqGpio
+  gBoardModuleTokenSpaceGuid.PcdTouchpadIrqGpio
+  gBoardModuleTokenSpaceGuid.PcdTouchpanelIrqGpio
+  gBoardModuleTokenSpaceGuid.PcdEcLowPowerExitGpio
+  gBoardModuleTokenSpaceGuid.PcdEcSmiGpio
+
+#
+# AdvancedFeaturesBegin
+#
+  # Power Meter Support
+  gBoardModuleTokenSpaceGuid.PcdPowerMeterI2cControllerNumber
+  gBoardModuleTokenSpaceGuid.PcdPAC193xPowerMeterSupport
+#
+# AdvancedFeaturesEnd
+#
+
+  gBoardModuleTokenSpaceGuid.PcdEInkDfuDevice
+  gBoardModuleTokenSpaceGuid.PcdUsbTypeCSupport
+  gBoardModuleTokenSpaceGuid.PcdTsOnDimmTemperature
+
+  gBoardModuleTokenSpaceGuid.PcdRvp3Rtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdAmlRtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdRvp7Rtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdRvpRRtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdRvpKcRtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdRvp10Rtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdRvp11Rtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdSdlBrkRtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdSdsRtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdPchFpsSupport
+  gBoardModuleTokenSpaceGuid.PcdEInkDfuSpecialPowerCycleEnable
+  gBoardModuleTokenSpaceGuid.PcdRunTimeVmVrGpio
+  gBoardModuleTokenSpaceGuid.PcdAmlY42Rtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdAmlY42CffRtd3TableEnable
+  gBoardModuleTokenSpaceGuid.PcdWwanInterface
+
+#
+# AdvancedFeaturesEnd
+#
+  gBoardModuleTokenSpaceGuid.PcdBoardUcmcGpioTable
+  gBoardModuleTokenSpaceGuid.PcdBoardUcmcGpioTableSize
+#
+# AdvancedFeaturesBegin
+#
+  gBoardModuleTokenSpaceGuid.PcdWwanGnssUartReset
+  gBoardModuleTokenSpaceGuid.PcdPs2SupportDisable
+  gBoardModuleTokenSpaceGuid.PcdPchAudioPowerEnable
+  gBoardModuleTokenSpaceGuid.PcdPcieSlot2Wake
+  gBoardModuleTokenSpaceGuid.PcdM2WlanReset
+  gBoardModuleTokenSpaceGuid.PcdUsbP8Power
+  gBoardModuleTokenSpaceGuid.PcdM2PcieSsd2Reset
+  gBoardModuleTokenSpaceGuid.PcdM2PcieSsd2Power
+  gBoardModuleTokenSpaceGuid.PcdTbtSxWakeSwitchLogicEnable
+#
+# AdvancedFeaturesEnd
+#
+
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress ## CONSUMES
+  gSiPkgTokenSpaceGuid.PcdPciExpressRegionLength    ## CONSUMES
+#
+# AdvancedFeaturesBegin
+#
+  # USB Type Multi Port Support.
+  gBoardModuleTokenSpaceGuid.PcdUsbTypeCMultiPortSupport
+
+  # S3 Wake Capability LID Switch GPE0 Number
+  gBoardModuleTokenSpaceGuid.PcdLidSwitchGpe0Number
+#
+# AdvancedFeaturesEnd
+#
+  gSiPkgTokenSpaceGuid.PcdAcpiDefaultOemTableId     ## CONSUMES
+
+[FixedPcd]
+  gSiPkgTokenSpaceGuid.PcdAcpiBaseAddress           ## CONSUMES
+
+  gPlatformModuleTokenSpaceGuid.PcdApicLocalAddress ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdApicIoAddress    ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdAcpiEnableSwSmi  ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdAcpiDisableSwSmi ## CONSUMES
+  gPlatformModuleTokenSpaceGuid.PcdApicIoIdPch      ## CONSUMES
+
+[Protocols]
+  gEfiAcpiTableProtocolGuid                     ## CONSUMES
+  gEfiFirmwareVolume2ProtocolGuid               ## CONSUMES
+  gEfiPciRootBridgeIoProtocolGuid               ## CONSUMES
+  gEfiMpServiceProtocolGuid                     ## CONSUMES
+  gEfiPciIoProtocolGuid                         ## CONSUMES
+  gEfiCpuIo2ProtocolGuid                        ## CONSUMES
+  gEfiSimpleFileSystemProtocolGuid              ## CONSUMES # AdvancedFeaturesContent
+  gEfiGlobalNvsAreaProtocolGuid                 ## CONSUMES
+# AMI_OVERRIDE_START - EIP204108
+  gCpuGlobalNvsAreaProtocolGuid    
+# AMI_OVERRIDE_END - EIP204108
+
+[Guids]
+  gRcAcpiTableStorageGuid                       ## CONSUMES
+  gOcAcpiTableStorageGuid                       ## CONSUMES # AdvancedFeaturesContent
+  gEfiGlobalVariableGuid                        ## CONSUMES
+  gEfiHobListGuid                               ## CONSUMES
+  gPlatformInfoHobGuid                          ## CONSUMES
+  gEfiFileInfoGuid                              ## CONSUMES # AdvancedFeaturesContent
+  gTbtInfoHobGuid                               ## CONSUMES # AdvancedFeaturesContent
+  gSetupVariableGuid                            ## SOMETIMES_PRODUCES
+  gSaSetupVariableGuid                          ## CONSUMES
+  gMeSetupVariableGuid                          ## CONSUMES
+  gCpuSetupVariableGuid                         ## CONSUMES
+  gPchSetupVariableGuid                         ## CONSUMES
+  gMeBiosPayloadHobGuid                         ## CONSUMES
+  gEfiEndOfDxeEventGroupGuid                    ## CONSUMES
+# AMI_OVERRIDE_START - Replace the DSDT GUID to AMI's definition
+  gAmiAslDsdtFileGuid
+# AMI_OVERRIDE_END - Replace the DSDT GUID to AMI's definition
+
+[Depex]
+  gEfiAcpiTableProtocolGuid           AND
+  gEfiFirmwareVolume2ProtocolGuid     AND
+  gEfiCpuIo2ProtocolGuid              AND
+  gEfiMpServiceProtocolGuid           AND
+  gEfiPciRootBridgeIoProtocolGuid     AND
+  gEfiVariableArchProtocolGuid        AND
+  gEfiSmbusHcProtocolGuid             AND
+  gEfiVariableWriteArchProtocolGuid   AND
+  gPchInfoProtocolGuid

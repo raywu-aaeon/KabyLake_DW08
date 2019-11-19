@@ -1,0 +1,10 @@
+<component>
+	name = "FspHeader"
+	category = ModulePart
+	LocalRoot = "KabylakeFspPkg\FspHeader\"
+	RefName = "KabylakeFspPkg.FspHeader"
+[INF]
+"FspHeader.inf"
+[files]
+"FspHeader.sdl"	
+<endComponent>

@@ -1,0 +1,183 @@
+TOKEN
+    Name  = "MouseDriver_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable Mouse Driver support in Project"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes    
+    Master = Yes
+End
+
+TOKEN
+    Name  = "MOUSE_POINTER_FOR_ABS_DEVICE"
+    Value  = "1"
+    Help  = "ON  - Show Mouse Pointer on the screen for ABS(Touch Screen) device \OFF - Dont show the Mouse Cursor"
+    TokenType = Boolean
+    TargetH = Yes
+    Range  = "ON - OFF"
+End
+
+TOKEN
+    Name  = "DRAW_MOUSE_ON_HOTPLUG"
+    Value  = "0"
+    Help  = "ON - Draws the mouse pointer on hot plug in and clears it on unplug, OFF - this feature is not supported"
+    TokenType = Boolean
+    TargetH = Yes
+    Range  = "ON - OFF"
+End
+
+TOKEN
+    Name  = "MOUSE_POINTER_BEHAVIOR"
+    Value  = "1"
+    TokenType = Integer
+    Help  = "Set mouse pointer behavior when softkbd is active. 1 - Display Mouse cursor always. 2 - Hide cursor on Softkbd. 3 - Hide cursor when Softkbd is active."
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ABS_CLICK_MODE"
+    Value  = "1"
+    Help  = "1 - Click event by touch Sensor. 2 - Click Event by Side Switch"
+    TokenType = Integer
+    TargetH = Yes
+    Range  = "1 - 2"
+End
+
+TOKEN
+    Name  = "MOUSE_BASE_SPEED"
+    Value  = "1"
+    Help  = "This token specifies the default base speed of the mouse cursor and can be modified in code by calling DXE_MOUSE_PROTOCOL.SetMouseSpeed."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "MOUSE_SPEED_FRAME_RATE"
+    Value  = "16"
+    Help  = "This token specifies how many frames are used in determining the speed of the cursor, where a frame is defined as a single read of the mouse hardware coordinates."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "MOUSE_PROTOCOL_REVISION"
+    Value  = "2"
+    Help  = "Mouse Protocol Revision Number"
+    TokenType = Integer
+    TargetH = Yes
+    Token = "MouseDriver_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "CHANGE_TIMER_TICK_INTERVAL"
+    Value  = "0"
+    Help  = "OFF- Default Timer Tick Interval will be set(54ms). ON - Timer Tick interval will be set to TIMER_TICK_INTERVAL_ON_SETUP value."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "TIMER_TICK_INTERVAL_ON_SETUP"
+    Value  = "549183"
+    Help  = "Time Interval in 100ns to generate timer interrupt in SETUP for smooth mouse movement."
+    TokenType = Integer
+    TargetH = Yes
+    Token = "CHANGE_TIMER_TICK_INTERVAL" "=" "1"
+End
+
+PATH
+    Name  = "MouseDriver_DIR"
+End
+
+
+TOKEN
+    Name  = "MOUSE_TIMER_EVENT_RATE"
+    Value  = "18"
+    Help  = " Token value determines the number of time Mouse timer event genrated in one sec. Default value will be 18.4 times per second"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "MOUSE_CLICK_RANGE"
+    Value  = "2"
+    Help  = " Maximum Pixel difference between button down position and release position to report Single/Double Click"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SINGLE_TOUCH_RANGE"
+    Value  = "1"
+    Help  = " Maximum Pixel difference between touch down position and release position to report Single Click"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "DOUBLE_TOUCH_RANGE"
+    Value  = "5"
+    Help  = " Maximum Pixel difference between touch down position and release position to report Double Click"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "MOUSE_SUPPORT_FOR_NT32"
+    Value  = "0"
+    Help  = "ON  - Token value Should be enabled only for NT32 Simulator projects"
+    TokenType = Boolean
+    TargetH = Yes
+    Range  = "ON - OFF"
+End
+
+TOKEN
+    Name  = "HIDE_POINTER_FOR_TOUCH"
+    Value  = "0"
+    Help  = "ON  - Hides Mouse Pointer if ABS action is performed & draws pointer only if any simple pointer action performed"
+    TokenType = Boolean
+    TargetH = Yes
+    Range  = "ON - OFF"
+End
+
+ELINK
+    Name  = "MOUSE_ACCELERATION_ENTRIES"
+    Help  = "Specify speed range and speed translation multiplier in this format, where the braces and terminating coma are required: {speed_low, speed_high, multiplier},"
+    InvokeOrder = ReplaceParent
+End
+
+ELINK
+    Name  = "{61, 1000, 500},"
+    Parent  = "MOUSE_ACCELERATION_ENTRIES"
+    Help  = "Speed translation multiplier for speed 61+ is 5.0"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "{31, 60, 450},"
+    Parent  = "MOUSE_ACCELERATION_ENTRIES"
+    Help  = "Speed translation multiplier for speed 31 - 60 is 4.5"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "{0, 30, 400},"
+    Parent  = "MOUSE_ACCELERATION_ENTRIES"
+    Help  = "Speed translation multiplier for speed 0 - 30 is 4.0"
+    InvokeOrder = AfterParent
+End
+
+INFComponent
+    Name  = "MouseDriver"
+    File  = "MouseDriver.inf"
+    Package  = "MouseSupport"
+    ModuleTypes  = "DXE_RUNTIME_DRIVER"
+    Token = "MouseDriver_SUPPORT" "=" "1"
+End
+
+Outputregister
+    Name = "MouseDriverElinksLst"
+    Path = "Build"
+    File = "MouseDriverElinks.h"
+    Template = "MouseDriverElinks.txt"
+End

@@ -1,0 +1,31 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DynamicSmmPciExpressLib
+  FILE_GUID                      = 5E5F276B-EFB8-4A30-90B6-9E2B49DD1686
+  MODULE_TYPE                    = DXE_SMM_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PciExpressLib|DXE_SMM_DRIVER
+  CONSTRUCTOR                    = DynamicSmmPciExpressLibConstructor
+  DESTRUCTOR                     = DynamicSmmPciExpressLibDestructor
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  PciExpressLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  PcdLib
+  DebugLib
+  IoLib
+  UefiBootServicesTableLib
+  PciCf8Lib
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress  ## CONSUMES
+

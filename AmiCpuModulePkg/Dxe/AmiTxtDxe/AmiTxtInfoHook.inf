@@ -1,0 +1,30 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiTxtInfoHookLib
+  FILE_GUID                      = ebcf3118-0839-45db-b55e-36fd6b7bcfaa
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AmiTxtInfoHookLib | DXE_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  AmiTxtInfoHook.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiTsePkg/AmiTsePkg.dec
+  AmiCpuModulePkg/AmiCpuModulePkg.dec
+  
+[LibraryClasses]
+  PrintLib
+
+[Pcd]
+

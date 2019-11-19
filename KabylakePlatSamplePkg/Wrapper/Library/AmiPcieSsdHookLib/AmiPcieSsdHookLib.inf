@@ -1,0 +1,35 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiPcieSsdHookLib
+  FILE_GUID                      = 8062793b-8222-44bd-9e6b-9020c8350f34                                   
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AmiPcieSsdHookLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  AmiPcieSsdHookLib.c 
+
+[Packages]
+  MdePkg/MdePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+    
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  UefiBootServicesTableLib
+  DebugLib
+  MemoryAllocationLib
+
+[Guids]
+  
+[Protocols]
+  gEfiPciIoProtocolGuid
+  gRstStatusProtocolGuid
+  

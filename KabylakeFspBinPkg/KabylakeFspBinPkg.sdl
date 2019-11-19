@@ -1,0 +1,400 @@
+TOKEN
+    Name  = "FSP_WRAPPER_ENABLE"
+    Value  = "0"
+    Help  = "Main switch to enable FSP Wrapper."
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+PATH
+    Name  = "FSP_BIN_PKG_DIR"
+End
+
+TOKEN
+    Name  = "FSP_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable common code support for FSP"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Lock = Yes
+End
+
+TOKEN
+    Name  = "FV_MICROCODE_SIZE"
+    Value  = "$(FV_DATA_SIZE) - $(INTEL_FIT_SIZE)"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+    Token = "MICROCODE_SPLIT_BB_UPDATE" "=" "0"
+    Token = "INTEL_FIT_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "FLASH_CODE_CACHE_ADDRESS"
+    Value  = "$(FLASH_ADDRESS) + $(FV_FSP_OFFSET)"
+    Help  = "Code Cache Base Address."
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "FLASH_CODE_CACHE_SIZE"
+    Value  = "0xFFFFFFFF - $(FLASH_CODE_CACHE_ADDRESS) + 1"
+    Help  = "Code Cache Size."
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== FSP Layout Configuration ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "FV_FSP_SIZE"
+    Value  = "0x100000"
+    Help  = "Size of the FV_FSP"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_OFFSET"
+    Value  = "$(FLASH_SIZE) - $(FV_BB_SIZE) - $(FV_FSP_SIZE)"
+    Help  = "Offset of the FV_FSP"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_S_BASE"
+    Value  = "$(FLASH_ADDRESS) + $(FV_FSP_OFFSET)"
+    Help  = "Base Address of the FV_FSP_S"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_S_WRAPPER_SIZE"
+    Value  = "0x45000"
+    Help  = "Size for the FV_FSP_S in FSP Wrapper. The size is bigger than FV_FSP_S_SIZE because of pad.bin"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_M_T_BASE"
+    Value  = "$(FLASH_ADDRESS) + $(FV_FSP_OFFSET) + $(FV_FSP_S_WRAPPER_SIZE)"
+    Help  = "Base Address of the FV_FSP_M_T"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_M_T_OFFSET"
+    Value  = "$(FV_FSP_OFFSET) + $(FV_FSP_S_WRAPPER_SIZE)"
+    Help  = "Offset of the FV_FSP_M_T"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspsBase"
+    GuidSpace  = "gPlatformModuleTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FV_FSP_S_BASE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+    TargetFDF = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspsOffset"
+    GuidSpace  = "gPlatformModuleTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FV_FSP_OFFSET)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+    TargetFDF = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspmtBase"
+    GuidSpace  = "gPlatformModuleTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FV_FSP_M_T_BASE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+    TargetFDF = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspmtOffset"
+    GuidSpace  = "gPlatformModuleTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FV_FSP_M_T_OFFSET)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+    TargetFDF = Yes
+End
+
+FD_AREA
+    Name  = "FV_FSP_S"
+    TYPE  = "FV"
+    FD_INFO  = "AMIROM"
+    Offset  = "$(FV_FSP_OFFSET)"
+    Size  = "$(FV_FSP_S_WRAPPER_SIZE)"
+    Attributes  = "0xffff"
+    Alignment  = "16"
+End
+
+FD_AREA
+    Name  = "FV_FSP"
+    TYPE  = "File"
+    FD_INFO  = "AMIROM"
+    Offset  = "$(FV_FSP_M_T_OFFSET)"
+    Size  = "$(FV_FSP_SIZE) - $(FV_FSP_S_WRAPPER_SIZE)"
+    Alignment  = "16"
+    Guid  = "7BEBD21A-A1E5-4C4C-9CA1-A0C168BCBD9D"
+    File  = "Build/Fsp_Rebased_M_T.fd"
+End
+
+FFS_FILE
+    Name  = "FvFspS"
+    FD_AREA  = "FV_FSP_S"
+    FILE_Stmt  = "KabylakeFspBinPkg/FvFspSFdfFileStatement.txt"
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== SecCore Configuration ======"
+    TokenType = Expression
+End
+
+INFComponent
+    Name  = "SecCore"
+    File  = "SecCore/SecCore.inf"
+    Package  = "UefiCpuPkg"
+    ModuleTypes  = "SEC"
+    Path  = "UEFI_CPU_PKG_DIR"
+End
+
+INFComponent
+    Name  = "BasePcdLibNull"
+    File  = "../MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf"
+    Package  = "MdePkg"
+End
+
+INFComponent
+    Name  = "BaseReportStatusCodeLibNull"
+    File  = "../MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf"
+    Package  = "MdePkg"
+End
+
+LibraryMapping
+    Class  = "PcdLib"
+    Instance  = "MdePkg.BasePcdLibNull"
+    Override  = "UefiCpuPkg.SecCore"
+End
+
+LibraryMapping
+    Class  = "DebugLib"
+    Instance  = "MdePkg.BaseDebugLibSerialPort"
+    Override  = "UefiCpuPkg.SecCore"
+End
+
+LibraryMapping
+    Class  = "ReportStatusCodeLib"
+    Instance  = "MdePkg.BaseReportStatusCodeLibNull"
+    Override  = "UefiCpuPkg.SecCore"
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+ELINK
+    Name  = "-D FSP_WRAPPER_FLAG"
+    Parent  = "*_*_*_CC_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "-D FSP_WRAPPER_FLAG"
+    Parent  = "*_*_*_ASM_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "-D FSP_WRAPPER_FLAG"
+    Parent  = "*_*_*_VFRPP_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+#
+# FFS
+#
+LibraryMapping
+    Class  = "DebugLib"
+    Instance  = "MdePkg.BaseDebugLibNull"
+    ModuleTypes  = "PEIM"
+    Override  = "MdeModulePkg.PcdPei"
+End
+
+#
+# Pcd Setting
+#
+PcdMapping
+    Name  = "PcdFspWrapperEnable"
+    GuidSpace  = "gPlatformModuleTokenSpaceGuid"
+    PcdType  = "PcdsFeatureFlag"
+    DataType  = "Boolean"
+    Value  = "$(FSP_WRAPPER_ENABLE)"
+    Offset  = 00h
+    Length  = 01h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdCpuMicrocodePatchAddress"
+    GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint64"
+    Value  = "$(FV_MICROCODE_BINARY_BASE)"
+    Offset  = 00h
+    Length  = 08h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdCpuMicrocodePatchRegionSize"
+    GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint64"
+    Value  = "$(FV_MICROCODE_SIZE)"
+    Offset  = 00h
+    Length  = 08h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashMicrocodeOffset"
+    GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "0"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashCodeCacheAddress"
+    GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FLASH_CODE_CACHE_ADDRESS)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashCodeCacheSize"
+    GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FLASH_CODE_CACHE_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvRecoveryBase"
+    GuidSpace  = "gPlatformModuleTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FV_BB_BASE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdVpdBaseAddress"
+    GuidSpace  = "gEfiMdeModulePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "0"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashAreaBaseAddress"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FLASH_ADDRESS)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashAreaSize"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(FLASH_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdPeiPhaseStackTop"
+    GuidSpace  = "gPlatformModuleTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "0xA0000"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdPeiMinMemSize"
+    GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(PEI_MIN_MEMORY_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End

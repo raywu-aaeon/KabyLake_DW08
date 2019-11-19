@@ -1,0 +1,10 @@
+<component>
+	name = "FspDebugInit"
+	category = ModulePart
+	LocalRoot = "KabylakeFspPkg\FspDebugInit\"
+	RefName = "KabylakeFspPkg.FspDebugInit"
+[INF]
+"Pei\FspDebugServicePei.inf"
+[files]
+"FspDebugInit.sdl"	
+<endComponent>

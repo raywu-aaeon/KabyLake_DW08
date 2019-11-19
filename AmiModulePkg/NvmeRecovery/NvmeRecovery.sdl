@@ -1,0 +1,77 @@
+TOKEN
+    Name  = "NvmeRecovery_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable Nvme device recovery support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+    Master = Yes
+End
+
+TOKEN
+    Name  = "ENABLE_NVME_RECOVERY_TRACES"
+    Value  = "0"
+    Help  = "Main token to enable Nvme Recovery driver Trace support "
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "NVME_MAXIMUM_PCI_ROOT_BRIDGE"
+    Value  = "12"
+    Help  = "Port this - Maximum Bridge's in the Platform including number of root/root port Bridge's."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "NVME_PCI_MEM_MAP_BRIDGE_ADDRESS_OFFSET"
+    Value  = "$(ABAR_MEMORY_SIZE)"
+    Help  = "Memory map address to be allocated for Nvme Device's, the OEM has to be aware that this address is not used by someone in PEI phase, if used OEM has to Port this address and allocate resource also."
+    TokenType = Integer
+    TargetH = Yes
+    Token = "AhciRecovery_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "NVME_PCI_MEM_MAP_BASE_ADDRESS_LENGTH"
+    Value  = "0x10000"
+    Help  = "NVMe BAR Memory space size.Currently only consider for one controller."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "MAX_NVME_RECOVERY_DEVICE"
+    Value  = "4"
+    Help  = "Maximum NVme Device to be supported for recovery."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+ELINK
+    Name  = "NVME_ROOT_BRIDGE_LIST"
+    InvokeOrder = ReplaceParent
+    Help  = "List of Root Bridge's under which Nvme Device has to be searched \Format - {Bus, Dev, Func}"
+End
+
+Outputregister
+    Name = "NvmeRootBridgeList"
+    Path = "Build"
+    File = "NvmeRootBridgeElink.h"
+    Template = "NvmeRootBridgeElink.txt"
+End
+
+INFComponent
+    Name  = "NvmeRecovery"
+    File  = "NvmeRecovery.inf"
+    Package  = "AmiModulePkg"
+    Token = "FsRecovery_SUPPORT" "=" "1"
+    ModuleTypes  = "PEIM"
+End
+                                
+ELINK         
+    Name = "{0x01,0x08,0x02,0x00},"
+    Parent = "PEI_PCI_CLASSCODE_LIST"             
+    InvokeOrder = ReplaceParent
+    Token = "PeiPciEnumeration_SUPPORT" "=" "1"
+End

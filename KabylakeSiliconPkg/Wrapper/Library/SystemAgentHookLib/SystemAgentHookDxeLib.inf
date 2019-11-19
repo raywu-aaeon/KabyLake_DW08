@@ -1,0 +1,45 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SystemAgentHookDxeLib
+  FILE_GUID                      = 07537BEF-B657-49ed-99FF-DF35B2F22C86
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SystemAgentHook|DXE_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  AmiSaPolicyUpdateDxe.c 
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+    
+[LibraryClasses]
+  DxeServicesTableLib
+  NbGetSetupData
+  UefiLib
+
+[Guids]
+  gMemoryDxeConfigGuid

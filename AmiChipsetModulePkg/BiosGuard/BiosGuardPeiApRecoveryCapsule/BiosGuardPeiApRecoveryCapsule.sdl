@@ -1,0 +1,112 @@
+TOKEN
+	Name  = "BIOS_GUARD_PEI_AP_RECOVERY_CAPSULE_SUPPORT"
+	Value  = "1"
+	Help  = "Main switch to enable BiosGuardPeiApRecoveryCapsule support in Project"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	Master = Yes
+	Token = "BIOS_GUARD_RECOVERY_SUPPORT" "=" "1"    
+End
+
+INFComponent
+     Name = "BiosGuardPeiApRecoveryCapsule"
+     File = "BiosGuardPeiApRecoveryCapsule.inf"
+     Package = "AmiChipsetModulePkg"     
+     ModuleTypes = "PEIM"
+End
+
+TOKEN
+    Name  = "====== BiosGuard MEUD ======"
+    TokenType = Expression
+End
+
+TOKEN
+     Name = "BIOS_GUARD_MEUD_SUPPORT"
+     Value = "0"
+     TokenType = Boolean
+     TargetEQU = Yes
+     TargetMAK = Yes
+     TargetH = Yes
+     Help = "Switch to enable BiosGuard ME update support in Project"
+End
+
+TOKEN
+     Name = "BIOS_GUARD_MEUD_SUPPORT"
+     Value = "1"
+     TokenType = Boolean
+     TargetEQU = Yes
+     TargetMAK = Yes
+     TargetH = Yes
+     Help = "Switch to enable BiosGuard ME update support in Project"
+     Token = "MEUD_SUPPORT" "=" "1"
+     Token = "AUTO_ME_UPDATE_POLICY" "=" "2"
+End
+
+TOKEN
+    Name = "BIOSGUARD_MEUD_WARMRESET"
+    Value = "0"
+    Help = "For test only, do not enable it."
+    TokenType = Integer
+    TargetH = Yes
+    Lock = Yes
+End
+
+TOKEN
+    Name = "BIOSGUARD_MEUD_BIOS_SIZE"
+    Value = "$(FLASH_SIZE) + $(BIOS_GUARD_RESERVE_SIZE)"
+    Help = "ROM size for Bios Guard recovery"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name = "BIOSGUARD_ME_ALIGNMENT_SIZE"
+    Value = "$(FV_MEFW_CAPSULE_SIZE) + 0x10000"
+    Help = "Alignment for MEFWSIGN.CAP"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+    Token = "BIOS_GUARD_MEUD_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name = "BIOSGUARD_ME_ALIGNMENT_SIZE"
+    Value = "$(FV_MEFW_CAPSULE_SIZE) + 0x20000"
+    Help = "Alignment for MEFWSIGN.CAP"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+    Token = "FWCAPSULE_FILE_FORMAT" "=" "1"
+    Token = "BIOS_GUARD_MEUD_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name = "BIOSGUARD_MEUD_RECOVERY_IMAGE_SIZE"
+    Value = "$(BIOSGUARD_MEUD_BIOS_SIZE) + $(FV_MEFW_CAPSULE_SIZE)"
+    Help = "ROM size for Bios Guard MEUD recovery"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+    Token = "BIOS_GUARD_MEUD_SUPPORT" "=" "1"
+End
+
+INFComponent
+     Name = "BiosGuardVerifyRomImage"
+     File = "BiosGuardVerifyRomImage/BiosGuardVerifyRomImage.inf"
+     Package = "AmiChipsetModulePkg"     
+     ModuleTypes = "PEIM"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "AmiModulePkg.VerifyFwCapsulePeiLib"
+    Override  = "AmiChipsetModulePkg.BiosGuardVerifyRomImage"
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+

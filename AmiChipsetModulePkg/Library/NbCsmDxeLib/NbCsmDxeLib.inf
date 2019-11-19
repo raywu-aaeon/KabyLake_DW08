@@ -1,0 +1,24 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = NbCsmDxeLib
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = NbCsmDxeLib|DXE_DRIVER
+
+[Sources]
+  NbCsmDxeLib.c
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec  
+  
+[LibraryClasses]
+  AmiDxeLib
+  NbGetSetupData
+
+[Protocols]
+  gEfiPciIoProtocolGuid

@@ -1,0 +1,45 @@
+TOKEN
+    Name  = "IntelFsp2WrapperPkg_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable IntelFsp2WrapperPkg support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+    Token = "FSP_WRAPPER_ENABLE" "=" "1" 	
+End
+
+INFComponent
+    Name  = "FspWrapperNotifyDxe"
+    File  = "FspWrapperNotifyDxe\FspWrapperNotifyDxe.inf"
+    Package  = "IntelFsp2WrapperPkg"
+    ModuleTypes  = "DXE_DRIVER"
+End
+
+INFComponent
+    Name  = "FspmWrapperPeim"
+    File  = "FspmWrapperPeim\FspmWrapperPeim.inf"
+    Package  = "IntelFsp2WrapperPkg"
+    ModuleTypes  = "PEIM"
+End
+
+INFComponent
+    Name  = "FspsWrapperPeim"
+    File  = "FspsWrapperPeim\FspsWrapperPeim.inf"
+    Package  = "IntelFsp2WrapperPkg"
+    ModuleTypes  = "PEIM"
+End
+
+FFS_FILE
+    Name  = "FspmWrapperPeim"
+    FD_AREA  = "FV_BB"
+    INFComponent  = "IntelFsp2WrapperPkg.FspmWrapperPeim"
+    Index  = '"AFTER" "PlatformInitPreMem"'
+End
+
+FFS_FILE
+    Name  = "FspsWrapperPeim"
+    FD_AREA  = "FV_BB_AFTER_MEMORY"
+    INFComponent  = "IntelFsp2WrapperPkg.FspsWrapperPeim"
+    Index  = '"AFTER" "PlatformInit"'
+End

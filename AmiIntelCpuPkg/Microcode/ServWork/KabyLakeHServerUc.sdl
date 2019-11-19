@@ -1,0 +1,53 @@
+TOKEN
+    Name  = "SERVWORK_906EX"
+    Value = "0"
+    Help  = "Intel(R) KabyLake"
+    TokenType = Boolean
+    Master = Yes
+End
+
+TOKEN
+    Name  = "SERVWORK_M2A906E9"
+    Value  = "1"
+    Help  = "Intel(R) KabyLake Processor B-0 Stepping"
+    TokenType = Boolean	
+End
+
+TOKEN
+    Name  = "SERVWORK_M22906EA"
+    Value  = "1"
+    Help  = "Intel(R) Coffee Lake-S 4+2/6+2 Xeon E U-0 Stepping"
+    TokenType = Boolean	
+End
+
+TOKEN
+    Name  = "SERVWORK_M02906EB"
+    Value  = "1"
+    Help  = "Intel(R) Coffee Lake-S 4+2 Xeon E3 B-0 Stepping"
+    TokenType = Boolean
+    Token = "NON_PRODUCTION_MICROCODE" "=" "1"	
+End
+
+ELINK
+    Name  = "$(MICROCODE_SERVWORK_DIR)/M2A906E9_000000B4.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Kaby Lake Xeon E3(906E9) B-0 Stepping"
+    Token = "SERVWORK_M2A906E9" "=" "1"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_SERVWORK_DIR)/M22906EA_000000B4.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Coffee Lake-S 4+2/6+2 Xeon E(906EA) U-0 Stepping"
+    Token = "SERVWORK_M22906EA" "=" "1"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_SERVWORK_DIR)/M02906EB_00000084.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Coffee Lake-S 4+2 Xeon E3 B-0 Stepping"
+    Token = "SERVWORK_M02906EB" "=" "1"
+    InvokeOrder = AfterParent
+End

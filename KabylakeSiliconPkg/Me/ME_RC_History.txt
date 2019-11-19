@@ -1,0 +1,38 @@
+
+[Tag] AMI_OVERRIDE_ME0000 (Removed)
+[Description] EIP231628 : Fine-Tune ME POST time.
+[Files] KabylakeSiliconPkg\Me\HeciInit\Dxe\HeciInit.inf
+[Update] Remove this override because MFG_001 test item.
+
+[Tag] AMI_OVERRIDE_ME0001
+[Description] EIP209078: Nuvoton TPM work around
+[Files] KabylakeSiliconPkg\Me\Include\ConfigBlock\MePeiConfig.h
+
+[Tag] AMI_OVERRIDE_ME0002
+[Description] EIP196762 : Reconnect -r hang
+[Files] KabylakeSiliconPkg\Me\IntegratedTouch\IntegratedTouch.c
+
+[Tag] AMI_OVERRIDE_ME0003 (Removed)
+[Description] Can't find this dec file.
+[Files] KabylakeSiliconPkg\Me\Library\PeiDxePttHciLib\PeiDxePttHciLib.inf
+[Update] Remove this override because this file has be removed form RC.
+
+[Tag] AMI_OVERRIDE_ME0004
+[Description] Can't find this dec file.
+[Files] KabylakeSiliconPkg\Me\Library\PeiDxePttPtpLib\PeiDxePttPtpLib.inf
+
+[Tag] AMI_OVERRIDE_ME0005
+[Description] EIP209078: Nuvoton TPM work around
+[Files] KabylakeSiliconPkg\Me\Library\Private\PeiMeInitLib\PchMeUma.c
+
+[Tag] AMI_OVERRIDE_ME0006
+[Description] Use gSmst to get SmmVariable.
+[Files] KabylakeSiliconPkg\Me\Ptt\Smm\PttHciSmm.c
+
+[Tag] AMI_OVERRIDE_ME0007 (Removed)
+[Description] EIP244374 : Due to pointer size is used instead of array size  
+[Files] KabylakeSiliconPkg\Me\Library\DxeMeLib\HeciMsgDxeLib.c
+
+[Tag] AMI_OVERRIDE_ME0008
+[Description] KabylakeSiliconPkg\Me\HeciInit\Dxe\HeciInit.c still include it, so we need to add it in the INF.
+[Files] KabylakeSiliconPkg\Me\HeciInit\Dxe\HeciInit.inf

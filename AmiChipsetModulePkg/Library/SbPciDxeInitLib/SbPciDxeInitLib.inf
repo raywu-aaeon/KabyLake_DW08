@@ -1,0 +1,29 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbPciDxeInitLib
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SbPciDxeInitLib|DXE_DRIVER
+
+[Sources]
+  SbPciDxeInitLib.c
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses]
+  AmiSdlLib
+  AmiPciBusLib
+  PchPcieRpLib
+  DebugLib
+
+[Protocols]
+  gAmiBoardInfo2ProtocolGuid
+  

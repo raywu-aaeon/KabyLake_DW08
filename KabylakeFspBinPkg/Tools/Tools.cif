@@ -1,0 +1,14 @@
+<component>
+	name = "Tools"
+	category = ModulePart
+	LocalRoot = "KabylakeFspBinPkg\Tools\"
+	RefName = "KabylakeFspBinPkg.Tools"
+[files]
+"Tools.sdl"	
+"Tools.mak"	
+"pad.bin"
+"PatchFspBinFvsBaseAddress.py"
+"PatchFspBinFvsBaseAddress.exe"	
+"RebaseAndPatchFspBinBaseAddress.py"
+"RebaseAndPatchFspBinBaseAddress.exe"
+<endComponent>

@@ -1,0 +1,10 @@
+<component>
+	name = "Include"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg\Include\"
+	RefName = "AmiChipsetModulePkg.SgTpvInclude"
+[files]
+"Protocol/Mxm30.h"
+"Protocol/Nbci.h"
+"Library/PeiSgTpvLib.h"
+<endComponent>

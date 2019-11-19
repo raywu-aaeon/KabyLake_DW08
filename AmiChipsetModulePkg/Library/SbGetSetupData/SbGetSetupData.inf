@@ -1,0 +1,36 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbGetSetupData
+  FILE_GUID                      = 86B57B57-B70F-4551-AC58-4685DA0468D6  
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SbGetSetupData
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  GetSetupData.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  
+[LibraryClasses]
+  PchLinkLib  
+  SbLinkLib
+  AmiCspLib
+
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid
+ 
+[Pcd]
+

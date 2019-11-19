@@ -1,0 +1,85 @@
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2019, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************
+
+//*****************************************************************************
+/** @file 
+    This file contains the FIT Structure definition.  This structure
+    is given a temporary value. During build process, other tools will 
+    update this sturcture.
+*/
+
+// Module specific Includes
+#include <Token.h>
+
+#define FIT_HEADER  0x2020205F5449465F  // "   _FIT_"
+
+typedef struct _FIT_ENTRY
+{
+    UINT64           TblAddress;
+    UINT32           TblSIZE;
+    UINT16           TblVer;
+    UINT8            TblType;
+    UINT8            TblChkSum;
+} FIT_ENTRY;
+
+FIT_ENTRY   Fit[24] = 
+{
+    {        FIT_HEADER,          0, 0x0100, 0x00, 0x00},   // [Entry 0]FIT type 0x00 - FIT Header Entry
+    {0x00000000FFFFFFFF,          0, 0x0100, 0x01, 0x00},   // [Entry 1]FIT type 0x01 - Microcode Update Entry
+#if (defined INTEL_BOOT_GUARD_SUPPORT) && (INTEL_BOOT_GUARD_SUPPORT == 1)
+    {0x00000000FFFFFFFF,          0, 0x0100, 0x02, 0x00},   // [Entry 2]FIT type 0x02 - BootGuard ACM location
+#else
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},
+#endif
+#if (defined INTEL_BOOT_GUARD_SUPPORT) && (INTEL_BOOT_GUARD_SUPPORT == 1)
+    {0x00000000FFFFFFFF,          0, 0x0100, 0x0B, 0x00},   // [Entry 3]FIT type 0x0B - Key Manifest
+    {0x00000000FFFFFFFF,          0, 0x0100, 0x0C, 0x00},   // [Entry 4]FIT type 0x0C - Boot Policy Manifest
+#else
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},
+#endif
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 5]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 6]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 7]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 8]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 9]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 10]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 11]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 12]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 13]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 14]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 15]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 16]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 17]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 18]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 19]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 20]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 21]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF},   // [Entry 22]
+    {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFF, 0xFFFF, 0xFF, 0xFF}    // [Entry 23]
+};
+
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2019, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************

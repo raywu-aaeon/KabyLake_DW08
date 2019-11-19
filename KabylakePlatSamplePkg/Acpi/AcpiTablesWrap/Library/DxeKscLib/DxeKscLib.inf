@@ -1,0 +1,33 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = DxeKscLib
+  FILE_GUID                      = 060A9C4C-361F-4fb6-94AF-BDFB7B01F39D
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = DxeKscLib|DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER UEFI_APPLICATION UEFI_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#  
+  
+[Sources]
+  DxeKscLib.c
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+  
+[LibraryClasses]
+
+[Guids]
+
+[Protocols]
+  gEfiCpuIo2ProtocolGuid
+  gPlatformInfoProtocolGuid
+  
+[Depex]  
+  gPlatformInfoProtocolGuid

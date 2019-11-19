@@ -1,0 +1,4 @@
+FILE RAW = D9093578-08EB-44DF-B9D8-D0C1D3D55D96   align=16
+{
+    SECTION RAW = KabylakeFspPkg\FspDescription\FspDescription.txt
+}

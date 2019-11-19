@@ -1,0 +1,67 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+
+[Defines]
+  INF_VERSION = 0x00010017
+  BASE_NAME = AmiTbtInfo
+  FILE_GUID = f80156a2-1a2c-3335-982c-066c1fc37626
+  VERSION_STRING = 1.0
+  MODULE_TYPE = DXE_DRIVER
+  ENTRY_POINT = TbtInfoEntryPoint
+
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  HobLib
+  IoLib
+  UefiLib
+  DebugLib
+  BaseMemoryLib
+  TbtCommonLib
+
+[Packages]
+  MdePkg/MdePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+
+[Sources]
+  AmiTbtInfo.c
+
+[Protocols]
+  gAmiThunderboltInfoProtocolGuid
+
+[Guids]
+  gTbtInfoHobGuid
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+
+[Depex]
+  gEfiVariableArchProtocolGuid   AND
+  gEfiVariableWriteArchProtocolGuid
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

@@ -1,0 +1,67 @@
+#*************************************************************************
+#**                                                                     **
+#**   Copyright (c) 1985-2019, American Megatrends International LLC.   **
+#**                                                                     **
+#**      All rights reserved. Subject to AMI licensing agreement.       **
+#**                                                                     **
+#*************************************************************************
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PchHookPeiLib
+  FILE_GUID                      = FD7E4D6C-5484-47A3-A328-D021F23EEE0D
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PchHook|PEIM
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  AmiPchPolicyUpdatePei.c 
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec  
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/KabylakeSiliconPrivate.dec
+  
+[LibraryClasses]
+  PciLib
+  IoLib
+  PcdLib
+  DebugLib
+  SbGetSetupData
+  NbGetSetupData
+  PchGbeLib
+  PchInfoLib
+  EcLib
+  SbHdaVerbTableLib
+  SbPolicyUpdate
+  AmiPeiLib
+  PchPcieRpLib # AMI_OVERRIDE_NCD_START >>> EIP222861 Implement Detect Non-Compliance Device item function (Parts of South Bridge)
+  AmiSioPeiLib
+
+[Pcd]
+  gBoardModuleTokenSpaceGuid.PcdUsbTypeCSupport
+
+[Guids]
+  gAmiChipsetVariableGuid
+  gPchConfigHobGuid
+    
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid   
+  gEfiPeiStallPpiGuid
+  gEfiEndOfPeiSignalPpiGuid
+
+[Depex]
+  gEfiPeiReadOnlyVariable2PpiGuid

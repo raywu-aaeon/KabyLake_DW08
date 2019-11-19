@@ -1,0 +1,46 @@
+#*************************************************************************
+#**                                                                     **
+#**   Copyright (c) 1985-2019, American Megatrends International LLC.   **
+#**                                                                     **
+#**      All rights reserved. Subject to AMI licensing agreement.       **
+#**                                                                     **
+#*************************************************************************
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = AmiSyncSetupData
+  FILE_GUID      = 3dfe2e72-9f6d-4350-ba4f-20333b52b876
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 1.0
+  ENTRY_POINT    = AmiSyncSetupDataEntry
+
+[Sources]
+  AmiSyncSetupData.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  UefiDriverEntryPoint
+  IoLib
+  MmPciLib
+  DebugLib
+  PttHeciLib
+
+[Guids]
+  gEfiEndOfDxeEventGroupGuid
+  gSetupVariableGuid
+
+[Protocols]
+
+[Depex]
+  gEfiVariableArchProtocolGuid AND 
+  gEfiVariableWriteArchProtocolGuid
+

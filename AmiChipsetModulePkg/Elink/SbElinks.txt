@@ -1,0 +1,8 @@
+#define ACPI_ENABLE_CALL_BACK_LIST @Elink(AcpiEnableCallbackList, "@Child", " ", "%n")
+#define ACPI_DISABLE_CALL_BACK_LIST @Elink(AcpiDisableCallbackList, "@Child", " ", "%n")
+#define SB_OEM_SETUP_CALLBACK_LIST @Elink(SbConfigurationList, "@Child", " ", "%n")
+#define SB_RESET_CALLBACK_LIST @Elink(SbResetCallbackList, "@Child", " ", "%n")
+#define SB_OEM_PCH_POLICY_CALLBACK_LIST @Elink(OemPchPolicyCallbackList, "@Child", " ", "%n")
+#define SB_RTC_PWR_VALID_CALLBACK_LIST @Elink(SbRtcPwrValidCallbackList, "@Child", " ", "%n")
+#define SB_INIT_RTC_CALLBACK_LIST @Elink(SbInitRtcCallbackList, "@Child", " ", "%n")
+#define SB_OEM_S3_WARMRESET_CALLBACK_LIST @Elink(SB_OEM_S3_WARMRESET_CALLBACK_LIST, "@Child", " ", "%n")

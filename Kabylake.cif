@@ -1,0 +1,12 @@
+<component>
+	name = "Kabylake"
+	category = Flavor
+	RefName = "Kabylake"
+[files]
+"KabylakeDT.chm"	
+"AmiChipsetPkg\Include\Library\AmiChipsetIoLib.h"	
+"AmiNetworkPkg\UefiNetworkStack\Common\HttpDxe\HttpProto.h"	
+"AmiNetworkPkg\UefiNetworkStack\Common\HttpDxe\HttpsSupport.c"	
+"AmiNetworkPkg\UefiNetworkStack\Common\TlsDxe\TlsProtocol.c"	
+"MdePkg\Include\IndustryStandard\SmBios.h"	
+<endComponent>

@@ -1,0 +1,10 @@
+<component>
+    name = "CapsuleRuntimeDxe"
+    category = ModulePart
+    LocalRoot = "SkyBayPkg\Override\MdeModulePkg\Universal\CapsuleRuntimeDxe"
+    RefName = "SkyBayPkg.Override.CapsuleRuntimeDxe"
+[INF]
+[files]
+"CapsuleRuntimeDxe.inf"
+"CapsuleService.c"
+<endComponent>

@@ -1,0 +1,40 @@
+TOKEN
+	Name  = "MOBILE_806EX_COMETLAKE"
+	Value  = "0"
+    Help = "Intel(R) CometLake"
+	TokenType = Boolean
+	Master = Yes
+End
+
+TOKEN
+    Name  = "MOBILE_M94806EC_COMETLAKE"
+    Value  = "1"
+    Help  = "Intel(R) CometLake U42 v1(806EC) V-0 Stepping"
+    TokenType = Boolean
+    Token = "NON_PRODUCTION_MICROCODE" "=" "1"
+End
+
+TOKEN
+    Name  = "MOBILE_M80A0660_COMETLAKE"
+    Value  = "1"
+    Help  = "Intel(R) CometLake U62 v1(A0660) V-0 Stepping"
+    TokenType = Boolean
+    Token = "NON_PRODUCTION_MICROCODE" "=" "1"
+End
+
+ELINK
+    Name  = "$(MICROCODE_MOBILE_DIR)/M94806EC_000000B8.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) CometLake U42 v1(806EC) V-0 Stepping"
+    Token = "MOBILE_M94806EC_COMETLAKE" "=" "1"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_MOBILE_DIR)/M80A0660_000000AC.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) CometLake U62 v1(A0660) V-0 Stepping"
+    Token = "MOBILE_M80A0660_COMETLAKE" "=" "1"
+    InvokeOrder = AfterParent
+End
+

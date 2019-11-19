@@ -1,0 +1,10 @@
+<component>
+    name = "PiSmmCpuDxeSmm"
+    category = ModulePart
+    LocalRoot = "SkyBayPkg\Override\UefiCpuPkg\PiSmmCpuDxeSmm"
+    RefName = "SkyBayPkg.Override.PiSmmCpuDxeSmm"
+[INF]
+[files]
+"PiSmmCpuDxeSmm.inf"
+"SmramSaveState.c"
+<endComponent>

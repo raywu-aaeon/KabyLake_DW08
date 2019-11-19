@@ -1,0 +1,36 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbPeiWdt
+  FILE_GUID                      = 5D92B738-F87B-4357-9CEE-E32E33811AE7
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SbWdt|PEIM
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  SbWdt.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses]
+
+[Protocols]
+  gWdtProtocolGuid
+  
+[Ppis]
+  gWdtPpiGuid
+
+

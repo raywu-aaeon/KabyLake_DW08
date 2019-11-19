@@ -1,0 +1,14 @@
+<component>
+	name = "EmbeddedController"
+	category = eModule
+	LocalRoot = "AmiModulePkg\EC\"
+	RefName = "AmiModulePkg.EC"
+[INF]
+"ECPei.inf"
+"EcPlatformHookLib.inf"
+[files]
+"EC.sdl"	
+"EC.asl"	
+[parts]
+"KabylakePlatSamplePkg.EC"
+<endComponent>

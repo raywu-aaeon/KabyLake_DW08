@@ -1,0 +1,22 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "KabylakeFspPkg\Library\"
+	RefName = "KabylakeFspPkg.Library"
+[INF]
+"BaseCacheAsRamLib\BaseCacheAsRamLib.inf"
+"BasePostCodeLibPort80Ex\BasePostCodeLibPort80Ex.inf"
+"DebugPrintErrorLevelLib\FspDebugPrintErrorLevelLib.inf"
+"FspDebugLibService\FspDebugLibService.inf"
+"MmPciCf8Lib\MmPciCf8Lib.inf"
+"PeiPolicyUpdateLib\PeiPolicyUpdateLib.inf"
+"PeiPolicyUpdatePreMemLib\PeiPolicyUpdatePreMemLib.inf"
+"SerialPortLib\SerialPortLib.inf"
+"TscAcpiTimerLib\PeiTscTimerLib.inf"
+"TscAcpiTimerLib\SecTscTimerLib.inf"
+[files]
+"Library.sdl"	
+"BaseCacheAsRamLib\Ia32\CpuGcc.S"
+"SerialPortLib\SioRegs.h"	
+"FspDebugLibService\FspDebugLibService.h"
+<endComponent>

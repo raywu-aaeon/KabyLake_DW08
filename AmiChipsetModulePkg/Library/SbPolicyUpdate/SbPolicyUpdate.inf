@@ -1,0 +1,33 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbPolicyUpdate
+  FILE_GUID                      = c27fafa0-d552-11e4-8830-0800200c9a66  
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SbPolicyUpdate
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  PchPolicyUpdate.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec  
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  
+[LibraryClasses]
+
+[Ppis]
+ 
+[Pcd]
+

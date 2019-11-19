@@ -1,0 +1,40 @@
+
+[Defines]
+  INF_VERSION                     = 0x00010005
+  BASE_NAME                       = SmBusSmm
+  FILE_GUID                       = F1E39131-DE41-4bec-BB19-F18FB320E0EE
+  MODULE_TYPE                     = DXE_SMM_DRIVER
+  VERSION_STRING                  = 1.0
+  PI_SPECIFICATION_VERSION        = 0x0001000A
+  ENTRY_POINT                     = SmBusSmmEntryPoint
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  SmBusSmm.c
+  SmBusDxeSmm.c
+  SmBusDxeSmm.h
+
+[Packages]
+  MdePkg/MdePkg.dec  
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  
+[LibraryClasses]
+  UefiDriverEntryPoint
+  AmiDxeLib
+  AmiSmBusLib
+
+[Protocols]
+  gAmiSmbusSmmProtocolGuid
+
+[Depex]
+  gEfiSmmBase2ProtocolGuid AND
+  gEfiSmbusHcProtocolGuid

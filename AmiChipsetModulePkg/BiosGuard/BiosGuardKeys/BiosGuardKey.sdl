@@ -1,0 +1,28 @@
+TOKEN
+    Name  = "Bios_Guard_Keys_SUPPORT"
+    Value  = "1"
+    Help  = "Enable Bios Guard Key"
+    TokenType = Boolean
+    Master = Yes
+End
+
+TOKEN
+    Name  = "BIOS_GUARD_PUBKEY"
+    Value  = "$(BiosGuradKey_DIR)$(PATH_SLASH)BiosGuardPublic.key"
+    Help  = "Use for Bios Guard Publish Key"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "BIOS_GUARD_PRIKEY"
+    Value  = "$(BiosGuradKey_DIR)$(PATH_SLASH)BiosGuardPrivate.key"
+    Help  = "Use for Bios Guard Private Key"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+PATH
+    Name  = "BiosGuradKey_DIR"
+    Help  = "Path to default Platform Bios Guard Signing Key.\User may change this path to point to another location of FW Key."
+End

@@ -1,0 +1,39 @@
+[Tag] AMI_OVERRIDE_SIPKG0000
+[Description] for build  ChipsetReference.dec.
+[Files] KabylakeSiliconPkg\SiPkg.dec
+
+[Tag] AMI_OVERRIDE_SIPKG0001
+[Description] Did not use these PCD.
+[Files] KabylakeSiliconPkg\SiPkg.dec
+
+[Tag] AMI_OVERRIDE_SIPKG0002
+[Description] For capsule debug mode assert. Capsule mode will not insatll SmbiosProtocol. So it's normal not need assert.
+[Files] KabylakeSiliconPkg\SiInit\Dxe\SiInitDxe.c
+
+[Tag] AMI_OVERRIDE_SIPKG0003  (Removed)
+[Description] still using gPeiCachePpiGuid guid.
+[Files] KabylakeSiliconPkg\SiPkg.dec
+
+[Tag] AMI_OVERRIDE_SIPKG0004
+[Description] We don't use PCD PcdSiCsmEnable, used Setup data to determine CsmFlag.
+[Files]
+KabylakeSiliconPkg\Library\PeiSiPolicyLib\PeiSiPolicyLib.c
+KabylakeSiliconPkg\Wrapper\Library\CpuHookLib\CpuRcPolicyWrapPeiLib\CpuRcPolicyPei.c
+KabylakeSiliconPkg\Cpu\CpuInit\Dxe\MpCommon.c
+KabylakeSiliconPkg\Cpu\CpuInit\Dxe\MpService.c
+KabylakeSiliconPkg\Library\Private\DxeSiFviInitLib\SaFvi.c
+KabylakeSiliconPkg\SystemAgent\SaInit\Dxe\GraphicsInit.c
+KabylakeSiliconPkg\SystemAgent\SaInit\Dxe\IgdOpRegion.c
+KabylakeSiliconPkg\Library\PeiSiPolicyLib\PeiSiPolicyLib.inf
+KabylakeSiliconPkg\Cpu\CpuInit\Dxe\CpuInitDxe.inf
+KabylakeSiliconPkg\Library\Private\DxeSiFviInitLib\DxeSiFviInitLib.inf
+KabylakeSiliconPkg\SystemAgent\SaInit\Dxe\SaInitDxe.inf
+
+[Tag] AMI_OVERRIDE_SIPKG0005
+[Description] Fix Linux Gcc build error on KabylakeSiliconPkg component
+[Files] KabylakeSiliconPkg\Hsti\Dxe\MeasuredBootEnforcement.c
+
+[Tag] AMI_OVERRIDE_SIPKG0006 [Remove: Fix it by RC 2.3.0]
+[Description] When PCH thermal is disable or enable in ACPI mode, it would get wrong 
+bar to check Thermal Throttling Locks. Then the system would hang at post code 0xA2.
+[Files] KabylakeSiliconPkg\Hsti\Dxe\SecurePCHConfiguration.c

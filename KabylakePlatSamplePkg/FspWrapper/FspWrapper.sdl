@@ -1,0 +1,23 @@
+TOKEN
+    Name = "FspWrapper_SUPPORT"
+    Value = "1"
+    Help  = "Main switch to enable FspWrapper support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+INFComponent
+    Name  = "FspWrapperPeim"
+    File  = "FspWrapperPeim\FspWrapperPeim.inf"
+    Package  = "KabylakePlatSamplePkg"
+    ModuleTypes  = "PEIM"
+End
+
+FFS_FILE
+    Name  = "FspWrapperPeim"
+    FD_AREA  = "FV_BB_AFTER_MEMORY"
+    INFComponent  = "KabylakePlatSamplePkg.FspWrapperPeim"
+    Index  = '"AFTER" "FspsWrapperPeim"'
+End

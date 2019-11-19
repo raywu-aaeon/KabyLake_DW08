@@ -1,0 +1,61 @@
+TOKEN
+    Name  = "KabylakeFspBinPkg_Tools_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable KabylakeFspBinPkg Tools support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+PATH
+    Name  = "FSP_BIN_PKG_TOOLS_DIR"
+End
+
+MODULE
+    Help  = "Includes Tools.mak to Project"
+    File  = "Tools.mak"
+End
+
+TOKEN
+    Name  = "FSP_BINARY_NAME"
+    Value  = "Fsp.fd"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+#
+# This file is automatically updated. Please do NOT modify !!!
+#
+PcdMapping
+   Name  = "PcdFsptBaseAddress"
+   GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+   PcdType  = "PcdsFixedAtBuild"
+   DataType  = "Uint32"
+   Value  = "0xFFEC0000"
+   Offset  = 00h
+   Length  = 04h
+   TargetDSC = Yes
+End
+
+PcdMapping
+   Name  = "PcdFspmBaseAddress"
+   GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+   PcdType  = "PcdsFixedAtBuild"
+   DataType  = "Uint32"
+   Value  = "0xFFEC6000"
+   Offset  = 00h
+   Length  = 04h
+   TargetDSC = Yes
+End
+
+PcdMapping
+   Name  = "PcdFspsBaseAddress"
+   GuidSpace  = "gIntelFsp2WrapperTokenSpaceGuid"
+   PcdType  = "PcdsDynamicDefault"
+   DataType  = "Uint32"
+   Value  = "0xFFF63000"
+   Offset  = 00h
+   Length  = 04h
+   TargetDSC = Yes
+End

@@ -1,0 +1,10 @@
+<component>
+    name = "DxeAmiUsbBdsLib"
+    category = ModulePart
+    LocalRoot = "SkyBayPkg\Override\AmiModulePkg\Usb\AmiUsbLib\DxeAmiUsbBdsLib"
+    RefName = "SkyBayPkg.Override.DxeAmiUsbBdsLib"
+[INF]
+[files]
+"DxeAmiUsbBdsLib.inf"
+"DxeAmiUsbBdsLib.c"
+<endComponent>

@@ -1,0 +1,42 @@
+
+
+#
+# This file contains code for Thunderbolt Library functions
+#
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiTbtOemLib
+  FILE_GUID                      = D3E313F1-DC1E-444a-9838-CF7F0F7167BE
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AmiTbtOemLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  AmiTbtOemLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+
+[LibraryClasses]
+  IoLib
+  PcdLib
+  AmiChipsetIoLib
+  PchPcieRpLib
+  PchInfoLib
+  GpioLib
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress

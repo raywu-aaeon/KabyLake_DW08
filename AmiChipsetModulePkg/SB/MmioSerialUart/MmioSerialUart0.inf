@@ -1,0 +1,37 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MmioSerialUart0
+  FILE_GUID                      = 5f8504c4-bcaa-4600-b435-347eec6b5e14
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+  ENTRY_POINT                    = SerialUart0EntryPoint
+
+[Sources]
+  MmioSerialUart0.c
+  
+[Packages]
+  AmiCompatibilityPkg\AmiCompatibilityPkg.dec
+  MdePkg\MdePkg.dec
+  AmiModulePkg\AmiModulePkg.dec
+  
+[LibraryClasses]
+  AmiDxeLib
+  UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib   # EIP397240
+  
+[Protocols]
+  gAmiSerialProtocolGuid
+  gEfiDevicePathProtocolGuid
+  
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultDataBits
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultParity
+  gEfiMdePkgTokenSpaceGuid.PcdUartDefaultStopBits
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+  
+[Depex]
+  TRUE
+

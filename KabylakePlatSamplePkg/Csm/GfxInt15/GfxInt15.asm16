@@ -1,0 +1,815 @@
+;;@file
+;
+; @copyright
+;  INTEL CONFIDENTIAL
+;  Copyright 2010 - 2016 Intel Corporation.
+;
+;  The source code contained or described herein and all documents related to the
+;  source code ("Material") are owned by Intel Corporation or its suppliers or
+;  licensors. Title to the Material remains with Intel Corporation or its suppliers
+;  and licensors. The Material may contain trade secrets and proprietary and
+;  confidential information of Intel Corporation and its suppliers and licensors,
+;  and is protected by worldwide copyright and trade secret laws and treaty
+;  provisions. No part of the Material may be used, copied, reproduced, modified,
+;  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+;  without Intel's prior express written permission.
+;
+;  No license under any patent, copyright, trade secret or other intellectual
+;  property right is granted to or conferred upon you by disclosure or delivery
+;  of the Materials, either expressly, by implication, inducement, estoppel or
+;  otherwise. Any license under such intellectual property rights must be
+;  express and approved by Intel in writing.
+;
+;  Unless otherwise agreed by Intel in writing, you may not remove or alter
+;  this notice or any other notice embedded in Materials by Intel or
+;  Intel's suppliers or licensors in any way.
+;
+;  This file contains a 'Sample Driver' and is licensed as such under the terms
+;  of your license agreement with Intel or your vendor. This file may be modified
+;  by the user, subject to the additional terms of the license agreement.
+;
+;@par Specification Reference:
+;;
+
+	TITLE	INT15.ASM -- OEM INTERRUPT IMPLEMENTATION
+include CmosMap.equ
+; AMI_OVERRIDE_START
+include Token.equ
+; AMI_OVERRIDE_END
+.686p
+
+CSMOEM_CSEG SEGMENT PARA PUBLIC 'CODE' USE16
+	ASSUME cs:CSMOEM_CSEG, ds:CSMOEM_CSEG
+
+OldIntHandler	LABEL DWORD
+	IntSegSav	dw	0
+	IntOfsSav	dw	0
+
+EFP_OPTIONS	struc
+ Reserved1              dw ?
+ DeviceType             dw ?
+ Reserved2              db ?
+ PVTS1                  db ?
+ PVTS2                  db ?
+ HDMILevelShifterConfig db ?
+ Reserved3              dw 4 DUP (0)
+ OutputPort             db ?
+ Reserved4              dw ?
+ DDCGPIOPinPair         db ?
+ Reserved5              db 3 DUP (0)
+ DPS                    db ?
+ Reserved6              db ?
+ AuxChannel             db ?
+ DongleDetect           db ?
+ Reserved7              dw 3 DUP (0)
+EFP_OPTIONS	ends
+
+;---------------------------------------------------------------------------
+;
+; Name:		INT15Proc
+;
+; Description:	IGD INT15 function implememtation
+;
+;---------------------------------------------------------------------------
+
+INT15Proc PROC   PUBLIC
+
+	cmp		ah, 5fh
+	je		igd_call
+	jmp	DWORD PTR cs:[OldIntHandler]
+
+igd_call:
+;	We are going to handle this call
+	cmp		al, 00
+	jne		not_5f00
+
+	mov		bx, 1302h
+	jmp		exit_success
+
+not_5f00:
+
+; AMI_OVERRIDE_START - Support Disabel CRB EC support
+IFDEF MKF_CRB_EC_SUPPORT 
+IF MKF_CRB_EC_SUPPORT 
+	cmp		al, 14h
+	jne		not_5f14
+
+	cmp		bx, 078Fh
+	jne		exit_not_supported
+
+	mov		cl, 00h
+	call	read_ec_port
+	jmp	exit_success
+ENDIF 
+ENDIF 
+; AMI_OVERRIDE_END - Support Disabel CRB EC support
+
+not_5f14:
+	cmp		al,40h
+	jne		not_5f40
+
+
+;	Get LFP Panel Type
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;	mov		al, CMOS_LCDPANELTYPE_REG
+	mov		al, MKF_IGFX_LCD_PANEL_TYPE
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.   
+
+
+read_paneltype:
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;	call		get_cmos
+	call		get_igfx_setup_data
+; AMI_OVERRIDE_END - use SW SMI to get Setup data. 
+	mov		cl, al
+	cmp		cl, 0
+        jz      not_5f01
+	jmp		exit_success
+
+not_5f40:
+	cmp		al, 34h
+	jne		not_5f34
+
+;	Get Panel Scaling feature
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;	mov		al, CMOS_LCDPANELSCALING_REG
+;	call	get_cmos
+        mov             al, MKF_IGFX_LCD_PANEL_SCALING
+        call            get_igfx_setup_data
+; AMI_OVERRIDE_END -  use SW SMI to get Setup data.        
+	mov		cl, al
+	jmp		exit_success
+
+
+not_5f34:
+	cmp		al,35h
+	jne		not_5f35
+
+;	Get IGD boot type
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;       mov		al,CMOS_IGDBOOTTYPE_REG
+;       call	get_cmos
+        mov             al,MKF_IGFX_BOOT_TYPE
+        call            get_igfx_setup_data
+; AMI_OVERRIDE_END -  use SW SMI to get Setup data.        
+	mov		cl, al
+        cmp             cl, 00h
+        jne             check_pipe_B_display
+        mov             ch, 00h
+        jmp             exit_success
+
+check_pipe_B_display:
+
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;       Get Pipe B device type
+;       mov             al,CMOS_IGD_DISPLAY_PIPE_B_REG
+;       call    get_cmos
+        mov             al,MKF_IGFX_DISPLAY_PIPE_B_TYPE
+        call            get_igfx_setup_data
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.         
+        mov             ch, al
+
+;       Check Pipe A & Pipe B are same
+        cmp             cl, ch
+        jne             exit_success
+        mov             ch, 00h
+        jmp             exit_success
+
+not_5f35:
+	cmp		al,49h
+	jne		not_5f49
+
+; ----------------------------------------------------
+; Int 15h, AX = 5F49h, Get backlight type and polarity
+; Return Registers :
+; AX	Return Status (function not supported if AL != 5Fh):
+; Value	Description
+; 005Fh	Function supported and successful
+; 015Fh	Function supported but failed
+; BX	Value	Description
+; 0-255	Initial backlight control brightness value
+; CX	Value	Description
+; 00h	Enable PWM - Inverted
+; 02h	Enable PWM - Normal
+; ----------------------------------------------------
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;	mov		al,CMOS_BRIGHTNESS_REG
+;	call	get_cmos
+;	movzx	bx, al
+; 	mov		al,CMOS_BACKLIGHT_REG
+; 	call	get_cmos
+        mov             al,MKF_IGFX_BACKLIGHT_TYPE
+        call            get_igfx_setup_data
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.         
+	movzx		cx, al
+	jmp		exit_success
+
+not_5f49:
+	cmp		al,50h
+	jne		not_5f50
+
+; ----------------------------------------------------
+; Int 15h, AX = 5F50h, Program Squelch Register for eDP
+; ----------------------------------------------------
+      push  es
+      push  0
+      pop   es
+      push  edi
+;
+; Get PCIEXBAR
+; PCD cannot pass to this particular driver so use CF8/CFC to get PCIEXBAR.
+;
+      push  eax
+      push  dx
+      mov   eax,  80000060h
+      mov   dx,   0CF8h
+      out   dx,   eax
+      mov   dx,   0CFCh
+      in    eax, dx
+      and   eax, 0FC000000h
+      mov   edi, eax
+      pop   dx
+      pop   eax
+;
+; set PCIEXBAR + 0x8dfc[1]=1b
+;
+      mov   al, BYTE PTR es:[edi + 08dfch]
+      or    al,02h
+      mov   BYTE PTR es:[edi + 08dfch],al
+;
+; set PCIEXBAR + 0x8f88[31]=1b
+; set PCIEXBAR + 0x8f88[26]=0b
+;
+      mov   al, BYTE PTR es:[edi + 08f8bh]
+      or    al,080h
+      and   al,NOT (04h)
+      mov   BYTE PTR es:[edi + 08f8bh],al
+;
+; set PCIEXBAR + 0x8fa8[31]=1b
+; set PCIEXBAR + 0x8fa8[26]=0b
+;
+      mov   al, BYTE PTR es:[edi + 08fabh]
+      or    al,080h
+      and   al,NOT (04h)
+      mov   BYTE PTR es:[edi + 08fabh],al
+;
+; set PCIEXBAR + 0x8fc8[31]=1b
+; set PCIEXBAR + 0x8fc8[26]=0b
+;
+     mov   al, BYTE PTR es:[edi + 08fcbh]
+     or    al,080h
+     and   al,NOT (04h)
+     mov   BYTE PTR es:[edi + 08fcbh],al
+;
+; set PCIEXBAR + 0x8fe8[31]=1b
+; set PCIEXBAR + 0x8fe8[26]=0b
+;
+     mov   al, BYTE PTR es:[edi + 08febh]
+     or    al,080h
+     and   al,NOT (04h)
+     mov   BYTE PTR es:[edi + 08febh],al
+     pop   edi
+     pop   es
+     jmp   exit_success
+not_5f50:
+     cmp   al,51h
+     jne   not_5f51
+; ----------------------------------------------------
+; Int 15h, AX = 5F51h, Select Active LFP Configuration
+; ----------------------------------------------------
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+; mov		al,CMOS_EDP_ACTIVE_LFP_CONFIG_REG
+; call	get_cmos
+        mov             al,MKF_IGFX_EDP_ACTIVE_LFP_CONFIG_TYPE
+        call            get_igfx_setup_data
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.        
+	movzx		cx, al
+	jmp		exit_success
+not_5f51:
+	cmp 	al,52h
+	jne		not_5f52
+; -----------------------------------------------------
+; Int 15h, AX = 5F52h, Hook to select Panel Color Depth
+; -----------------------------------------------------
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+; 	mov		al,CMOS_LFP_PANEL_COLOR_DEPTH_REG
+; 	call	get_cmos
+        mov             al,MKF_IGFX_LFP_PANEL_COLOR_DEPTH_TYPE
+        call            get_igfx_setup_data
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.        
+	movzx		cx, al
+	jmp		exit_success
+not_5f52:
+	cmp		al,21h
+	jne		not_5f21
+; --------------------------------------------------
+; Int 15h, AX = 5F21h, Get Actual display core clock
+; --------------------------------------------------
+	call	GetCDClock
+	cmp		cx, 0
+	je		exit_fail
+	jmp		exit_success
+
+not_5f21:
+	cmp		al,22h
+	jne		not_5f22
+; --------------------------------------------------
+; Int 15h, AX = 5F22h, Get FSB frequency
+; --------------------------------------------------
+	call	GetFsbFreq
+	cmp		cx, 0
+	je		exit_fail
+	jmp		exit_success
+
+not_5f22:
+	.686p
+	cmp		al,01h
+	jnz 	not_5f01
+	INT		10h
+	mov     eax,ebx
+	shr		ebx,16
+	mov 	dx,bx
+	mov 	bx,ax
+	jmp		exit_success
+
+not_5f01:
+	cmp 	al, 70h
+	jnz	not_5f70
+	call 	Func_70h_handler
+	jmp	exit
+
+exit_not_supported:
+	mov		ax, 0000h
+	jmp     exit
+not_5f70:
+	cmp 	al, 54h
+	jnz	not_5f54
+	call 	Func_54h_handler
+	jmp	exit
+exit_fail:
+not_5f54:
+	mov		ax, 15fh
+    jmp     exit
+
+
+exit_success:
+	mov		ax, 05fh
+
+exit:
+	retf	2
+INT15Proc	ENDP
+;---------------------------------------------------------------------------;
+;
+; Procedure:      Func_54h_handler
+;
+; Description:
+;
+;
+; 5F54 - Hook to get Integrated DP/HDMI port configuration
+;This hook will get the port configuration for integrated DP/HDMI port from SBIOS.
+;It is assumed that the SBIOS populates the below port configuration properly.
+;
+;INPUT
+;AX 	= 5F54h, INT 15h Interface Version Hook
+;ES:DI 	= pointer to 99 bytes EFP data structures
+;
+;OUTPUT:
+;AX 	= Return Status (function not supported if AL != 5Fh):
+;= 015Fh, Function supported but failed
+;= 005Fh, Function supported and successful
+;ES:DI 	= 99 bytes data structures filled up
+
+;---------------------------------------------------------------------------;
+
+Func_54h_handler PROC NEAR
+       push es
+       push di
+
+; Pointer to EFP structure (Device 1)
+
+;Device Type Values -
+;0x0000 - No device
+;0x68c6 - Integrated DisplayPort Only
+;0x60D6-Integrated DisplayPort with HDMI/DVI Compatible
+;0x68D6-Integrated DisplayPort with DVI Compatible
+;0x60D2 - Integrated HDMI/DVI
+;0x68D2 - Integrated DVI Only
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;        mov   al, CMOS_DISP_DDI_REG
+;        call  get_cmos
+       mov   al, MKF_IGFX_DISP_DDI_TYPE
+       call  get_igfx_setup_data
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.        
+       cmp   al, 0h
+       je    exit_success
+       mov   bx, 60D6h
+       mov   word ptr es:[di].EFP_OPTIONS.DeviceType, bx
+
+;Output Port Values
+;0x00 - N/A
+;0x01 - HDMI-B
+;0x02 - HDMI-C
+;0x03 - HDMI-D
+;0x07 - DisplayPort-B
+;0x08 - DisplayPort-C
+;0x09 - DisplayPort-D
+
+       mov   cl, 7h
+       mov   byte ptr es:[di].EFP_OPTIONS.OutputPort, cl
+       pop   edi
+       push  edi
+
+; Pointer to EFP structure (Device 2)
+       add   di, SIZE EFP_OPTIONS
+
+       mov   bx, 60D2h
+       mov   word ptr es:[di].EFP_OPTIONS.DeviceType, bx
+       mov   cl, 2h
+       mov   byte ptr es:[di].EFP_OPTIONS.OutputPort, cl
+       jmp   exit_success
+exit_success:
+       mov   ax, 05fh
+
+       pop   di
+       pop   es
+       clc
+       ret
+
+Func_54h_handler ENDP
+;---------------------------------------------------------------------------;
+;
+; Procedure:      Func_70h_handler
+;
+; Description:    Get/Set MUX State Hook
+;
+; Input:  AX        = 5F70h, Get/Set MUX State
+;           CH        = 00h - Get MUX State
+;       	          = 01h - Set MUX State
+;                     = 02h - Get SG/Non-SG Mode
+;
+;
+;           For CH=01h Set MUX State,
+;           CL         = MUX state,
+;                      = 0 - Set all MUXs to iGPU
+;                      = 1 - Set all MUXs to dGPU
+;
+; Output: AX        = Return Status(function not supported if AL !=5FH)
+;                                   005Fh,Function Supported and successful
+;                                   015Fh,Function Supported but failed
+;                      For CH=00h in Input, CL =  MUX State (0 = iGPU, 1= dGPU)
+;                          Bit 0 = CRT
+;                          Bit 3 = LFP
+;                      For CH=02h in Input, Get SG/Non-SG Mode
+;                            CL =  SG Mode (0 = SG Enabled, 1= SG Disabled)
+;
+;---------------------------------------------------------------------------;
+
+Func_70h_handler PROC NEAR PUBLIC
+.686p
+
+; check if function 0 of handler is being called
+	push	dx
+	push	eax
+    cmp      ch, 0h
+    jne      check_INTEL_HG_F1
+
+; Function 0       - Get MUX State
+    mov      dx, 0538h
+	mov	cl, 09h		; assume DGPU
+    in       eax, dx
+    and      eax, 00100000h
+	jz	OK_70
+	mov	cl, 0h
+    jmp      OK_70
+
+; Function 1
+; check if function 1 of handler is being called
+check_INTEL_HG_F1:
+    cmp      ch, 01h
+    jne      check_INTEL_HG_F2
+
+	mov	dx, 0538h	; DX = mux register
+    cmp      cl, 0
+    je       ProgramMuxIGPU_Intel
+    cmp      cl, 1
+    je       ProgramMuxDGPU_Intel
+    jmp      notOK_70
+
+ProgramMuxIGPU_Intel:
+    in       eax, dx
+    or       eax, 00180000h
+    out      dx, eax
+    jmp      OK_70
+
+ProgramMuxDGPU_Intel:
+    in       eax, dx
+    and      eax, NOT (00180000h)
+    out      dx, eax
+	jmp      OK_70
+
+; Function 2
+; Check if function 2 of handler is being called
+
+check_INTEL_HG_F2:
+    cmp      ch, 02h
+    jne      notOK_70
+
+;Get PrimaryDisplay
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;    mov      al, CMOS_PRIMARY_DISPLAY_REG
+;    call     get_cmos
+    mov            al, MKF_IGFX_PRIMARY_DISPLAY_TYPE
+    call           get_igfx_setup_data
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.     
+    cmp      al,4h
+    je       PrimaryDisplay_SG
+
+    mov      cl,01h
+    jmp      OK_70
+
+PrimaryDisplay_SG:
+    mov      cl,00h
+
+OK_70:
+    pop	     eax		; restore EAX before setting return value
+    mov      ax, 005fh
+    jmp	     Func_70h_exit
+
+notOK_70:
+    pop	     eax		; restore EAX before setting return value
+    mov      ax, 015Fh
+
+Func_70h_exit:
+    pop	     dx
+    ret
+
+Func_70h_handler ENDP
+
+; procedure to read status values from EC ports
+; i/p: n/a
+; o/p: data in CL register
+
+read_ec_port	proc	near
+
+	push		eax
+
+ 	; Code added to check if this is SV Board ( No EC in SV board)
+ 	; TODO - Code needs to be removed, if in future we decide to add EC to SV Boards
+; AMI_OVERRIDE_START - Support Disabel CRB EC support	
+;	mov al, Q_SV_SV_BOARD_REG
+;	out 72h, al
+;	in  al, 73h
+;	cmp al, 1
+;	je  exit_read_ec_port
+; AMI_OVERRIDE_END - Support Disabel CRB EC support 
+
+	mov		al, 0Ah
+	out		66h, al
+ec_read_loop1:
+	in		al, 66h
+	cmp		al, 0FFh
+	je	exit_read_ec_port
+	and		al, 01h
+	jz 	ec_read_loop1
+	in		al, 62h
+	mov		ah, al
+
+	mov		al, 8Ah
+	out		66h, al
+ec_read_loop2:
+	in		al, 66h
+	and		al, 01h
+	jz 	ec_read_loop2
+	in		al, 62h
+
+; SS Docking status
+	and		al, 01h
+	jz	check_lid_status
+	or		cl, 01h
+
+;Lid status
+check_lid_status:
+	mov		al, ah
+	and		al, 01h
+	jnz	check_AC_status
+	or		cl, 02h
+
+;AC power status
+check_AC_status:
+	mov		al, ah
+	and		al, 10h
+	jz	exit_read_ec_port
+	or		cl, 04h
+
+exit_read_ec_port:
+	pop		eax
+	ret
+
+read_ec_port	endp
+
+
+;	i/p al : Index
+;	o/p	data in reg al
+get_cmos	proc	near
+
+	push	dx
+	mov		dx, CMOS_ADDR_PORT
+	out		dx, al
+	jcxz	$+2
+	jcxz	$+2
+	inc		dx
+	in		al, dx
+	pop		dx
+	ret
+
+get_cmos	endp
+
+; AMI_OVERRIDE_START - use SW SMI to get Setup data.
+;<AMI_PHDR_START>
+;---------------------------------------------------------------------------;
+;
+; Procedure:      get_igfx_setup_data
+;
+; Description:    get IGFX setup data after call NB SMI 
+;
+; Input:          AL  - INDEX
+;
+; Output:         data in reg al
+;
+;---------------------------------------------------------------------------;
+;<AMI_PHDR_END>
+get_igfx_setup_data        proc    near
+
+        push           bx
+;       save index to bl
+        mov            bl, al
+
+;       NB SW SMI
+        mov            al, MKF_NB_SWSMI_IGFX_GET_SETUP
+        out            0b2h, al
+
+;       setup data move to al
+        mov            al, bl
+
+        pop            bx
+
+        ret
+
+get_igfx_setup_data        endp
+; AMI_OVERRIDE_END - use SW SMI to get Setup data.  
+
+GraphicsCoreClock	LABEL	WORD
+;
+; VCO = 3200MHz (MCHBAR+0C0Fh[2:0] = 000b)
+;
+	DW	0228
+	DW	0320
+;
+; VCO = 4000MHz (MCHBAR+0C0Fh[2:0] = 001b)
+;
+	DW	0222
+	DW	0333
+;
+; Reserved
+;
+	DW	0222
+	DW	0333
+;
+; Reserved
+;
+	DW	0
+	DW	0
+;
+; VCO = 2666MHz (MCHBAR+0C0Fh[2:0] = 100b)
+;
+	DW	0222
+	DW	0333
+
+SaveCoreClock   DW      05555h
+
+;----------------------------------------------------------------------------
+;
+; Name:		GetCDClock
+;
+; Description:	This function gets the Cantiga IGD display core clock value
+;               and return it in CX.
+;
+;----------------------------------------------------------------------------
+GetCDClock      PROC
+        mov     cx, cs:[SaveCoreClock]
+        cmp     cx, 05555h
+        jne     ExitGetCDClock
+
+        push    ax
+        push    bx
+        push    edi
+;
+; Read MCHBAR + 0C0Fh[2:0] = HPLL VCO frequency
+;
+        push    es                      ; Save previous ES
+        push    0
+        pop     es
+; AMI_OVERRIDE_START - Use TOKEN value
+;        mov     edi, 0fed10000h         ; MCH_BASE_ADDRESS
+        mov     edi, MKF_MCH_BASE_ADDRESS
+; AMI_OVERRIDE_END - Use TOKEN value       
+        movzx   bx, BYTE PTR es:[edi + 0C0Fh]
+        and     bx, 7                   ; HPLL VCO Freq, Bits[2:0]
+
+        push    bx                      ; Save in BX
+;
+; Read B0:D2:F0:Offset F0h[12] = Graphics Core Display Clock Select
+;
+;
+; Get PCIEXBAR
+; PCD cannot pass to this particular driver so use CF8/CFC to get PCIEXBAR.
+;
+        push    eax
+        push    dx
+        mov     eax, 80000060h
+        mov     dx, 0CF8h
+        out     dx, eax
+        mov     dx, 0CFCh
+        in      eax, dx
+        and     eax, 0FC000000h
+        mov     edi, eax
+        pop     dx
+        pop     eax
+        add     edi, (2 SHL 15) + (0 SHL 12)
+        mov     ax, WORD PTR es:[edi + 0F0h]
+        pop     es                      ; Restore ES
+        and     ax, 01000h ; GCFGC Bit[12]
+        shr     ax, 12 - 1              ; Bit[12] * (sizeof WORD)
+        pop     bx                      ; Restore HPLL VCO Freq
+        imul    bx, 4
+        add     bx, ax
+;
+; Get Actual Core Display Frequency from Table
+;
+        mov     cx, cs:GraphicsCoreClock[bx]
+        mov     cs:[SaveCoreClock], cx
+        pop     edi
+        pop     bx
+        pop     ax
+
+ExitGetCDClock:
+        ret
+GetCDClock      ENDP
+
+;----------------------------------------------------------------------------
+;
+; Name:		GetFsbFreq
+;
+; Description:	This function gets the Cantiga Front Side Bus (FSB) Frequency
+;               and return it in CX.
+;
+;----------------------------------------------------------------------------
+SaveFsbFreq     DW  05555h
+GetFsbFreq      PROC    NEAR
+    mov     cx, cs:[SaveFsbFreq]
+    cmp     cx, 05555h
+    jne     Exit
+
+    push    ax
+    push    edi
+;
+; Read MCHBAR + 0C00h[2:0] = FSB Frequency
+;
+    push    es          ; Save previous ES
+    push    0           ;
+    pop	    es
+; AMI_OVERRIDE_START - Use TOKEN value
+;    mov     edi, 0fed10000h ; MCH_BASE_ADDRESS
+    mov     edi, MKF_MCH_BASE_ADDRESS
+; AMI_OVERRIDE_END - Use TOKEN value     
+    mov     al, BYTE PTR es:[edi + 0C00h]
+    and	    al, 7       ; FSB Freq, Bits[2:0]
+
+;
+; Get actual Front Side Bus Frequency
+;
+    mov     cx, 800
+    cmp     al, 2
+    je      GotFsbFreq
+    mov     cx, 667
+    cmp     al, 3
+    je      GotFsbFreq
+    mov     cx, 1066
+    cmp     al, 6
+    je      GotFsbFreq
+    mov     cx, 0       ; Not supported
+
+GotFsbFreq:
+    mov     cs:[SaveFsbFreq], cx
+    pop     es          ; Restore ES
+    pop     edi
+    pop     ax
+
+Exit:
+    ret
+GetFsbFreq      ENDP
+
+
+CSMOEM_CSEG ENDS
+
+END

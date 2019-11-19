@@ -1,0 +1,13 @@
+<component>
+	name = "DptfAcpiTablesKblG"
+	category = ModulePart
+	LocalRoot = "KabylakePlatSamplePkg\Features\Dptf\AcpiTables\KblG\"
+	RefName = "KabylakePlatSamplePkg.Features.Dptf.KblG.DptfAcpiTablesKblG"
+[files]
+"DptfAcpiTablesKblg.sdl"	
+"DGFCParticipant.asl"	
+"DGHMParticipant.asl"	
+"MCPParticipant.asl"
+"XlBiosDataVault.asl"
+"XtBiosDataVault.asl"	
+<endComponent>

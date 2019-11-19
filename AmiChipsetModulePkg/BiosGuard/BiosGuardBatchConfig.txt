@@ -1,0 +1,9 @@
+BiosImageName 1ATQO.BIN
+CRB_BOARD 2
+BIOS_SVN 356352
+BiosGuardMaxSectionSize 0x100000
+BIOS_GUARD_SL2BIN BIOSGuardSL2BIN_PV.2.0.3683.exe
+BIOS_GUARD_PB BIOSGuardPB_PV.2.0.3683.exe
+BiosGuardPriKey AmiChipsetModulePkg\BiosGuard\BiosGuardKeys\BiosGuardPrivate.key
+PlatformID=KABYLAKE
+RecoveryImageSize 0x1020000

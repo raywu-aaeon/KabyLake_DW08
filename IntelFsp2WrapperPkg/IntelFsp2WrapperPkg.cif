@@ -1,0 +1,17 @@
+<component>
+	name = "IntelFsp2WrapperPkg"
+	category = eChipset
+	LocalRoot = "IntelFsp2WrapperPkg\"
+	RefName = "IntelFsp2WrapperPkg"
+[INF]
+"FspmWrapperPeim\FspmWrapperPeim.inf"
+"FspsWrapperPeim\FspsWrapperPeim.inf"
+"FspWrapperNotifyDxe\FspWrapperNotifyDxe.inf"
+[files]
+"IntelFsp2WrapperPkg.chm"	
+"IntelFsp2WrapperPkg.dec"	
+"IntelFsp2WrapperPkg.sdl"	
+[parts]
+"IntelFsp2WrapperPkg.Include"
+"IntelFsp2WrapperPkg.Library"
+<endComponent>

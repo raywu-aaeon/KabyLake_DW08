@@ -1,0 +1,9 @@
+<component>
+	name = "BiosGuardKeys"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/BiosGuard/BiosGuardKeys"
+	RefName = "BiosGuardKeys"
+[files]
+"BiosGuardKey.sdl"	
+"GenBiosGuardKey.bat"	
+<endComponent>

@@ -1,0 +1,10 @@
+<component>
+	name = "Server Snowridge uCode Patches (8066X)"
+	category = ModulePart
+	Rank = 40
+	LocalRoot = "AmiIntelCpuPkg\Microcode\ServWork\"
+	RefName = "SnowridgeServerUc"
+[files]
+"SnowridgeServerUc.sdl"	
+"M0180660_80661_90020002.mcb"	= "SERVER WORKSTATION MICROCODE UPDATES"
+<endComponent>

@@ -1,0 +1,18 @@
+<component>
+    name = "HddAcoustic"
+    category = eModule
+    LocalRoot = "AmiModulePkg\HddAcoustic\"
+    RefName = "Acoustic"
+[INF]
+"Acoustic.inf"
+[files]
+"Acoustic.sdl"
+"Acoustic.sd"
+"Acoustic.chm"
+"Acoustic.uni"
+"AcousticSetup.c"
+"AcousticSetupVar.h"
+[parts]
+"AcousticProtocol"
+"HddAcousticDynamicSetup"
+<endComponent>

@@ -1,0 +1,7 @@
+FILE RAW = 7934156D-CFCE-460E-92F5-A07909A59ECA {
+  AmiChipsetModulePkg/BiosGuard/BiosGuardBinary/BIOSGuardModule_PV.2.0.3683.bin
+}
+
+FILE RAW = 7af6f648-b261-42f5-a632-ec91541432c1 {
+  AmiChipsetModulePkg/BiosGuard/BiosGuardBinary/BIOSGuardModule_QS.2.0.4093.bin
+}

@@ -1,0 +1,10 @@
+<component>
+	name = "Licenses"
+	category = ModulePart
+	LocalRoot = "RomImage\"
+	RefName = "RomImageLicenses"
+[files]
+[parts]
+"FwLicenses"
+"ToolsLicenses"
+<endComponent>

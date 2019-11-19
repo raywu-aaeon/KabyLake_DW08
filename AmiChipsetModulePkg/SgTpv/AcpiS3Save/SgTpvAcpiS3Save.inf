@@ -1,0 +1,71 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+## @file
+#   
+##
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SgTpvAcpiS3Save
+  FILE_GUID                      = CB9B939E-FB6D-48B7-9E58-90188D77189D
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = SgTpvAcpiS3SaveInit
+
+[Sources]  
+  SgTpvAcpiS3Save.c
+
+[Packages]
+  AmiModulePkg/AmiModulePkg.dec
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  SkyBayPkg/SkyBayPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec 
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  
+[LibraryClasses]
+  CpuPlatformLib
+  PciLib
+  AmiDxeLib
+  AmiCspLib
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  NbGetSetupData
+  PchInfoLib
+  
+[Protocols]
+  gEfiPciIoProtocolGuid
+  gSaGlobalNvsAreaProtocolGuid
+  gEfiS3SaveStateProtocolGuid
+
+[Guids]
+  gEfiEndOfDxeEventGroupGuid 
+  
+[Depex]
+  gEfiAcpiSupportGuid AND
+  gEfiGlobalNvsAreaProtocolGuid
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

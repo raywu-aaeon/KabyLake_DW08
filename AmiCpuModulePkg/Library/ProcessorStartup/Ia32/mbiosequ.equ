@@ -1,0 +1,159 @@
+;Inclusion guard
+ifndef	_mbiosequ_equ_
+_mbiosequ_equ_	equ	1
+.586p
+.xlist
+
+;****************************************************************************
+;****************************************************************************
+;**                                                             	   **
+;**      	(C)Copyright 1987-2013, American Megatrends, Inc.          **
+;**                                                             	   **
+;**                    	     All Rights Reserved.          	           **
+;**                                                                        **
+;**                 6145-F Northbelt Pkwy, Norcross, GA 30071         	   **
+;**                                                             	   **
+;**                          Phone (770)-246-8600    	                   **
+;**                                                             	   **
+;****************************************************************************
+;****************************************************************************
+;****************************************************************************
+; $Header:  $
+;
+; $Revision: $
+;
+; $Date:  $
+;****************************************************************************
+; Revision History
+; ----------------
+; $Log: $
+; 
+
+;****************************************************************************
+;****************************************************************************
+
+
+;============================================================================
+; B I T 	E Q U A T E S
+;============================================================================
+BIT_0				EQU	01h
+BIT_1				EQU	02h
+BIT_2				EQU	04h
+BIT_3				EQU	008h
+BIT_4				EQU	010h
+BIT_5				EQU	020h
+BIT_6				EQU	040h
+BIT_7				EQU	080h
+BIT_8				EQU	0100h
+BIT_9				EQU	0200h
+BIT_10				EQU	0400h
+BIT_11				EQU	0800h
+BIT_12				EQU	01000h
+BIT_13				EQU	02000h
+BIT_14				EQU	04000h
+BIT_15				EQU	08000h
+BIT_16				EQU 010000h
+BIT_17				EQU	020000h
+BIT_18				EQU	040000h
+BIT_19				EQU	080000h
+BIT_20				EQU	0100000h
+BIT_21				EQU	0200000h
+BIT_22				EQU	0400000h
+BIT_23				EQU	0800000h
+BIT_24				EQU	01000000h
+BIT_25				EQU	02000000h
+BIT_26				EQU	04000000h
+BIT_27				EQU	08000000h
+BIT_28				EQU	010000000h
+BIT_29				EQU	020000000h
+BIT_30				EQU	040000000h
+BIT_31				EQU	080000000h
+
+BIT0				equ	001h
+BIT1				equ	002h
+BIT2				equ	004h
+BIT3				equ	008h
+BIT4				equ	010h
+BIT5				equ	020h
+BIT6				equ	040h
+BIT7				equ	080h
+BIT8				equ	100h
+BIT9				equ	200h
+BIT10				equ	400h
+BIT11				equ	800h
+BIT12				equ	1000h
+BIT13				equ	2000h
+BIT14				equ	4000h
+BIT15				equ	8000h
+BIT16				equ	10000h
+BIT17				equ	20000h
+BIT18				equ	40000h
+BIT19				equ	80000h
+BIT20				equ	100000h
+BIT21				equ	200000h
+BIT22				equ	400000h
+BIT23				equ	800000h
+BIT24				equ	1000000h
+BIT25				equ	2000000h
+BIT26				equ	4000000h
+BIT27				equ	8000000h
+BIT28				equ	10000000h
+BIT29				equ	20000000h
+BIT30				equ	40000000h
+BIT31				equ	80000000h
+
+
+;============================================================================
+; C M O S
+;============================================================================
+CMOS_DIAG_STS_0Eh		EQU	08Eh
+  CDS_0Eh_DATE_TIME_ERR_BIT	EQU	BIT_2
+  CDS_0Eh_HDD_ERR_BIT		EQU	BIT_3
+  CDS_0Eh_INVALID_CONFIG_BIT	EQU	BIT_5
+  CDS_0Eh_BAD_CHECKSUM_BIT	EQU	BIT_6
+  CDS_0Eh_RTC_LOST_POWER_BIT	EQU	BIT_7
+CMOS_SHUTDOWN_STS_0Fh		EQU	08Fh
+CMOS_MACHINE_CONFIG_14h		EQU	094h
+CMOS_BASE_MEM_LOW_15h     	EQU	095h
+CMOS_BASE_MEM_HIGH_16h     	EQU	096h
+CMOS_KB_MEM_LOW_17h		EQU	097h
+CMOS_KB_MEM_HIGH_18h		EQU	098h
+CMOS_KB_MEM_LOW_30h    		EQU	0B0h
+  CMOS_30h_FLASH_UPDATE_REQ_SIGN EQU	055AAh
+CMOS_KB_MEM_HIGH_31h		EQU	0B1h
+CMOS_SCRATCH_33h       		EQU	0B3h
+  CSCR_33h_CACHE_GOOD_BIT	EQU	00000001b
+  CSCR_33h_SOFT_RESET_BIT	EQU	00000100b
+  CSCR_33h_FLASH_UPDATE_REQ_BIT	EQU	01000000b
+  CSCR_33h_MEM_EXPANSION_BIT	EQU	10000000b
+CMOS_SCRATCH_34h       		EQU	0B4h
+CSCR_34h_NVRAM_PRESENT_BIT	EQU	10000000b
+CMOS_MB_MEM_LOW_35h    		EQU	0B5h
+CMOS_MB_MEM_HIGH_36h		EQU	0B6h
+
+
+;============================================================================
+; For eKernel [End]
+;============================================================================
+
+
+
+;****************************************************************************
+;****************************************************************************
+;**                                                             	   **
+;**      	(C)Copyright 1987-2013, American Megatrends, Inc.          **
+;**                                                             	   **
+;**                    	     All Rights Reserved.          	           **
+;**                                                                        **
+;**                 6145-F Northbelt Pkwy, Norcross, GA 30071         	   **
+;**                                                             	   **
+;**                          Phone (770)-246-8600    	                   **
+;**                                                             	   **
+;****************************************************************************
+;****************************************************************************
+.list
+;End of Inclusion guard
+endif	;_mbiosequ_equ_
+
+
+

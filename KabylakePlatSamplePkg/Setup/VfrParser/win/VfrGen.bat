@@ -1,0 +1,1 @@
+for /f "delims= " %%i in (%1) do KabylakePlatSamplePkg\Setup\VfrParser\win\VfrParser.exe %%i -o%3 -i%2 -c

@@ -1,0 +1,16 @@
+<component>
+	name = "EC Dxe"
+	category = ModulePart
+	LocalRoot = "KabylakePlatSamplePkg\EC\"
+	RefName = "KabylakePlatSamplePkg.EC"
+[INF]
+"EC.inf"
+[files]
+"EcDxe.sdl"	
+"EC.h"	
+"AcpiRes.h"
+"Asl\Bat0Virt.asl"
+"Asl\Bat1Real.asl"
+"Asl\Bat2Real.asl"
+"Asl\EC.ASL"	
+<endComponent>

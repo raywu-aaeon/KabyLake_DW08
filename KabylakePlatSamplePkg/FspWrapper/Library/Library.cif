@@ -1,0 +1,16 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "KabylakePlatSamplePkg\FspWrapper\Library\"
+	RefName = "KabylakePlatSamplePkg.FspWrapper.Library"
+[INF]
+"BaseFspWrapperPlatformLib\BaseFspWrapperPlatformLib.inf"
+"DxeFspWrapperPlatformResetLib\DxeFspWrapperPlatformResetLib.inf"
+"PeiFspPolicyInitLib\PeiFspPolicyInitLib.inf"
+"PeiFspWrapperHobProcessLib\PeiFspWrapperHobProcessLib.inf"
+"PeiFspWrapperPlatformResetLib\PeiFspWrapperPlatformResetLib.inf"
+"SecFspWrapperPlatformSecLib\SecFspWrapperPlatformSecLib.inf"
+[files]
+"Library.sdl"	
+"PeiFspPolicyInitLib\PeiFspPolicyInitLib.h"	
+<endComponent>

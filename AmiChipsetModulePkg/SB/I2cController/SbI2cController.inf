@@ -1,0 +1,42 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbI2cController
+  FILE_GUID                      = 9812e929-5b25-40c3-810d-b97d9e43965c
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = I2cControllerEntryPoint 
+
+[sources]
+ SbI2cController.c
+ SbI2cController.h
+
+[Packages] 
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiLib
+  BaseLib
+  BaseMemoryLib
+  IoLib
+  UefiBootServicesTableLib  
+  AmiDxeLib
+  I2cAccessLib
+  PchSerialIoLib
+  DebugLib
+  
+[Protocols]
+gEfiSimpleTextInputExProtocolGuid
+gEfiDriverBindingProtocolGuid
+gEfiPciIoProtocolGuid
+gEfiSmmControl2ProtocolGuid
+
+
+
+ [Depex]
+ TRUE

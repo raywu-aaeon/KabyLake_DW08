@@ -1,0 +1,13 @@
+<component>
+	name = "Server/Workstation Broadwell-DE uCode Patches (5066X)"
+	category = ModulePart
+	LocalRoot = "AmiIntelCpuPkg\Microcode\ServWork\"
+	RefName = "BroadwellDEUc"
+[files]
+"BroadwellDEUc.sdl"	
+"MFF50661_F1000008.mcb"	= "SERVER WORKSTATION MICROCODE UPDATES"
+"M1050662_0000001A.mcb"	= "SERVER WORKSTATION MICROCODE UPDATES"
+"M1050663_07000017.mcb"	= "SERVER WORKSTATION MICROCODE UPDATES"
+"M1050664_0F000015.mcb"	= "SERVER WORKSTATION MICROCODE UPDATES"
+"M1050665_0E00000D.mcb"	= "SERVER WORKSTATION MICROCODE UPDATES"
+<endComponent>

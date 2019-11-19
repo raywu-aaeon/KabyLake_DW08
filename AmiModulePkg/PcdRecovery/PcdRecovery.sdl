@@ -1,0 +1,55 @@
+TOKEN
+    Name  = "PCD_RECOVERY_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable PcdRecovery support in Project"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+PATH
+	Name  = "PCD_RECOVERY_DIR"
+End
+
+TOKEN
+    Name  = "PCD_RECOVERY_SKIP_FW_VERSION_CHECK"
+    Value  = "0"
+    Help  = "Enable to skip FW version(PROJECT_MAJOR_VERSION, PROJECT_MINOR_VERSION) check before PCD recovery."
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+ELINK
+    Name  = "PcdRecoveryInit,"
+    Parent  = "DxeCoreInitialize"
+    InvokeOrder = AfterParent
+End
+
+INFComponent
+    Name  = "PcdRecoveryPei"
+    File  = "PcdRecoveryPei.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "PEIM"
+End
+
+INFComponent
+    Name  = "PcdRecoveryLib"
+    File  = "PcdRecoveryLib.inf"
+    Package  = "AmiModulePkg"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "AmiModulePkg.PcdRecoveryLib"
+    Override = "MdeModulePkg.DxeMain"
+End
+
+FFS_FILE
+    Name  = "PcdPeiDxe"
+    FD_AREA  = "FV_MAIN"
+    INFComponent  = "MdeModulePkg.PcdPei"
+End
+

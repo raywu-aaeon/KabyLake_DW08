@@ -1,0 +1,175 @@
+TOKEN
+    Name  = "SGOEMSSDT_SUPPORT"
+    Value  = "0"
+    Help  = "Add an OEM SSDT for discrete VGA card. When Primarydisplay = Auto or PEG, the system can report OEM SSDT talbes for AMD or nVidia dGPU VGA card."
+    TokenType = Boolean
+    TargetH = Yes
+    Master = Yes
+End
+
+TOKEN
+    Name  = "SGOEMSSDT_NVIDIA_SUPPORT"
+    Value  = "0"
+    Help  = " This token is for NVIDIA dGPU only platform. It assume your platform has NVIDIA dGPU on PEG0 of your platform as primary display card."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SGOEMSSDT_ATI_SUPPORT"
+    Value  = "0"
+    Help  = " This token is for ATI detachable graphics feature. It will always Install this ACPI table.And Set primary disaply to IGD."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SGOEM_ACPI_NV_SLI_SUPPORT"
+    Value  = "1"
+    Help  = "Support NV SLI"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SGOEM_ACPI_NV_SSDT_GUID"
+    Value  = "{0x5B232086, 0x350A, 0x42c7, 0xA7, 0x0E, 0x34, 0x97, 0xB5, 0x76, 0x5D, 0x85}"
+    Help  = "SGTpv OEM Acpi Package"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SGOEM_ACPI_ATI_SSDT_GUID"
+    Value  = "{0x1e28dc28, 0xd461, 0x4c36, 0x93, 0xf0, 0x69, 0xf2, 0xfb, 0xe0, 0x21, 0xbc}"
+    Help  = "SGTpv OEM Acpi Package"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "DGPU_LCD_BCL_METHOD"
+    Value  = "Return(Package(){80, 50, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100})"
+    Help  = "OEM can return an integer directly or call any method/variable to get/return _BCL value of DGPU LCD device."
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "OEM_ATI_SCOPE"
+    Value  = "\_SB.PCI0.GFX0"
+    TokenType = Expression
+    TargetH = Yes
+    Lock = Yes
+End
+
+TOKEN
+    Name  = "OEM_ATIF_SUPPORT_FUN"
+    Value  = "0x100003"
+    TokenType = Expression
+    TargetH = Yes
+    Lock = Yes
+End
+
+TOKEN
+    Name  = "OEM_ATI_EXT_GPU_BUS"
+    Value  = "0x0001"
+    Help  = "Please remember to fix the bus when use ATI Detachable graphics(Not throuth thunderbolt) feature."    
+    TokenType = Expression
+    TargetH = Yes
+    Lock = Yes
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_NVSSDT_INF_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMNvSSDT.inf"
+    Template  = "OEMNvSSDTSample.inf"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_NVSSDT_ASL_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMNvSSDT.asl"
+    Template  = "OEMNvSSDTSample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_NV_DGPU_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMNVdGPU.asl"
+    Template  = "OEMNVdGPUSample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_NV_IGPU_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMNViGPU.asl"
+    Template  = "OEMNViGPUSample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_NV_VENTURA_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMNvVentura.asl"
+    Template  = "OEMNvVenturaSample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_NV_GPS_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMNvGPS.asl"
+    Template  = "OEMNvGPSSample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_NV_WAKE_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMNvWake.asl"
+    Template  = "OEMNvWakeSample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_ATISSDT_INF_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMAtiSSDT.inf"
+    Template  = "OEMAtiSSDTSample.inf"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_ATISSDT_ASL_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMAtiSSDT.asl"
+    Template  = "OEMAtiSSDTSample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+OUTPUTREGISTER
+    Name  = "OEM_ATI_ATIF_F21_ELINK_PATH"
+    Path  = "Build"
+    File  = "OEMAtiAtifF21.asl"
+    Template  = "OEMAtiAtifF21Sample.asl"
+    Help  = "Oem can clone this OUTPUTREGISTER and replace the Template to their ASL code for meeting their H/w design."
+End
+
+INFComponent
+    Name  = "OEMNvSSDT"
+    File  = "../../../../Build/OEMNvSSDT.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes="USER_DEFINED"
+End
+
+INFComponent
+    Name  = "OEMAtiSSDT"
+    File  = "../../../../Build/OEMAtiSSDT.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes="USER_DEFINED"
+End

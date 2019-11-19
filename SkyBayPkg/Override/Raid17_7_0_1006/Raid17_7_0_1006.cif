@@ -1,0 +1,13 @@
+<component>
+    name = "Raid17.7.0.4404"
+    category = ModulePart
+    LocalRoot = "SkyBayPkg\Override\Raid17_7_0_1006"
+    RefName = "SkyBayPkg.Override.Raid17_7_0_1006"
+[INF]
+[files]
+"RaidDriver.efi"
+"RaidDriver.inf"
+"RaidDriverSmm.efi"
+"RaidDriverSmm_FdfFileStatement.txt"
+"RaidOrom.bin"
+<endComponent>

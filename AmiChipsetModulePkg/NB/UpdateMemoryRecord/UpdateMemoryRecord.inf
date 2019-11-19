@@ -1,0 +1,53 @@
+[Defines]
+    INF_VERSION                    = 0x00010015
+    VERSION_STRING                 = 1.0
+    BASE_NAME                      = UpdateMemoryRecord
+    FILE_GUID                      = 24CCD374-3DF6-4181-86F6-E3C66920A145
+    MODULE_TYPE                    = DXE_DRIVER
+    ENTRY_POINT                    = UpdateMemoryRecordDriverEntryPoint
+
+[Sources]
+    UpdateMemoryRecord.h
+    UpdateMemoryRecord.c
+
+[Packages]
+    MdePkg/MdePkg.dec 
+    AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+    AmiModulePkg/AmiModulePkg.dec
+    AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+    IntelFrameworkPkg/IntelFrameworkPkg.dec
+    KabylakeSiliconPkg/SiPkg.dec
+    ClientSiliconPkg/ClientSiliconPkg.dec
+    
+[LibraryClasses]
+    AmiDxeLib
+    UefiDriverEntryPoint
+    BaseLib
+    DebugLib
+    ConfigBlockLib
+    MemoryAllocationLib
+
+[Guids]
+    gEfiMemorySubClassGuid
+    gEfiGlobalVariableGuid
+    gMemoryDxeConfigGuid
+    gEfiHobListGuid
+
+[Protocols]
+    gAmiSmbiosProtocolGuid
+    gSmbiosUpdateDataProtocolGuid
+    gEfiDataHubProtocolGuid
+    gEfiHiiDatabaseProtocolGuid
+    gEfiHiiStringProtocolGuid
+    gMemInfoProtocolGuid
+    gEfiSmbusHcProtocolGuid
+    gSaPolicyProtocolGuid
+    
+[Depex]
+    gSaPolicyProtocolGuid AND
+    gSmbiosUpdateDataProtocolGuid AND
+    gAmiSmbiosProtocolGuid AND
+    gEfiHiiDatabaseProtocolGuid AND
+    gEfiHiiStringProtocolGuid AND
+    gMemInfoProtocolGuid AND
+    gEfiSmbusHcProtocolGuid

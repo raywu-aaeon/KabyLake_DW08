@@ -1,0 +1,8 @@
+<component>
+  name = "I2cProtocol"
+  category = ModulePart
+  LocalRoot = "AmiModulePkg\Include\Protocol\"
+  RefName = "I2cProtocol"
+[files]
+  "I2cProtocol.h"
+<endComponent>

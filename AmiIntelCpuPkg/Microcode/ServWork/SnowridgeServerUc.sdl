@@ -1,0 +1,22 @@
+TOKEN
+    Name  = "SERVWORK_8066X"
+    Value = "0"
+    Help  = "Intel(R) Snowridge"
+    TokenType = Boolean
+    Master = Yes
+End
+
+TOKEN
+    Name  = "SERVWORK_M0180660_80661"
+    Value  = "1"
+    Help  = "Intel(R) Snowridge Processor A-0/A-1 Stepping"
+    TokenType = Boolean
+End
+
+ELINK
+    Name  = "$(MICROCODE_SERVWORK_DIR)/M0180660_80661_90020002.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Snowridge Processor A0 stepping (0x80660) and A1 stepping (0x80661)"
+    Token = "SERVWORK_M0180660_80661" "=" "1"
+    InvokeOrder = AfterParent
+End

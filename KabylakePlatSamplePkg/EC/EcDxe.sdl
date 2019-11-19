@@ -1,0 +1,31 @@
+TOKEN
+	Name  = "EcDxe_SUPPORT"
+	Value  = "1"
+	Help  = "Main switch to enable Platform support in Project"
+	TokenType = Boolean
+	Master = Yes
+End
+
+INFComponent
+    Name  = "EC"
+    File  = "EC.inf"
+    Package  = "KabylakePlatSamplePkg"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+    Token = "EC_SUPPORT" "=" "1"
+End
+
+#PCIDEVICE
+#    Title  = "Embedded Controller"
+#    Parent  = "PciHost (Virtual)"
+#    Attribute  = "0x0"
+#    Dev_type  = "Container"
+#    Dev  = 00h
+#    Fun  = 00h
+#    SleepNum  = 01h
+#    ASLfile  = "'KabylakePlatSamplePkg\EC\Asl\EC.ASL;After Pci Tree'"
+#    Token = "EC_SUPPORT" "=" "1"
+#    DeviceType = OnBoard
+#    PCIBusSize = 32bit
+#    ROMMain = No
+#    Virtual = Yes
+#End

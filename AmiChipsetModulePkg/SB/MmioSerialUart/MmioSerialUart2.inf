@@ -1,0 +1,43 @@
+
+[Defines]
+INF_VERSION                    = 0x00010005
+BASE_NAME                      = MmioSerialUart2
+FILE_GUID                      = 1093a6f0-37ed-49ba-9dcc-4f6999807315
+MODULE_TYPE                    = DXE_DRIVER
+VERSION_STRING                 = 1.0
+PI_SPECIFICATION_VERSION       = 0x0001000A
+ENTRY_POINT                    = SerialUart2EntryPoint
+
+
+[Sources]
+MmioSerialUart2.c
+
+
+[Packages]
+AmiCompatibilityPkg\AmiCompatibilityPkg.dec
+MdePkg\MdePkg.dec
+AmiModulePkg\AmiModulePkg.dec
+
+
+[LibraryClasses]
+AmiDxeLib
+UefiDriverEntryPoint
+UefiRuntimeServicesTableLib     # EIP397240
+
+[Protocols]
+gAmiSerialProtocolGuid
+gEfiDevicePathProtocolGuid
+
+
+[Pcd]
+gEfiMdePkgTokenSpaceGuid.PcdUartDefaultBaudRate
+gEfiMdePkgTokenSpaceGuid.PcdUartDefaultDataBits
+gEfiMdePkgTokenSpaceGuid.PcdUartDefaultParity
+gEfiMdePkgTokenSpaceGuid.PcdUartDefaultStopBits
+gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+
+
+[Depex]
+TRUE
+
+

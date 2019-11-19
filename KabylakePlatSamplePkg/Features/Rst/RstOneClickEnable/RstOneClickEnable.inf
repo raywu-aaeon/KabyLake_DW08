@@ -1,0 +1,62 @@
+### @file
+#  Component description file for Setup module
+#
+# Copyright (C) 2016, Intel Corporation. All rights reserved.<BR>
+# This software and associated documentation (if any) is furnished
+# under a license and may only be used or copied in accordance with
+# the terms of the license. Except as permitted by the license, no
+# part of this software or documentation may be reproduced, stored in
+# a retrieval system, or transmitted in any form or by any means
+# without the express written consent of Intel Corporation.
+# This file contains a 'Sample Driver' and is licensed as such under
+# the terms of your license agreement with Intel or your vendor. This
+# file may be modified by the user, subject to the additional terms of
+# the license agreement.
+#
+# @par Specification Reference:
+#
+# @par Glossary:
+###
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = RstOneClickEnable
+  FILE_GUID                      = 3DC5DC4A-824A-44C5-89D0-D4547191E3F4
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = RstOneClickEnableEntryPoint
+
+[Sources]
+  RstOneClickEnable.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  BpCommonPkg/BpCommonPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+
+[LibraryClasses]
+  UefiLib
+  DebugLib
+  IoLib
+  PchInfoLib
+  MmPciLib
+  UefiRuntimeServicesTableLib
+  UefiDriverEntryPoint
+# AMI_OVERRIDE_START - Since token ALWAYS_PUBLISH_HII_RESOURCES is 0, prepare SetupVolatileData for Rst remap from PchSetup.c.   
+  HobLib
+# AMI_OVERRIDE_END - Since token ALWAYS_PUBLISH_HII_RESOURCES is 0, prepare SetupVolatileData for Rst remap from PchSetup.c.     
+
+[Guids]
+  gRstConfigVariableGuid  ##CONSUMES
+  gPchSetupVariableGuid   ##CONSUMES
+  gSetupVariableGuid      ##CONSUMES
+# AMI_OVERRIDE_START - Since token ALWAYS_PUBLISH_HII_RESOURCES is 0, prepare SetupVolatileData for Rst remap from PchSetup.c.     
+  gPchPcieStorageDetectHobGuid
+# AMI_OVERRIDE_END - Since token ALWAYS_PUBLISH_HII_RESOURCES is 0, prepare SetupVolatileData for Rst remap from PchSetup.c.     
+
+[Depex]
+  TRUE

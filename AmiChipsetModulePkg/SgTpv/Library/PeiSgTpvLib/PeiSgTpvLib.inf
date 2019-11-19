@@ -1,0 +1,72 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+## @file
+#   
+##
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = PeiSgTpvLib
+  FILE_GUID                      = b3df01c7-1b10-4ac4-b7e9-1c6f6e3a7ce1  
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SgTpvLib
+  
+
+[Sources]  
+  PeiSgTpvLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec 
+  ClientSiliconPkg/ClientSiliconPkg.dec 
+  AmiModulePkg/AmiModulePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  SkyBayPkg/SkyBayPkg.dec
+  Build/Platform.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec  
+
+[LibraryClasses]
+  AmiPeiLib
+  ConfigBlockLib
+  AmiCspLib
+  PchInitCommonLib
+  TimerLib
+  PciLib  
+  
+[Guids]
+  gSaMiscPeiPreMemConfigGuid  
+  
+[Ppis]
+  gAmiSbGpioConfigDonePpiGuid 
+  gSiPreMemPolicyPpiGuid                        ## CONSUMES 
+
+[Depex]
+  TRUE
+  
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

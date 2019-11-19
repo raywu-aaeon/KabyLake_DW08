@@ -1,0 +1,74 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+## @file
+#   
+##
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SgTpvAcpiTables
+  FILE_GUID                      = C18B8105-AB89-44de-8D37-50B31FAE5D1E
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = SgTpvAcpiTablesInit
+
+[sources]
+  SgTpvAcpiTables.c
+  SgTpvAcpiTables.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+
+[LibraryClasses]
+  CpuPlatformLib
+  PcdLib
+  UefiDriverEntryPoint
+  IoLib
+  BaseLib
+  MmPciLib
+  UefiLib
+  AmiDxeLib
+  AmiCspLib
+  NbGetSetupData
+  PchInfoLib
+  
+[Protocols]
+  gSaGlobalNvsAreaProtocolGuid
+  gEfiFirmwareVolume2ProtocolGuid
+  gEfiAcpiTableProtocolGuid
+  gEfiAcpiSupportProtocolGuid
+  
+[Depex]
+  gEfiAcpiTableProtocolGuid AND
+  gEfiAcpiSupportProtocolGuid AND
+  gEfiFirmwareVolume2ProtocolGuid AND
+  gSaGlobalNvsAreaProtocolGuid
+  
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

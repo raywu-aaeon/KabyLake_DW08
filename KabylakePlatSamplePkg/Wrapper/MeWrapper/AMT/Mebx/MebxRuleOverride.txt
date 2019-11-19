@@ -1,0 +1,6 @@
+  FILE DRIVER = 9cfd802c-09a1-43d6-8217-aa49c1f90d2c
+  {
+    SECTION COMPRESS PI_STD{
+        SECTION PE32 = $(EFIMebx_FILE_PATH)
+    }
+  }

@@ -1,0 +1,15 @@
+<component>
+	name = "KabylakeFspPkg"
+	category = eBoard
+	Rank = 52
+	LocalRoot = "KabylakeFspPkg\"
+	RefName = "KabylakeFspPkg"
+[files]
+"KabylakeFspPkg.chm"	
+"KabylakeFspPkg.dec"	
+[parts]
+"KabylakeFspPkg.KabylakeFspSource"
+"KabylakeFspPkg.Include"
+[dependency]
+UefiCpuPkg >= "SS: AptioV;$/AptioV/Source/Interfaces/UefiCpuPkg;UefiCpuPkg_12"
+<endComponent>

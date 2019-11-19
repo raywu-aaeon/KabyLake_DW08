@@ -1,0 +1,710 @@
+;;@file
+;
+; @copyright
+;  INTEL CONFIDENTIAL
+;  Copyright 2010 - 2016 Intel Corporation.
+;
+;  The source code contained or described herein and all documents related to the
+;  source code ("Material") are owned by Intel Corporation or its suppliers or
+;  licensors. Title to the Material remains with Intel Corporation or its suppliers
+;  and licensors. The Material may contain trade secrets and proprietary and
+;  confidential information of Intel Corporation and its suppliers and licensors,
+;  and is protected by worldwide copyright and trade secret laws and treaty
+;  provisions. No part of the Material may be used, copied, reproduced, modified,
+;  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+;  without Intel's prior express written permission.
+;
+;  No license under any patent, copyright, trade secret or other intellectual
+;  property right is granted to or conferred upon you by disclosure or delivery
+;  of the Materials, either expressly, by implication, inducement, estoppel or
+;  otherwise. Any license under such intellectual property rights must be
+;  express and approved by Intel in writing.
+;
+;  Unless otherwise agreed by Intel in writing, you may not remove or alter
+;  this notice or any other notice embedded in Materials by Intel or
+;  Intel's suppliers or licensors in any way.
+;
+;  This file contains a 'Sample Driver' and is licensed as such under the terms
+;  of your license agreement with Intel or your vendor. This file may be modified
+;  by the user, subject to the additional terms of the license agreement.
+;
+;@par Specification Reference:
+;;
+
+BITS 16
+%include "CmosMap.equ"
+
+CSMOEM_CSEG SEGMENT USE16
+;ASSUME cs:CSMOEM_CSEG, ds:CSMOEM_CSEG
+
+OldIntHandler:
+	IntSegSav: dw 0
+	IntOfsSav: dw 0
+
+struc   EFP_OPTIONS
+ .Reserved1:              resw 1
+ .DeviceType:             resw 1
+ .Reserved2:              resb 1
+ .PVTS1:                  resb 1
+ .PVTS2:                  resb 1
+ .HDMILevelShifterConfig: resb 1
+ .Reserved3:              resw 4
+ .OutputPort:             resb 1
+ .Reserved4:              resw 1
+ .DDCGPIOPinPair:         resb 1
+ .Reserved5:              resb 3
+ .DPS:                    resb 1
+ .Reserved6:              resb 1
+ .AuxChannel:             resb 1
+ .DongleDetect:           resb 1
+ .Reserved7:              resw 3
+endstruc
+
+
+;---------------------------------------------------------------------------
+;
+; Name:		INT15Proc
+;
+; Description:	IGD INT15 function implememtation
+;
+;---------------------------------------------------------------------------
+
+global ASM_PFX(INT15Proc)
+ASM_PFX(INT15Proc):
+
+	cmp		ah, 0x5f
+	je		igd_call
+	jmp	far [word cs:OldIntHandler]
+
+igd_call:
+;	We are going to handle this call
+	cmp		al, 00
+	jne		not_5f00
+
+	mov		bx, 0x1302
+	jmp		INT15Proc_exit_success
+
+not_5f00:
+	cmp		al, 0x14
+	jne		not_5f14
+
+	cmp		bx, 0x78F
+	jne		exit_not_supported
+
+	mov		cl, 0x0
+	call	read_ec_port
+	jmp	INT15Proc_exit_success
+
+not_5f14:
+	cmp		al,0x40
+	jne		not_5f40
+
+;	Get LFP Panel Type
+	mov		al, CMOS_LCDPANELTYPE_REG
+
+read_paneltype:
+       	call	get_cmos
+	mov		cl, al
+	cmp		cl, 0
+        jz      not_5f01
+	jmp		INT15Proc_exit_success
+
+not_5f40:
+	cmp		al, 0x34
+	jne		not_5f34
+
+;	Get Panel Scaling feature
+	mov		al, CMOS_LCDPANELSCALING_REG
+	call	get_cmos
+	mov		cl, al
+	jmp		INT15Proc_exit_success
+
+not_5f34:
+	cmp		al,0x35
+	jne		not_5f35
+
+;	Get IGD boot type
+	mov		al,CMOS_IGDBOOTTYPE_REG
+	call	get_cmos
+	mov		cl, al
+        cmp             cl, 0x0
+        jne             check_pipe_B_display
+        mov             ch, 0x0
+        jmp             INT15Proc_exit_success
+
+check_pipe_B_display:
+
+;       Get Pipe B device type
+        mov             al,CMOS_IGD_DISPLAY_PIPE_B_REG
+        call    get_cmos
+        mov             ch, al
+
+;       Check Pipe A & Pipe B are same
+        cmp             cl, ch
+        jne             INT15Proc_exit_success
+        mov             ch, 0x0
+        jmp             INT15Proc_exit_success
+
+not_5f35:
+	cmp		al,0x49
+	jne		not_5f49
+
+; ----------------------------------------------------
+; Int 15h, AX = 5F49h, Get backlight type and polarity
+; Return Registers :
+; AX	Return Status (function not supported if AL != 5Fh):
+; Value	Description
+; 005Fh	Function supported and successful
+; 015Fh	Function supported but failed
+; BX	Value	Description
+; 0-255	Initial backlight control brightness value
+; CX	Value	Description
+; 00h	Enable PWM – Inverted
+; 02h	Enable PWM – Normal
+; ----------------------------------------------------
+	mov		al,CMOS_BRIGHTNESS_REG
+	call	get_cmos
+	movzx	bx, al
+	mov		al,CMOS_BACKLIGHT_REG
+	call	get_cmos
+	movzx		cx, al
+	jmp		INT15Proc_exit_success
+
+not_5f49:
+	cmp		al,0x50
+	jne		not_5f50
+
+; ----------------------------------------------------
+; Int 15h, AX = 5F50h, Program Squelch Register for eDP
+; ----------------------------------------------------
+	push	es
+	push	0
+	pop		es
+	push	edi
+;
+; Get PCIEXBAR
+;
+      push  eax
+      push  dx
+      mov   eax,  0x80000060
+      mov   dx,   0x0CF8
+      out   dx,   eax
+      mov   dx,   0x0CFC
+      in    eax, dx
+      and   eax, 0x0FC000000
+      mov   edi, eax
+      pop   dx
+      pop   eax
+;
+; set PCIEXBAR + 0x8dfc[1]=1b
+;
+	mov		al, BYTE [es:edi + 0x8dfc]
+	or		al,0x2
+	mov		BYTE [es:edi + 0x8dfc],al
+;
+; set PCIEXBAR + 0x8f88[31]=1b
+; set PCIEXBAR + 0x8f88[26]=0b
+;
+	mov		al, BYTE [es:edi + 0x8f8b]
+	or		al,0x80
+	and		al,~ (0x4)
+	mov		BYTE [es:edi + 0x8f8b],al
+;
+; set PCIEXBAR + 0x8fa8[31]=1b
+; set PCIEXBAR + 0x8fa8[26]=0b
+;
+	mov		al, BYTE [es:edi + 0x8fab]
+	or		al,0x80
+	and		al,~ (0x4)
+	mov		BYTE [es:edi + 0x8fab],al
+;
+; set PCIEXBAR + 0x8fc8[31]=1b
+; set PCIEXBAR + 0x8fc8[26]=0b
+;
+	mov		al, BYTE [es:edi + 0x8fcb]
+	or		al,0x80
+	and		al,~ (0x4)
+	mov		BYTE [es:edi + 0x8fcb],al
+;
+; set PCIEXBAR + 0x8fe8[31]=1b
+; set PCIEXBAR + 0x8fe8[26]=0b
+;
+	mov		al, BYTE [es:edi + 0x8feb]
+	or		al,0x80
+	and		al,~ (0x4)
+	mov		BYTE [es:edi + 0x8feb],al
+	pop	edi
+	pop	es
+	jmp		INT15Proc_exit_success
+not_5f50:
+	cmp		al,0x51
+	jne		not_5f51
+; ----------------------------------------------------
+; Int 15h, AX = 5F51h, Select Active LFP Configuration
+; ----------------------------------------------------
+	mov		al,CMOS_EDP_ACTIVE_LFP_CONFIG_REG
+	call	get_cmos
+	movzx		cx, al
+	jmp		INT15Proc_exit_success
+not_5f51:
+	cmp 	al,0x52
+	jne		not_5f52
+; -----------------------------------------------------
+; Int 15h, AX = 5F52h, Hook to select Panel Color Depth
+; -----------------------------------------------------
+	mov		al,CMOS_LFP_PANEL_COLOR_DEPTH_REG
+	call	get_cmos
+	movzx		cx, al
+	jmp		INT15Proc_exit_success
+not_5f52:
+	cmp		al,0x21
+	jne		not_5f21
+; --------------------------------------------------
+; Int 15h, AX = 5F21h, Get Actual display core clock
+; --------------------------------------------------
+	call	GetCDClock
+	cmp		cx, 0
+	je		exit_fail
+	jmp		INT15Proc_exit_success
+
+not_5f21:
+	cmp		al,0x22
+	jne		not_5f22
+; --------------------------------------------------
+; Int 15h, AX = 5F22h, Get FSB frequency
+; --------------------------------------------------
+	call	GetFsbFreq
+	cmp		cx, 0
+	je		exit_fail
+	jmp		INT15Proc_exit_success
+
+not_5f22:
+	cmp		al,0x1
+	jnz 	not_5f01
+	INT		0x10
+	mov     eax,ebx
+	shr		ebx,16
+	mov 	dx,bx
+	mov 	bx,ax
+	jmp		INT15Proc_exit_success
+
+not_5f01:
+	cmp 	al, 0x70
+	jnz	not_5f70
+	call 	Func_0x70_handler
+	jmp	exit
+
+exit_not_supported:
+	mov		ax, 0x0
+	jmp     exit
+not_5f70:
+	cmp 	al, 0x54
+	jnz	not_5f54
+	call 	Func_0x54_handler
+	jmp	exit
+exit_fail:
+not_5f54:
+	mov		ax, 0x15f
+    jmp     exit
+
+INT15Proc_exit_success:
+	mov		ax, 0x5f
+
+exit:
+	retf	2
+;---------------------------------------------------------------------------;
+;
+; Procedure:      Func_54h_handler
+;
+; Description:
+;
+;
+; 5F54 - Hook to get Integrated DP/HDMI port configuration
+;This hook will get the port configuration for integrated DP/HDMI port from SBIOS.
+;It is assumed that the SBIOS populates the below port configuration properly.
+;
+;INPUT
+;AX 	= 5F54h, INT 15h Interface Version Hook
+;ES:DI 	= pointer to 99 bytes EFP data structures
+;
+;OUTPUT:
+;AX 	= Return Status (function not supported if AL != 5Fh):
+;= 015Fh, Function supported but failed
+;= 005Fh, Function supported and successful
+;ES:DI 	= 99 bytes data structures filled up
+
+;---------------------------------------------------------------------------;
+
+global ASM_PFX(Func_54h_handler)
+ASM_PFX(Func_0x54_handler):
+       push es
+       push di
+
+; Pointer to EFP structure (Device 1)
+
+;Device Type Values -
+;0x0000 - No device
+;0x68c6 - Integrated DisplayPort Only
+;0x60D6-Integrated DisplayPort with HDMI/DVI Compatible
+;0x68D6-Integrated DisplayPort with DVI Compatible
+;0x60D2 - Integrated HDMI/DVI
+;0x68D2 - Integrated DVI Only
+
+       mov   al, CMOS_DISP_DDI_REG
+       call  get_cmos
+       cmp   al, 0x0
+       je    .exit_success
+       mov   bx, 0x60D6
+       mov   word [es:di + EFP_OPTIONS.DeviceType], bx
+
+;Output Port Values
+;0x00 - N/A
+;0x01 - HDMI-B
+;0x02 - HDMI-C
+;0x03 - HDMI-D
+;0x07 - DisplayPort-B
+;0x08 - DisplayPort-C
+;0x09 - DisplayPort-D
+
+       mov   cl, 0x7
+       mov   byte [es:di + EFP_OPTIONS.OutputPort], cl
+       pop   edi
+       push  edi
+
+; Pointer to EFP structure (Device 2)
+       add   di, EFP_OPTIONS_size
+
+       mov   bx, 0x60D2
+       mov   word [es:di + EFP_OPTIONS.DeviceType], bx
+       mov   cl, 0x2
+       mov   byte [es:di + EFP_OPTIONS.OutputPort], cl
+       jmp   .exit_success
+.exit_success:
+       mov   ax, 0x5f
+
+       pop   di
+       pop   es
+       clc
+       ret
+
+;---------------------------------------------------------------------------;
+;
+; Procedure:      Func_70h_handler
+;
+; Description:    Get/Set MUX State Hook
+;
+; Input:  AX        = 5F70h, Get/Set MUX State
+;           CH        = 00h - Get MUX State
+;       	          = 01h - Set MUX State
+;                     = 02h - Get SG/Non-SG Mode
+;
+;
+;           For CH=01h Set MUX State,
+;           CL         = MUX state,
+;                      = 0 - Set all MUXs to iGPU
+;                      = 1 - Set all MUXs to dGPU
+;
+; Output: AX        = Return Status(function not supported if AL !=5FH)
+;                                   005Fh,Function Supported and successful
+;                                   015Fh,Function Supported but failed
+;                      For CH=00h in Input, CL =  MUX State (0 = iGPU, 1= dGPU)
+;                          Bit 0 = CRT
+;                          Bit 3 = LFP
+;                      For CH=02h in Input, Get SG/Non-SG Mode
+;                            CL =  SG Mode (0 = SG Enabled, 1= SG Disabled)
+;
+;---------------------------------------------------------------------------;
+
+global ASM_PFX(Func_70h_handler)
+ASM_PFX(Func_0x70_handler):
+
+; check if function 0 of handler is being called
+	push	dx
+	push	eax
+    cmp      ch, 0x0
+    jne      check_INTEL_HG_F1
+
+; Function 0       - Get MUX State
+    mov      dx, 0x538
+	mov	cl, 0x9		; assume DGPU
+    in       eax, dx
+    and      eax, 0x100000
+	jz	OK_70
+	mov	cl, 0x0
+    jmp      OK_70
+
+; Function 1
+; check if function 1 of handler is being called
+check_INTEL_HG_F1:
+    cmp      ch, 0x1
+    jne      check_INTEL_HG_F2
+
+	mov	dx, 0x538	; DX = mux register
+    cmp      cl, 0
+    je       ProgramMuxIGPU_Intel
+    cmp      cl, 1
+    je       ProgramMuxDGPU_Intel
+    jmp      notOK_70
+
+ProgramMuxIGPU_Intel:
+    in       eax, dx
+    or       eax, 0x180000
+    out      dx, eax
+    jmp      OK_70
+
+ProgramMuxDGPU_Intel:
+    in       eax, dx
+    and      eax, ~ (0x180000)
+    out      dx, eax
+	jmp      OK_70
+
+; Function 2
+; Check if function 2 of handler is being called
+
+check_INTEL_HG_F2:
+    cmp      ch, 0x2
+    jne      notOK_70
+
+;Get PrimaryDisplay
+    mov      al, CMOS_PRIMARY_DISPLAY_REG
+    call     get_cmos
+    cmp      al,0x4
+    je       PrimaryDisplay_SG
+
+    mov      cl,0x1
+    jmp      OK_70
+
+PrimaryDisplay_SG:
+    mov      cl,0x0
+
+OK_70:
+    pop	     eax		; restore EAX before setting return value
+    mov      ax, 0x5f
+    jmp	     Func_0x70_exit
+
+notOK_70:
+    pop	     eax		; restore EAX before setting return value
+    mov      ax, 0x15F
+
+Func_0x70_exit:
+    pop	     dx
+    ret
+
+; procedure to read status values from EC ports
+; i/p: n/a
+; o/p: data in CL register
+
+global ASM_PFX(read_ec_port)
+ASM_PFX(read_ec_port):
+
+	push		eax
+
+ 	; Code added to check if this is SV Board ( No EC in SV board)
+ 	; TODO - Code needs to be removed, if in future we decide to add EC to SV Boards
+	mov al, Q_SV_SV_BOARD_REG
+	out 0x72, al
+	in  al, 0x73
+	cmp al, 1
+	je  exit_read_ec_port
+
+	mov		al, 0xA
+	out		0x66, al
+ec_read_loop1:
+	in		al, 0x66
+	cmp		al, 0xFF
+	je	exit_read_ec_port
+	and		al, 0x1
+	jz 	ec_read_loop1
+	in		al, 0x62
+	mov		ah, al
+
+	mov		al, 0x8A
+	out		0x66, al
+ec_read_loop2:
+	in		al, 0x66
+	and		al, 0x1
+	jz 	ec_read_loop2
+	in		al, 0x62
+
+; SS Docking status
+	and		al, 0x1
+	jz	check_lid_status
+	or		cl, 0x1
+
+;Lid status
+check_lid_status:
+	mov		al, ah
+	and		al, 0x1
+	jnz	check_AC_status
+	or		cl, 0x2
+
+;AC power status
+check_AC_status:
+	mov		al, ah
+	and		al, 0x10
+	jz	exit_read_ec_port
+	or		cl, 0x4
+
+exit_read_ec_port:
+	pop		eax
+	ret
+
+;	i/p al : Index
+;	o/p	data in reg al
+global ASM_PFX(get_cmos)
+ASM_PFX(get_cmos):
+
+	push	dx
+	mov		dx, CMOS_ADDR_PORT
+	out		dx, al
+	jcxz	$+2
+	jcxz	$+2
+	inc		dx
+	in		al, dx
+	pop		dx
+	ret
+
+GraphicsCoreClock:
+;
+; VCO = 3200MHz (MCHBAR+0C0Fh[2:0] = 000b)
+;
+	DW	0228
+	DW	0320
+;
+; VCO = 4000MHz (MCHBAR+0C0Fh[2:0] = 001b)
+;
+	DW	0222
+	DW	0333
+;
+; Reserved
+;
+	DW	0222
+	DW	0333
+;
+; Reserved
+;
+	DW	0
+	DW	0
+;
+; VCO = 2666MHz (MCHBAR+0C0Fh[2:0] = 100b)
+;
+	DW	0222
+	DW	0333
+
+SaveCoreClock: DW 0x5555
+
+;----------------------------------------------------------------------------
+;
+; Name:		GetCDClock
+;
+; Description:	This function gets the Cantiga IGD display core clock value
+;               and return it in CX.
+;
+;----------------------------------------------------------------------------
+global ASM_PFX(GetCDClock)
+ASM_PFX(GetCDClock):
+        mov     cx, [cs:SaveCoreClock]
+        cmp     cx, 0x5555
+        jne     ExitGetCDClock
+
+        push    ax
+        push    bx
+        push    edi
+;
+; Read MCHBAR + 0C0Fh[2:0] = HPLL VCO frequency
+;
+	push	es			; Save previous ES
+	push	0			;
+	pop	es
+	mov	edi, 0fed10000h ; MCH_BASE_ADDRESS
+	movzx	bx, BYTE [es:edi + 0xC0F]
+	and	bx, 7                   ; HPLL VCO Freq, Bits[2:0]
+
+	push	bx			; Save in BX
+;
+; Read B0:D2:F0:Offset F0h[12] = Graphics Core Display Clock Select
+;
+;
+; Get PCIEXBAR
+;
+      push  eax
+      push  dx
+      mov   eax,  0x80000060
+      mov   dx,   0x0CF8
+      out   dx,   eax
+      mov   dx,   0x0CFC
+      in    eax, dx
+      and   eax, 0x0FC000000
+      mov   edi, eax
+      pop   dx
+      pop   eax
+	add	edi, (2 << 15) + (0 << 12)
+        mov     ax, WORD [es:edi + 0xF0]
+	pop	es			; Restore ES
+	and	ax, 0x1000		; GCFGC Bit[12]
+	shr	ax, 12 - 1              ; Bit[12] * (sizeof WORD)
+	pop	bx			; Restore HPLL VCO Freq
+	imul	bx, 4
+	add	bx, ax
+;
+; Get Actual Core Display Frequency from Table
+;
+	mov	cx, [cs:GraphicsCoreClock + bx]
+        mov     [cs:SaveCoreClock], cx
+        pop     edi
+        pop     bx
+        pop     ax
+
+ExitGetCDClock:
+        ret
+
+;----------------------------------------------------------------------------
+;
+; Name:		GetFsbFreq
+;
+; Description:	This function gets the Cantiga Front Side Bus (FSB) Frequency
+;               and return it in CX.
+;
+;----------------------------------------------------------------------------
+SaveFsbFreq: DW 0x5555
+global ASM_PFX(GetFsbFreq)
+ASM_PFX(GetFsbFreq):
+    mov     cx, [cs:SaveFsbFreq]
+    cmp     cx, 0x5555
+    jne     Exit
+
+    push    ax
+    push    edi
+;
+; Read MCHBAR + 0C00h[2:0] = FSB Frequency
+;
+    push    es          ; Save previous ES
+    push    0           ;
+    pop	    es
+    mov	    edi, 0fed10000h ; MCH_BASE_ADDRESS
+    mov     al, BYTE [es:edi + 0xC00]
+    and	    al, 7       ; FSB Freq, Bits[2:0]
+
+;
+; Get actual Front Side Bus Frequency
+;
+    mov     cx, 800
+    cmp     al, 2
+    je      GotFsbFreq
+    mov     cx, 667
+    cmp     al, 3
+    je      GotFsbFreq
+    mov     cx, 1066
+    cmp     al, 6
+    je      GotFsbFreq
+    mov     cx, 0       ; Not supported
+
+GotFsbFreq:
+    mov     [cs:SaveFsbFreq], cx
+    pop     es          ; Restore ES
+    pop     edi
+    pop     ax
+
+Exit:
+    ret
+

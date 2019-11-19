@@ -1,0 +1,9 @@
+<component>
+	name = "XmlFiles"
+	category = ModulePart
+	LocalRoot = "RomImage\"
+	RefName = "RomImageXmlFiles"
+[parts]
+"PreProductionXmlFiles"
+"ProductionXmlFiles"
+<endComponent>

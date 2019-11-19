@@ -1,0 +1,104 @@
+[Tag] AMI_OVERRIDE_OVERCLOCK0012
+[Description]  Fix ICC BCLK function and fix ICC BCLK setup information.
+[Files]
+KabylakePlatSamplePkg\Features\OverClocking\OverClockInit\DxeOverClock.c
+KabylakePlatSamplePkg\Features\OverClocking\OverClockSetupOverride.c
+KabylakePlatSamplePkg\Setup\IccSetup.c
+KabylakePlatSamplePkg\Setup\IccSetup.hfr
+KabylakePlatSamplePkg\Setup\PlatformSetup.c
+KabylakeSiliconPkg\SystemAgent\Library\Private\PeiSaOcInitLib\PeiSaOcInitLib.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0011
+[Description]  Fix one building error in OC module after updating RC 1.0.1.
+[Files]
+KabylakePlatSamplePkg\Features\OverClocking\OverclockInterface\OverclockInterface.c
+KabylakePlatSamplePkg\Features\OverClocking\OverclockInterface\OverClockSmiHandler.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0010
+[Description]  Variable size isn't defined in function OverClockSmiHandlerEntryPoint.
+[Files]
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0009
+[Description]  Modify some code for updating RC 0.7.0.
+[Files]
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.h
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\PeiOverClock.h
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\PeiOverClock.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.h
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0008
+[Description]  Modify the functions overclockinterface for updating module NVRAM_07.
+[Files]
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0007
+[Description]  No need to set this to variable, it would cause memory do sizing. Side effect of merge SaSetup variable to Setup Variable.
+[Files]
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0006
+[Description] Move code to OverClockSetupOverride.c and delete the ModulePart OverClockSetup.
+[Files]
+KabylakePlatSamplePkg\Platform\OverClocking\Overclock.sdl
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockSetupOverride.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.h
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0005
+[Description] EIP229470
+[Files] 
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.h
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterfaceACPI.asl
+KabylakePlatSamplePkg\Include\OcSetupVariable.h
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0004
+[Description] EIP239426
+[Files] 
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0003
+[Description] Add setup items "ICCMAX" and "VrConfig" to OC policy
+[Files] 
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.h
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.c
+KabylakePlatSamplePkg\Include\OcSetupVariable.h
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0002
+[Description] Fix to build error when it doesn't support OverClock
+[Files]
+KabylakePlatSamplePkg\Library\PeiPlatformHookLib\PeiPlatformHookLib.c
+KabylakePlatSamplePkg\Library\PeiPolicyUpdateLib\PeiCpuPolicyUpdate.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.c
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0001
+[Description] Fix to build error when it doesn't support fastboot.
+[Files] 
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.inf
+
+[Tag] AMI_OVERRIDE_OVERCLOCK0000
+[Description] 1. Add runtime access SetupVariable
+              2. Override SMM function to access CPU register
+              3. Add PERF_TUNE_SW_SMI token to pass SW SMI port   
+              4. Add Extended Time Window table at asl code and fix 
+          5. Fix that memory voltage value doesn't match with setup value
+          6. Add TOKEN BCLK_FLOW_WARM_RESET to change reset type.
+          7. Fix that Turbo power and power limitation don't sync with setup value.
+[Files]
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.h
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterface.inf
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.h
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverClockSmiHandler.inf
+KabylakePlatSamplePkg\Platform\OverClocking\OverclockInterface\OverclockInterfaceACPI.asl
+KabylakePlatSamplePkg\PlatformInit\Dxe\PlatformInitDxe.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClockLib.c
+KabylakePlatSamplePkg\Platform\OverClocking\OverClockInit\DxeOverClock.c

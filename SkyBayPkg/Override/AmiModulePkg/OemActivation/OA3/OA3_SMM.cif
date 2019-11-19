@@ -1,0 +1,11 @@
+<component>
+    name = "OA3_SMM"
+    category = ModulePart
+    LocalRoot = "SkyBayPkg\Override\AmiModulePkg\OemActivation\OA3"
+    RefName = "SkyBayPkg.Override.OA3_SMM"
+[INF]
+[files]
+"OA3_SMM.inf"
+"OA3_SMM.c"
+"OA3.h"
+<endComponent>

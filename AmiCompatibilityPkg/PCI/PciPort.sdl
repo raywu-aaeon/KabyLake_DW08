@@ -1,0 +1,79 @@
+TOKEN
+	Name  = "PciPort_SUPPORT"
+	Value  = "1"
+	Help  = "Main switch to enable Pci Compatibility support in Project"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	Master = Yes
+End
+
+TOKEN
+	Name  = "PCI_PORT_LAUNCH_INIT_ROUTINE_PRIORITY"
+	Value  = "0"
+	Help  = "Allows to select launch priority of PCI Initialization routines (which routine will be launched last and may override the previous programing).\Possible combinations are:\   0 = lpAptioV\   1 = lpAptio4x\All other values are reserved\"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+PATH
+	Name  = "PciPort_DIR"
+End
+
+MODULE
+	Help  = "Includes PciPort.mak to Project"
+	File  = "PciPort.mak"
+End
+
+ELINK
+	Name  = "OEM_SKIP_PCI_DEVICE"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PROGRAM_PCI_DEVICE"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PCI_DEVICE_SET_ASPM"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PCI_DEVICE_SET_LNK_SPEED"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PCI_DEVICE_GET_OPT_ROM"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PCI_ATTRIBUTES"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PCI_DEVICE_OUT_OF_RESOURCES"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PCI_CHECK_BAD_PCIE_DEVICE"
+	InvokeOrder = ReplaceParent
+End
+
+ELINK
+	Name  = "OEM_PCI_QUERY_PCI_DEVICE"
+	InvokeOrder = ReplaceParent
+End
+
+INFComponent
+	Name  = "PciPort"
+	File  = "PciPort.inf"
+	Package  = "AmiCompatibilityPkg"
+	ModuleTypes  = "DXE_DRIVER"
+End
+

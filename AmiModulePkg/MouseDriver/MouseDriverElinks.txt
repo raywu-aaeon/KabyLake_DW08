@@ -1,0 +1,1 @@
+#define MOUSE_ACCELERATION_ENTRIES @Elink(MOUSE_ACCELERATION_ENTRIES, "@Child", " ", "%n")

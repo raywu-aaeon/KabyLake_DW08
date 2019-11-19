@@ -1,0 +1,53 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+## @file
+#   
+##
+[Defines]
+  INF_VERSION                = 0x00010015
+  BASE_NAME                  = AmiOemSmbiosType41LibNull
+  FILE_GUID                  = F2159EA7-18DE-4E65-AE74-55DCF72204EB
+  MODULE_TYPE                = BASE
+  VERSION_STRING             = 1.0
+  LIBRARY_CLASS              = AmiOemSmbiosType41Lib
+
+[Sources]  
+  AmiOemSmbiosType41LibNull.c
+  AmiOemSmbiosType41Lib.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  
+[Pcd]
+
+[Protocols]
+
+[Depex]
+  TRUE
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

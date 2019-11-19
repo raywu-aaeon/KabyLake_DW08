@@ -1,0 +1,1 @@
+#define ACPI_OEM_SETUP_CALLBACK_LIST @Elink(AcpiConfigurationList, "@Child", " ", "%n")

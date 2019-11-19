@@ -1,0 +1,23 @@
+<component>
+	name = "KabylakeFspSource"
+	category = ModulePart
+	LocalRoot = "KabylakeFspPkg\"
+	RefName = "KabylakeFspPkg.KabylakeFspSource"
+[files]
+"KabylakeFspSource.sdl"	
+"KabylakeFspPkg.dsc"	
+"KabylakeFspPkgConfig.dsc"	
+"KabylakeFspPkgExtConfig.dsc"	
+"BuildFspBin.mak"	
+"FspFdfRules.txt"	
+"FspmUpdFdfFileStatements.txt"	
+"FspsUpdFdfFileStatements.txt"	
+"FsptUpdFdfFileStatements.txt"	
+[parts]
+"KabylakeFspPkg.FspDebugInit"
+"KabylakeFspPkg.FspDescription"
+"KabylakeFspPkg.FspHeader"
+"KabylakeFspPkg.FspInit"
+"KabylakeFspPkg.FspPcdInit"
+"KabylakeFspPkg.Library"
+<endComponent>

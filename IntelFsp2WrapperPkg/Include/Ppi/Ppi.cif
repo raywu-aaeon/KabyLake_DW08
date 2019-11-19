@@ -1,0 +1,9 @@
+<component>
+	name = "Ppi"
+	category = ModulePart
+	LocalRoot = "IntelFsp2WrapperPkg\Include\Ppi\"
+	RefName = "IntelFsp2WrapperPkg.Include.Ppi"
+[files]
+"FspSiliconInitDone.h"	
+"TopOfTemporaryRam.h"	
+<endComponent>

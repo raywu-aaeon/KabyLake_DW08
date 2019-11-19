@@ -1,0 +1,30 @@
+TOKEN
+    Name  = "IntelFsp2WrapperPkg_Library_SUPPORT"
+    Value  = "1"
+    Help  = "Switch for IntelFsp2WrapperPkg Library support in the project"
+    TokenType = Boolean
+    Master = Yes   
+End
+
+INFComponent
+    Name  = "BaseFspWrapperApiLib"
+    File  = "BaseFspWrapperApiLib\BaseFspWrapperApiLib.inf"
+    Package  = "IntelFsp2WrapperPkg"
+End
+
+LibraryMapping
+    Class  = "FspWrapperApiLib"
+    Instance  = "IntelFsp2WrapperPkg.BaseFspWrapperApiLib"
+End
+
+INFComponent
+    Name  = "PeiFspWrapperApiTestLib"
+    File  = "PeiFspWrapperApiTestLib\PeiFspWrapperApiTestLib.inf"
+    Package  = "IntelFsp2WrapperPkg"
+End
+
+LibraryMapping
+    Class  = "FspWrapperApiTestLib"
+    Instance  = "IntelFsp2WrapperPkg.PeiFspWrapperApiTestLib"
+    ModuleTypes  = "PEIM"
+End

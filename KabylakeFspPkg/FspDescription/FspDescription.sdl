@@ -1,0 +1,15 @@
+TOKEN
+    Name = "FspDescription_SUPPORT"
+    Value = "1"
+    Help  = "Main switch to enable FspDescription support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+FFS_FILE
+    Name  = "FspFdfFileStatements"
+    FD_AREA  = "FSP_M"
+    FILE_Stmt  = "KabylakeFspPkg\FspDescription\FspFdfFileStatements.txt"
+End

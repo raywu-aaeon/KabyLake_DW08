@@ -1,0 +1,25 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AcpiPlatformSetupLib
+  FILE_GUID                      = 3CAA3401-4A4F-42D9-A79C-7C0767F23079
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AcpiPlatformSetupLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#  
+  
+[Sources]
+  AcpiPlatformSetupLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec  
+
+[LibraryClasses]
+  DebugLib
+

@@ -1,0 +1,55 @@
+#*************************************************************************
+#**                                                                     **
+#**   Copyright (c) 1985-2019, American Megatrends International LLC.   **
+#**                                                                     **
+#**      All rights reserved. Subject to AMI licensing agreement.       **
+#**                                                                     **
+#*************************************************************************
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CpuRcPolicyWrapPeiLib
+  FILE_GUID                      = CC0B1677-6153-4d7e-B74D-DBEB3BD78343
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PEIM
+
+[Sources]
+  CpuRcPolicyPei.c
+  CpuRcPolicyPeiPreMem.c
+  CpuRcPolicyPei.h
+  CpuRcPolicyPeiPreMem.h
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  AmiCpuModulePkg/AmiCpuModulePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/KabylakeSiliconPrivate.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+  
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid
+  gSiPreMemPolicyPpiGuid
+
+[Guids]
+  gTxtBiosAcmPeiFileGuid
+  gSiConfigGuid
+  gCpuConfigLibPreMemConfigGuid  ## CONSUMES
+
+[LibraryClasses]
+  PeiServicesTablePointerLib
+  BaseLib
+  DebugLib
+  IoLib
+  HobLib
+  AmiPeiLib
+  CpuPlatformLib
+  CpuCspPeiLib
+  BaseMemoryLib
+  ConfigBlockLib
+
+[Depex]
+  gEfiPeiReadOnlyVariable2PpiGuid

@@ -1,0 +1,1762 @@
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************
+
+//*************************************************************************
+// $Header: /Alaska/BIN/Chipset/Intel/SouthBridge/LynxPoint/Intel Pch SB Board/SBSetup/SB.sd 3     5/03/12 6:31a Victortu $
+//
+// $Revision: 3 $
+//
+// $Date: 5/03/12 6:31a $
+//*************************************************************************
+//*************************************************************************
+//<AMI_FHDR_START>
+//
+// Name:    SB.sd
+//
+// Description: South Bridge setup form
+//
+//<AMI_FHDR_END>
+//*************************************************************************
+
+#ifdef SETUP_DATA_DEFINITION
+//----------------------------------------------------------------------------
+// Put NVRAM data definitions here.
+// For example: UINT8 Data1;
+// These definitions will be converted by the build process
+// to a definitions of SETUP_DATA fields.
+//----------------------------------------------------------------------------
+//    UINT8   TestSB;
+#if EHCI_CON_DISCON_WAKE_UP_SUPPORT
+    UINT8   EhciConDisConWakeUp;
+#endif
+    UINT8   PcieRPDetectNonComplaint[PCH_PCIE_MAX_ROOT_PORTS];
+    UINT16  PciePFMemRsvd[PCH_PCIE_MAX_ROOT_PORTS];
+    UINT8   PcieMemRsvdalig[PCH_PCIE_MAX_ROOT_PORTS];     // AMI Feature for Thunderbolt
+    UINT8   PciePFMemRsvdalig[PCH_PCIE_MAX_ROOT_PORTS];   // AMI Feature for Thunderbolt    
+#endif
+
+#ifdef FORM_SET_TYPEDEF
+	#include <Protocol/SBPlatformData.h>
+#endif
+
+//---------------------------------------------------------------------------
+#if defined(VFRCOMPILE) && !defined(CONTROLS_ARE_DEFINED)
+#define CONTROL_DEFINITION
+#endif
+//---------------------------------------------------------------------------
+
+#ifdef CONTROL_DEFINITION
+
+//#define SB_ONEOF_TESTSB\
+//        oneof varid    = SETUP_DATA.TestSB,\
+//          prompt      = STRING_TOKEN(STR_TEST_AAA_PROMPT),\
+//          help        = STRING_TOKEN(STR_TEST_AAA_HELP),\
+//          option text = STRING_TOKEN(STR_COMMON_DISABLED), value = 0, flags = RESET_REQUIRED;\
+//          option text = STRING_TOKEN(STR_COMMON_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+//        endoneof;
+#if EHCI_CON_DISCON_WAKE_UP_SUPPORT
+#define SB_ONEOF_EHCICONDISCONWAKEUP\
+  oneof varid    = SETUP_DATA.EhciConDisConWakeUp,\
+    prompt       = STRING_TOKEN (STR_PCH_USB_CON_DISCON_WAKEUP_PROMPT),\
+    help         = STRING_TOKEN (STR_PCH_USB_CON_DISCON_WAKEUP_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+#endif
+
+#define SB_ONEOF_PCIEROOTPORTDNCD00\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_0],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD01\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_1],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT1),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD02\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_2],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT2),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD03\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_3],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT3),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD04\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_4],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT4),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD05\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_5],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT5),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD06\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_6],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT6),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD07\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_7],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT7),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD08\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_8],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT8),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD09\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_9],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT9),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD10\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_10],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT10),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD11\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_11],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT11),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD12\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_12],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT12),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD13\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_13],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT13),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD14\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_14],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT14),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD15\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_15],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT15),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD16\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_16],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT16),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD17\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_17],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT17),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD18\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_18],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT18),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD19\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_19],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT19),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;                                        
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD20\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_20],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT20),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;   
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD21\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_21],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT21),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;   
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD22\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_22],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT22),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;   
+  
+#define SB_ONEOF_PCIEROOTPORTDNCD23\
+  oneof varid    = SETUP_DATA.PcieRPDetectNonComplaint[OFFSET_23],\
+    prompt       = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_PROMPT23),\
+    help         = STRING_TOKEN (STR_PCIE_NON_COMPLIANCE_HELP),\
+    option text  = STRING_TOKEN (STR_COMMON_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+    option text  = STRING_TOKEN (STR_COMMON_ENABLED), value = 1, flags = RESET_REQUIRED;\
+  endoneof;           
+
+#define SB_ONEOF_PCIEPFMEMRSVD00\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_0],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD01\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_1],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT1),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD02\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_2],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT2),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD03\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_3],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT3),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD04\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_4],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT4),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD05\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_5],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT5),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD06\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_6],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT6),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD07\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_7],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT7),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD08\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_8],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT8),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD09\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_9],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT9),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD10\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_10],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT10),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD11\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_11],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT11),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD12\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_12],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT12),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD13\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_13],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT13),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD14\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_14],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT14),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD15\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_15],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT15),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD16\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_16],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT16),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD17\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_17],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT17),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD18\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_18],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT18),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD19\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_19],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT19),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD20\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_20],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT20),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD21\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_21],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT21),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD22\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_22],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT22),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVD23\
+  numeric varid  = SETUP_DATA.PciePFMemRsvd[OFFSET_23],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_PROMPT23),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = MAX_PCIE_PF_MEM_RESERVED,\
+    step         = 1,\
+    default      = 10,\
+    default      = 10, defaultstore = AmiMfgDefault,\
+  endnumeric;        
+                                        
+#define SB_ONEOF_PCIEMEMRSVDALIG00\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_0],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG01\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_1],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT1),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG02\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_2],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT2),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG03\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_3],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT3),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG04\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_4],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT4),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG05\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_5],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT5),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG06\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_6],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT6),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG07\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_7],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT7),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG08\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_8],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT8),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG09\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_9],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT9),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG10\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_10],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT10),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG11\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_11],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT11),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG12\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_12],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT12),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG13\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_13],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT13),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG14\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_14],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT14),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG15\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_15],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT15),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG16\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_16],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT16),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG17\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_17],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT17),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG18\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_18],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT18),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG19\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_19],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT19),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG20\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_20],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT20),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG21\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_21],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT21),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG22\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_22],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT22),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEMEMRSVDALIG23\
+  numeric varid  = SETUP_DATA.PcieMemRsvdalig[OFFSET_23],\
+    prompt       = STRING_TOKEN (STR_PCIE_RMEM_ALIG_PROMPT23),\
+    help         = STRING_TOKEN (STR_PCIE_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;        
+ 
+#define SB_ONEOF_PCIEPFMEMRSVDALIG00\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_0],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG01\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_1],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT1),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG02\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_2],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT2),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG03\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_3],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT3),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG04\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_4],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT4),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG05\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_5],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT5),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG06\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_6],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT6),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG07\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_7],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT7),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG08\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_8],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT8),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG09\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_9],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT9),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG10\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_10],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT10),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG11\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_11],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT11),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG12\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_12],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT12),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG13\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_13],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT13),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG14\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_14],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT14),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG15\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_15],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT15),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG16\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_16],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT16),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG17\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_17],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT17),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG18\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_18],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT18),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG19\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_19],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT19),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG20\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_20],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT20),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG21\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_21],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT21),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG22\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_22],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT22),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;
+  
+#define SB_ONEOF_PCIEPFMEMRSVDALIG23\
+  numeric varid  = SETUP_DATA.PciePFMemRsvdalig[OFFSET_23],\
+    prompt       = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_PROMPT23),\
+    help         = STRING_TOKEN (STR_PCIE_PF_RMEM_ALIG_HELP),\
+    flags        = RESET_REQUIRED,\
+    minimum      = 1,\
+    maximum      = 31,\
+    step         = 1,\
+    default      = 1,\
+    default      = 1, defaultstore = AmiMfgDefault,\
+  endnumeric;        
+                                                                          
+#endif // CONTROL_DEFINITION
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+#ifdef CONTROLS_WITH_DEFAULTS
+#if EHCI_CON_DISCON_WAKE_UP_SUPPORT
+    SB_ONEOF_EHCICONDISCONWAKEUP
+#endif   
+    SB_ONEOF_PCIEROOTPORTDNCD00
+    SB_ONEOF_PCIEROOTPORTDNCD01
+    SB_ONEOF_PCIEROOTPORTDNCD02
+    SB_ONEOF_PCIEROOTPORTDNCD03
+    SB_ONEOF_PCIEROOTPORTDNCD04
+    SB_ONEOF_PCIEROOTPORTDNCD05
+    SB_ONEOF_PCIEROOTPORTDNCD06
+    SB_ONEOF_PCIEROOTPORTDNCD07
+    SB_ONEOF_PCIEROOTPORTDNCD08
+    SB_ONEOF_PCIEROOTPORTDNCD09
+    SB_ONEOF_PCIEROOTPORTDNCD10
+    SB_ONEOF_PCIEROOTPORTDNCD11
+    SB_ONEOF_PCIEROOTPORTDNCD12
+    SB_ONEOF_PCIEROOTPORTDNCD13
+    SB_ONEOF_PCIEROOTPORTDNCD14
+    SB_ONEOF_PCIEROOTPORTDNCD15
+    SB_ONEOF_PCIEROOTPORTDNCD16
+    SB_ONEOF_PCIEROOTPORTDNCD17
+    SB_ONEOF_PCIEROOTPORTDNCD18
+    SB_ONEOF_PCIEROOTPORTDNCD19
+    SB_ONEOF_PCIEROOTPORTDNCD20
+    SB_ONEOF_PCIEROOTPORTDNCD21
+    SB_ONEOF_PCIEROOTPORTDNCD22
+    SB_ONEOF_PCIEROOTPORTDNCD23
+    SB_ONEOF_PCIEPFMEMRSVD00
+    SB_ONEOF_PCIEPFMEMRSVD01
+    SB_ONEOF_PCIEPFMEMRSVD02
+    SB_ONEOF_PCIEPFMEMRSVD03
+    SB_ONEOF_PCIEPFMEMRSVD04
+    SB_ONEOF_PCIEPFMEMRSVD05
+    SB_ONEOF_PCIEPFMEMRSVD06
+    SB_ONEOF_PCIEPFMEMRSVD07
+    SB_ONEOF_PCIEPFMEMRSVD08
+    SB_ONEOF_PCIEPFMEMRSVD09
+    SB_ONEOF_PCIEPFMEMRSVD10
+    SB_ONEOF_PCIEPFMEMRSVD11
+    SB_ONEOF_PCIEPFMEMRSVD12
+    SB_ONEOF_PCIEPFMEMRSVD13
+    SB_ONEOF_PCIEPFMEMRSVD14
+    SB_ONEOF_PCIEPFMEMRSVD15
+    SB_ONEOF_PCIEPFMEMRSVD16
+    SB_ONEOF_PCIEPFMEMRSVD17
+    SB_ONEOF_PCIEPFMEMRSVD18
+    SB_ONEOF_PCIEPFMEMRSVD19
+    SB_ONEOF_PCIEPFMEMRSVD20
+    SB_ONEOF_PCIEPFMEMRSVD21
+    SB_ONEOF_PCIEPFMEMRSVD22
+    SB_ONEOF_PCIEPFMEMRSVD23
+    SB_ONEOF_PCIEMEMRSVDALIG00
+    SB_ONEOF_PCIEMEMRSVDALIG01
+    SB_ONEOF_PCIEMEMRSVDALIG02
+    SB_ONEOF_PCIEMEMRSVDALIG03
+    SB_ONEOF_PCIEMEMRSVDALIG04
+    SB_ONEOF_PCIEMEMRSVDALIG05
+    SB_ONEOF_PCIEMEMRSVDALIG06
+    SB_ONEOF_PCIEMEMRSVDALIG07
+    SB_ONEOF_PCIEMEMRSVDALIG08
+    SB_ONEOF_PCIEMEMRSVDALIG09
+    SB_ONEOF_PCIEMEMRSVDALIG10
+    SB_ONEOF_PCIEMEMRSVDALIG11
+    SB_ONEOF_PCIEMEMRSVDALIG12
+    SB_ONEOF_PCIEMEMRSVDALIG13
+    SB_ONEOF_PCIEMEMRSVDALIG14
+    SB_ONEOF_PCIEMEMRSVDALIG15
+    SB_ONEOF_PCIEMEMRSVDALIG16
+    SB_ONEOF_PCIEMEMRSVDALIG17
+    SB_ONEOF_PCIEMEMRSVDALIG18
+    SB_ONEOF_PCIEMEMRSVDALIG19
+    SB_ONEOF_PCIEMEMRSVDALIG20
+    SB_ONEOF_PCIEMEMRSVDALIG21
+    SB_ONEOF_PCIEMEMRSVDALIG22
+    SB_ONEOF_PCIEMEMRSVDALIG23
+    SB_ONEOF_PCIEPFMEMRSVDALIG00
+    SB_ONEOF_PCIEPFMEMRSVDALIG01
+    SB_ONEOF_PCIEPFMEMRSVDALIG02
+    SB_ONEOF_PCIEPFMEMRSVDALIG03
+    SB_ONEOF_PCIEPFMEMRSVDALIG04
+    SB_ONEOF_PCIEPFMEMRSVDALIG05
+    SB_ONEOF_PCIEPFMEMRSVDALIG06
+    SB_ONEOF_PCIEPFMEMRSVDALIG07
+    SB_ONEOF_PCIEPFMEMRSVDALIG08
+    SB_ONEOF_PCIEPFMEMRSVDALIG09
+    SB_ONEOF_PCIEPFMEMRSVDALIG10
+    SB_ONEOF_PCIEPFMEMRSVDALIG11
+    SB_ONEOF_PCIEPFMEMRSVDALIG12
+    SB_ONEOF_PCIEPFMEMRSVDALIG13
+    SB_ONEOF_PCIEPFMEMRSVDALIG14
+    SB_ONEOF_PCIEPFMEMRSVDALIG15
+    SB_ONEOF_PCIEPFMEMRSVDALIG16
+    SB_ONEOF_PCIEPFMEMRSVDALIG17
+    SB_ONEOF_PCIEPFMEMRSVDALIG18
+    SB_ONEOF_PCIEPFMEMRSVDALIG19
+    SB_ONEOF_PCIEPFMEMRSVDALIG20
+    SB_ONEOF_PCIEPFMEMRSVDALIG21
+    SB_ONEOF_PCIEPFMEMRSVDALIG22
+    SB_ONEOF_PCIEPFMEMRSVDALIG23
+#endif // CONTROLS_WITH_DEFAULTS
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+#ifdef CHIPSET_FORM_SET
+    #ifndef SUPPRESS_GRAYOUT_ENDIF //old Core
+    #define SUPPRESS_GRAYOUT_ENDIF endif;
+    #endif
+
+    #ifdef FORM_SET_VARSTORE
+       varstore SETUP_PLATFORM_DATA,
+       key   = AUTO_ID(SETUP_PLATFORM_DATA_ID),
+       name  = SetupPlatformData,
+       guid  = SETUP_GUID;
+    #endif
+
+/*
+    #ifdef FORM_SET_VARSTORE
+       varstore SB_PLATFORM_DATA,
+       key   = AUTO_ID(SB_PLATFORM_DATA_ID),
+       name  = SBPlatformData,
+       guid  = SETUP_GUID;
+    #endif
+*/
+    #ifdef FORM_SET_ITEM
+    // Define controls to be added to the main page of the formset
+    #endif
+
+    #ifdef FORM_SET_GOTO
+    // Define goto commands for the forms defined in this file
+    #endif
+
+    #ifdef FORM_SET_FORM
+    // Define forms
+//----------------------------------------------------------------------------
+//                  SB Porting Configuration Form
+//----------------------------------------------------------------------------   
+    #ifndef SB_FORM_PORTING_CONFIGURATION
+    #define SB_FORM_PORTING_CONFIGURATION
+        form formid = AUTO_ID(SB_PORTING_FORM_ID),
+            title = STRING_TOKEN(STR_SB_PORTING_CONFIGURATION_FORM);
+       
+            SUBTITLE(STRING_TOKEN (STR_SB_PORTING_FORM_FORM_TITLE))
+
+#if EHCI_CON_DISCON_WAKE_UP_SUPPORT
+            SB_ONEOF_EHCICONDISCONWAKEUP
+#endif
+
+            SEPARATOR
+        
+        endform; // SB_PORTING_FORM_ID
+    #endif // SB_FORM_PORTING_CONFIGURATION
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#01 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP01_OPTIONS
+    #define SB_FORM_PCIERP01_OPTIONS
+        form formid = AUTO_ID(PCIERP01_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD00
+            SB_ONEOF_PCIEPFMEMRSVD00
+            SB_ONEOF_PCIEMEMRSVDALIG00
+            SB_ONEOF_PCIEPFMEMRSVDALIG00
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP01_OPTIONS
+    #endif // SB_FORM_PCIERP01_OPTIONS   
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#02 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP02_OPTIONS
+    #define SB_FORM_PCIERP02_OPTIONS
+        form formid = AUTO_ID(PCIERP02_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD01
+            SB_ONEOF_PCIEPFMEMRSVD01
+            SB_ONEOF_PCIEMEMRSVDALIG01
+            SB_ONEOF_PCIEPFMEMRSVDALIG01
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP02_OPTIONS
+    #endif // SB_FORM_PCIERP02_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#03 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP03_OPTIONS
+    #define SB_FORM_PCIERP03_OPTIONS
+        form formid = AUTO_ID(PCIERP03_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD02
+            SB_ONEOF_PCIEPFMEMRSVD02
+            SB_ONEOF_PCIEMEMRSVDALIG02
+            SB_ONEOF_PCIEPFMEMRSVDALIG02
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP03_OPTIONS
+    #endif // SB_FORM_PCIERP03_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#04 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP04_OPTIONS
+    #define SB_FORM_PCIERP04_OPTIONS
+        form formid = AUTO_ID(PCIERP04_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD03
+            SB_ONEOF_PCIEPFMEMRSVD03
+            SB_ONEOF_PCIEMEMRSVDALIG03
+            SB_ONEOF_PCIEPFMEMRSVDALIG03
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP04_OPTIONS
+    #endif // SB_FORM_PCIERP04_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#05 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP05_OPTIONS
+    #define SB_FORM_PCIERP05_OPTIONS
+        form formid = AUTO_ID(PCIERP05_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD04
+            SB_ONEOF_PCIEPFMEMRSVD04
+            SB_ONEOF_PCIEMEMRSVDALIG04
+            SB_ONEOF_PCIEPFMEMRSVDALIG04
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP05_OPTIONS
+    #endif // SB_FORM_PCIERP05_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#06 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP06_OPTIONS
+    #define SB_FORM_PCIERP06_OPTIONS
+        form formid = AUTO_ID(PCIERP06_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD05
+            SB_ONEOF_PCIEPFMEMRSVD05
+            SB_ONEOF_PCIEMEMRSVDALIG05
+            SB_ONEOF_PCIEPFMEMRSVDALIG05
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP06_OPTIONS
+    #endif // SB_FORM_PCIERP06_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#07 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP07_OPTIONS
+    #define SB_FORM_PCIERP07_OPTIONS
+        form formid = AUTO_ID(PCIERP07_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD06
+            SB_ONEOF_PCIEPFMEMRSVD06
+            SB_ONEOF_PCIEMEMRSVDALIG06
+            SB_ONEOF_PCIEPFMEMRSVDALIG06
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP07_OPTIONS
+    #endif // SB_FORM_PCIERP07_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#08 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP08_OPTIONS
+    #define SB_FORM_PCIERP08_OPTIONS
+        form formid = AUTO_ID(PCIERP08_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD07
+            SB_ONEOF_PCIEPFMEMRSVD07
+            SB_ONEOF_PCIEMEMRSVDALIG07
+            SB_ONEOF_PCIEPFMEMRSVDALIG07
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP08_OPTIONS
+    #endif // SB_FORM_PCIERP08_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#09 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP09_OPTIONS
+    #define SB_FORM_PCIERP09_OPTIONS
+        form formid = AUTO_ID(PCIERP09_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD08
+            SB_ONEOF_PCIEPFMEMRSVD08
+            SB_ONEOF_PCIEMEMRSVDALIG08
+            SB_ONEOF_PCIEPFMEMRSVDALIG08
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP09_OPTIONS
+    #endif // SB_FORM_PCIERP09_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#10 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP10_OPTIONS
+    #define SB_FORM_PCIERP10_OPTIONS
+        form formid = AUTO_ID(PCIERP10_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD09
+            SB_ONEOF_PCIEPFMEMRSVD09
+            SB_ONEOF_PCIEMEMRSVDALIG09
+            SB_ONEOF_PCIEPFMEMRSVDALIG09
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP10_OPTIONS
+    #endif // SB_FORM_PCIERP10_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#11 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP11_OPTIONS
+    #define SB_FORM_PCIERP11_OPTIONS
+        form formid = AUTO_ID(PCIERP11_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD10
+            SB_ONEOF_PCIEPFMEMRSVD10
+            SB_ONEOF_PCIEMEMRSVDALIG10
+            SB_ONEOF_PCIEPFMEMRSVDALIG10
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP11_OPTIONS
+    #endif // SB_FORM_PCIERP11_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#12 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP12_OPTIONS
+    #define SB_FORM_PCIERP12_OPTIONS
+        form formid = AUTO_ID(PCIERP12_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD11
+            SB_ONEOF_PCIEPFMEMRSVD11
+            SB_ONEOF_PCIEMEMRSVDALIG11
+            SB_ONEOF_PCIEPFMEMRSVDALIG11
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP12_OPTIONS
+    #endif // SB_FORM_PCIERP12_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#3 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP13_OPTIONS
+    #define SB_FORM_PCIERP13_OPTIONS
+        form formid = AUTO_ID(PCIERP13_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD12
+            SB_ONEOF_PCIEPFMEMRSVD12
+            SB_ONEOF_PCIEMEMRSVDALIG12
+            SB_ONEOF_PCIEPFMEMRSVDALIG12
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP13_OPTIONS
+    #endif // SB_FORM_PCIERP13_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#14 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP14_OPTIONS
+    #define SB_FORM_PCIERP14_OPTIONS
+        form formid = AUTO_ID(PCIERP14_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD13
+            SB_ONEOF_PCIEPFMEMRSVD13
+            SB_ONEOF_PCIEMEMRSVDALIG13
+            SB_ONEOF_PCIEPFMEMRSVDALIG13
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP14_OPTIONS
+    #endif // SB_FORM_PCIERP14_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#15 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP15_OPTIONS
+    #define SB_FORM_PCIERP15_OPTIONS
+        form formid = AUTO_ID(PCIERP15_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD14
+            SB_ONEOF_PCIEPFMEMRSVD14
+            SB_ONEOF_PCIEMEMRSVDALIG14
+            SB_ONEOF_PCIEPFMEMRSVDALIG14
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP15_OPTIONS
+    #endif // SB_FORM_PCIERP15_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#16 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP16_OPTIONS
+    #define SB_FORM_PCIERP16_OPTIONS
+        form formid = AUTO_ID(PCIERP16_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD15
+            SB_ONEOF_PCIEPFMEMRSVD15
+            SB_ONEOF_PCIEMEMRSVDALIG15
+            SB_ONEOF_PCIEPFMEMRSVDALIG15
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP16_OPTIONS
+    #endif // SB_FORM_PCIERP16_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#17 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP17_OPTIONS
+    #define SB_FORM_PCIERP17_OPTIONS
+        form formid = AUTO_ID(PCIERP17_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD16
+            SB_ONEOF_PCIEPFMEMRSVD16
+            SB_ONEOF_PCIEMEMRSVDALIG16
+            SB_ONEOF_PCIEPFMEMRSVDALIG16
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP17_OPTIONS
+    #endif // SB_FORM_PCIERP17_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#18 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP18_OPTIONS
+    #define SB_FORM_PCIERP18_OPTIONS
+        form formid = AUTO_ID(PCIERP18_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD17
+            SB_ONEOF_PCIEPFMEMRSVD17
+            SB_ONEOF_PCIEMEMRSVDALIG17
+            SB_ONEOF_PCIEPFMEMRSVDALIG17
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP18_OPTIONS
+    #endif // SB_FORM_PCIERP18_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#19 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP19_OPTIONS
+    #define SB_FORM_PCIERP19_OPTIONS
+        form formid = AUTO_ID(PCIERP19_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD18
+            SB_ONEOF_PCIEPFMEMRSVD18
+            SB_ONEOF_PCIEMEMRSVDALIG18
+            SB_ONEOF_PCIEPFMEMRSVDALIG18
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP19_OPTIONS
+    #endif // SB_FORM_PCIERP19_OPTIONS
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#20 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP20_OPTIONS
+    #define SB_FORM_PCIERP20_OPTIONS
+        form formid = AUTO_ID(PCIERP20_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD19
+            SB_ONEOF_PCIEPFMEMRSVD19
+            SB_ONEOF_PCIEMEMRSVDALIG19
+            SB_ONEOF_PCIEPFMEMRSVDALIG19
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP20_OPTIONS
+    #endif // SB_FORM_PCIERP20_OPTIONS                                                                              
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#21 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP21_OPTIONS
+    #define SB_FORM_PCIERP21_OPTIONS
+        form formid = AUTO_ID(PCIERP21_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD20
+            SB_ONEOF_PCIEPFMEMRSVD20
+            SB_ONEOF_PCIEMEMRSVDALIG20
+            SB_ONEOF_PCIEPFMEMRSVDALIG20
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP21_OPTIONS
+    #endif // SB_FORM_PCIERP21_OPTIONS    
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#22 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP22_OPTIONS
+    #define SB_FORM_PCIERP22_OPTIONS
+        form formid = AUTO_ID(PCIERP22_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD21
+            SB_ONEOF_PCIEPFMEMRSVD21
+            SB_ONEOF_PCIEMEMRSVDALIG21
+            SB_ONEOF_PCIEPFMEMRSVDALIG21
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP22_OPTIONS
+    #endif // SB_FORM_PCIERP22_OPTIONS 
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#23 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP23_OPTIONS
+    #define SB_FORM_PCIERP23_OPTIONS
+        form formid = AUTO_ID(PCIERP23_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD22
+            SB_ONEOF_PCIEPFMEMRSVD22
+            SB_ONEOF_PCIEMEMRSVDALIG22
+            SB_ONEOF_PCIEPFMEMRSVDALIG22
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP23_OPTIONS
+    #endif // SB_FORM_PCIERP23_OPTIONS       
+    
+//----------------------------------------------------------------------------
+//                  CHIPSET - SB PCI-E Root Port#24 Form
+//----------------------------------------------------------------------------
+    #ifndef SB_FORM_PCIERP24_OPTIONS
+    #define SB_FORM_PCIERP24_OPTIONS
+        form formid = AUTO_ID(PCIERP24_OPTIONS_FORM_ID),
+            title   = STRING_TOKEN (STR_EXTRA_OPTIONS_FORM_TITLE);
+            
+            grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+            SB_ONEOF_PCIEROOTPORTDNCD23
+            SB_ONEOF_PCIEPFMEMRSVD23
+            SB_ONEOF_PCIEMEMRSVDALIG23
+            SB_ONEOF_PCIEPFMEMRSVDALIG23
+
+            endif; // End of SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER
+        endform; // End of SB_FORM_PCIERP24_OPTIONS
+    #endif // SB_FORM_PCIERP24_OPTIONS        
+    
+    #endif // end FORM_SET_FORM
+#endif // end CHIPSET_SET_FORM
+
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************

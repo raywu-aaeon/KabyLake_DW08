@@ -1,0 +1,41 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PchLinkLib
+  FILE_GUID                      = B78DBFBF-AD98-43E2-A4B0-43281A3E6EC5
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PchLinkLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  PchLinkLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+
+[LibraryClasses]
+  DebugLib
+  PchInfoLib
+  
+[Guids]
+  gCpuSetupVariableGuid
+  gPchSetupVariableGuid
+
+[Pcd]
+  
+[BuildOptions.COMMON] 
+MSFT:*_*_*_CC_FLAGS = /D EDK_FLAG
+GCC:*_*_*_CC_FLAGS = -D EDK_FLAG

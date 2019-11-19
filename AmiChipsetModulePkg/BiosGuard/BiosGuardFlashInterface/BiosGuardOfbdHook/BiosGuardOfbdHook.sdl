@@ -1,0 +1,80 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**     5555 Oakbrook Pkwy, Suite 200, Norcross, GA 30093            **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+#**********************************************************************
+#<AMI_FHDR_START>
+#
+# Name:	BiosGuardOfbdHook.sdl
+#
+# Description: SDL file for BiosGuardOfbdHook
+#
+#<AMI_FHDR_END>
+#**********************************************************************
+
+TOKEN
+     Name = "BIOS_GUARD_OFBD_HOOK_SUPPORT"
+     Value = "1"
+     TokenType = Boolean
+     TargetEQU = Yes
+     TargetMAK = Yes
+     Master = Yes
+     Help = "Main switch to enable BIOS_GUARD_OFBD_HOOK_SUPPORT support in Project"
+End
+
+PATH
+    Name  = "BIOS_GUARD_OFBD_DIR"
+End
+
+ELINK
+    Name  = "$(BIOS_GUARD_OFBD_DIR)/BiosGuardOfbdHook.h"
+    Parent  = "OFBD_FUNC_INCLUDE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(BIOS_GUARD_OFBD_DIR)/BiosGuardOfbdHook.c"
+    Parent  = "OFBD_FUNC_SOURCES_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "BGUEntry,"
+    Parent  = "OFBD_INIT_FUNC_LIST"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "BGUInSmm,"
+    Parent  = "OFBD_IN_SMM_FUNC_LIST"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "AmiChipsetModulePkg/AmiChipsetModulePkg.dec"
+    Parent  = "AMI_OFBD_PACKAGES"
+    InvokeOrder = AfterParent
+End
+
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**     5555 Oakbrook Pkwy, Suite 200, Norcross, GA 30093            **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************

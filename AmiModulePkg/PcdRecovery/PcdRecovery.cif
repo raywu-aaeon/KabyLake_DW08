@@ -1,0 +1,12 @@
+<component>
+	name = "PcdRecovery"
+	category = eModule
+	LocalRoot = "AmiModulePkg\PcdRecovery\"
+	RefName = "PcdRecovery"
+[INF]
+"PcdRecoveryLib.inf"
+"PcdRecoveryPei.inf"
+[files]
+"PcdRecovery.chm"
+"PcdRecovery.sdl"
+<endComponent>

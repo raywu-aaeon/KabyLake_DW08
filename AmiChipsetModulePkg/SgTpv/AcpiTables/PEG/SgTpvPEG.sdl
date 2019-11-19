@@ -1,0 +1,15 @@
+TOKEN
+    Name  = "SgTpvPEG_SUPPORT"
+    Value  = "1"
+    Help  = "Add an OEM SSDT for discrete VGA card. When Primarydisplay = Auto or PEG, the system can report OEM SSDT talbes for AMD or nVidia dGPU VGA card."
+    TokenType = Boolean
+    TargetH = Yes
+    Master = Yes
+End
+
+INFComponent
+    Name  = "SgTpvPegSSDT"
+    File  = "SgTpvPegSSDT.inf"
+    Package  = "SkyBayPkg"
+    ModuleTypes="USER_DEFINED"
+End

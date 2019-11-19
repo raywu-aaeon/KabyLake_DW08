@@ -1,0 +1,152 @@
+TOKEN
+    Name  = "KabylakeFspPkg_Library_SUPPORT"
+    Value  = "1"
+    Help  = "Switch for KabylakeFspPkg Library support in the project"
+    TokenType = Boolean
+    Master = Yes
+End
+
+INFComponent
+    Name  = "FspDebugLibService"
+    File  = "FspDebugLibService\FspDebugLibService.inf"
+    Package  = "KabylakeFspPkg" 
+    Token = "DEBUG_MODE" "=" "1"          
+End
+
+LibraryMapping
+    Class  = "DebugLib"
+    Instance  = "KabylakeFspPkg.FspDebugLibService"     
+    ModuleTypes  = "PEIM"  
+    Token = "DEBUG_MODE" "=" "1"        
+End
+
+INFComponent
+    Name  = "MmPciCf8Lib"
+    File  = "MmPciCf8Lib\MmPciCf8Lib.inf"
+    Package  = "KabylakeFspPkg"
+End
+
+LibraryMapping
+    Class  = "MmPciLib"
+    Instance  = "KabylakeFspPkg.MmPciCf8Lib"
+    ModuleTypes  = "PEIM"
+End
+
+LibraryMapping
+    Class  = "MmPciLib"
+    Instance  = "KabylakeFspPkg.MmPciCf8Lib"
+    Override  = "IntelFsp2Pkg.FspSecCoreT" 
+End
+
+LibraryMapping
+    Class  = "MmPciLib"
+    Instance  = "KabylakeFspPkg.MmPciCf8Lib"
+    Override  = "IntelFsp2Pkg.FspSecCoreM" 
+End
+
+LibraryMapping
+    Class  = "MmPciLib"
+    Instance  = "KabylakeFspPkg.MmPciCf8Lib"
+    Override  = "IntelFsp2Pkg.FspSecCoreS" 
+End
+
+LibraryMapping
+    Class  = "MmPciLib"
+    Instance  = "KabylakeFspPkg.MmPciCf8Lib"
+    Override  = "MdeModulePkg.PeiMain" 
+End
+
+INFComponent
+    Name  = "PeiPolicyUpdatePreMemLib"
+    File  = "PeiPolicyUpdatePreMemLib\PeiPolicyUpdatePreMemLib.inf"
+    Package  = "KabylakeFspPkg"
+End
+
+LibraryMapping
+    Class  = "PeiPolicyUpdatePreMemLib"
+    Instance  = "KabylakeFspPkg.PeiPolicyUpdatePreMemLib"
+    ModuleTypes  = "PEIM"
+End
+
+INFComponent
+    Name  = "PeiPolicyUpdateLib"
+    File  = "PeiPolicyUpdateLib\PeiPolicyUpdateLib.inf"
+    Package  = "KabylakeFspPkg"
+End
+
+LibraryMapping
+    Class  = "PeiPolicyUpdateLib"
+    Instance  = "KabylakeFspPkg.PeiPolicyUpdateLib"
+    ModuleTypes  = "PEIM"
+End
+
+INFComponent
+    Name  = "BaseCacheAsRamLib"
+    File  = "BaseCacheAsRamLib\BaseCacheAsRamLib.inf"
+    Package  = "KabylakeFspPkg"
+End
+
+LibraryMapping
+    Class  = "CacheAsRamLib"
+    Instance  = "KabylakeFspPkg.BaseCacheAsRamLib"
+    ModuleTypes  = "PEIM"
+End
+
+INFComponent
+    Name  = "BasePostCodeLibPort80Ex"
+    File  = "BasePostCodeLibPort80Ex\BasePostCodeLibPort80Ex.inf"
+    Package  = "KabylakeFspPkg"   
+End
+
+LibraryMapping
+    Class  = "PostCodeLib"
+    Instance  = "KabylakeFspPkg.BasePostCodeLibPort80Ex"       
+End
+
+INFComponent
+    Name  = "FspDebugPrintErrorLevelLib"
+    File  = "DebugPrintErrorLevelLib\FspDebugPrintErrorLevelLib.inf"
+    Package  = "KabylakeFspPkg"   
+End
+
+LibraryMapping
+    Class  = "DebugPrintErrorLevelLib"
+    Instance  = "KabylakeFspPkg.FspDebugPrintErrorLevelLib"       
+End
+
+INFComponent
+    Name  = "SerialPortLib"
+    File  = "SerialPortLib\SerialPortLib.inf"
+    Package  = "KabylakeFspPkg"
+    Token = "DEBUG_MODE" "=" "1"               
+End
+
+LibraryMapping
+    Class  = "SerialPortLib"
+    Instance  = "KabylakeFspPkg.SerialPortLib"       
+    Token = "DEBUG_MODE" "=" "1"            
+End
+
+INFComponent
+    Name  = "PeiTscTimerLib"
+    File  = "TscAcpiTimerLib\PeiTscTimerLib.inf"
+    Package  = "KabylakeFspPkg"   
+End
+
+LibraryMapping
+    Class  = "TimerLib"
+    Instance  = "KabylakeFspPkg.PeiTscTimerLib"       
+    ModuleTypes  = "PEIM PEI_CORE"
+End
+
+INFComponent
+    Name  = "SecTscTimerLib"
+    File  = "TscAcpiTimerLib\SecTscTimerLib.inf"
+    Package  = "KabylakeFspPkg"   
+End
+
+LibraryMapping
+    Class  = "TimerLib"
+    Instance  = "KabylakeFspPkg.SecTscTimerLib"       
+    ModuleTypes  = "SEC"    
+End

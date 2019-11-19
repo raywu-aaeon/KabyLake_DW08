@@ -1,0 +1,41 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SaLinkLib
+  FILE_GUID                      = D2F8B80F-FB92-4080-AE3A-9371BCC81E87
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SaLinkLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  SaLinkLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  
+[LibraryClasses]
+  DebugLib
+  CpuPlatformLib
+  BaseMemoryLib
+  
+[Guids]
+  gSaSetupVariableGuid   
+
+[Pcd]
+  
+[BuildOptions.COMMON] 
+MSFT:*_*_*_CC_FLAGS = /D EDK_FLAG
+GCC:*_*_*_CC_FLAGS = -D EDK_FLAG

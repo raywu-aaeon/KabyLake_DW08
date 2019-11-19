@@ -1,0 +1,159 @@
+
+[Tag] AMI_OVERRIDE_PCH0000
+[Description] GpioDefine.asl and GpioLib.asl don't include in Intel default inf file. RC doesn¡¦t inlcude PchGpioDefine.asl and PchGpioLib.asl, it includes GpioDefine.asl and GpioLib.asl.
+[Files] SkylakeSiPkg\Pch\AcpiTables\Dsdt\PchAcpiTables.inf
+
+[Tag] AMI_OVERRIDE_PCH0001
+[Description] RC put PCIC, PCID method at Dsdt.asl and it will be missing with AMI code. So move the code from Dsdt.asl to here.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\Pch.asl
+
+[Tag] AMI_OVERRIDE_PCH0002
+[Description] Modified for UpServer platform. We also support GreenlowSVR and GreenlowWS on this RC Package.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\Pch.asl
+
+[Tag] AMI_OVERRIDE_PCH0003
+[Description] Device LPCB is generated in PCI_TREE.ASL by AMI utility.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\Pch.asl
+
+[Tag] AMI_OVERRIDE_PCH0004
+[Description] Modify PCI0 scope for PCH Power Management Controller.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\Pch.asl
+
+[Tag] AMI_OVERRIDE_PCH0005
+[Description] Modified for UpServer platform. We also support GreenlowSVR and GreenlowWS on this RC Package.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\Pch.asl
+
+[Tag] AMI_OVERRIDE_PCH0006
+[Description] PCIE Root Port are defined in PCI_TREE.asl by AMI utility.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\Pch.asl
+
+[Tag] AMI_OVERRIDE_PCH0007
+[Description] Override for TBT
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchPcie.asl
+
+[Tag] AMI_OVERRIDE_PCH0008
+[Description] Modified for PME Pending bit.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchPcie.asl
+
+[Tag] AMI_OVERRIDE_PCH0009 (Removed)
+[Description] Move "Include files" to PchRefCode.sdl to avoid build error. Don¡¦t know why Intel doesn¡¦t encouter Build error. If we include it, it has "Invalid Characater (0x), expecting ASL Keyword or name.
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\TraceHubDebug.asl
+
+[Tag] AMI_OVERRIDE_PCH0010
+[Description] To print the GPIO setting information when debug mode is ON.
+[Files] KabylakeSiliconPkg\Pch\Library\PeiDxeSmmGpioLib\GpioInit.c
+
+[Tag] AMI_OVERRIDE_PCH0011
+[Description] EIP208300:For including Token.h
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PeiPchInitLib.inf
+
+[Tag] AMI_OVERRIDE_PCH0012
+[Description] SB_OEM_PTSS_TABLE_LIST toke support for customer's required.
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchInit.c
+
+[Tag] AMI_OVERRIDE_PCH0013 (Removed)
+[Description] EIP151735
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchInit.c
+
+[Tag] AMI_OVERRIDE_PCH0014
+[Description] EIP213804:OEM_USB_PER_PORT_DISABLE_SUPPORT¡¨ function fail.
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchUsb.c
+
+[Tag] AMI_OVERRIDE_PCH0015  (Removed, RC 2.1.0 supported)
+[Description] EIP185914: Need Platform override support
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchUsb.c
+
+[Tag] AMI_OVERRIDE_PCH0016  (Removed)
+[Description] Restore I/O Trap register before reconfig PCIE power management.
+[Files] KabylakeSiliconPkg\Pch\PchInit\Dxe\PchInit.c
+
+[Tag] AMI_OVERRIDE_PCH0017
+[Description] Modified for multiple power button SMI support.
+[Files] KabylakeSiliconPkg\Pch\PchSmiDispatcher\Smm\PchSmmPowerButton.c
+
+[Tag] AMI_OVERRIDE_PCH0018  (Removed)
+[Description] EIP 206928 : Periodic Timer Issue on Skylake
+[Files] KabylakeSiliconPkg\Pch\PchSmiDispatcher\Smm\PchSmmPeriodicTimer.c
+
+[Tag] AMI_OVERRIDE_PCH0019 [Remove]
+[Description] Fixed assert issue. For AMI architecture, we can use Token to Reserve Memory/IO space. So once any other code to reserve again, it will get failed and Assert if debug mode is ON.
+[Files] KabylakeSiliconPkg\Pch\Reset\RuntimeDxe\PchReset.c
+
+[Tag] AMI_OVERRIDE_PCH0020 (Removed)
+[Description] Fixed assert issue.For AMI architecture, we can use Token to Reserve Memory/IO space. So once any other code to reserve again, it will get failed and Assert if debug mode is ON.
+[Files] KabylakeSiliconPkg\Pch\Spi\RuntimeDxe\PchSpi.c
+
+[Tag] AMI_OVERRIDE_PCH0021
+[Description] AMI_CRB_GPIO_OVERRIDE_SUPPORT_FLAG
+[Files] KabylakeSiliconPkg\Pch\Library\PeiDxeSmmGpioLib\GpioNativeLib.c
+
+[Tag] AMI_OVERRIDE_PCH0022 [Remove: Driver fix]
+[Description] Workaround for USB Legacy Support Capability Id (Offset 0x846C) is disappeared.
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchUsb.c
+
+[Tag] AMI_OVERRIDE_PCH0023
+[Description] reduce the Smi times, it's the same in SbSmmCorePlatformHookLib.c
+[Files] KabylakeSiliconPkg\Pch\PchSmiDispatcher\Smm\PchSmmCore.c
+
+[Tag] AMI_OVERRIDE_PCH0024
+[Description] Fix build error issue after update veb build tool to ver. 028.
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiI2cMasterLib\I2cMasterPei.c
+
+[Tag] AMI_OVERRIDE_PCH0025
+[Description] It is to SPI EISS (SPI PCI offset DCh[5])/ LPC/eSPI EISS (LPC/eSPI PCI offset DCh[5])
+[Files] KabylakeSiliconPkg\Pch\PchInit\Smm\PchBiosWriteProtect.c
+
+[Tag] AMI_OVERRIDE_PCH0026(Remove)
+[Description] Modified for multiple power button SMI support.
+[Files] KabylakeSiliconPkg\Pch\PchSmiDispatcher\Smm\PchSmmCore.c
+
+[Tag] AMI_OVERRIDE_PCH0027
+[Description] Workaround for afu efi and dos capsule update.
+[Files] SkylakeSiPkg\Pch\PchInit\Smm\PchXhciSxSmm.c
+
+[Tag] AMI_OVERRIDE_PCH0028 (Removed)
+[Description] EIP250929:OS warmboot cycle test will hang if OEM_USB_PER_PORT_DISABLE_SUPPORT is enabled and some SS USB ports are disabled.
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchUsb.c
+
+[Tag] AMI_OVERRIDE_PCH0029
+[Description] SB_OEM_PTSS_TABLE_LIST program data may lost once xHCI controller enter D3 then return D0 in OS.
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchUsb.c
+
+[Tag] AMI_OVERRIDE_PCH0030
+[Description] AR BIOS Implementation guide rev.0.8 - 2.1.2.5.1 ACPI requirements
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchPcie.asl
+
+[Tag] AMI_OVERRIDE_PCH0036
+[Description] Don't need to set SPI space in GCD in RC.
+[Files] KabylakeSiliconPkg\Pch\Spi\RuntimeDxe\PchSpi.c
+
+[Tag] AMI_OVERRIDE_PCH0037
+[Description] Override for support TopSwap FtRecovery.
+[Files] KabylakeSiliconPkg\Pch\PchInit\Dxe\PchInit.c
+
+[Tag] AMI_OVERRIDE_PCH0038  (Removed in RC 1.8.0)
+[Description] For supporting AMT WEB UI wake feature on CRB,it need to include "HIDWakeDSM.asl". 
+[Files] KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchHeci.asl
+
+[Tag] AMI_OVERRIDE_PCH0039
+[Description] Add Token to support special case for Smbus busy HW delay.
+[Files] KabylakeSiliconPkg\Pch\Library\BaseSmbusLib\BaseSmbusLib.c
+
+[Tag] AMI_OVERRIDE_PCH0040
+[Description] Support AMI_LEGACY_INTERRUPT_CFG set 0.
+[Files] KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchInterruptAssign.c
+
+[Tag] AMI_OVERRIDE_PCH0041
+[Description] A security advisory in regard to DCI.
+[Files] 
+KabylakeSiliconPkg\Pch\Include\Register\PchRegsDci.h
+KabylakeSiliconPkg\Pch\Library\Private\PeiPchInitLib\PchInitPreMem.c
+
+[Tag] AMI_OVERRIDE_PCH0043
+[Description] Fixed build errors with the latest ASL compiler
+[Files] 
+KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchHda.asl
+KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchHeci.asl
+KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchIsh.asl
+KabylakeSiliconPkg\Pch\AcpiTables\Dsdt\PchXdci.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\SwitchableGraphics\Pch\SgUlt.asl

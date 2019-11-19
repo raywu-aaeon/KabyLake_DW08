@@ -1,0 +1,33 @@
+### @file
+#
+# Copyright (C) 2017 - 2018, Intel Corporation. All rights reserved.<BR>
+# This software and associated documentation (if any) is furnished
+# under a license and may only be used or copied in accordance with
+# the terms of the license. Except as permitted by the license, no
+# part of this software or documentation may be reproduced, stored in
+# a retrieval system, or transmitted in any form or by any means
+# without the express written consent of Intel Corporation.
+# This file contains a 'Sample Driver' and is licensed as such under
+# the terms of your license agreement with Intel or your vendor. This
+# file may be modified by the user, subject to the additional terms of
+# the license agreement.
+#
+# @par Specification Reference:
+#
+# @par Glossary:
+###
+
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = AltoAcpi
+  FILE_GUID                      = 76AED82E-77DE-42CA-8C27-E9D71DF606C7
+  VERSION_STRING                 = 1.0
+  MODULE_TYPE                    = USER_DEFINED
+
+[Packages]
+  MdePkg/MdePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+
+[Sources]
+  Altopx.asl

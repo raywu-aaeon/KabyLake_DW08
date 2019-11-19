@@ -1,0 +1,8 @@
+<component>
+  name = "I2cControllerTemplate"
+  category = ModulePart
+  LocalRoot = "AmiModulePkg\I2cHid\I2CController\"
+  RefName = "I2cController"
+[INF]
+  "I2cController.inf"
+<endComponent>

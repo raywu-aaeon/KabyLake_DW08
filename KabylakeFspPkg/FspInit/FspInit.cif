@@ -1,0 +1,11 @@
+<component>
+	name = "FspInit"
+	category = ModulePart
+	LocalRoot = "KabylakeFspPkg\FspInit\"
+	RefName = "KabylakeFspPkg.FspInit"
+[INF]
+"Pei\FspInit.inf"
+"Pei\FspInitPreMem.inf"
+[files]
+"FspInit.sdl"	
+<endComponent>

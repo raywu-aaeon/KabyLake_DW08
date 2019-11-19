@@ -1,0 +1,49 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiTbtDxeSmmLib
+  FILE_GUID                      = 7E53D153-A03C-4919-8317-540D17AB1234
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AmiTbtDxeSmmLib|DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  AmiTbtDxeSmmLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+    
+[LibraryClasses]
+  IoLib
+  PcdLib
+  HobLib
+  DebugLib
+  AmiCspLib
+  AmiChipsetIoLib
+  UefiLib         #get tbt hob
+  PchPcieRpLib
+  TbtCommonLib    # Thunderbolt can't work on NB PCIe slot - EIP215475
+
+[Protocols]
+  gEfiPciIoProtocolGuid
+
+[Guids]
+  gTbtInfoHobGuid
+  gAmiTbtHrStatusGuid
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress

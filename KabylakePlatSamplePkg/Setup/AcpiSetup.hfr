@@ -1,0 +1,805 @@
+/** @file
+
+ @copyright
+  INTEL CONFIDENTIAL
+  Copyright 2014 - 2018 Intel Corporation.
+
+  The source code contained or described herein and all documents related to the
+  source code ("Material") are owned by Intel Corporation or its suppliers or
+  licensors. Title to the Material remains with Intel Corporation or its suppliers
+  and licensors. The Material may contain trade secrets and proprietary and
+  confidential information of Intel Corporation and its suppliers and licensors,
+  and is protected by worldwide copyright and trade secret laws and treaty
+  provisions. No part of the Material may be used, copied, reproduced, modified,
+  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+  without Intel's prior express written permission.
+
+  No license under any patent, copyright, trade secret or other intellectual
+  property right is granted to or conferred upon you by disclosure or delivery
+  of the Materials, either expressly, by implication, inducement, estoppel or
+  otherwise. Any license under such intellectual property rights must be
+  express and approved by Intel in writing.
+
+  Unless otherwise agreed by Intel in writing, you may not remove or alter
+  this notice or any other notice embedded in Materials by Intel or
+  Intel's suppliers or licensors in any way.
+
+  This file contains a 'Sample Driver' and is licensed as such under the terms
+  of your license agreement with Intel or your vendor. This file may be modified
+  by the user, subject to the additional terms of the license agreement.
+
+@par Specification
+**/
+
+// AMI_OVERRIDE_START - Independent RC ACPI Form.
+#ifdef ADVANCED_FORM_SET
+
+#ifdef FORM_SET_GOTO
+  goto RC_ACPI_FORM_ID, 
+    prompt = STRING_TOKEN(STR_RC_ACPI_FORM),
+    help = STRING_TOKEN(STR_ACPI_FORM_HELP);
+#endif
+
+#ifdef FORM_SET_FORM
+// AMI_OVERRIDE_END - Independent RC ACPI Form.
+form formid = AUTO_ID(RC_ACPI_FORM_ID),       // AMI_OVERRIDE_START - Independent RC ACPI Form.
+  title     = STRING_TOKEN(STR_RC_ACPI_FORM_TITLE);
+
+  SUBTITLE(STRING_TOKEN(STR_RC_ACPI_FORM_SUBTITLE))    // AMI_OVERRIDE_END - Independent RC ACPI Form.
+  SEPARATOR
+
+#if 0  // AMI_OVERRIDE_START - We using our ACPI module.
+  text
+    help  = STRING_TOKEN(STR_ACPI_VERSION_HELP),
+    text  = STRING_TOKEN(STR_ACPI_VERSION_STRING),
+    text  = STRING_TOKEN(STR_ACPI_VERSION_VALUE),
+    flags = 0,
+    key = 0;
+
+  grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+    checkbox varid = SETUP_DATA.AcpiAuto,
+      prompt       = STRING_TOKEN(STR_ACPI_AUTO_PROMPT),
+      help         = STRING_TOKEN(STR_ACPI_AUTO_HELP),
+      flags        = 0, //Flags behavior for checkbox is overloaded so that it equals a DEFAULT value.  CHECKBOX_DEFAULT = ON, 0 = off
+      key          = 0,
+    endcheckbox;
+  endif; // grayoutif
+
+  SEPARATOR
+  suppressif ideqval SETUP_DATA.AcpiAuto == 0x1;
+    grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER;
+
+      checkbox varid = SETUP_DATA.AcpiHibernate,
+        prompt       = STRING_TOKEN(STR_ACPI_S4_PROMPT),
+        help         = STRING_TOKEN(STR_ACPI_S4_HELP),
+        flags        = CHECKBOX_DEFAULT | CHECKBOX_DEFAULT_MFG | RESET_REQUIRED, //Flags behavior for checkbox is overloaded so that it equals a DEFAULT value.  CHECKBOX_DEFAULT = ON, 0 = off
+        key          = 0,
+      endcheckbox;
+#endif  // AMI_OVERRIDE_END - We using our ACPI module.
+
+      checkbox varid = SETUP_DATA.PtidSupport,
+        prompt       = STRING_TOKEN(STR_PTID_PROMPT),
+        help         = STRING_TOKEN(STR_PTID_HELP),
+        flags        = CHECKBOX_DEFAULT | CHECKBOX_DEFAULT_MFG | RESET_REQUIRED, //Flags behavior for checkbox is overloaded so that it equals a DEFAULT value.  CHECKBOX_DEFAULT = ON, 0 = off
+        key          = 0,
+      endcheckbox;
+#ifndef MINTREE_FLAG
+      oneof varid   = SETUP_DATA.PeciAccessMethod,
+        prompt      = STRING_TOKEN(STR_PECI_ACCESS_PROMPT),
+        help        = STRING_TOKEN(STR_PECI_ACCESS_HELP),
+        option text = STRING_TOKEN(STR_PECI_ACCESS_IO), value = 0, flags = RESET_REQUIRED|DEFAULT | MANUFACTURING;
+        option text = STRING_TOKEN(STR_PECI_ACCESS_ACPI), value = 1, flags = RESET_REQUIRED;
+      endoneof;
+#endif
+
+#if 0  // AMI_OVERRIDE_START - We using our ACPI module.
+      oneof varid   = SETUP_DATA.AcpiSleepState,
+        prompt      = STRING_TOKEN(STR_ACPI_S3_PROMPT),
+        help        = STRING_TOKEN(STR_ACPI_S3_HELP),
+#ifdef MINTREE_FLAG
+        option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
+#else
+        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Rvp3Ppv BoardIdSkylakeULpddr3Rvp5Ppv BoardIdSkylakeURvp7Ppv
+                                                                    ? 0x1:0x0), defaultstore = MyStandardDefault,
+        option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = RESET_REQUIRED;
+#endif
+        option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = RESET_REQUIRED;
+      endoneof;
+  SUPPRESS_GRAYOUT_ENDIF
+#endif  // AMI_OVERRIDE_END - We using our ACPI module.
+
+#ifndef MINTREE_FLAG
+// AMI_OVERRIDE_START - For TBT porting.
+#if defined(DEFAULT_TBT_ENABLE) && (DEFAULT_TBT_ENABLE == 1)
+  suppressif ideqval PCH_SETUP.PcieRootPortEn[OFFSET_0] == 0x0;
+    oneof varid   = SETUP_DATA.PciExpNative,
+      prompt      = STRING_TOKEN(STR_ACPI_PCIE_NATIVE_PROMPT),
+      help        = STRING_TOKEN(STR_ACPI_PCIE_NATIVE_HELP),
+      default     = DEFAULT_TBT_NATIVE_OS_HOT_PLUG,
+      option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+  endif; // suppressif
+#else
+  suppressif ideqval PCH_SETUP.PcieRootPortEn[OFFSET_0] == 0x0;
+    oneof varid   = SETUP_DATA.PciExpNative,
+      prompt      = STRING_TOKEN(STR_ACPI_PCIE_NATIVE_PROMPT),
+      help        = STRING_TOKEN(STR_ACPI_PCIE_NATIVE_HELP),
+      option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+    endoneof;
+  endif; // suppressif
+
+#endif // defined(DEFAULT_TBT_ENABLE) && (DEFAULT_TBT_ENABLE == 1)
+// AMI_OVERRIDE_END - For TBT porting.
+#endif // MINTREE_FLAG
+
+  suppressif ideqval SETUP_DATA.PciExpNative == 0x0;
+    oneof varid   = SETUP_DATA.NativeAspmEnable,
+      prompt      = STRING_TOKEN(STR_NATIVE_ASPM_PROMPT),
+      help        = STRING_TOKEN(STR_NATIVE_ASPM_HELP),
+      option text = STRING_TOKEN(STR_AUTO), value = 2, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
+      option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = RESET_REQUIRED;
+    endoneof;
+  endif; // suppressif
+
+
+#ifndef MINTREE_FLAG
+
+  SEPARATOR
+
+#ifdef RTCWakeup_SUPPORT_FLAG
+  oneof varid   = SETUP_DATA.WakeOnRTCS5,
+    prompt      = STRING_TOKEN(STR_WAKE_ON_RTC_PROMPT),
+    help        = STRING_TOKEN(STR_WAKE_ON_RTC_HELP),
+    option text = STRING_TOKEN(STR_DISABLED), value=0, flags= DEFAULT | MANUFACTURING | RESET_REQUIRED;
+    option text = STRING_TOKEN(STR_ENABLED), value=1, flags= RESET_REQUIRED;
+  endoneof;
+#endif //RTCWakeup_SUPPORT_FLAG
+
+#ifdef ACPI_DEBUG_FLAG
+  oneof varid   = SETUP_DATA.AcpiDebug,
+    prompt      = STRING_TOKEN(STR_ACPI_DEBUG_PROMPT),
+    help        = STRING_TOKEN(STR_ACPI_DEBUG_HELP),
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+  endoneof;
+
+  suppressif ideqval SETUP_DATA.AcpiDebug == 0;
+    text
+      help  = STRING_TOKEN(STR_ACPI_DEBUG_ADDRESS_HELP),
+      text  = STRING_TOKEN(STR_ACPI_DEBUG_ADDRESS_NAME),
+      text  = STRING_TOKEN(STR_ACPI_DEBUG_ADDRESS_VALUE),
+      flags = 0,
+      key   = 0;
+
+    oneof varid   = SETUP_DATA.SerialPortAcpiDebug,
+      prompt      = STRING_TOKEN(STR_SERIAL_ACPI_DEBUG_PROMPT),
+      help        = STRING_TOKEN(STR_SERIAL_ACPI_DEBUG_HELP),
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+
+  endif; // suppressif
+#endif //ACPI_DEBUG_FLAG
+
+#ifdef WHEA_SUPPORT_FLAG
+  //
+  // Whea
+  //
+  oneof varid   = WHEA_SETUP.WheaSupport,
+    prompt      = STRING_TOKEN(STR_WHEA_SUPPORT_PROMPT),
+    help        = STRING_TOKEN(STR_WHEA_SUPPORT_HELP),
+    option text = STRING_TOKEN(STR_WHEA_DISABLED), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+    option text = STRING_TOKEN(STR_WHEA_ENABLED), value = 1, flags = RESET_REQUIRED;
+  endoneof;
+
+  //
+  // Log Errors
+  //
+  oneof varid   = WHEA_SETUP.LogErrors,
+    prompt      = STRING_TOKEN(STR_LOG_ERRORS_PROMPT),
+    help        = STRING_TOKEN(STR_LOG_ERRORS_HELP),
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+  endoneof;
+
+  subtitle text = STRING_TOKEN(STR_NULL_STRING);
+
+  suppressif ideqval WHEA_SETUP.LogErrors == 0x00;
+    oneof varid   = WHEA_SETUP.ErrorGeneration,
+      prompt      = STRING_TOKEN(STR_ERROR_GEN_LOG_PROMPT),
+      help        = STRING_TOKEN(STR_ERROR_GEN_LOG_HELP),
+      option text = STRING_TOKEN(STR_NOINBAND), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_SMIPMI), value = 1, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+    endoneof;
+
+    oneof varid   = WHEA_SETUP.PchErrors,
+      prompt      = STRING_TOKEN(STR_PCH_ERROR_PROMPT),
+      help        = STRING_TOKEN(STR_PCH_ERROR_HELP),
+      option text = STRING_TOKEN(STR_NO), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_YES), value = 1, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+    endoneof;
+
+    oneof varid   = WHEA_SETUP.PcieErrors,
+      prompt      = STRING_TOKEN(STR_PCIE_LOG_PROMPT),
+      help        = STRING_TOKEN(STR_PCIE_LOG_HELP),
+      option text = STRING_TOKEN(STR_NO), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_YES), value = 1, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+    endoneof;
+
+    oneof varid   = WHEA_SETUP.PlatformErrors,
+      prompt      = STRING_TOKEN(STR_PLATFORM_LOG_PROMPT),
+      help        = STRING_TOKEN(STR_PLATFORM_LOG_HELP),
+      option text = STRING_TOKEN(STR_NO), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+      option text = STRING_TOKEN(STR_YES), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+
+    //
+    // Enable SERR# propagation.
+    //
+    oneof varid   = WHEA_SETUP.PropagateSerr,
+      prompt      = STRING_TOKEN(STR_ENABLE_SERR_PROP_PROMPT),
+      help        = STRING_TOKEN(STR_ENABLE_SERR_PROP_HELP),
+      option text = STRING_TOKEN(STR_NO), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_YES), value = 1, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+    endoneof;
+  endif; // suppressif
+
+  //
+  // Enable SERR# propagation.
+  //
+  suppressif ideqval WHEA_SETUP.LogErrors == 0x00 OR
+             ideqval WHEA_SETUP.PropagateSerr == 0x00;
+    oneof varid   = WHEA_SETUP.PropagatePerr,
+      prompt      = STRING_TOKEN(STR_ENABLE_PERR_PROP_PROMPT),
+      help        = STRING_TOKEN(STR_ENABLE_PERR_PROP_HELP),
+      option text = STRING_TOKEN(STR_NO), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_YES), value = 1, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+    endoneof;
+  endif; // suppressif
+
+  //
+  // Fatal Errors
+  //
+  suppressif ideqval WHEA_SETUP.LogErrors == 0x00 OR
+             ideqval WHEA_SETUP.PcieErrors == 0x00;
+    oneof varid   = WHEA_SETUP.FatErr,
+      prompt      = STRING_TOKEN(STR_FATAL_ERRORS_PROMPT),
+      help        = STRING_TOKEN(STR_FATAL_ERRORS_HELP),
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+
+    //
+    // Uncorrectable/Recoverable Errors
+    //
+    oneof varid   = WHEA_SETUP.UnCorRecErr,
+      prompt      = STRING_TOKEN(STR_UR_ERRORS_PROMPT),
+      help        = STRING_TOKEN(STR_UR_ERRORS_HELP),
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+
+    //
+    // Correctable Errors
+    //
+    oneof varid   = WHEA_SETUP.CorErr,
+      prompt      = STRING_TOKEN(STR_CORRECTABLE_ERRORS_PROMPT),
+      help        = STRING_TOKEN(STR_CORRECTABLE_ERRORS_HELP),
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+  endif; // suppressif
+#endif  //#ifdef WHEA_SUPPORT_FLAG
+#endif // MINTREE_FLAG
+
+#if 0  // AMI_OVERRIDE_START - We don't use this feature flag.
+    oneof varid   = SETUP_DATA.LowPowerS0Idle,
+      questionid  = KEY_LOW_POWER_S0_IDLE,
+      prompt      = STRING_TOKEN(STR_LOW_POWER_S0_IDLE),
+      help        = STRING_TOKEN(STR_LOW_POWER_S0_IDLE_HELP),
+      flags       = INTERACTIVE,
+#ifdef MINTREE_FLAG
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED | INTERACTIVE;
+#else
+      default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds BoardIdKabylakeGrizzlyMtn BoardIdKabylakeCoyoteMtn
+                         ? 0x0:0x1), defaultstore = MyStandardDefault,
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED | INTERACTIVE;
+#endif
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED | INTERACTIVE;
+    endoneof;
+#else
+    oneof varid   = SETUP_DATA.LowPowerS0Idle,
+      prompt      = STRING_TOKEN(STR_LOW_POWER_S0_IDLE),
+      help        = STRING_TOKEN(STR_LOW_POWER_S0_IDLE_HELP),
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;      
+#endif  // AMI_OVERRIDE_END - We don't use this feature flag.
+
+    suppressif NOT ideqval SETUP_DATA.LowPowerS0Idle == 1;
+      suppressif
+                 //
+                 // AdvancedFeaturesBegin
+                 //
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Lpddr3Crb AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Ddr4Rvp2 AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Rvp3 AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Rvp3Ppv AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeULpddr3Rvp5 AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeULpddr3Rvp5Ppv AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeLpdimmDoe AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeURvp7 AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdKabylakeRDdr4 AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdKabylakeRLpddr3 AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdKabylakeKcDdr3 AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeURvp7Ppv AND
+                 NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeURvp15 AND
+                 //
+                 // AdvancedFeaturesEnd
+                 //
+                 NOT ideqval SETUP_DATA.CSNotifyEC == 1;
+        oneof varid   = SETUP_DATA.TenSecondPowerButtonEnable,
+          prompt      = STRING_TOKEN(STR_10SEC_POWER_BUTTON_ENABLE),
+          help        = STRING_TOKEN(STR_10SEC_POWER_BUTTON_ENABLE_HELP),
+// AMI_OVERRIDE_START - We don't use this feature flag.        
+//#ifdef MINTREE_FLAG
+          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+//#else
+//          default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds BoardIdSkylakePantherMtn BoardIdKabylakeGrizzlyMtn BoardIdSkylakeStarbrook BoardIdKabylakeCoyoteMtn
+//                                                                 ? 0x0:0x1), defaultstore = MyStandardDefault,
+//          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
+//#endif
+// AMI_OVERRIDE_END - We don't use this feature flag.	  
+          option text = STRING_TOKEN(STR_ENABLED_STRING), value = 1, flags = RESET_REQUIRED;
+        endoneof;
+      endif; // suppressif
+
+      oneof varid   = SETUP_DATA.CSNotifyEC,
+        prompt      = STRING_TOKEN(STR_NOTIFY_EC),
+        help        = STRING_TOKEN(STR_NOTIFY_EC_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;
+#ifndef MINTREE_FLAG
+      suppressif NOT ideqval SETUP_DATA.CSNotifyEC == 1;
+        oneof varid   = SETUP_DATA.CSDebugLightEC,
+          prompt      = STRING_TOKEN(STR_DEBUG_LT_EC),
+          help        = STRING_TOKEN(STR_DEBUG_LT_EC_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+        endoneof;
+
+        oneof varid   = SETUP_DATA.EcLowPowerMode,
+          prompt      = STRING_TOKEN(STR_EC_LOWPOWER_MODE),
+          help        = STRING_TOKEN(STR_EC_LOWPOWER_MODE_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+        endoneof;
+      endif; // suppressif
+      suppressif NOT ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds;
+        oneof varid   = SETUP_DATA.EcDebugLed,
+          prompt      = STRING_TOKEN(STR_EC_DEBUG_LED),
+          help        = STRING_TOKEN(STR_EC_DEBUG_LED_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 1, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+        oneof varid   = SETUP_DATA.ECBaseCsPwrPolicy,
+          prompt      = STRING_TOKEN(STR_EC_DEBUG_BASE_CS_PWR_POLICY),
+          help        = STRING_TOKEN(STR_EC_DEBUG_BASE_CS_PWR_POLICY_HELP),
+          option text = STRING_TOKEN(STR_BATTERY_SAVER), value = 1, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_FULLY_FUNCTIONAL), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif; // suppressif
+
+      oneof varid   = SETUP_DATA.SensorStandby,
+        prompt      = STRING_TOKEN(STR_SENSOR_STANDBY),
+        help        = STRING_TOKEN(STR_SENSOR_STANDBY_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+      endoneof;
+
+      oneof varid   = SETUP_DATA.PL1LimitCS,
+        prompt      = STRING_TOKEN(STR_PL1_LIMIT_CS),
+        help        = STRING_TOKEN(STR_PL1_LIMIT_CS_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+      endoneof;
+
+      suppressif NOT ideqval SETUP_DATA.PL1LimitCS == 1;
+        numeric varid = SETUP_DATA.PL1LimitCSValue,
+          prompt      = STRING_TOKEN(STR_PL1_LIMIT_CS_VALUE),
+          help        = STRING_TOKEN(STR_PL1_LIMIT_CS_VALUE_HELP),
+          minimum     = 3000,
+          maximum     = 20000,
+          step        = 125,
+          default     = 4500,
+        endnumeric;
+      endif; // suppressif
+#endif // MINTREE_FLAG
+
+       goto PEP_FORM_ID,
+          prompt = STRING_TOKEN(STR_PEP_CONFIGURATION),
+          help = STRING_TOKEN(STR_PEP_CONFIGURATION_HELP);
+
+
+    endif; // suppressif NOT ideqval SETUP_DATA.LowPowerS0Idle == 1
+
+#ifndef MINTREE_FLAG
+    oneof varid   = SETUP_DATA.LpitRs2Wa,
+      prompt      = STRING_TOKEN(STR_LPIT_WINDOWS_RS2_WA_PROMPT),
+      help        = STRING_TOKEN(STR_LPIT_WINDOWS_RS2_WA_HELP),
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+    endoneof; 
+
+    suppressif NOT ideqval SETUP_DATA.LpitRs2Wa == 1;
+      oneof varid   = SETUP_DATA.LpitResidencyCounter,
+        prompt      = STRING_TOKEN(STR_LPIT_RESIDENCY_COUNTER_PROMPT),
+        help        = STRING_TOKEN(STR_LPIT_RESIDENCY_COUNTER_HELP),
+        option text = STRING_TOKEN(STR_SLP_S0_RESIDENCY_COUNTER), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_C10_RESIDENCY_COUNTER), value = 1, flags = RESET_REQUIRED;
+      endoneof;
+    endif; // suppressif NOT ideqval SETUP_DATA.LpitRs2Wa == 1
+
+  SEPARATOR
+
+  suppressif (ideqval SETUP_DATA.Rtd3Support == 0x0 OR
+              ((NOT ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorDesktop) AND
+               (NOT ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorMobile) AND
+               (NOT ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorUpServer)));
+    oneof varid   = SETUP_DATA.IrmtConfiguration,
+      prompt      = STRING_TOKEN(STR_IRMT),
+      help        = STRING_TOKEN(STR_IRMT_HELP),
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+
+// AMI_OVERRIDE_START - For our IRMT porting.
+    suppressif ideqval SETUP_DATA.IrmtConfiguration == 0x0;
+      oneof varid  = SETUP_DATA.IrmtHwNotification,
+        prompt = STRING_TOKEN(STR_IRMT_HW_PROMPT),
+        help = STRING_TOKEN(STR_IRMT_HW_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;  
+
+      oneof varid  = SETUP_DATA.IrmtState,
+        prompt = STRING_TOKEN(STR_IRMT_STATE_PROMPT),
+        help = STRING_TOKEN(STR_IRMT_STATE_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;
+    endif; // suppressif
+// AMI_OVERRIDE_END - For our IRMT porting.
+  endif; // suppressif
+
+  SEPARATOR
+
+// AMI_OVERRIDE_START - We don't use this feature.
+#if 0 
+  oneof varid   = SETUP_DATA.LoadSSDTFromFile,
+    prompt      = STRING_TOKEN(STR_ACPI_SSDT_FROM_FILE),
+    help        = STRING_TOKEN(STR_ACPI_SSDT_FROM_FILE),
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | RESET_REQUIRED;
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags =  RESET_REQUIRED;
+  endoneof;
+
+  SEPARATOR
+#endif
+// AMI_OVERRIDE_END - We don't use this feature.
+
+  oneof varid     = SETUP_DATA.PciDelayOptimizationEcr,
+    prompt      = STRING_TOKEN(STR_PCI_DELAY_OPTIMIZATION_ECR),
+    help        = STRING_TOKEN(STR_PCI_DELAY_OPTIMIZATION_ECR_HELP),
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+  endoneof;
+#endif // MINTREE_FLAG
+// AMI_OVERRIDE_START - EIP236974 : ZPODD ASL code implement
+#if defined (ZPODD_SUPPORT) && ZPODD_SUPPORT == 1 
+  oneof varid   = SETUP_DATA.ZpOddSupport,
+    prompt      = STRING_TOKEN(STR_ACPI_ZPODD_PROMPT),
+    help        = STRING_TOKEN(STR_ACPI_ZPODD_HELP),
+    option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+    option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+  endoneof;
+#endif // ZPODD_SUPPORT
+// AMI_OVERRIDE_END - EIP236974 : ZPODD ASL code implement
+
+// AMI_OVERRIDE_START - EIP325996 : Move "Type C Support" item from "Platform Settings" to "Intel RC ACPI Settings".
+  SEPARATOR 
+ // USB Type-C Support
+ oneof varid = SETUP_DATA.UsbTypeCAicSupport,
+       prompt   = STRING_TOKEN(STR_USB_TYPE_C_SUPPORT),
+       help     = STRING_TOKEN(STR_USB_TYPE_C_SUPPORT_HELP),
+       default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeDtRvp8Crb
+                           ? 0x1:0x0), defaultstore = MyStandardDefault,
+       option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+       option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+ endoneof;
+ SEPARATOR   
+// AMI_OVERRIDE_END - EIP325996 : Move "Type C Support" item from "Platform Settings" to "Intel RC ACPI Settings".
+
+endform;  // ACPI_FORM_ID
+
+//
+// Form to configure PEP constraints
+//
+form formid = AUTO_ID(PEP_FORM_ID),
+  title = STRING_TOKEN(STR_PEP_CONFIGURATION_TITLE);
+
+  SUBTITLE(STRING_TOKEN(STR_PEP_CONFIGURATION_SUBTITLE))
+  SEPARATOR
+#ifndef MINTREE_FLAG
+  oneof varid       = SETUP_DATA.PepCpu,
+        prompt      = STRING_TOKEN(STR_PEP_CPU),
+        help        = STRING_TOKEN(STR_PEP_CPU_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;
+
+      oneof varid   = SETUP_DATA.PepGfx,
+        prompt      = STRING_TOKEN(STR_PEP_GFX),
+        help        = STRING_TOKEN(STR_PEP_GFX_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;
+
+      oneof varid   = SETUP_DATA.PepIsp,
+        prompt      = STRING_TOKEN(STR_PEP_ISP),
+        help        = STRING_TOKEN(STR_PEP_ISP_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = RESET_REQUIRED;
+      endoneof;
+
+      oneof varid   = SETUP_DATA.PepStorageControllers,
+        prompt      = STRING_TOKEN(STR_PEP_SATA),
+        help        = STRING_TOKEN(STR_PEP_SATA_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;
+
+      oneof varid = SETUP_DATA.PepSataRaidVol0,
+            prompt = STRING_TOKEN(STR_PEP_RAID_VOL0_PROMPT),
+            help   = STRING_TOKEN(STR_PEP_RAID_VOL0_HELP),
+            option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_ENABLED), value = 1, flags =  RESET_REQUIRED;
+      endoneof;
+
+     oneof varid = SETUP_DATA.PepSataPort0,
+           prompt = STRING_TOKEN(STR_PEP_SATA_PORT0_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_PORT0_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataPort1,
+           prompt = STRING_TOKEN(STR_PEP_SATA_PORT1_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_PORT1_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataPort2,
+           prompt = STRING_TOKEN(STR_PEP_SATA_PORT2_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_PORT2_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataPort3,
+           prompt = STRING_TOKEN(STR_PEP_SATA_PORT3_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_PORT3_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataPort4,
+           prompt = STRING_TOKEN(STR_PEP_SATA_PORT4_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_PORT4_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataPort5,
+           prompt = STRING_TOKEN(STR_PEP_SATA_PORT5_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_PORT5_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataNvm1,
+           prompt = STRING_TOKEN(STR_PEP_SATA_NVM1_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_NVM1_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataNvm2,
+           prompt = STRING_TOKEN(STR_PEP_SATA_NVM2_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_NVM2_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+     oneof varid = SETUP_DATA.PepSataNvm3,
+           prompt = STRING_TOKEN(STR_PEP_SATA_NVM3_PROMPT),
+           help   = STRING_TOKEN(STR_PEP_SATA_NVM3_HELP),
+           option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+           option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+     endoneof;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[8]  == 0 AND
+                ideqval PCH_SETUP.PchSerialIoDevice[9]  == 0 AND
+                ideqval PCH_SETUP.PchSerialIoDevice[10] == 0;
+        oneof varid   = SETUP_DATA.PepUart,
+          prompt      = STRING_TOKEN(STR_PEP_UART),
+          help        = STRING_TOKEN(STR_PEP_UART_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[0] == 0;
+        oneof varid   = SETUP_DATA.PepI2c0,
+          prompt      = STRING_TOKEN(STR_PEP_I2C0),
+          help        = STRING_TOKEN(STR_PEP_I2C_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[1] == 0;
+        oneof varid   = SETUP_DATA.PepI2c1,
+          prompt      = STRING_TOKEN(STR_PEP_I2C1),
+          help        = STRING_TOKEN(STR_PEP_I2C_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[2] == 0;
+        oneof varid   = SETUP_DATA.PepI2c2,
+          prompt      = STRING_TOKEN(STR_PEP_I2C2),
+          help        = STRING_TOKEN(STR_PEP_I2C_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[3] == 0;
+        oneof varid   = SETUP_DATA.PepI2c3,
+          prompt      = STRING_TOKEN(STR_PEP_I2C3),
+          help        = STRING_TOKEN(STR_PEP_I2C_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[4] == 0;
+        oneof varid   = SETUP_DATA.PepI2c4,
+          prompt      = STRING_TOKEN(STR_PEP_I2C4),
+          help        = STRING_TOKEN(STR_PEP_I2C_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[5] == 0;
+        oneof varid   = SETUP_DATA.PepI2c5,
+          prompt      = STRING_TOKEN(STR_PEP_I2C5),
+          help        = STRING_TOKEN(STR_PEP_I2C_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSerialIoDevice[6] == 0 AND
+                ideqval PCH_SETUP.PchSerialIoDevice[7] == 0;
+        oneof varid   = SETUP_DATA.PepSpi,
+          prompt      = STRING_TOKEN(STR_PEP_SPI),
+          help        = STRING_TOKEN(STR_PEP_SPI_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      oneof varid   = SETUP_DATA.PepXhci,
+        prompt      = STRING_TOKEN(STR_PEP_XHCI),
+        help        = STRING_TOKEN(STR_PEP_XHCI_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;
+
+      grayoutif ideqval PCH_SETUP.PchHdAudio == 0;
+        oneof varid   = SETUP_DATA.PepAudio,
+          prompt      = STRING_TOKEN(STR_PEP_AUDIO),
+          help        = STRING_TOKEN(STR_PEP_AUDIO_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchScsEmmcEnabled == 0;
+        oneof varid   = SETUP_DATA.PepEmmc,
+          prompt      = STRING_TOKEN(STR_PEP_EMMC),
+          help        = STRING_TOKEN(STR_PEP_EMMC_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchScsSdCardEnabled == 0;
+        oneof varid   = SETUP_DATA.PepSdxc,
+          prompt      = STRING_TOKEN(STR_PEP_SDXC),
+          help        = STRING_TOKEN(STR_PEP_SDXC_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+
+      oneof varid   = SETUP_DATA.PepCsme,
+        prompt      = STRING_TOKEN(STR_PEP_CSME),
+        help        = STRING_TOKEN(STR_PEP_CSME_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = RESET_REQUIRED;
+      endoneof;
+
+      suppressif ideqval SETUP_VOLATILE_DATA.GbeAvailable == 0;
+        suppressif ideqval PCH_SETUP.PchLan == 0;
+          oneof varid   = SETUP_DATA.PepGbe,
+            prompt      = STRING_TOKEN(STR_PEP_GBE),
+            help        = STRING_TOKEN(STR_PEP_GBE_HELP),
+            option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = RESET_REQUIRED;
+          endoneof;
+        endif;
+      endif;
+
+      suppressif ideqval SETUP_DATA.TbtSupport == 0;
+        suppressif ideqval SETUP_DATA.Rtd3Tbt == 0;
+          oneof varid   = SETUP_DATA.PepTbt,
+            prompt      = STRING_TOKEN(STR_PEP_TBT),
+            help        = STRING_TOKEN(STR_PEP_TBT_HELP),
+            option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = RESET_REQUIRED;
+          endoneof;
+        endif;
+      endif;
+
+      grayoutif ideqval PCH_SETUP.PchSkyCamCio2Enable == 0;
+        oneof varid   = SETUP_DATA.PepCio2,
+          prompt      = STRING_TOKEN(STR_PEP_CIO2),
+          help        = STRING_TOKEN(STR_PEP_CIO2_HELP),
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = RESET_REQUIRED;
+        endoneof;
+      endif;
+
+#endif // MINTREE_FLAG
+
+      suppressif NOT ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorMobile;
+        oneof varid   = SETUP_DATA.PepWiGigF1,
+          prompt      = STRING_TOKEN(STR_PEP_WIGIG_F1),
+          help        = STRING_TOKEN(STR_PEP_WIGIG_F1_HELP),
+// AMI_OVERRIDE_START - We don't use this feature flag.
+//#ifdef MINTREE_FLAG
+//          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+//#else
+//          default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Rvp3Ppv ? 0x1:0x0), defaultstore = MyStandardDefault,
+//#endif
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+// AMI_OVERRIDE_END - We don't use this feature flag.
+        endoneof;
+      endif;
+
+endform; // PEP_CONFIG_FORM_ID
+
+// AMI_OVERRIDE_START - For our Setup menu design.
+#endif // end FORM_SET_FORM
+#endif // end ADVANCED_FORM_SET
+// AMI_OVERRIDE_END - For our Setup menu design.

@@ -1,0 +1,11 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "IntelFsp2WrapperPkg\Include\Library\"
+	RefName = "IntelFsp2WrapperPkg.Include.Library"
+[files]
+"FspWrapperApiLib.h"	
+"FspWrapperApiTestLib.h"	
+"FspWrapperHobProcessLib.h"	
+"FspWrapperPlatformLib.h"	
+<endComponent>

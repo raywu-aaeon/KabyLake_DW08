@@ -1,0 +1,31 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiGetTseg
+  FILE_GUID                      = 94B8A8FC-C6AD-4f49-A5DE-A57DD9890051
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = AmiGetTsegEntryPoint
+
+[Sources]
+  AmiGetTseg.c
+
+[Packages]
+  MdePkg/MdePkg.dec                             # base.h
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec   # efi.h
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  DebugLib
+  AmiDxeLib
+  MemoryAllocationLib
+  IoLib
+
+[Protocols]
+  gEfiSmmAccess2ProtocolGuid
+  
+[Guids]
+
+[Depex]
+

@@ -1,0 +1,128 @@
+### @file
+# Component description file for AmtWrapper Driver.
+#
+# @copyright
+#  INTEL CONFIDENTIAL
+#  Copyright 2010 - 2016 Intel Corporation.
+#
+#  The source code contained or described herein and all documents related to the
+#  source code ("Material") are owned by Intel Corporation or its suppliers or
+#  licensors. Title to the Material remains with Intel Corporation or its suppliers
+#  and licensors. The Material may contain trade secrets and proprietary and
+#  confidential information of Intel Corporation and its suppliers and licensors,
+#  and is protected by worldwide copyright and trade secret laws and treaty
+#  provisions. No part of the Material may be used, copied, reproduced, modified,
+#  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+#  without Intel's prior express written permission.
+#
+#  No license under any patent, copyright, trade secret or other intellectual
+#  property right is granted to or conferred upon you by disclosure or delivery
+#  of the Materials, either expressly, by implication, inducement, estoppel or
+#  otherwise. Any license under such intellectual property rights must be
+#  express and approved by Intel in writing.
+#
+#  Unless otherwise agreed by Intel in writing, you may not remove or alter
+#  this notice or any other notice embedded in Materials by Intel or
+#  Intel's suppliers or licensors in any way.
+#
+#  This file contains a 'Sample Driver' and is licensed as such under the terms
+#  of your license agreement with Intel or your vendor. This file may be modified
+#  by the user, subject to the additional terms of the license agreement.
+#
+# @par Specification Reference:
+#
+# @par Glossary:
+###
+
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = AmtWrapperDxe
+  FILE_GUID                      = D77C900D-A1C7-41C5-B989-0C3D37FCA432
+  VERSION_STRING                 = 1.0
+  MODULE_TYPE                    = DXE_DRIVER
+  ENTRY_POINT                    = AmtWrapperDxeEntryPoint
+#
+# The following information is for reference only and not required by the build tools.
+#
+# VALID_ARCHITECTURES = IA32 X64 IPF EBC
+#
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  DxeAmtLib
+  PrintLib
+  DevicePathLib
+  DxeServicesTableLib
+  MemoryAllocationLib
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  UefiBootManagerLib
+  PlatformBootManagerLib
+  PchInfoLib
+  ConfigBlockLib
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec # gSetupEnterGuid
+  ClientSiliconPkg/ClientSiliconPkg.dec
+#AMI_OVERRIDE_START - AMI IDER boot feature override 
+  IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
+#AMI_OVERRIDE_END - AMI IDER boot feature override 
+#AMI_OVERRIDE_START - For AMT security Boot, Set a empty File Authentication to skip Secure check.
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+#AMI_OVERRIDE_END - For AMT security Boot, Set a empty File Authentication to skip Secure check.
+
+[Pcd]
+  gPlatformModuleTokenSpaceGuid.PcdShellFile  ## CONSUMES
+
+[Sources]
+  AmtWrapperDxe.c
+  AmtWrapperDxe.h
+  AsfSupport.c
+  AsfSupport.h
+
+[Protocols]
+  gAlertStandardFormatProtocolGuid              ## CONSUMES
+  gEfiBlockIoProtocolGuid                       ## CONSUMES
+  gEfiDiskInfoProtocolGuid                      ## CONSUMES
+  gEfiDiskIoProtocolGuid                        ## CONSUMES
+  gEfiFirmwareVolume2ProtocolGuid               ## CONSUMES
+  gHeciProtocolGuid                             ## CONSUMES
+  gEfiLegacyBiosProtocolGuid                    ## CONSUMES
+  gEfiLoadFileProtocolGuid                      ## CONSUMES
+  gEfiSimpleFileSystemProtocolGuid              ## CONSUMES
+  gEfiSimpleNetworkProtocolGuid                 ## CONSUMES
+  gEfiPciIoProtocolGuid                         ## CONSUMES
+  gEfiPciRootBridgeIoProtocolGuid               ## CONSUMES
+  gEfiAmtWrapperProtocolGuid                    ## PRODUCES
+#AMI_OVERRIDE_START - Install dummy Diskinfo for USB device to pass AMT_013 test.  
+  gAmtReadyToBootProtocolGuid 
+#AMI_OVERRIDE_END - Install dummy Diskinfo for USB device to pass AMT_013 test.  
+#AMI_OVERRIDE_START - For AMT security Boot, Set a empty File Authentication to skip Secure check.
+  gEfiSecurity2ArchProtocolGuid 
+#AMI_OVERRIDE_END - For AMT security Boot, Set a empty File Authentication to skip Secure check.
+
+[Guids]
+  gEfiGlobalVariableGuid                        ## CONSUMES
+  gEfiDxeServicesTableGuid                      ## CONSUMES
+  gMeBiosPayloadHobGuid                         ## CONSUMES
+  gSetupEnterGuid                               ## CONSUMES
+  gAmtDxeConfigGuid                             ## CONSUMES
+#AMI_OVERRIDE_START - Install dummy Diskinfo for USB device to pass AMT_013 test.  
+  gEfiDiskInfoUsbInterfaceGuid
+#AMI_OVERRIDE_END - Install dummy Diskinfo for USB device to pass AMT_013 test.  
+#AMI_OVERRIDE_START - AMI IDER boot feature override
+  gEfiLegacyDevOrderVariableGuid
+#AMI_OVERRIDE_END - AMI IDER boot feature override  
+#AMI_OVERRIDE_START - Add this GUID to avoid build error.
+  gEfiSecureBootEnableDisableGuid
+#AMI_OVERRIDE_END - Add this GUID to avoid build error.  
+
+[Depex]
+  gActiveManagementProtocolGuid       AND
+  gAlertStandardFormatProtocolGuid    AND
+  gEfiPciRootBridgeIoProtocolGuid

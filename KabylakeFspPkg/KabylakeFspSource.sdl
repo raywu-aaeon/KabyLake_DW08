@@ -1,0 +1,2234 @@
+TOKEN
+    Name  = "FSP_SOURCE_BUILD_ENABLE"
+    Value  = "0"
+    Help  = "Main switch to build FSP source."
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes    
+End
+
+PATH
+    Name  = "FSP_SOURCE_PKG_DIR"
+End
+
+MODULE
+    Help  = "Includes FSP makefile to Project"
+    File  = "BuildFspBin.mak"
+End
+
+TOKEN
+    Name  = "FSP_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable common code support for FSP"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Lock = Yes  
+End
+
+ELINK
+    Name  = "-D FSP_FLAG=1"
+    Parent  = "*_*_*_CC_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "-D FSP_FLAG=1"
+    Parent  = "*_*_*_ASM_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+TOKEN
+    Name = "FSP_DSC"
+    Value = "KabylakeFspPkg.dsc"
+    Help  = "Main switch to build FSP."
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name = "FSP_BIN_PKG_NAME"
+    Value = "KabylakeFspBinPkg"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+ELINK
+    Name  = "KabylakeFspPkg\FspFdfRules.txt"
+    Parent  = "FdfRules"
+    InvokeOrder = AfterParent
+End
+
+TOKEN
+    Name  = "====== Module Configuration ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "CRB_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Chipset Reference Board support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FSP_WRAPPER_ENABLE"
+    Value  = "0"
+    Help  = "Main switch to enable FSP Wrapper."
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SAMPLEPKG_OVERRIDE_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Platform SamplePkg Override support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ACPI_PLATFORM_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable KabylakePlatSamplePkg Acpi support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "RcBoard_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Board support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PlatSamplePkg_Csm_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable KabylakePlatSamplePkg Csm support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "Features_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Features support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "GopDebugDxe_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable KabylakePlatSamplePkg GopDebugDxe support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "Platform_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Platform support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PlatformInit_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable PlatformInit support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "MeWrapper_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable MeWrapper support in Project"
+End
+
+TOKEN
+    Name  = "CpuAcpiTables_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "CpuInit_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling CpuInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PowerManagement_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "TxtInit_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling TxtInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "SaAcpiTables_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "BdatAccessHandler_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PciHostBridge_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "SmmAccess_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "ActiveBios_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "LegacyInterrupt_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchSmiDispatcher_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+INFComponent
+    Name  = "PchLateInitSmm"
+    File  = "Smm/PchInitSmm.inf"
+    Package  = "KabylakeSiliconPkg"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+    Disable  = Yes      
+End
+
+INFComponent
+    Name  = "PcdDxe"
+    File  = "Dxe/Pcd.inf"
+    Package  = "MdeModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+    Disable  = Yes
+End
+
+INFComponent
+    Name  = "TimestampDxe"
+    File  = "TimestampDxe.inf"
+    Package  = "MdeModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+    Disable  = Yes
+End
+
+INFComponent
+    Name  = "CpuIo2Dxe"
+    File  = "CpuIo2Dxe/CpuIo2Dxe.inf"
+    Package  = "UefiCpuPkg"
+    ModuleTypes  = "DXE_DRIVER"
+    Disable  = Yes
+End
+
+TOKEN
+    Name  = "PchReset_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchSataController_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchSerialGpio_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchSmartTimer_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchSmbus_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchSmmControl_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchSpi_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PchWdt_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MemoryInit support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "MeSsdt_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MeSsdt support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "BiosExtensionLoader_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable BiosExtensionLoader support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "AlertStandardFormat_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AlertStandardFormat support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "ActiveManagement_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable ActiveManagement support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "Sol_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling Sol support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "MeFwDowngrade_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable MeFwDowngrade support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "MePlatformReset_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling MePlatformReset support in the project"
+    TokenType = Boolean
+    TargetH = YES
+End
+
+TOKEN
+    Name  = "IntegratedTouch_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable IntegratedTouch support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "HSTI_RC_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling HSTI support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name = "CLIENTCOMMONPKG_UNIVERSAL_SUPPORT"
+    Value = "0"
+    Help  = "Main switch to enable ClientCommonPkg Universal in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "TraceHubDebugLibSvenTx_SUPPORT"
+    Value  = 0
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable TraceHubDebugLibSvenTx support in Project"
+End
+
+TOKEN
+    Name  = "INTEL_FIT_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Intel FIT in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "BiosGuard_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling BiosGuard support in the project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AmiChipsetModulePkg_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AmiChipsetModulePkg support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name = "NB_AMI_MEMORY_INFO_CONFIG"
+    Value = "0"
+    Help  = "Main switch to enable AmiMemoryInfo protocol in project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AmiCpuModulePkg_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling AmiCpuModulePkg support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "Microcode_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Microcode support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "SgTpv_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetH = Yes
+    Help  = "Main switch to enable SwitchableGraphics TPV support in Project"
+End
+
+TOKEN
+    Name  = "ME_ROM_IMAGE_BUILD_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "AmiStatusCode_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Status Code support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+INFComponent
+    Name  = "Fid"
+    File  = "Fid.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "USER_DEFINED"
+    Disable  = Yes  
+End
+
+INFComponent
+    Name  = "Bds"
+    File  = "Bds.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+    Disable  = Yes      
+End
+
+INFComponent
+    Name  = "ConSplitter"
+    File  = "ConSplitter.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "UEFI_DRIVER"
+    Disable  = Yes  
+End
+
+INFComponent
+    Name  = "DxeMain"
+    File  = "Dxe/DxeMain.inf"
+    Package  = "MdeModulePkg"
+    ModuleTypes  = "DXE_CORE"
+    Disable  = Yes      
+End
+
+INFComponent
+    Name  = "RuntimeDxe"
+    File  = "RuntimeDxe/RuntimeDxe.inf"
+    Package  = "MdeModulePkg"
+    ModuleTypes  = "DXE_RUNTIME_DRIVER"
+    Disable  = Yes          
+End
+
+TOKEN
+    Name  = "RomLayout_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable RomLayout support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "DataHub_SUPPORT"
+    Value  = 0
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable DataHub support in Project"
+End
+
+TOKEN
+    Name  = "DevicePath_SUPPORT"
+    Value  = 0
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable DevicePath support in Project"
+End
+
+TOKEN
+    Name  = "Disk_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Disk support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "Ebc_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Ebc support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "HiiDatabase_SUPPORT"
+    Value  = 0
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable HiiDatabase support in Project"
+End
+
+TOKEN
+    Name  = "SecurityStub_SUPPORT"
+    Value  = 0
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable SecurityStub support in Project"
+End
+
+TOKEN
+    Name  = "SmmLockBox_SUPPORT"
+    Value  = 0
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable SmmLockBox support in Project"
+End
+
+TOKEN
+    Name  = "OA2_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable OA2 support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "OA3_SUPPORT"
+    Value = "0"
+    Help  = "Main switch to enable OA3 support in the project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "Setup_SUPPORT"
+    Value  = "0"
+    Help  = "This is a master token that enables/disables the Setup eModule in the project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ACPI_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable ACPI support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "BlockS3Var_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable BlockS3Var support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "HARDWARE_SIGNATURE_MANAGEMENT_SUPPORT"
+    Value  = 0
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Help  = "Main switch to enable HardwareSignatureManagement support in Project"
+End
+
+TOKEN
+    Name  = "TCG2Support"
+    Value  = "0"
+    Help  = "Enable or Disable TCG_generic support"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "TcgCoreFvOverrideSupport"
+    Value  = "0"
+    Help  = "Enable or Disable TcgCoreFvOverride"
+    TokenType = Boolean
+    TargetH = Yes
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "PttHciSmm_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable PttHciSmm support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "SMBIOS_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable SMBIOS  support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AMIUSB_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AMI USB support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AmiNetworkPkg_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Intel Gigabit Lan network chip support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FatBinPkg_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable FatBinPkg support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "AmiGopPolicy"
+    Value  = "0"
+    Help  = "Main Switch to Enable AmiGopPolicy in Platform"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "FlashDriver_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Runtime support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "Flash_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable FLASH support in Project."
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "FlashSmiSupport"
+    Value  = "0"
+    Help  = "Main switch to enable Flash SMI support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SMIFlash_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable SMIFlash  support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "SECURE_FLASH_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "OFBD_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling OFBD support in the project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "MEUD_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable ME Firmware Update support in Project"
+End
+
+TOKEN
+    Name  = "NVRAM_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable NVRAM support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "EnhancePeiVariable_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable EnhancePeiVariable support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "GraphicsConsole_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable GraphicsConsole support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "AmiBoardInfo_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AMI Board Info support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "Recovery_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Recovery support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "Capsule_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Capsule support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "Esrt_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetMAK = Yes
+    Help  = "Main switch to enable Esrt support in Project"
+End
+
+TOKEN
+    Name  = "AMIDEBUGGERPKG_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling AMIDebuggerPkg support in the project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SmiVariable_SUPPORT"
+    Value = "0"
+    Help  = "Main switch to enable SmiVariable support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "TcgStorageSecurity_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable TcgStorageSecurity support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RamDisk_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable RamDisk support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AMIDEBUG_RX_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling AMIDebugRxPkg support in the project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AMI_DEBUGGER_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling Debugger support in the project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AMITSE_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AMITSE support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "TseDefaultBootOrder_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable TseDefaultBootOrder support in Project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "EfiOsBootOptionNames_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable EfiOsBootOptionNames support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "BcpBootOrder_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable BcpBootOrder support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RestoreSpecialBootOptions_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling RestoreSpecialBootOptions support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "EC_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable EC_H8SMC support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "GenericSio_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AMI Generic SIO support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AmiCryptoPkg_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling AmiCryptoPkg support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "CryptoPkg_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling CryptoPkg support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "Terminal_SUPPORT"
+    Value  = "0"
+    Help  = "Enable/Disable 'Serial Redirection' module. \This module contains Terminal.lib/Terminalx64.lib,\the compiled binary of module 'Serial Redirection \Sources.' It also contains all setup related material\for the module.\"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "CSM_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AMI CSM support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AmiPciBus_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable PciBus support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "PciPort_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Pci Compatibility support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "PS2Ctl_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable PS2 Controller support in the project."
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "EcPs2Kbd_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "VirtualSerial_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Virtual Serial Device support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "CMOS_MANAGER_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable CMOS manager support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "POST_TIME_TUNING_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable FastBoot (Post Time Tuning) module in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RsdpPlus_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable RsdpPlus support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SDIO_DRIVER_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable SdioDriver support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes    
+End
+
+TOKEN
+    Name  = "EdkShellBinPkg_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable EdkShellBinPkg support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "IntelGigabitLan_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Intel Gigabit Lan network chip support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AHCI_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AHCI support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AhciRecovery_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AhciSmm  support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "AtaPassThru_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable AtaPassThru support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "IdeBusSrc_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable IdeBusSrc support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ACOUSTIC_MANAGEMENT_DRIVER_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Acoustic Management support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "HDD_SECURITY_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable HddSecurity support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "NVMe_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable NVMe support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "NvmeRecovery_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Nvme device recovery support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "OpalSecurity_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable OpalSecurity support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SERIAL_DEBUGGER_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling Serial Debugger support in the project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "Usb3Statuscode_Support"
+    Value  = "0"
+    Help  = "Main switch to enable Usb3Statuscode support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "PauseKey_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable PauseKey support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2C_HID_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling I2c support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "MouseDriver_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable Mouse Driver support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes    
+End
+
+TOKEN
+    Name  = "AmiHstiPkg_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable MdePkg support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "AmiSecureBootPkg_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling SecureBootPkg support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "HddSmart_Support"
+    Value  = "0"
+    Help  = "Main switch to enable HddSMART support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SecureBoot_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable SecureBoot Module support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RandomNumberGen_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling RandomNumberGen support in the project"
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== FSP UPD Configuration ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "GEN_CFG_OPT_SUPPORT"
+    Value  = "1"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "FSP_T_UPD_TOOL_GUID"
+    Value  = "34686CA3-34F9-4901-B82A-BA630F0714C6"
+    Help  = "Fsp T UPD guid"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes    
+End
+
+TOKEN
+    Name  = "FSP_M_UPD_TOOL_GUID"
+    Value  = "39A250DB-E465-4DD1-A2AC-E2BD3C0E2385"
+    Help  = "Fsp M UPD guid"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes    
+End
+
+TOKEN
+    Name  = "FSP_S_UPD_TOOL_GUID"
+    Value  = "CAE3605B-5B34-4C85-B3D7-27D54273C40F"
+    Help  = "Fsp S UPD guid"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes    
+End
+
+TOKEN
+    Name  = "FSP_T_UPD_FFS_GUID"
+    Value  = "70BCF6A5-FFB1-47D8-B1AE-EFE5508E23EA"
+    Help  = "Fsp T UPD FFS guid"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes    
+End
+
+TOKEN
+    Name  = "FSP_M_UPD_FFS_GUID"
+    Value  = "D5B86AEA-6AF7-40D4-8014-982301BC3D89"
+    Help  = "Fsp M UPD FFS guid"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes    
+End
+
+TOKEN
+    Name  = "FSP_S_UPD_FFS_GUID"
+    Value  = "E3CD9B18-998C-4F76-B65E-98B154E5446F"
+    Help  = "Fsp S UPD FFS guid"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes    
+End
+
+TOKEN
+    Name = "FSP_BUILD_TYPE"
+    Value = "0x0001"
+    TokenType = Expression
+    TargetMAK = Yes
+    Token = "DEBUG_MODE" "=" "0"    
+End
+
+TOKEN
+    Name = "FSP_RELEASE_TYPE"
+    Value = "0x0002"
+    TokenType = Expression
+    TargetMAK = Yes
+    Token = "DEBUG_MODE" "=" "0"    
+End
+
+TOKEN
+    Name = "FSP_BUILD_TYPE"
+    Value = "0x0000"
+    TokenType = Expression
+    TargetMAK = Yes
+    Token = "DEBUG_MODE" "=" "1"    
+End
+
+TOKEN
+    Name = "FSP_RELEASE_TYPE"
+    Value = "0x0000"
+    TokenType = Expression
+    TargetMAK = Yes
+    Token = "DEBUG_MODE" "=" "1"    
+End
+
+TOKEN
+    Name  = "FSP_BINARY_NAME"
+    Value  = "Fsp.fd"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== Chipset Configuration ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "TSEG_SIZE"
+    Value  = "0x400000"
+    Help  = "Size of SMM TSEG area used (in bytes) \Default size 4MB."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "TSEG_SIZE"
+    Value  = "0x1000000"
+    Help  = "Size of SMM TSEG area used (in bytes) \Default size 16MB."
+    TokenType = Integer
+    TargetH = Yes
+    Token = "DEBUG_MODE" "=" "1"
+End
+
+TOKEN
+    Name  = "PEI_MIN_MEMORY_SIZE"
+    Value  = "0x8000000"
+    Help  = "Minimum memory required for PEI currently 128 MB"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "NB_MCH_BASE_ADDRESS"
+    Value  = "0x0FED10000"
+    Help  = "\(G)MCH Memory Mapped Register Range Base Address (D0:F0:Rx48). 16KB non-Conflicting Address Space Required."
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "MCH_LENGTH"
+    Value  = "0x8000"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "IntelGraphicsPeimVbt_SUPPORT"
+    Value  = "0"
+    Help  = "IntelGraphicsPeimVbt is included in FSP Wrapper, so disable it in FSP Source."
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "IntelGraphicsPeim_RC_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable IntelGraphicsPeim support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ACPI_BASE_ADDRESS"
+    Value  = "0x1800"
+    Help  = "ACPI Base Address(ABASE), D31F2, Offset 40h"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SMBUS_BASE_ADDRESS"
+    Value  = "0x0580"
+    Help  = "This token just effected before PCI Bus driver dispatched."
+    TokenType = Integer
+    TargetH = Yes
+    Lock = Yes
+End
+
+TOKEN
+    Name  = "TCO_BASE_ADDRESS"
+    Value  = "0x400"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "DEBUG_COM_PORT_ADDR"
+    Value  = "0x3F8"
+    Help  = "COM Port address the debugger uses."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "PCI_EXPRESS_SUPPORT"
+    Value  = "0"
+    Help  = "Enables / Disables Pci Bus Driver Native PCI Express support"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "SB_OEM_PTSS_TABLE_LIST"
+    Value  = "{0xFF, 0, 0, 0, 0},"
+    Help  = "Format:{LanNum, PhyMode, Offset, Value, BitMask}, LanNum: HSIO Lan#(Start from 1), PhyMode: 0:PCIEDMI/1:USB3/2:SATA/8:USB2, For USB2 set LanNum to 0."
+    TokenType = Expression
+    TargetH = Yes
+End
+
+PcdMapping
+    Name  = "PcdTsegSize"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(TSEG_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdPciExpressBaseAddress"
+    GuidSpace  = "gEfiMdePkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    DataType  = "Uint64"
+    Value  = "0xE0000000"
+    Offset  = 00h
+    Length  = 08h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdPciExpressRegionLength"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    DataType  = "Uint32"
+    Value  = "0x10000000"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdMchBaseAddress"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(NB_MCH_BASE_ADDRESS)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdMchMmioSize"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(MCH_LENGTH)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdAcpiBaseAddress"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint16"
+    Value  = "$(ACPI_BASE_ADDRESS)"
+    Offset  = 00h
+    Length  = 02h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdAcpiIoPortBaseAddress"
+    GuidSpace  = "gAmiChipsetPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    Value  = "$(ACPI_BASE_ADDRESS)"
+    Offset  = 00h
+    Length  = 00h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdSmbusBaseAddress"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint16"
+    Value  = "$(SMBUS_BASE_ADDRESS)"
+    Offset  = 00h
+    Length  = 02h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdTcoBaseAddress"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "$(TCO_BASE_ADDRESS)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdSerialRegisterBase"
+    GuidSpace  = "gEfiMdeModulePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    Value  = "$(DEBUG_COM_PORT_ADDR)"
+    Offset  = 00h
+    Length  = 00h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdShadowPeimOnS3Boot"
+    GuidSpace  = "gEfiMdeModulePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Boolean"
+    Value  = "TRUE"
+    Offset  = 00h
+    Length  = 01h
+    TargetDSC = Yes
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== Core Setting ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "X64_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "SMM_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable SMM support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "USE_TE_SECTION_FOR_UNCOMPRESSED_PEI_EXECUTABLES"
+    Value  = "1"
+    Help  = "When this token is enabled, uncompressed PEI executables with default packaging are packaged into a TE FFS section.\When the token is disabled, the executables are packaged into a PE section.\Note: Intel BCT only support TE images."
+    TokenType = Boolean
+End
+
+TOKEN
+    Name  = "PLATFORM_NAME"
+    Value  = "KabylakeFsp"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetDSC = Yes
+End
+
+TOKEN
+    Name  = "PLATFORM_GUID"
+    Value  = "21c06e7c-bd27-8462-0238-61c13de6162c"
+    Help  = "The unique platform GUID that does into the description file.\MUST BE CLONED IN EVERY PROJECT!"
+    TokenType = Expression
+    TargetDSC = Yes
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== Flash Configuration ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "FLASH_BLOCK_SIZE"
+    Value  = "0x1000"
+    Help  = "Size of the Flash Device Block"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FLASH_SIZE"
+    Value  = "0xF0000"
+    Help  = "Size of the Flash Device in bytes"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FLASH_ADDRESS"
+    Value  = "0xFFE40000"
+    Help  = "Starting address of the FSP Binary. $(FLASH_START_ADDRESS) + $(FV_FSP_OFFSET)."
+    TokenType = Integer
+    Token = "DEBUG_MODE" "=" "0"    
+End
+
+TOKEN
+    Name  = "FLASH_ADDRESS"
+    Value  = "0xFFDC0000"
+    Help  = "Starting address of the FSP Binary. $(FLASH_START_ADDRESS) + $(FV_FSP_OFFSET)."
+    TokenType = Integer
+    Token = "DEBUG_MODE" "=" "1"    
+End
+
+TOKEN
+    Name  = "FV_FSP_S_OFFSET"
+    Value  = "0"
+    Help  = "Offset of FSP S area"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_S_SIZE"
+    Value  = "0x44000"
+    Help  = "Size of FSP S area"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_M_OFFSET"
+    Value  = "$(FV_FSP_S_SIZE)"
+    Help  = "Offset of FSP M area"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_M_SIZE"
+    Value  = "0xA0000"
+    Help  = "Size of FSP M area"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_T_OFFSET"
+    Value  = "$(FV_FSP_S_SIZE)+$(FV_FSP_M_SIZE)"
+    Help  = "Offset of FSP T area"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "FV_FSP_T_SIZE"
+    Value  = "$(FLASH_SIZE)-$(FV_FSP_S_SIZE)-$(FV_FSP_M_SIZE)"
+    Help  = "Size of FSP T area."
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+PcdMapping
+    Name  = "PcdFspAreaBaseAddress"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FLASH_ADDRESS)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFspAreaSize"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FLASH_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFspBootFirmwareVolumeBase"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FLASH_ADDRESS) + $(FV_FSP_S_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspBase"
+    GuidSpace  = "gKabylakeFspPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FLASH_ADDRESS)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspsBase"
+    GuidSpace  = "gKabylakeFspPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FLASH_ADDRESS) + $(FV_FSP_S_OFFSET)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspsSize"
+    GuidSpace  = "gKabylakeFspPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FV_FSP_S_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspmBase"
+    GuidSpace  = "gKabylakeFspPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FLASH_ADDRESS) + $(FV_FSP_M_OFFSET)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFspmSize"
+    GuidSpace  = "gKabylakeFspPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FV_FSP_M_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFsptBase"
+    GuidSpace  = "gKabylakeFspPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FLASH_ADDRESS) + $(FV_FSP_T_OFFSET)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFlashFvFsptSize"
+    GuidSpace  = "gKabylakeFspPkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "$(FV_FSP_T_SIZE)"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== FSP Platform.fdf layout ======"
+    TokenType = Expression
+End
+
+FD_AREA
+    Name  = "FSP_T"
+    TYPE  = "FV"
+    FD_INFO  = "AMIROM"
+    Offset  = "$(FV_FSP_T_OFFSET)"
+    Size  = "$(FV_FSP_T_SIZE)"
+    Attributes  = "0xffff"          
+    Alignment  = "16"
+    Guid  = "7BEBD21A-A1E5-4C4C-9CA1-A0C168BCBD9D"
+End
+
+FD_AREA
+    Name  = "FSP_M"
+    TYPE  = "FV"
+    FD_INFO  = "AMIROM"
+    Offset  = "$(FV_FSP_M_OFFSET)"
+    Size  = "$(FV_FSP_M_SIZE)"
+    Attributes  = "0xffff"      
+    Alignment  = "16"
+    Guid  = "52F1AFB6-78A6-448f-8274-F370549AC5D0"
+End
+
+FD_AREA
+    Name  = "FSP_S"
+    TYPE  = "FV"
+    FD_INFO  = "AMIROM"
+    Offset  = "$(FV_FSP_S_OFFSET)"
+    Size  = "$(FV_FSP_S_SIZE)"
+    Attributes  = "0xffff"          
+    Alignment  = "16"
+    Guid  = "1B5C27FE-F01C-4fbc-AEAE-341B2E992A17"
+End
+
+FD_AREA
+    Name  = "NVRAM"
+    TYPE  = "FV"
+    FD_INFO  = "AMIROM"
+    Offset  = "0"
+    Size  = "0"
+    Layout_Attribute  = "0xd00"
+    Attributes  = "0xffff"
+    Alignment  = "16"
+    Disable  = Yes
+End
+
+FD_AREA
+    Name  = "NVRAM_BACKUP"
+    TYPE  = "RAW"
+    FD_INFO  = "AMIROM"
+    Offset  = "0"
+    Size  = "0"
+    Layout_Attribute  = "0xd00"
+    Attributes  = "0x0"
+    Disable  = Yes
+End
+
+FD_AREA
+    Name  = "FV_MAIN"
+    TYPE  = "FV"
+    FD_INFO  = "AMIROM"
+    Offset  = "0"
+    Size  = "0"
+    Layout_Attribute  = "0xd09"
+    Attributes  = "0xffff"
+    Alignment  = "16"
+    Guid  = "5C60F367-A505-419A-859E-2A4FF6CA6FE5"
+    Disable  = Yes
+End
+
+FD_AREA
+    Name  = "FV_BB"
+    TYPE  = "FV"
+    FD_INFO  = "AMIROM"
+    Offset  = "0"
+    Size  = "0"
+    Layout_Attribute  = "0xd89"
+    Attributes  = "0xffff"
+    Alignment  = "16"
+    Guid  = "61C0F511-A691-4F54-974F-B9A42172CE53"
+    Disable  = Yes    
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+#
+# INF and Library
+#
+INFComponent
+    Name  = "BasePcdLibNull"
+    File  = "../MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf"
+    Package  = "MdePkg"
+End
+
+LibraryMapping
+    Class  = "PcdLib"
+    Instance  = "MdePkg.BasePcdLibNull"
+    Override  = "MdeModulePkg.PcdPei"
+End
+
+INFComponent
+    Name  = "BaseDebugLibNull"
+    File  = "../MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf"
+    Package  = "MdePkg"
+    Token = "DEBUG_MODE" "=" "0"        
+End
+
+LibraryMapping
+    Class  = "DebugLib"
+    Instance  = "MdePkg.BaseDebugLibNull"
+    Token = "DEBUG_MODE" "=" "0"        
+End
+
+LibraryMapping
+    Class  = "DebugLib"
+    Instance  = "MdePkg.BaseDebugLibSerialPort"
+    Token = "DEBUG_MODE" "=" "1"        
+End
+
+INFComponent
+    Name  = "BaseSerialPortLibNull"
+    File  = "../MdePkg/Library/BaseSerialPortLibNull/BaseSerialPortLibNull.inf"
+    Package  = "MdePkg"
+    Token = "DEBUG_MODE" "=" "0"        
+End
+
+LibraryMapping
+    Class  = "SerialPortLib"
+    Instance  = "MdePkg.BaseSerialPortLibNull"
+    Token = "DEBUG_MODE" "=" "0"        
+End
+
+LibraryMapping
+    Class  = "SmbusLib"
+    Instance  = "MdePkg.PeiSmbusLibSmbus2Ppi"
+    ModuleTypes  = "PEIM"
+    Disable = Yes
+End
+
+#
+# FFS Definition
+#
+FFS_FILE
+    Name  = "FspSecCoreT"
+    FD_AREA  = "FSP_T"
+    INFComponent  = "IntelFsp2Pkg.FspSecCoreT"
+    Rule_Override  = "RELOC"
+End
+
+FFS_FILE
+    Name  = "FsptUpdFdfFileStatements"
+    FD_AREA  = "FSP_T"
+    FILE_Stmt  = "KabylakeFspPkg\FsptUpdFdfFileStatements.txt"
+End
+
+FFS_FILE
+    Name  = "FspSecCoreM"
+    FD_AREA  = "FSP_M"
+    INFComponent  = "IntelFsp2Pkg.FspSecCoreM"
+    Rule_Override  = "RELOC"    
+End
+
+FFS_FILE
+    Name  = "PeiMain"
+    FD_AREA  = "FSP_M"
+    INFComponent  = "MdeModulePkg.PeiMain"
+End
+
+FFS_FILE
+    Name  = "PcdPei"
+    FD_AREA  = "FSP_M"
+    INFComponent  = "MdeModulePkg.PcdPei"
+End
+
+FFS_FILE
+    Name  = "FspDebugServicePei"
+    FD_AREA  = "FSP_M"
+    INFComponent  = "KabylakeFspPkg.FspDebugServicePei"
+    Token = "DEBUG_MODE" "=" "1"    
+End
+
+FFS_FILE
+    Name  = "FspPcdInit"
+    FD_AREA  = "FSP_M"
+    INFComponent  = "KabylakeFspPkg.FspPcdInit"
+End
+
+FFS_FILE
+    Name  = "SiInitPreMemFsp"
+    FD_AREA  = "FSP_M"
+    INFComponent  = "KabylakeSiliconPkg.SiInitPreMemFsp"
+End
+
+FFS_FILE
+    Name  = "FspInitPreMem"
+    FD_AREA  = "FSP_M"
+    INFComponent  = "KabylakeFspPkg.FspInitPreMem"
+    Index  = '"AFTER" "SiInitPreMemFsp"'    
+End
+
+FFS_FILE
+    Name  = "FspmUpdFdfFileStatements"
+    FD_AREA  = "FSP_M"
+    FILE_Stmt  = "KabylakeFspPkg\FspmUpdFdfFileStatements.txt"
+End
+
+FFS_FILE
+    Name  = "FspSecCoreS"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "IntelFsp2Pkg.FspSecCoreS"
+    Rule_Override  = "RELOC"    
+End
+
+FFS_FILE
+    Name  = "DxeIpl"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "MdeModulePkg.DxeIpl"
+End
+
+FFS_FILE
+    Name  = "FspInit"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "KabylakeFspPkg.FspInit"
+    Rule_Override  = "Compressed"
+End
+
+FFS_FILE
+    Name  = "PcatSingleSegmentPciCfg2Pei"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "MdeModulePkg.PcatSingleSegmentPciCfg2Pei"
+    Rule_Override  = "Compressed"    
+    Token = "IntelGraphicsPeim_RC_SUPPORT" "=" "1"
+End
+
+FFS_FILE
+    Name  = "IntelGraphicsPeim"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "KabylakeSiliconPkg.IntelGraphicsPeim"
+    Rule_Override  = "Compressed"    
+    Token = "IntelGraphicsPeim_RC_SUPPORT" "=" "1"      
+End
+
+FFS_FILE
+    Name  = "CpuMpPei"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "KabylakeSiliconPkg.CpuMpPei"
+    Rule_Override  = "Compressed"
+    Index  = '"BEFORE" "SiInit"'    
+    Token = "SI_OVERRIDE_UEFICPUPKG_SUPPORT" "=" "1"
+End
+
+FFS_FILE
+    Name  = "SiInit"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "KabylakeSiliconPkg.SiInit"
+    Rule_Override  = "Compressed"    
+End
+
+FFS_FILE
+    Name  = "SaInitFsp"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "KabylakeSiliconPkg.SaInitFsp"
+    Rule_Override  = "Compressed"
+    Index  = '"AFTER" "SiInit"'            
+End
+
+FFS_FILE
+    Name  = "PchInitDxeFsp"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "KabylakeSiliconPkg.PchInitDxeFsp"
+    Rule_Override  = "Compressed"
+    Index  = '"AFTER" "SiInit"'         
+End
+
+FFS_FILE
+    Name  = "HeciInitFsp"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "KabylakeSiliconPkg.HeciInitFsp"
+    Rule_Override  = "Compressed"   
+    Index  = '"AFTER" "SiInit"'      
+End
+
+FFS_FILE
+    Name  = "FspNotifyPhasePeim"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "IntelFsp2Pkg.FspNotifyPhasePeim"
+    Rule_Override  = "Compressed"   
+    Index  = '"AFTER" "SiInit"'      
+End
+
+FFS_FILE
+    Name  = "FspsUpdFdfFileStatements"
+    FD_AREA  = "FSP_S"
+    FILE_Stmt  = "KabylakeFspPkg\FspsUpdFdfFileStatements.txt"
+End
+
+#
+# Pcd Setting
+#
+PcdMapping
+    Name  = "PcdFspReservedMemoryLength"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "0x00400000"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdDebugPropertyMask"
+    GuidSpace  = "gEfiMdePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    Value  = "0x27"
+    Offset  = 00h
+    Length  = 00h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdDebugPrintErrorLevel"
+    GuidSpace  = "gEfiMdePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    Value  = "0x00000001"
+    Offset  = 00h
+    Length  = 00h
+    TargetDSC = Yes
+    Token = "DEBUG_MODE" "=" "0"    
+End
+
+PcdMapping
+    Name  = "PcdDebugPrintErrorLevel"
+    GuidSpace  = "gEfiMdePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    Value  = "0x80000044"
+    Offset  = 00h
+    Length  = 00h
+    TargetDSC = Yes
+    Token = "DEBUG_MODE" "=" "1"    
+End
+
+PcdMapping
+    Name  = "PcdUseNewImageOnFlashUpdate"
+    GuidSpace  = "gAmiModulePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "BOOLEAN"
+    Value  = "FALSE"
+    Offset  = 00h
+    Length  = 01h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdCpuMaxLogicalProcessorNumber"
+    GuidSpace  = "gUefiCpuPkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    DataType  = "UINT32"
+    Value  = "12"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdCpuMicrocodePatchAddress"
+    GuidSpace  = "gUefiCpuPkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    DataType  = "Uint64"
+    Value  = "0"
+    Offset  = 00h
+    Length  = 08h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdCpuMicrocodePatchRegionSize"
+    GuidSpace  = "gUefiCpuPkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    DataType  = "Uint64"
+    Value  = "0"
+    Offset  = 00h
+    Length  = 08h
+    TargetDSC = Yes
+End
+
+TOKEN
+    Name  = "SI_OVERRIDE_UEFICPUPKG_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling SiPkg Override UefiCpuPkg support in the project"
+    TokenType = Boolean
+End
+TOKEN
+    Name  = "UefiCpuPkg_Override_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable UefiCpuPkg Override support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+INFComponent
+    Name  = "PeiMpInitLib"
+    File  = "../UefiCpuPkg/Library/MpInitLib/PeiMpInitLib.inf"
+    Package  = "UefiCpuPkg"
+End
+
+INFComponent
+    Name  = "CpuMpPei"
+    File  = "../UefiCpuPkg/CpuMpPei/CpuMpPei.inf"
+    Package  = "UefiCpuPkg"
+    ModuleTypes  = "PEIM"
+    Token = "SI_OVERRIDE_UEFICPUPKG_SUPPORT" "=" "0"
+End
+
+LibraryMapping
+    Class  = "MpInitLib"
+    Instance  = "UefiCpuPkg.PeiMpInitLib"
+    Arch  = "IA32 X64"
+    ModuleTypes  = "PEIM"
+End
+
+FFS_FILE
+    Name  = "CpuMpPei"
+    FD_AREA  = "FSP_S"
+    INFComponent  = "UefiCpuPkg.CpuMpPei"
+    Rule_Override  = "Compressed"
+    Index  = '"BEFORE" "SiInit"'
+    Token = "SI_OVERRIDE_UEFICPUPKG_SUPPORT" "=" "0"
+End

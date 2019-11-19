@@ -1,0 +1,50 @@
+TOKEN
+    Name      = "UPDATE_SMBIOS_TYPE_41_SUPPORT"
+    Value     = "1"
+    Help      = "Main switch to enable updating Smbios Type 41 support automatically in Project"
+    TokenType = Boolean
+    TargetH   = Yes
+    Master    = Yes
+End
+
+INFComponent
+    Name        = "UpdateSmbiosType41"
+    File        = "UpdateSmbiosType41.inf"
+    Package     = "AmiChipsetModulePkg"
+    ModuleTypes = "DXE_DRIVER"
+End
+
+OUTPUTREGISTER
+    Name     = "AmiOemOnboardDevicesTable"
+    Path     = "Build"
+    File     = "AmiOemOnboardDevicesTable.h"
+    Template = "AmiTempOnboardDevicesTable.h"
+    Help     = "Creating onboard Devices table can be overridden and this file is auto-generated to the Build folder"
+End
+
+INFComponent
+    Name     = "AmiOemSmbiosType41LibNull"
+    File     = "AmiOemSmbiosType41LibNull.inf"
+    Package  = "AmiChipsetModulePkg"
+End
+
+LibraryMapping
+    Class    = "AmiOemSmbiosType41Lib"
+    Instance = "AmiChipsetModulePkg.AmiOemSmbiosType41LibNull"
+End
+
+TOKEN
+    Name      = "COLLECT_OTHER_ONBOARD_PCIE_DEVICES"
+    Value     = "1"
+    Help      = "Collect other onboard PCIe devices information and create their SMBIOS Type 41 table except for OEM table list"
+    TokenType = Boolean
+    TargetH   = Yes
+END
+
+TOKEN
+    Name  = "SMBIOS_TYPE_41_START_GUID"
+    Value  = "{0x60FF8964, 0xE906, 0x41D0, 0xAF, 0xED, 0xF2, 0x41, 0xE9, 0x74, 0xE0, 0x8E}"
+    Help  = "This guid is used to register one callback function for SMBIOS type 41 tables. (By default it is gEfiDxeSmmReadyToLockProtocolGuid)"
+    TokenType = Expression
+    TargetH = Yes
+End

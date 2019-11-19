@@ -1,0 +1,33 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AcpiGetSetupData
+  FILE_GUID                      = 2447EFAE-F848-489F-9200-F313BEE7D156
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AcpiGetSetupData|DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  GetSetupData.c
+  AcpiSetupData.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid
+ 
+[Pcd]
+
+

@@ -1,0 +1,25 @@
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = BaseAmiGetBoardInfoLib
+  FILE_GUID                      = 11850749-1189-44EA-B97A-7E53D05FC853
+  VERSION_STRING                 = 1.0
+  MODULE_TYPE                    = BASE
+  LIBRARY_CLASS                  = AmiGetBoardInfoLib
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  BaseMemoryLib
+
+[Packages]
+  MdePkg/MdePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+
+[Pcd]
+  gBoardModuleTokenSpaceGuid.PcdPeiBoardInitTableList
+  gBoardModuleTokenSpaceGuid.PcdFuncBoardConfigInit
+  gBoardModuleTokenSpaceGuid.PcdBoardPrivateData
+
+[Sources]
+  AmiGetBoardInfoLib.c

@@ -1,0 +1,173 @@
+TOKEN
+    Name  = "PCIE_DYNAMIC_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable PCIE Length dynamic adjustment in Project"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+INFComponent
+    Name  = "DynamicPciePciLib"
+    File  = "DynamicPciePciLib/DynamicPciePciLib.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes  = "BASE"
+End
+
+LibraryMapping
+    Class  = "MmPciLib"
+    Instance  = "KabylakeSiliconPkg.PeiDxeSmmMmPciLib"
+    Disable = Yes
+End
+
+LibraryMapping
+    Class  = "MmPciLib"
+    Instance  = "AmiChipsetModulePkg.DynamicPciePciLib"
+End
+
+INFComponent
+    Name  = "DynamicSmmPciExpressLib"
+    File  = "DynamicSmmPciExpressLib/DynamicSmmPciExpressLib.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+End
+
+INFComponent
+    Name  = "DynamicSmmBasePciLibPciExpress"
+    File  = "DynamicSmmBasePciLibPciExpress/DynamicSmmBasePciLibPciExpress.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+End
+
+LibraryMapping
+    Class  = "PciExpressLib"
+    Instance  = "AmiChipsetModulePkg.DynamicSmmPciExpressLib"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+End
+
+LibraryMapping
+    Class  = "BasePciLibPciExpress"
+    Instance  = "AmiChipsetModulePkg.DynamicSmmBasePciLibPciExpress"
+    ModuleTypes  = "DXE_SMM_DRIVER"
+End
+
+TOKEN
+    Name  = "=============== PCIE size Dynamic Configuration =============="
+    TokenType = Expression
+End
+
+ELINK
+    Name  = "-D AMI_PCIE_DYNAMIC_SUPPORT_FLAG"
+    Parent  = "*_*_*_CC_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "-D AMI_PCIE_DYNAMIC_SUPPORT_FLAG"
+    Parent  = "*_*_*_ASM_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+TOKEN
+    Name  = "PCIEX_BASE_ADDRESS"
+    Value  = "(PciRead32 (PCI_LIB_ADDRESS(0,0,0,0x60)) & 0xff000000)"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "PEBS"
+    Value  = "$(PCIEX_BASE_ADDRESS)"
+    TokenType = Integer
+    TargetASL = Yes
+    Disable = Yes
+End
+
+TOKEN
+    Name  = "PCIEX_LENGTH_BIT_SETTING"
+    Value  = "0x4"
+    Help  = "PCI 0:0:0:60 PCIEXBAR bits [2:0] - PCI express size, 0x0 is 256MB, 0x2 is 128MB, 0x4 is 64MB"
+    TokenType = Integer
+    TargetEQU = Yes
+    Disable = Yes
+End
+
+TOKEN
+    Name  = "PELN"
+    Value  = "$(PCIEX_LENGTH)"
+    TokenType = Integer
+    TargetASL = Yes
+    Disable = Yes
+End
+
+TOKEN
+    Name  = "PCIEX_LENGTH"
+    Value  = "(((PciRead32 (PCI_LIB_ADDRESS(0,0,0,0x60)) & 0x6) == 0x0) ? (0x10000000) : ((PciRead32 (PCI_LIB_ADDRESS(0,0,0,0x60)) & 0x6) == 0x2) ? (0x8000000) : ((PciRead32 (PCI_LIB_ADDRESS(0,0,0,0x60)) & 0x6) == 0x4) ? (0x4000000) : (0x10000000))"
+    TokenType = Expression
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name = "TBT_MAX_EXTRA_BUS_RESERVED"
+    Value = "245"
+    Help = "The Max number of extra Bus Reserved for bridges behind this Root Bridge for Thunderbolt."
+    TokenType = Integer
+    TargetH = Yes
+    Disable = Yes
+    TOKEN = "TBT_FCTP" "=" "1"
+End
+
+PcdMapping
+    Name  = "PcdPciExpressBaseAddress"
+    GuidSpace  = "gEfiMdePkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    DataType  = "Uint64"
+    Value  = "0xE0000000"
+    Offset  = 00h
+    Length  = 08h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdPciExpressRegionLength"
+    GuidSpace  = "gSiPkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    DataType  = "Uint32"
+    Value  = "0x10000000"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+TOKEN
+    Name  = "=============== NB/SB PCI DEVICES SSID TABLE =============="
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "SB_PCI_DEVICES_SSID_TABLE"
+    Value  = "{SB_BUS_DEV_FUN, -1}, {SB_ISH_BUS_DEV_FUN, -1}, {SB_XHCI_BUS_DEV_FUN, -1}, {SB_XDCI_BUS_DEV_FUN, -1}, {SB_THERMAL_BUS_DEV_FUN, -1}, {SB_CIO2_BUS_DEV_FUN, -1}, {SB_SIO_I2C0_BUS_DEV_FUN, -1}, {SB_SIO_I2C1_BUS_DEV_FUN, -1}, {SB_SIO_I2C2_BUS_DEV_FUN, -1}, {SB_SIO_I2C3_BUS_DEV_FUN, -1}, {SB_HECI_BUS_DEV_FUN, -1}, {SB_HECI2_BUS_DEV_FUN, -1}, {SB_HECI3_BUS_DEV_FUN, -1}, {SB_IDER_BUS_DEV_FUN, -1}, {SB_KT_BUS_DEV_FUN, -1}, {SB_SATA_BUS_DEV_FUN, -1}, {SB_SIO_UART2_BUS_DEV_FUN, -1}, {SB_SIO_I2C5_BUS_DEV_FUN, -1}, {SB_SIO_I2C4_BUS_DEV_FUN, -1}, {SB_PCIERP00_BUS_DEV_FUN, -1}, {SB_PCIERP01_BUS_DEV_FUN, -1}, {SB_PCIERP02_BUS_DEV_FUN, -1}, {SB_PCIERP03_BUS_DEV_FUN, -1}, {SB_PCIERP04_BUS_DEV_FUN, -1}, {SB_PCIERP05_BUS_DEV_FUN, -1}, {SB_PCIERP06_BUS_DEV_FUN, -1}, {SB_PCIERP07_BUS_DEV_FUN, -1}, {SB_PCIERP08_BUS_DEV_FUN, -1}, {SB_PCIERP09_BUS_DEV_FUN, -1}, {SB_PCIERP10_BUS_DEV_FUN, -1}, {SB_PCIERP11_BUS_DEV_FUN, -1}, {SB_PCIERP12_BUS_DEV_FUN, -1}, {SB_PCIERP13_BUS_DEV_FUN, -1}, {SB_PCIERP14_BUS_DEV_FUN, -1}, {SB_PCIERP15_BUS_DEV_FUN, -1}, {SB_PCIERP16_BUS_DEV_FUN, -1}, {SB_PCIERP17_BUS_DEV_FUN, -1}, {SB_PCIERP18_BUS_DEV_FUN, -1}, {SB_PCIERP19_BUS_DEV_FUN, -1}, {SB_SIO_UART0_BUS_DEV_FUN, -1}, {SB_SIO_UART1_BUS_DEV_FUN, -1}, {SB_SIO_GSPI0_BUS_DEV_FUN, -1}, {SB_SIO_GSPI1_BUS_DEV_FUN, -1}, {SB_SCS_EMMC_BUS_DEV_FUN, -1}, {SB_SCS_SDIO_BUS_DEV_FUN, -1}, {SB_SCS_SDCARD_BUS_DEV_FUN, -1}, {SB_P2SB_BUS_DEV_FUN, -1}, {SB_PMC_BUS_DEV_FUN, -1}, {SB_HDA_BUS_DEV_FUN, -1}, {SB_SMBUS_BUS_DEV_FUN, -1}, {SB_SPI_BUS_DEV_FUN, -1}, {SB_LAN_BUS_DEV_FUN, -1}, {-1, -1}"
+    Help  = "List of PCI device's Sub-System ID in the following format:\{Device#1 Bus/Device/Function, Device#1 Sub-ID}, {Device#2 Bus/Device/Function, Device#2 Sub-ID}...\The format of the PCI bus/device/function is followed by EFI_PCI_CONFIGURATION_ADDRESS.\If the value of Sub-ID is -1, that means BIOS will use PCI Vendor-ID and Device-ID instead.\The last structure {-1, -1} is end of the table, don't remove it!"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "=============== Reserve CSP North-Bridge Resources =============="
+    TokenType = Expression
+End
+
+RSVCHIPSET
+    Name  = "PCI express MMIO resource"
+    BASEADDR  = "0xE0000000"
+    LENGTH  = "0x10000000"
+    TYPE  = "EfiGcdMemoryTypeMemoryMappedIo"
+    ATTRIBUTES  = "0x8000000000000001"
+    Help  = "(EFI_MEMORY_UC|EFI_MEMORY_RUNTIME)"
+    Disable = Yes
+End

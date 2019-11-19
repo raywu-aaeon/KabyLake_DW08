@@ -1,0 +1,18 @@
+<component>
+	name = "SgTpv OEMSSDT"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg\SgTpv\AcpiTables\OEM\"
+	RefName = "SgOemSSDT"
+[files]
+"OEMSSDT.sdl"
+"OEMNvSSDTSample.inf"	
+"OEMAtiSSDTSample.inf"	
+"OEMAtiSSDTSample.asl"	
+"OEMAtiAtifF21Sample.asl"	
+"OEMNvSSDTSample.asl"	
+"OEMNVdGPUSample.asl"	
+"OEMNViGPUSample.asl"	
+"OEMNvVenturaSample.asl"	
+"OEMNvGPSSample.asl"	
+"OEMNvWakeSample.asl"	
+<endComponent>

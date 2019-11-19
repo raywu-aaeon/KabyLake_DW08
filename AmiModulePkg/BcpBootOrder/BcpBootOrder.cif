@@ -1,0 +1,13 @@
+<component>
+	name = "BcpBootOrder"
+	category = eModule
+	LocalRoot = "AmiModulePkg\BcpBootOrder\"
+	RefName = "AmiModulePkg.BcpBootOrder"
+[INF]
+"BcpBootOrder.inf"
+"BootOrderSection.inf"
+[files]
+"BcpBootOrder.sdl"	
+"BcpBootOrder.chm"	
+"BcpBootOrderElinks.txt"	
+<endComponent>

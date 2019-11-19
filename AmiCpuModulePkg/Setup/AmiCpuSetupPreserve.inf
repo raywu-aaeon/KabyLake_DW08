@@ -1,0 +1,18 @@
+[Defines]
+    INF_VERSION = 0x00010005
+    VERSION_STRING = 1.0
+    BASE_NAME = CpuSetupPreserveLib
+    FILE_GUID = c9edc738-de28-45e9-9ba6-5c5c365a24e1                    
+    MODULE_TYPE = DXE_SMM_DRIVER
+    LIBRARY_CLASS  = NULL
+	
+[Sources]
+    AmiCpuSetupPreserve.c
+
+[Packages]
+    IntelFrameworkPkg/IntelFrameworkPkg.dec
+    MdePkg/MdePkg.dec  
+    AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+      
+[LibraryClasses]
+    UefiRuntimeServicesTableLib

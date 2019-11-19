@@ -1,0 +1,12 @@
+<component>
+	name = "FwUpdateLib:: Me 14.0"
+	category = ModulePart
+	LocalRoot = "AmiModulePkg\Ofbd\Meud\MEFwUpdLcl\Me_14\"
+	RefName = "FWUpdateLib_ME_14"
+[INF]
+"FWUpdateLib.inf"
+"FWUpdatePlatformLib.inf"
+[files]
+"FWUpdateLib.sdl"
+"FWUpdateLib.lib"
+<endComponent>

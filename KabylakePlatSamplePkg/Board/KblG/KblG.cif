@@ -1,0 +1,24 @@
+<component>
+	name = "KblG"
+	category = ModulePart
+	LocalRoot = "KabylakePlatSamplePkg\Board\KblG\"
+	RefName = "KabylakePlatSamplePkg.KblG"
+[INF]
+"AcpiTable\AltoAcpiTable.inf"
+"KabylakeDdr4Rvp17\DxeBoardInitLib\KabylakeDdr4Rvp17InitLib.inf"
+"KabylakeDdr4Rvp17\PeiBoardInitLib\PeiKabylakeDdr4Rvp17InitLib.inf"
+"KabylakeDdr4Rvp17\PeiBoardInitLib\PeiKabylakeDdr4Rvp17InitPreMemLib.inf"
+[files]
+"KblG.sdl"	
+"AcpiTable\AtifCommonFunc.asl"	
+"AcpiTable\AtifDgpu.asl"	
+"AcpiTable\AtifSg.asl"	
+"AcpiTable\Atpx.asl"	
+"AcpiTable\Pxport.asl"	
+"TpvSgfx\Include\Guid\TpvSgfxAcpiTableGuid.h"	
+"KabylakeDdr4Rvp17\DxeBoardInitLib\KabylakeDdr4Rvp17InitLib.h"	
+"KabylakeDdr4Rvp17\PeiBoardInitLib\GpioTableKblRvp17.h"	
+"KabylakeDdr4Rvp17\PeiBoardInitLib\KabylakeDdr4Rvp17HdaVerbTables.h"	
+"KabylakeDdr4Rvp17\PeiBoardInitLib\KabylakeDdr4Rvp17HsioPtssTables.h"	
+"KabylakeDdr4Rvp17\PeiBoardInitLib\PeiKabylakeDdr4Rvp17InitLib.h"	
+<endComponent>

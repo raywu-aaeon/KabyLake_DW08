@@ -1,0 +1,67 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+## @file
+#   
+##
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Mxm30Nbci
+  FILE_GUID                      = 31A0B6EF-A400-4419-8327-0FB134AA59E7
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = MxmDriverEntryPoint
+
+[Sources]
+  Mxm30Dxe.c
+  Mxm30Efi.c
+  NBCIEfi.c  
+
+[Packages]
+  AmiModulePkg/AmiModulePkg.dec
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  SkyBayPkg/SkyBayPkg.dec
+  Build/Platform.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec  
+   
+[LibraryClasses]
+  AmiDxeLib
+  AmiCspLib
+  UefiDriverEntryPoint
+  NbGetSetupData
+  
+[Protocols]
+  gEfiAcpiSupportGuid
+  gEfiPciRootBridgeIoProtocolGuid
+  gEfiLegacyBiosProtocolGuid
+  gEfiLegacyBiosExtProtocolGuid
+  
+[Depex]
+  gEfiAcpiSupportGuid AND
+  gEfiPciRootBridgeIoProtocolGuid
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

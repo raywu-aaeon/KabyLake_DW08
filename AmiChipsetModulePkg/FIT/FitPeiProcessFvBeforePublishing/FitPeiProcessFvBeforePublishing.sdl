@@ -1,0 +1,34 @@
+TOKEN
+    Name  = "FitPeiProcessFvBeforePublishing_SUPPORT"
+    Value  = "1"
+    Help  = "Switch to enable FitPeiProcessFvBeforePublishing support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+    TargetMAK = Yes
+    Master = Yes
+    Token = "INTEL_BOOT_GUARD_SECURITY_FUNCTION_SUPPORT" "=" "0"
+    Token = "INTEL_BOOT_GUARD_CHAIN_OF_TRUST_SUPPORT" "=" "1"
+End
+
+PATH
+    Name  = "FitPeiProcessFvBeforePublishing_DIR"
+End
+
+ELINK
+    Name  = "FitPeiProcessFvBeforePublishing"
+    Parent  = "PeiProcessFvBeforePublishing"
+    InvokeOrder = AfterParent
+End
+
+INFComponent
+    Name  = "FitPeiProcessFvBeforePublishing"
+    File  = "FitPeiProcessFvBeforePublishing.inf"
+    Package  = "AmiChipsetModulePkg"
+End
+
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "AmiChipsetModulePkg.FitPeiProcessFvBeforePublishing"
+    Override  = "AmiModulePkg.RomLayoutPei"
+End

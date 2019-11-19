@@ -1,0 +1,2563 @@
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_052                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP482848 
+[Category] Improvement
+[Severity] Normal
+[Description] Set token PROGRAM_GPIO_STYLE to 1. The definition of Status is not defined.
+[Files] AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+[TAG] EIP474103
+[Category] Improvement
+[Severity] Normal
+[Description] [Aptio V][Chipset Template] Verify SPI Bar address in SMM
+[Files] AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\AmiSmmLib\AmiSmmLib.c
+AmiChipsetModulePkg\Library\AmiSmmLib\AmiSmmLib.inf
+
+[TAG] EIP473514, EIP481863, EIP481870
+[Category] Improvement
+[Severity] Normal
+[Description] Default setting can't get in S4
+[Files] AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\AmiChipsetModulePkg.cif
+AmiChipsetModulePkg\AmiChipsetModulePkg.dec
+AmiChipsetModulePkg\AmiCspGlobalNvs.cif
+AmiChipsetModulePkg\AmiCspGlobalNvs.sdl
+AmiChipsetModulePkg\AmiCspGlobalNvs\AmiCspGlobalNvsDxe.c
+AmiChipsetModulePkg\AmiCspGlobalNvs\AmiCspGlobalNvsDxe.inf
+AmiChipsetModulePkg\ASL\AmiCspGlobalNvs.asl
+AmiChipsetModulePkg\ASL\Sb.asl
+AmiChipsetModulePkg\Include\Guid\AmiCspGlobalNvs.h
+AmiChipsetModulePkg\Include\Protocol\AmiCspGlobalNvsAreaProtocol.h
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.inf
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.inf
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_051                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP479649
+[Category] Improvement
+[Severity] Normal
+[Description] Intel Rapid Storage Technology 17.5.0.1017 PV (RAID EFI-Driver/OPROM 17.5.0.4136)
+[Files] AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriverSmm.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[TAG] EIP465808
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Fix GCC warnings in chipset code. (AmiChipsetModulePkg)
+[Files] AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\Library\AmiCspFlashLib\SbCspFlashLib.c
+AmiChipsetModulePkg\SB\PowerButton\PowerButton.c
+AmiChipsetModulePkg\SB\PcieErrorLog\PcieErrorLog.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\SbInit\SbRun.c
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+AmiChipsetModulePkg\SB\SbInit\SleepSmi.c
+AmiChipsetModulePkg\SB\SmBus\SmBusDxe.c
+AmiChipsetModulePkg\SB\SmBus\SmBusDxeSmm.c
+AmiChipsetModulePkg\SB\SmBus\SmBusPei.c
+AmiChipsetModulePkg\SB\AcpiModeEnable\AcpiModeEnable.c
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmiHandlerGeneric.c
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmmChildDispatchMain.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+miChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+AmiChipsetModulePkg\Library\SbGetSetupData\GetSetupData.c
+AmiChipsetModulePkg\Library\SbCsmDxeLib\SbCsmDxeLib.c
+AmiChipsetModulePkg\Library\SbPciHotPlugLib\SbPciHotPlugLib.c
+AmiChipsetModulePkg\Library\SbWdt\SbWdt.c
+AmiChipsetModulePkg\Library\SbHdaVerbTableLib\SbHdaVerbTableLib.c
+AmiChipsetModulePkg\Library\SbCspIoDecodeLib\SbCspIoDecodeLib.c
+AmiChipsetModulePkg\Library\SbPciDxeInitLib\SbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\AmiWdatLib\AmiWdatLib.c
+AmiChipsetModulePkg\Library\SbCriticalSectionLib\SbCriticalSectionLib.c
+AmiChipsetModulePkg\Library\AmiHpetApicLib\AmiHpetApicLib.c
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.c
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscPeiLib.c
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_050.2                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP467760
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Reduce the time between SMI / timer interrupt entry and exit
+[Files] AmiChipsetModulePkg\Library\AmiSmmLib\AmiSmmLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_050.1                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP465264
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] CVE119 [Security] Correct boundary for Dynamic loops
+[Files] AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[TAG] EIP465269
+[Category] Improvement
+[Severity] Normal
+[Description] Reserved MMIO resource for eMMC
+[Files] AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_050                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP461877
+[Category] Improvement
+[Severity] Normal
+[Description] Update RST EFI v17.2.0.1009
+[Files] AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriverSmm.efi
+
+[TAG] EIP426082
+[Category] Improvement
+[Severity] Normal
+[Description] AmiUsb_22.01, EFI_USB_PROTOCOL has been changed, so SbUsbProtocolCallback needs to be updated accordingly.
+[Files] AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_049                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP448389
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Verify the system is able to do the capsule updating via the warm reset.
+Add a warm reset type for capsule update.
+[Files] AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.c
+
+[TAG] EIP424690
+[Category] Improvement
+[Severity] Normal
+[Description] Change the default value of COLD_RESET_WITH_POWER_CYCLE to 1.
+In non-SMM, ResetCold() in Intel Reference code is called from pRS->ResetSystem(EfiResetCold) it and causes Power Cycle Reset (IoWrite8(0xCF9,0xE)).
+But in SMM, SBLib_ResetSystem() in AmiSbMiscLib is called from pRS->ResetSystem(EfiResetCold) and it calls IoWrite8(0xCF9, 0x6) and it doesn't cause power cycle reset. 
+[Files] AmiChipsetModulePkg\Sb.sdl
+
+[TAG] EIP444390
+[Category] Improvement
+[Severity] Normal
+[Description] [Aptio V][Chipset Template] AmiChipsetGetTime function improvement
+[Files] AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_048                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP443780
+[Category] Improvement
+[Severity] Normal
+[Description] Update RST Legacy OPROM v17.0.0.3713
+[Files]	AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[TAG] EIP443780
+[Category] Improvement
+[Severity] Normal
+[Description] Update RST EFI v17.0.0.3713
+[Files]	AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriverSmm.efi
+
+[TAG] EIP431111
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] EFIAPI function qualifiers for Linux Build.
+[Files] AmiChipsetModulePkg\Library\SbPciDxeInitLib\SbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\SB\AcpiModeEnable\AcpiModeEnable.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbRun.c
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+AmiChipsetModulePkg\SB\SbInit\SleepSmi.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_047                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP440130
+[Category] Bug Fix
+[Severity] Normal
+[Symptom] HSTI testing failed of Error 0x00080003 due to enabling B0:D1:F1
+[RootCause] We don't reserve prefetchable memory for PEG Root Bridges if hotplug is enabled.
+[Solution] Reserve prefetchable memory for PEG Root Bridges if hotplug is enabled.
+[Files] AmiChipsetModulePkg/Library/SbPciHotPlugLib/SbPciHotPlugLib.c
+
+[TAG] EIP440912
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Re-configures the RTC configuration registers (A & B) while RTC Divisor setting is not 010b or Update Cycle Inhibit bit is set.
+[Files] AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIP426038
+[Category] Improvement
+[Severity] Normal
+[Description] NbPei and SbDxe modules don't build with new GCC flags
+[Files] AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.c
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.inf
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscPeiLib.c
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscPeiLib.inf
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.6                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP429800 
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] PEI_BUILD, DXE_BUILD, and SMM_BUILD removal.
+[Files] AmiCspFlashLib\SbCspFlashLib.inf
+AmiCspFlashLib\SbCspFlashLib.c
+AmiCspFlashLib\SbCspFlashPeiLib.inf
+AmiCspFlashLib\SbCspFlashPeiLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.5                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP427935
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Do not use EFI_SPECIFICATION_VERSION and PI_SPECIFICATION_VERSION.
+[Files] AmiChipsetModulePkg\SB\SmBus\SmBusPei.c
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmiHandlerPorting.c
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmmChildDispatch.h
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmmChildDispatchMain.c
+
+[TAG] EIP429589
+[Category] Improvement
+[Severity] Important
+[Description] Unable to boot to Shell/Setup if enable tracehub debugger
+[Files] AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[TAG] EIP431183 
+[Category] Improvement
+[Severity] Normal
+[Description] Update Intel Rapid Storage Technology 16.7.0.1009
+[Files] AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriverSmm.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.4                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP427935
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Do not use EFI_SPECIFICATION_VERSION and PI_SPECIFICATION_VERSION.
+[Files] AmiChipsetModulePkg\SB\SmBus\SmBusPei.c
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmiHandlerPorting.c
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmmChildDispatch.h
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmmChildDispatchMain.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.3                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP422646
+[Category] Improvement
+[Severity] Normal
+[Description] Updated RAID Driver EFI & Legacy v16.5.0.3492
+[Files] AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriverSmm.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.2                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP418295
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Improve the DSDT table updating logic for compatible with (INT)ACPI 017.
+[Files] AmiChipsetModulePkg\SB\SbInit\SbDxe.inf
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.1                      **
+**                                                                        **
+****************************************************************************
+[TAG] None
+[Category] Improvement
+[Severity] Normal
+[Description] AutoCheck - SDL Files Setting Check:The VectorRange of I/O APIC ID#2 must be 018h.
+[Files] AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP417697
+[Category] Improvement
+[Severity] Normal
+[Description] Update for KBL RC v3.4.0
+[Files] AmiChipsetModulePkg\Library\AmiGpioLib\AmiGpioLib.c
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.c
+AmiChipsetModulePkg\Library\AmiSmmLib\AmiSmmLib.c
+AmiChipsetModulePkg\Library\SbPciDxeInitLib\SbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\SbPciHotPlugLib\SbPciHotPlugLib.h
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+AmiChipsetModulePkg\Library\SbSmmLib\SbSmmLib.c
+AmiChipsetModulePkg\Library\SbSpiLib\SbSpiLib.c
+AmiChipsetModulePkg\Library\SmBusLib\SmBusPorting.c
+AmiChipsetModulePkg\SB\AcpiModeEnable\AcpiModeEnable.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbRun.c
+AmiChipsetModulePkg\SB\SbSetup\SbSetup.c
+AmiChipsetModulePkg\SB\SmBus\SmBusDxe.c
+AmiChipsetModulePkg\SB\SmBus\SmBusPei.c
+AmiChipsetModulePkg\SB\SmmChildDispatch\SmiHandlerPorting.c
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_045                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP405812 
+[Category] Improvement
+[Severity] Normal
+[Description] Mapping ID porting problems in AMIChipsetModulePkg
+[Files] AmiChipsetModulePkg\SB\SbSetup\Sb.sd
+AmiChipsetModulePkg\SB\SbSetup\Sb.uni
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_044                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP404688
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Kaby Lake Platform SiC/Platform Sample Code/FSP 3.2.0
+[Files]         AmiChipsetModulePkg\Library\SbOemGpioLib\SbPeiBoard.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_043                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP359738 
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Plug in USB device (USB key & USB mouse) Hang up.
+[Files]         AmiChipsetModulePkg\SB\I2cController\SbI2cController.c
+
+[TAG]           EIP397240 
+[Category]      Improvement
+[Severity]      Normal
+[Description]   [KBL] PCH PCI UART will cause an exception error before boot into DOS.
+[Files]         AmiChipsetModulePkg\SB\MmioSerialUart\MmioSerialUart0.c
+AmiChipsetModulePkg\SB\MmioSerialUart\MmioSerialUart0.inf
+AmiChipsetModulePkg\SB\MmioSerialUart\MmioSerialUart1.c
+AmiChipsetModulePkg\SB\MmioSerialUart\MmioSerialUart1.inf
+AmiChipsetModulePkg\SB\MmioSerialUart\MmioSerialUart2.c
+AmiChipsetModulePkg\SB\MmioSerialUart\MmioSerialUart2.inf
+
+[TAG]           EIP394899 
+[Category]      Improvement
+[Severity]      Normal
+[Description]   REF-46694: BIOS Basic Test failed.
+[Files]         AmiChipsetModulePkg\SB\UpdateSmbiosType41\AmiOemSmbiosType41Lib.h
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\AmiOemSmbiosType41LibNull.c
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\AmiOemSmbiosType41LibNull.inf
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\AmiTempOnboardDevicesTable.h
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.c
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.cif
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.h
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.inf
+AmiChipsetModulePkg\SB\UpdateSmbiosType41\UpdateSmbiosType41.sdl
+
+[TAG]           None
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update RAID  legacy ROM and EFI driver (Version: 16.0.2.3402)
+[Files]         AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriverSmm.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_042                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP384682
+[Category]      Improvement
+[Severity]      Normal
+[Description]   [KBL] NbPegDetectNonComplaint() and NbClearPegCtrlRegVgaEnable() access unexisting table members.
+[Files]         AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Correct UART2 definition
+[Files]         AmiChipsetModulePkg\Include\Sb.h
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_040                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Spec Update
+[Severity]      Normal
+[Description]   Update Raid efi driver and legacy oprom to 15.9.0.1013.
+[Files]         RaidDriver.efi
+LegacyRom\Raid\RaidOrom.bin
+
+[TAG]           EIPNone
+[Category]      Spec Update
+[Severity]      Normal
+[Description]   Update Raid efi driver and legacy oprom to 15.9.0.1011.
+[Files]         RaidDriver.efi
+LegacyRom\Raid\RaidOrom.bin
+
+[TAG]           EIP365691
+[Category]      New Feature
+[Severity]      Normal
+[Description]   [KBL] Implement generic Read & write porting from the bottom 
+layer for SPI device.
+[Files]         SbSpiLib\SbSpiLib.inf
+SbSpiLib\SbSpiLib.c
+SbLibrary.cif
+Sb.sdl
+Library\SbSpiLib.h
+SbInclude.cif
+
+[TAG] EIPNone
+[Category] Bug Fix
+[Severity] Normal
+[Symptom] SbLinkLib is not override into SbRun driver.
+[RootCause] SbLinkLib is not override into SbRun driver due to preprocess.
+[Solution] Include SbLinkLib in SbRun.inf
+[Files] SbRun.inf
+Sb.sdl
+
+[TAG]           EIPNone
+[Category]      Spec Update
+[Severity]      Normal
+[Description]   Update for Kabylake RC 2.8.0
+[Files]         SbPcie.asl
+
+[TAG]           EIP366302
+[Category]      Improvement
+[Severity]      Normal
+[Symptom] Stall() function caused more delay time.
+[RootCause] TickPeriod was set to 100 which will make 
+any delay time under 10us become 10us.
+If pBS->Stall(1) is used, the delay time will be 10us.
+[Files]         Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_039.1                      **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Remove TOOL_CHAIN_TAG dependency.
+[Files]         AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_039                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP349651
+[Category] New Feature
+[Severity] Normal
+[Description] [KBL] Support Console Redirection by PCH UART.
+[Files] MmioSerialUart.sdl
+MmioSerialUart0.inf
+MmioSerialUart0.c
+MmioSerialUart1.inf
+MmioSerialUart1.c
+MmioSerialUart2.inf
+MmioSerialUart2.c
+MmioSerialUart.cif
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_038                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIPNone
+[Category] Improvement
+[Severity] Important
+[Description] Add CFL_RAID_DRIVER_SUPPORT for support CFLS+KBP platform.
+[Files]
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.sdl
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriverSmm_FdfFileStatement.txt
+AmiChipsetModulePkg\SB\RaidDriver\CflRaidDriver.inf
+AmiChipsetModulePkg\SB\RaidDriver\CflRaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.cif
+AmiChipsetModulePkg\LegacyRom\Raid\CflRaidOrom.bin
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Sb.cif
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_037                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP335612
+[Category] Improvement
+[Severity] Normal
+[Description] Provide SB_RESET_SHUTDOWN_OVERRIDE token hook ResetSystem() to call AmiChipsetResetSystem() when the reset type is EfiResetShutdown.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbRun.c
+AmiChipsetModulePkg\Sb.sdl 
+
+
+[TAG] EIPNone
+[Category] Improvement
+[Severity] Normal
+[Description] Update gpio table for RVP7, RVP15 and RVP8, because intel split the gpio table into two parts.
+[Files] AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c 
+
+
+[TAG] EIP349651
+[Severity] Normal
+[Description] [KBL] Support Console Redirection by PCH UART.
+[Files] 
+MmioSerialUart.cif
+MmioSerialUart.sdl
+MmioSerialUart.inf
+MmioSerialUart.c
+Csp.sdl 
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_036                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Spec Update
+[Severity]      Normal
+[Description]   Update Raid efi driver and legacy oprom to 15.7.0.1014
+[Files]         RaidDriver.sdl
+RaidDriverSmm.txt
+RaidDriverSmm.efi
+RaidDriverSmm.depex
+RaidDriver.efi
+RaidDriver.cif
+LegacyRom\Raid\RaidOrom.bin
+
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update _INI method for every pci root ports.
+[Files]         Sb.sdl
+SbPcie.asl
+
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Minor
+[Description]   Remove SbIsDefaultConfigMode token help information. SbIsDefaultConfigMode won’t be used for preserving password 
+[Files]         Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_035                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Bug Fix
+[Severity]      Normal
+[Symptom]   Disable SB_WAKEUP_TYPE_FN would build error.
+[RootCause] DEFAULT_SYSTEM_WAKEUP_TYPE is not defined when disable SB_WAKEUP_TYPE_FN.
+[Solution]      Remove SB_WAKEUP_TYPE_FN dependency from DEFAULT_SYSTEM_WAKEUP_TYPE token.
+[Files]         AmiChipsetModulePkg\Sb.sdl
+
+[TAG]           EIP338039
+[Category]      Bug Fix
+[Severity]      Minor
+[Symptom]   SATA HDD doesn't work in KabyLake R RVP if FSP_WRAPPER_ENABLE is enabled in 5.12_VEB_1ATQO034
+[RootCause] Fsp wrappers creates 0xFFA00000 to EfiGcdMemoryTypeMemoryMappedIo, it casues that we assign the wrong mmio bar for the SATA controller.
+[Solution]      This code was a W/A for SetMemorySpaceAttribute issue in PchSpi and PchReset drivers in FVMAIN of SSPT. This is unused now.
+[Files]         KabylakePlatSamplePkg\FspWrapper\Library\PeiFspWrapperHobProcessLib\FspWrapperHobProcessLib.c
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_034                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP336142
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Fix GCC build error.
+[Files]         
+AmiChipsetModulePkg\Include\Protocol\PeriodicSmiControl.h
+AmiChipsetModulePkg\AmiCspLib.sdl
+
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Add Kabylake Diaplay audio DID for disable HDMI codec.
+[Files]         AmiChipsetModulePkg\Library\SbHdaVerbTableLib\SbHdaVerbTableLib.c
+
+[TAG]           EIP334480
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Follow Chipset Template for RTC Init
+[Files]         
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+[TAG]           EIP336013
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Provide the token to enable/disable IO Port 0x26,0x27,0x2A,0x2B check during S3 resume.
+[Files]         
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_032.2                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP324127
+[Category] Improvement
+[Severity] Normal
+[Description] SbIsWarmBoot function support.
+[Files] AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.inf
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.inf
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\Include\Library\AmiSbMiscLib.h
+
+[TAG] EIP330041
+[Category] Improvement
+[Severity] Normal
+[Description] Change Power Management Registers block length
+[Files] AmiChipsetModulePkg\Sb.sdl
+
+[TAG] EIPNone
+[Category] Bug Fix
+[Symptom] GEN_PMCON_A and FEN_PMCON_B register are 32 bits register. Use READ_PCI32 to read the register.
+[RootCause] GEN_PMCON_A and FEN_PMCON_B register are 32 bits register. Use READ_PCI32 to read the register.
+[Solution] Use READ_PCI32 to read the register.
+[Files] AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIPNone
+[Category] Bug Fix
+[Symptom] Disable audio register is not correct.
+[RootCause] Disable audio register is not correct.
+[Solution] Write correct PCR register for disable audio.
+[Files] AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.c
+
+[TAG] EIPNone
+[Category] Bug Fix
+[Severity] Normal
+[Symptom] GPE status register is incorrect.
+[RootCause] GPE status register is incorrect.
+[Solution] Correct GPE status register.
+[Files] AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIPNone
+[Category] Improvement
+[Severity] Normal
+[Description] Add BoardIdKabylakeRDdr4 support for AmiBoardInit().
+[Files] AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_032.1                      **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Minor
+[Description]   Disable SB_TIMER_ARCH_PROTOCOL_SUPPORT, it's no used.
+[Files]         AmiChipsetModulePkg\SB\SbInit\SbDxeBoard.c
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_032                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIPNone
+[Category] Bug Fix
+[Severity] Important
+[Symptom] SB_OEM_S3_WARMRESET_CALLBACK_LIST definition contains extra bracket, it would cause elink not generate
+[RootCause] SB_OEM_S3_WARMRESET_CALLBACK_LIST definition contains extra bracket
+[Solution] remove extra bracket
+[Files] Elink\SbElinks.txt
+    
+[TAG] EIPNone
+[Category] Improvement
+[Severity] Important
+[Description] Update Raid efi driver and legacy oprom to v15.5.0.1047
+[Files] AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+    
+[TAG] EIP325042
+[Category] Bug Fix
+[Severity] Normal
+[Symptom] Write to NULL in TcoSmi.c
+[RootCause] Write to NULL in TcoSmi.c
+[Solution] Correct parameter to pass by address.
+[Files] AmiChipsetModulePkg\SB\TcoSmi\TcoSmi.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_031.1                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP326666
+[Category] Bug Fix
+[Severity] Normal
+[Symptom] System cannot seelp into S3/S4/S5 when invoked "pRS->GetTime" in SLP SMI.
+[RootCause] After call InitAmiSmmLib() in SMM, pRS is changed to use SmmRsTable, 
+so it need to use pRS not gRT to call GetVariable/SetVariable.
+[Solution] Change to use pRS to call GetVariable/SetVariable.
+[Files] SbRuntimeServiceLib\SbRuntimeServiceLib.inf
+SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_031                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Remove CPSB.
+[Files]
+AmiChipsetModulePkg\ASL\Sb.asl
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Modify SbCspLib.h to include other header files.
+[Files]
+AmiChipsetModulePkg\Include\Library\AmiCmosLib.h
+AmiChipsetModulePkg\Include\Library\SbCspLib.h
+AmiChipsetModulePkg\Include\SbInclude.cif
+AmiChipsetModulePkg\Library\AmiSmmLib\AmiSmmLib.c
+AmiChipsetModulePkg\Include\Library\AmiCspFlashLib.h
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Add PCIE port 21 - 24.
+[Files]
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\Include\Library\AmiSbMiscLib.h
+AmiChipsetModulePkg\Library\AmiSbMiscLib\AmiSbMiscLib.c
+AmiChipsetModulePkg\Library\NbCsmDxeLib\NbCsmDxeLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\SB\PcieErrorLog\PcieErrorLog.c
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_030                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP314007
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Update AmiChipsetModulePkg to Sync with Labeled 'AmiChipsetModulePkg_08'
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_029                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fix Linux build error.
+[Files] 
+AmiChipsetModulePkg\Library\SbSmbusLib\SbSmbusLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_026                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP312938
+[Category] BugFix
+[Severity] Normal
+[Description] BIOS implementation for RST/Optane usage.
+[Files] 
+AmiChipsetModulePkg\Include\SbSetupData.h
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.sdl
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.inf
+AmiChipsetModulePkg\SB\SbSetup\Sb.sd
+
+[Tag] EIP275531
+[Category] BugFix
+[Severity] Normal
+[Description] LSI PCIe device missing after S3.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.inf
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] EIP312877
+[Category] BugFix
+[Severity] Normal
+[Description] Disable AMT in BIOS--Advanced--AMT Configuration, AMT will 
+show up in device manager after resume from S3.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.inf
+
+[Tag] EIP308339
+[Category] BugFix
+[Severity] Normal
+[Description] Ubuntu Firmware Test Live Test failed.
+[Files] 
+AmiChipsetModulePkg\ASL\Sata.asl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_025.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP310414
+[Category] BugFix
+[Severity] Normal
+[Description] I2C accessing problem with PCI above 4G decode 
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\SbPciDxeInitLib\SbPciDxeInitLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_025                        **
+**                                                                        **
+****************************************************************************
+[Tag] None 
+[Category] Improvement
+[Severity] Normal
+[Description] SbPciHotPlugLib improvement.
+[Files] 
+AmiChipsetModulePkg\Library\SbPciHotPlugLib\SbPciHotPlugLib.c
+
+[Tag] EIP304054 
+[Category] BugFix
+[Severity] Normal
+[Description] S3 Resume Crash when use BootScript use Smbus command 
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\Library\SbLibrary.cif
+AmiChipsetModulePkg\Library\SbSmbusLib\SbSmbusLib.c
+AmiChipsetModulePkg\Library\SbSmbusLib\SbSmbusLib.inf
+
+[Tag] EIP308646
+[Category] BugFix
+[Severity] Normal
+[Description]  System can't be waked up by setup item "Wake system from S5".
+[Files] 
+AmiChipsetModulePkg\SB\PowerButton\PowerButton.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_024                        **
+**                                                                        **
+****************************************************************************
+[Tag] None 
+[Category] Improvement
+[Severity] Normal
+[Description] Add chipset I2cHID support.
+[Files] 
+AmiChipsetModulePkg\Sb.cif
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\I2cController\SbI2cController.inf
+AmiChipsetModulePkg\SB\I2cController\SbI2cController.c
+AmiChipsetModulePkg\SB\I2cController\SbI2cController.h
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_023.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None 
+[Category] Improvement
+[Severity] Normal
+[Description] Modify for RC 1.4.1 USB DelayPdoProgramming feature.
+It's same as AMI OEM_USB_PER_PORT_DISABLE_SUPPORT feature.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_023                        **
+**                                                                        **
+****************************************************************************
+[Tag] None 
+[Category] Improvement
+[Severity] Normal
+[Description] Fix Linux build error/
+[Files] 
+AmiChipsetModulePkg\ASL\SbAcpiTableSsdt.inf
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+[Tag] EIP302888
+[Category] Improvement
+[Severity] Normal
+[Description] Fix event log test failed.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fix SB_LAN_REG declaration wrong
+[Files] 
+AmiChipsetModulePkg\Include\Sb.h
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fix IsTopSwapOn() read wrong LPC R_PCH_LPC_BC register.
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspFlashLib\SbCspFlashLib.c
+
+[Tag] EIP303384
+[Category] Improvement
+[Severity] Normal
+[Description] Fix  PCIE device in PCIEx4 slot(port 21~24) can't allow wake under device manager.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_021                        **
+**                                                                        **
+****************************************************************************
+[Tag] None 
+[Category] Improvement
+[Severity] Normal
+[Description] Fix system can't boot to Win7 OS
+[Files] 
+AmiChipsetModulePkg\ASL\Sata.asl
+
+[Tag] EIP297222 
+[Category] Improvement
+[Severity] Normal
+[Description] Clarfications for Debug Messages on AmiCpuModulePkg component
+
+[Tag] None 
+[Category] Improvement
+[Severity] Normal
+[Description] Fixed WDAT2 issue for HLK WDAT test
+[Files]
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\AmiWdatLib\AmiWdatLib.c
+ 
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_020.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP297551 
+[Category] Improvement
+[Severity] Normal
+[Description] Both Intel RC & AMI have declare duplicate SATA PORTx name in ASL code.
+[Files] 
+AmiChipsetModulePkg\ASL\Sata.asl
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Add one "RESERVE_SBWARMRESETVAR" token to Clear/Reserve SB_WARM_RESET_VARIABLE.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update to meet GenericSio_07.
+[Files] 
+AmiChipsetModulePkg\Library\SbIoDecodeLib\SbIoDecodeLib.c
+
+[Tag] EIP294014
+[Category] Improvement
+[Severity] Normal
+[Description] Change method for Get PMC BaseAddress. (from CSP_PCI_CFG_ADDRESS to SB_PCI_CFG_ADDRESS)
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_020                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP292207
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove EFI_SPECIFICATION_VERSION related token, it's no used now.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+
+[Tag] EIP291544
+[Category] Improvement
+[Severity] Normal 
+[Description] When SMBIOS component is removed, it gets build error
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Include\Protocol\SmbiosUpdateDataProtocol.h
+AmiChipsetModulePkg\NB\SmbiosUpdateData\SmbiosUpdateData.c
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.h
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove unused variable "AmiIccVariable"
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix HOTPLUG_SUPPORT enable build error.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.inf
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Always keep SbWarmResetVar to improve S3 resume time.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_019.2                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v15.2.0.1020.
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_019.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fix enable FORCE_HDD_PASSWORD_PROMPT, system can't enter S4.
+[Files]
+AmiChipsetModulePkg\ASL\Sata.asl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_019                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP273814
+[Category] Improvement
+[Severity] Normal
+[Description] Add SaddleBrook board init support.
+[Files] 
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Install sata.asl to send "Device Configuration Freeze Lock" command after S3.
+[Files] 
+AmiChipsetModulePkg\Sb.cif
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\ASL\Sata.asl
+AmiChipsetModulePkg\ASL\SbAcpiTableSsdt.inf
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] EIP286839 
+[Category] Improvement
+[Severity] Normal
+[Description] Enable/Disable HPET timer in AmiCriticalSectionCompatLib.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Include\Library\SbHpetTimerLib.h
+AmiChipsetModulePkg\Library\SbHpetTimerLib\SbHpetTimerLib.c
+AmiChipsetModulePkg\Library\SbHpetTimerLib\SbHpetTimerLib.inf
+
+[Tag] EIP289166  
+[Category] Improvement
+[Severity] Normal
+[Description] Create SbIoDecodeLib to Support GenericSio_6.3
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\SbIoDecodeLib\SbIoDecodeLib.c
+AmiChipsetModulePkg\Library\SbIoDecodeLib\SbIoDecodeLib.inf
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_017                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fix SB_PCIE_ERROR_LOG_SUPPORT enable build error.
+[Files] 
+AmiChipsetModulePkg\SB\PcieErrorLog\PcieErrorLog.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Add PEI_AHCI_CONTROLLER_2_PPI support for AhciRecovery_04.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_015                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP279471
+[Category] Improvement
+[Severity] Normal
+[Description] Implement gAmiSbBadPciDevList.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\SbPciDxeInitLib\SbPciDxeInitLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Implement IsTopSwapOn() and SetTopSwap().
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspFlashLib\SbCspFlashLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_014                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Add AmiGetBoardInfoLib and Kabylake uDIMM GPIO initial support.
+[Files] 
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.inf
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.inf
+KabylakePlatSamplePkg\PlatformInit\PolicyInitDxe\GopPolicyInitDxe.c
+KabylakePlatSamplePkg\PlatformInit\PolicyInitDxe\PolicyInitDxe.inf
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.c
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.cif
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.h
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.inf
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.sdl
+
+[Tag] EIP279579
+[Category] Improvement
+[Severity] Normal
+[Description] NMI generation does not work.
+[Files] 
+AmiChipsetModulePkg\SB\PcieErrorLog\PcieErrorLog.c
+
+[Tag] EIP277752
+[Category] Improvement
+[Severity] Normal
+[Description] Add WDAT2 support for KBL platform.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\SbLibrary.cif
+AmiChipsetModulePkg\Library\AmiWdatLib\AmiWdatLib.c
+AmiChipsetModulePkg\Library\AmiWdatLib\AmiWdatLib.inf
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_013.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Add X-AMI mapping language definition.
+[Files] 
+AmiChipsetModulePkg\SB\SbSetup\Sb.uni
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_013                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v15.2.0.1008.
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[Tag] EIP275950
+[Category] Improvement
+[Severity] Normal 
+[Description] Create a token for TempPciBusMin.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+KabylakeSiliconPkg\Wrapper\Library\PchHookLib\AmiPchPolicyUpdatePei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_012                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Add "POWER_BUTTON_DRIVER_SUPPORT" token to enable/disable the 
+Power Button driver support
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+
+[Tag] EIP274298
+[Category] Improvement
+[Severity] Normal 
+[Description] When FFS_FILE_CHECKSUM_SUPPORT token is enable in project, 
+system reboot at CP0x19 while FV_MAIN checksum is done.
+[Files] 
+AmiChipsetModulePkg\Library\SbSecLib\SbSecInit.S
+AmiChipsetModulePkg\Library\SbSecLib\SbSecInit.asm
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_011                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v15.0.0.1039.
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update GBE legacy rom to i219 Jacksonville SW3 PV v1.
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Pxe\GbE_OR.BIN
+
+[Tag] EIP270727
+[Category] Improvement
+[Severity] Normal
+[Description] When the system get RtcLostPower status, it will get the Incorrect values.
+[Files]
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.inf
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix FtRecovery_Support enable build fail.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_010                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix windows firmware update fail when enable PTT.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.inf
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_008                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP263627
+[Category] Improvement
+[Severity] Normal
+[Description] AmiChipsetModulePkg module build failed with Linux (GCC) compiler.
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v15.1.0.1016
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_007.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP264739
+[Category] Improvement
+[Severity] Normal
+[Description] Fix build error when enable AMIDEBUG_RX_SUPPORT.
+[Files] 
+AmiChipsetModulePkg\Library\SbPeiDebugger\SbPeiDebugger.inf
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_007                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP263372
+[Category] Improvement
+[Severity] Normal
+[Description] Use build\ChipsetReference.dec for all chipset related ¡§Includes¡¨ if need.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.inf
+AmiChipsetModulePkg\Library\SbAcpiTimerLib\SbAcpiTimerLib.inf
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.inf
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+AmiChipsetModulePkg\Library\SbSioDxeLib\SbSioDxeLib.inf
+AmiChipsetModulePkg\Library\SbSioPeiLib\SbSioPeiLib.inf
+AmiChipsetModulePkg\AmiChipsetModulePkg.dec
+
+[Tag] EIP261082
+[Category] Improvement
+[Severity] Normal
+[Description] STOP 0xC4 is occurred when rebooting windows.
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+[Tag] EIP259339
+[Category] Improvement
+[Severity] Normal
+[Description] Create AmiCspFlashLib.
+[Files] 
+AmiChipsetModulePkg\Library\SbLibrary.cif
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\Library\AmiCspFlashLib\SbCspFlashLib.c
+AmiChipsetModulePkg\Library\AmiCspFlashLib\SbCspFlashLib.inf
+AmiChipsetModulePkg\Library\AmiCspFlashLib\SbCspFlashPeiLib.inf
+AmiChipsetModulePkg\AmiCspLib.mak
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_006                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP257357
+[Category] Improvement
+[Severity] Normal
+[Description] Create AmiGpioLib.
+[Files] 
+AmiChipsetModulePkg\Include\Library\AmiGpioLib.h
+AmiChipsetModulePkg\Library\AmiGpioLib\AmiGpioLib.c
+AmiChipsetModulePkg\Library\AmiGpioLib\AmiGpioLib.inf
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Problems accessing ODD that support AN (Asynchronous Notification).
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_005                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP258148
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix set time with a leap year test failed.
+[Files] 
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update GBE efi driver(E0013X7.EFI) and legacy rom to 
+i219 Jacksonville Kabylake Beta v1
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Pxe\GbE_OR.BIN
+SkyBayPkg\IntelGigabitLan.efi
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to 15.0.0.1031
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[Tag] EIP257771/255132
+[Category] Improvement
+[Severity] Normal 
+[Description] Create the token to control SW SMI Timer Enable bit
+[Files] 
+AmiChipsetModulePkg\SB\AcpiModeEnable\AcpiModeEnable.c
+AmiChipsetModulePkg\SB\AcpiModeEnable\AcpiModeEnable.sdl
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+
+[Tag] EIP251471
+[Category] Improvement
+[Severity] Normal 
+[Description] Runtime Error Logging improvement.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\PcieErrorLog\PcieErrorLog.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_004                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix OEM_HDA_VERB_TABLE not working issue
+[Files] 
+AmiChipsetModulePkg\Library\SbHdaVerbTableLib\SbHdaVerbTableLib.c
+AmiChipsetModulePkg\Library\SbHdaVerbTableLib\SbHdaVerbTableLib.inf
+AmiChipsetModulePkg\Include\Library\SbHdaVerbTableLib.h
+AmiChipsetModulePkg\Include\HDAVBTBL.h
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_003.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP254453
+[Category] Improvement
+[Severity] Normal 
+[Description] AFUDOS (Previous BIOS to Test Bios) Test failed. System will hang 
+at postcode 04.
+[Files] 
+AmiChipsetModulePkg\ASL\Sb.asl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_003                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP253888
+[Category] Improvement
+[Severity] Normal 
+[Description] Thunderbolt device cannot be mapped to the above 4G region after 
+enable "Above 4GB MMIO BIOS assignment" in SETUP
+[Files] 
+AmiChipsetModulePkg\Library\SbPciHotPlugLib\SbPciHotPlugLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_002.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP251245
+[Category] Improvement
+[Severity] Normal 
+[Description] When the Hard drive password is set, the screen will be blank(0xA0) 
+for over one minute after resuming from the first S3 state after booting to Windows.
+Or the system may hang or run very slowly after resuming from S3 state. 
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+
+[Tag] EIP251357
+[Category] Improvement
+[Severity] Normal 
+[Description] AmiResetSystemEvent callbacks might not be executed.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbRun.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update GBE efi driver(E0012X7.EFI) and legacy rom(v1.06) to 
+i219 (Jacksonville) Kabylake DT & MB Alpha v1
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Pxe\GbE_OR.BIN
+SkyBayPkg\IntelGigabitLan.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_002                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v15.0.0.2371
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[Tag] None
+[Category] None
+[Severity] Normal 
+[Description] Sync all modification to SKL-030.
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_001                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] None
+[Severity] Normal 
+[Description] KabyLake project first label(Base on SKL-026).
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+Pch setup item/callback implementing when delete PchSetup module.
+[Files]
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbSetup\Sb.sd
+AmiChipsetModulePkg\SB\SbSetup\Sb.uni
+AmiChipsetModulePkg\SB\SbSetup\SbSetup.c
+AmiChipsetModulePkg\SB\SbSetup\SbSetup.sdl
+AmiChipsetModulePkg\Library\SbPciHotPlugLib\SbPciHotPlugLib.c
+KabylakePlatSamplePkg\Setup\PchSetup.hfr
+KabylakePlatSamplePkg\Setup\Setup.sdl
+KabylakeSiliconPkg\Wrapper\Library\PchLinkLib\PchLinkLib.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_021                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove USB ClearStatusRegReset.csm16, it's for A0 PCH stepping.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\ClearStatusRegReset.csm16
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_020.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Follow Intel PchResetCommon.c PchReset() to change WarmReset from 04 to 06.
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_020                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP235140
+[Category] BUGFIX
+[Severity] Normal 
+[Description] xHCI Port Disable Override 4773006 Sighting Alert 
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_019.3                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP226243
+[Category] BUGFIX
+[Severity] Normal 
+[Description] BQA_REF-34308.V6: Ubuntu Firmware Test Live test failed 
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_019.2                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP215475
+[Category] BUGFIX
+[Severity] Normal 
+[Description] Thunderbolt can't work on NB PCIe slot
+[Files] 
+AmiChipsetModulePkg\Library\SbPciHotPlugLib\SbPciHotPlugLib.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_019                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP230524
+[Category] BUGFIX
+[Severity] Normal 
+[Description] System can't resume from S3 with NVMe SSD on UEFI + RAID On mode.
+[Files] 
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v14.6.0.2285
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_018                        **
+**                                                                        **
+****************************************************************************
+[Tag] AMI_OVERRIDE_NCD
+[Category] Improvement
+[Severity] Normal 
+[Description] Implement Detect Non-Compliance Device item function (Parts of South Bridge)
+[Files] 
+SkylakeSiPkg\Wrapper\Library\PchHookLib\AmiPchPolicyUpdatePei.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_017                        **
+**                                                                        **   
+****************************************************************************
+[TAG]   EIP224168
+[Category]    New Feature
+[Description] Support AmiBeep function on Skylake generic code
+[Files]   Sb.sdl, SbBeepLibPcAt\SbBeepLibPcAt.inf, SbBeepLibPcAt\SbBeepLibPcAt.c, SbLibrary.cif
+
+[TAG] N/A
+[Category] Improvement
+[Severity] Normal
+[Description] Add HDMI_CODEC_PORT_B, HDMI_CODEC_PORT_C and HDMI_CODEC_PORT_D
+to support disable audio display verb table
+[Files]
+AmiChipsetModulePkg\Include\Library\SbHdaVerbTableLib.h
+AmiChipsetModulePkg\Library\SbHdaVerbTableLib\SbHdaVerbTableLib.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_016.2                      **
+**                                                                        **   
+****************************************************************************
+[TAG] N/A
+[Category] Improvement
+[Severity] Normal
+[Description] When PROGRAM_GPIO_STYLE set to 0, remove unused gpio table to reduce code size
+[Files]
+AmiChipsetModulePkg\Include\SbGpio.h
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_016.1                      **
+**                                                                        **   
+****************************************************************************
+[TAG] N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Update gpio table according to RC1.2.0
+[Files] 
+AmiChipsetModulePkg\Include\SbGpio.h
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_015.2                      **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v14.5.0.2241
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_015.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP217713
+[Category] Improvement
+[Severity] Normal 
+[Description] [SKL] follow EIP216913 to Create CmosBadHob while RTC power is invalid
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.inf
+
+[TAG] N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Update gpio table according to RC1.1.0
+[Files] 
+AmiChipsetModulePkg\Include\SbGpio.h
+
+[TAG] N/A
+[Category] BUGFIX
+[Severity] Normal 
+[Description] Save 0x72 index value first, then write SB_CMOS_MISC_FLAG_REG. 
+[Files] 
+AmiChipsetModulePkg\Library\SbSmmCorePlatformHookLib.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_015                        **
+**                                                                        **   
+****************************************************************************
+[Tag] AMI_OVERRIDE_SCT000
+[Category] Self Certification Tests
+[Severity] None
+[Description] 
+1. Fixed RuntimeServicesTest\TimeServicesTest 5.2.2.4.28 RT.SetWakeupTime 
+   - SetWakeupTime() enables the wakeup time at EFI_TPL_APPLICATION.
+2. Fixed RuntimeServicesTest\TimeServicesTest 5.2.2.4.29 RT.SetWakeupTime 
+   - SetWakeupTime() enables the wakeup time at EFI_TPL_CALLBACK.
+[Files] 
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+[Tag] AMI_OVERRIDE_SCT001
+[Category] Self Certification Tests
+[Severity] None
+[Description] 
+1. Fixed RuntimeServicesTest\TimeServicesTest 5.2.2.4.2 RT.SetWakeupTime 
+   - SetWakeupTime() returns EFI_INVALID_PARAMETER with Year is greater than the upper range.
+[Files] 
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Add ProgramMeSubId() to program ME(D22Fxx) SSID at PlatformInitPreMem
+[Files] 
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\Include\SbPeiLib.h
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_014.2                      **
+**                                                                        **   
+****************************************************************************
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Update gpio table
+[Files] 
+AmiChipsetModulePkg\Include\SbGpio.h
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_014.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP219718
+[Category] Improvement
+[Severity] Normal 
+[Description] Improve Legacy IO decode method for UART Legacy IO(0x3F8, 0x3E8, 0x2F8 and 0x2E8).
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\Library\SbSioDxeLib\SbSioDxeLib.c
+AmiChipsetModulePkg\Library\SbSioPeiLib\SbSioPeiLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update GBE efi driver(E0007X7.EFI) and legacy rom(v1.04) to V20.2C00038
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Pxe\GbE_OR.BIN
+SkyBayPkg\IntelGigabitLan.efi
+
+[Tag] EIP221175
+[Category] Improvement
+[Severity] Normal 
+[Description] Investigating that some of PCIe devices may always generating 
+errors when RtErrorLogging is enabled.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v14.0.0.2234
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[Tag] EIP219709
+[Category] BUGFIX
+[Severity] Normal 
+[Description] Always enable B_PCH_ACPI_PM1_EN_PWRBTN at EnableAcpiMode()
+[Files] 
+AmiChipsetModulePkg\SB\AcpiModeEnable\AcpiModeEnable.c
+
+[Tag] EIP219548
+[Category] BUGFIX
+[Severity] Normal 
+[Description] Add DISABLE_DAYLIGHT_SAVINGS token for disable daylight savings.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove StateAfterG3 == 2 related code, it's no used.
+[Files] 
+AmiChipsetModulePkg\Sb\PowerButton\PowerButton.c
+AmiChipsetModulePkg\Sb\SbInit\SleepSmi.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_013.2                      **
+**                                                                        **   
+****************************************************************************
+[TAG]           EIP217203
+[Category]      Bug Fix
+[Severity]      Normal
+[Symptom]       [SKL] Flash update should not be successful on Recovery and 
+Capsule path if SmmWriteProtect Enabled and Flash SMI module doesn't been included.
+[RootCause]     When SMM_BWP is set, we only can write the BIT0 of MSR 0x1FE in SMM mode.
+[Solution]      We write the BIT0 of MSR 0x1FE in SMM mode.
+[Files]         SbGeneric.c, SbSmmCorePlatformHookLib.c, SbSmmCorePlatformHookLib.inf
+
+[Tag] NONE
+[Category] BUGFIX
+[Severity] Normal 
+[Description] Fix GPIO GPE enable/status bit can not clear 
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_013.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP217006
+[Category] BUGFIX
+[Severity] Normal 
+[Description] Fix BiosLock enable, AFU can not flash
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_013                        **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v14.0.0.2209
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Add SB_CPU_SMM_CODE_ACCESS_CHECK_SUPPORT
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Add SB_LPC_IO_DECODE_BASEADDR and SB_LPC_IO_DECODE_SIZE
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_012.2                      **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fix BIOS LOCK issue
+[Files]
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_012.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Refine PCH PEIe error logging initialization.
+Some of PCIe device OpROM initialization may conflict to the old PCH PCIe 
+error initialization. Relocated the PCH PCIe code to before boot phase to 
+prevent such situation occur.
+[Files]
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_012                        **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP212781
+[Category] Improvement
+[Severity] Normal
+[Description] Implmenet a New SATA strength programming method instead of 
+RC SATA strength method 
+[Files]
+AmiChipsetModulePkg\Sb.mak
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_011.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP205038
+[Category] Improvement
+[Severity] Normal
+[Description] Modified for ME Capsule Update. Add warmboot.
+[Files]
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_011                        **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP208616
+[Category] Improvement
+[Severity] Normal
+[Description] Add HPET_SETUP_SUPPORT
+[Files]
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Sb\SbInit\SbDxe.c
+
+[Tag] EIP210955
+[Category] BUGFIX
+[Severity] Normal 
+[Description] Add callback function to handle NewCentury event
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Sb.cif
+AmiChipsetModulePkg\Sb\TcoSmi\TcoSmi.inf
+AmiChipsetModulePkg\Sb\TcoSmi\TcoSmi.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] change SB_RUN_RESET_CALLBACK_LIST to SbResetCallbackList 
+[Files] 
+AmiChipsetModulePkg\Sb.mak
+AmiChipsetModulePkg\Sb.sdl
+
+[Tag] EIP210948
+[Category] Improvement
+[Severity] Normal 
+[Description] Support S5 wake Via USB Keyboard 
+[Files] 
+AmiChipsetModulePkg\Sb\PowerButton\PowerButton.c
+AmiChipsetModulePkg\Sb\SbInit\SleepSmi.c
+
+[Tag] EIP211114
+[Category] Improvement
+[Severity] Normal 
+[Description] Support multi board gpio program and policy update
+[Files] 
+AmiChipsetModulePkg\Include\SbGpio.h
+AmiChipsetModulePkg\Include\Sbinclude.cif
+AmiChipsetModulePkg\Include\SbPolicyupdate.h
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.inf
+AmiChipsetModulePkg\Library\SbLibrary.cif
+AmiChipsetModulePkg\Library\SbPolicyUpdate\PchPolicyUpdate.c
+AmiChipsetModulePkg\Library\SbPolicyUpdate\SbPolicyUpdate.inf
+AmiChipsetElinks.txt
+AmiChipsetModulePkg\Sb.sdl
+
+[Tag] EIP209721
+[Category] Improvement
+[Severity] Normal 
+[Description] Change AmiAdjustOemGpioConfig location to SbPei.c
+[Files] 
+AmiChipsetModulePkg\Include\SbPeiLib.h
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+Skylake/Greenlow SB initialize for Runtime Error Logging.
+[Files]
+AmiChipsetModulePkg\SB\PcieErrorLog\PcieErrorLog.c
+AmiChipsetModulePkg\SB\PcieErrorLog\PcieErrorLog.inf
+AmiChipsetModulePkg\Sb.cif
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_010                        **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Added a PCIDEVICE "CSI-2 Interface"
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+
+[Tag] EIP206558, EIP206529
+[Category] Improvement
+[Severity] BugFix 
+[Description] Fix RVP11 S3 resume fail. Change power failure check bit from
+HOST_RST_STS to RTC_PWR_STS according to the bios spec.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_009.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP206316
+[Category] Bug Fix
+[Severity] Normal 
+[Description] Remove multiple quotation marks since it would cause "echo" 
+utility to generate quotation mark in SbRunInitElink.h.
+[Files] Sb.mak
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_009                        **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v14.0.0.2198
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_008.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] 
+Change AMI_GPIO_GROUP_TYPE for PCH-LP.
+[Files] 
+AmiChipsetModulePkg\Include\Library\SbCspLib.h
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] 
+Removed EnablePchEissProtectRegister method, it's retired.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbRun.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] 
+Removed XHCI workaround in SbDxe.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_007.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] ProgramSBRegBeforeMrc
+[Category] Improvement
+[Severity] BugFix 
+[Description] 
+Fixed xHCI SVID can't program issue. EIP202657.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.inf
+
+[Tag] SbGetGpioLvlSel
+[Category] Improvement
+[Severity] BugFix 
+[Description] 
+Return RX state when the GPIO is set to input and return TX state when the 
+GPIO is set to output. 
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+[Tag] SbGetGpioLvlSel
+[Category] Improvement
+[Severity] BugFix 
+[Description] 
+Add SbReadGpiGppSmiSts() function to get SMI Status
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\Include\Library\SbCspLib.h
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_007                        **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] BugFix 
+[Description] 
+1. Fixed a assert issue when debug mode enable on ULT platform.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.inf
+
+[Tag] AmiAdjustOemGpioConfig
+[Category] Improvement
+[Severity] Normal 
+[Description] Add oem config gpio function before program the bootmode
+[Files]
+AmiChipsetModulePkg\Sb.mak
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+[Tag] SbReadAltGpiSmiSts
+[Category] Improvement
+[Severity] Normal 
+[Description] Update SbReadAltGpiSmiSts to be same with template
+[Files] 
+AmiChipsetModulePkg\Include\Library\SbCspLib.h
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RAID efi driver and legacy rom to v14.0.0.2180
+[Files] 
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver.efi
+AmiChipsetModulePkg\LegacyRom\Raid\RaidOrom.bin
+
+[Tag] SsidTblPtr
+[Category] Improvement
+[Severity] BugFix 
+[Description] SsidTblPtr will still be assigned to DefaultSIdTbl,
+              Since global Variable can't be changed in PEI phase. 
+[Files] 
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_006.4                      **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix FACP table not updated in AcpiPlatform.c
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+SkylakePlatSamplePkg\Acpi\AcpiTables\AcpiPlatform\Dxe\AcpiPlatform.c
+SkylakePlatSamplePkg\Acpi\AcpiTables\AcpiPlatform\Dxe\AcpiPlatform.h
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix IsTopSwapOn function.
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update RaidDriver.efi and RaidOrom.bin
+[Files]
+AmiChipsetModulePkg\LegacyRom\Raid\RaidDriver.efi
+AmiChipsetModulePkg\SB\RaidDriver\RaidDriver\RaidOrom.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] The global reset is issued in PchEarlyInit() if RTC missing.
+If clear RTC_PWR_STS bit here, it will cause SbIsDefaultConfigMode fail. 
+The RTC_PWR_STS bit will be cleared in PchConfigureRtc().
+[Files]
+AmiChipsetModulePkg\SB\SbInit\SbPei.c 
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Add D22F4 device on SB_PCI_DEVICES_SSID_TABLE Table list.
+[Files]
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Include\Sb.h
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_006.3                      **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Create "IsCtrlHomePressed" function that if the Ctrl + Home key press has been made.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove the Token "HPTB", it's retired.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Remove "CORE_REVISION".
+[Files] 
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] AMI_OVERRIDE_NB0000_START
+[Category] Improvement
+[Severity] Normal
+[Description] Retired LibAllocCspResource(gNbCspResTable) method and using "RSVCHIPSET" in Nb.sdl and Sb.sdl
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+SkylakeSiPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+SkylakeSiPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_006.1                      **
+**                                                                        **   
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Trimming South Bridge chipset porting library function name.
+[Files] 
+AmiChipsetModulePkg\Include\Library\SbCspLib.h
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiModulePkg\SecureFlash\SecSMIFlash\SecSMIFlash.c
+AmiChipsetModulePkg\Library\SbRuntimeServiceLib\SbRuntimeServiceLib.c
+
+[Tag] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove "EFI_VARIABLE_RUNTIME_ACCESS" in SbAslBufferPtrVar.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_006                        **
+**                                                                        **   
+****************************************************************************
+[Tag] EIP196145
+[Category] Improvement
+[Severity] Normal 
+[Description] Create "TICK_PERIOD" in EFI_METRONOME_ARCH_PROTOCOL.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbRun.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_005.3                      **
+**                                                                        **
+****************************************************************************
+[TAG] ROOT_PORT_FUN_SWAP_ENABLE
+[Category] Improvement
+[Severity] Normal  
+[Description] Remove Token ROOT_PORT_FUN_SWAP_ENABLE.
+[Files]
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_005.1                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP193049
+[Category] Bug fixed
+[Severity] Important 
+[Description] PCI Device Interrupt Line Configuration incomplete.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\Library\AmiCspLib\NbGeneric.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] SwitchableGraphics_SUPPORT rename to SgTpv_SUPPORT.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] fixed capsule module hang issue, but still not work.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIP193510
+[Category] Improvement
+[Severity] Normal 
+[Description] fixed System boot mode is incorrect when S4 resume mode.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_005                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Add SKY RVP11 CRB support.
+[Files] 
+AmiChipsetModulePkg\Include\SbGpio.h
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+
+[TAG] EIP N/A
+[Category] Bug fixed
+[Severity] Normal 
+[Description] Fixed build error when PROGRAM_GPIO_STYLE = 2.
+[Files] 
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_004.2                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Integrate SbPlatformHookBeforeAfterSmmDispatch for SMM  SKL _08.
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\Library\SbSmmCorePlatformHookLib\SbSmmCorePlatformHookLib.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Support USB keyboard and mouse in Windows7.
+[Files] 
+AmiChipsetModulePkg\SB\AcpiModeEnable\AcpiModeEnable.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_004.1                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP 187264
+[Category] Improvement
+[Severity] Normal 
+[Description] Implement Switchable Graphics module for Skylake platform.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Added Ami Oem Ssid Support.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\Include\SbPeiLib.h
+AmiChipsetModulePkg\Sb.sdl
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_004                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Fixed S3 resume not work of Ami SmmControlPpi.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Fixed Capsule assert error in PlatformPolicySetup.c when debug mode is enable.
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] OEM function requested
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\Include\Library\SbCspLib.h
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Follow Intel RC changing GPIO definition
+[Files] 
+AmiChipsetModulePkg\Library\SbOemGpioLib\SbOemGpioLib.inf
+AmiChipsetModulePkg\Library\SbOemGpioLib\SbPeiBoard.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.inf
+AmiChipsetModulePkg\SB\SbInit\SbPei.inf
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\Include\SbGpio.h
+AmiChipsetPkg\Include\Ppi\SbPpi.h
+AmiChipsetModulePkg\SB\PowerButton\PowerButton.c
+AmiChipsetModulePkg\SB\PowerButton\PowerButton.inf
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_003                        **
+**                                                                        **   
+****************************************************************************
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] clear AME bit in IsBadCmos.
+[Files] 
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Modified SATA controller PCI device include ROM file from RaidOrom140.bin to RaidOrom.bin
+[Files] 
+AmiChipsetModulePkg\Sb.sdl
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Add some specific equates and structures
+[Files] 
+AmiChipsetModulePkg\Include\Sb.h
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Sata Registers Save/Restore Boot Script 
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **                      
+**                    SKL  AmiChipsetModulePkg_001                        **
+**                                                                        **   
+****************************************************************************
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] fix hotplug resource cannot be reserved
+[Files] 
+AmiChipsetModulePkg\Library\SbPciHotPlugLib\SbPciHotPlugLib.c
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix IO decode and LPC IO decode fail
+[Files] 
+AmiChipsetModulePkg\Library\SbSioPeiLib\SbSioPeiLib.c
+AmiChipsetModulePkg\Library\SbSioPeiLib\SbSioPeiLib.inf
+AmiChipsetModulePkg\Library\SbSioDxeLib\SbSioDxeLib.c
+AmiChipsetModulePkg\Library\SbSioDxeLib\SbSioDxeLib.inf
+AmiChipsetModulePkg\Sb.sdl
+SkyBayPkg\Csp.sdl
+
+[TAG] EIP N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Clean code
+[Files] 
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+AmiChipsetModulePkg\SB\SbInit\SbPei.c
+AmiChipsetModulePkg\Include\Library\SbCspLib.h
+
+[TAG] EIP 185914
+[Category] Improvement
+[Severity] Normal 
+[Description] Implement OEM_USB_PER_PORT_DISABLE_SUPPORT
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+SkylakeSiPkg\Pch\LibraryPrivate\PeiPchInitLib\PchUsb.c
+AmiChipsetModulePkg\Sb.sdl
+
+[TAG] EIP 185926
+[Category] Improvement
+[Severity] Normal 
+[Description] Implement SbSmmCorePlatformHookLib for SbPlatformHookBeforeSmmDispatch and SbPlatformHookAfterSmmDispatch.
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\SbGeneric.c
+AmiChipsetModulePkg\Library\SbSmmCorePlatformHookLib\SbSmmCorePlatformHookLib.c
+AmiChipsetModulePkg\Library\SbSmmCorePlatformHookLib\SbSmmCorePlatformHookLib.inf
+AmiChipsetModulePkg\Sb.sdl

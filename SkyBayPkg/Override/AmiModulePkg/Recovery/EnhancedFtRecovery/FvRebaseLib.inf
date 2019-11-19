@@ -1,0 +1,29 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = FvRebaseLib
+  COMPONENT_TYPE                 = LIBRARY
+  FILE_GUID                      = BCBACBB1-A245-4BB3-8374-5E0030600766
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = FvRebaseLib|DXE_DRIVER
+
+[Sources]
+$(FvRebaseLib_INF_SRC_FILES)
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+
+[Guids]
+  
+[Protocols]
+
+[LibraryClasses]
+  AmiDxeLib
+  AmiCspLib
+  BaseLib
+  PeCoffLib
+  PeCoffGetEntryPointLib
+

@@ -1,0 +1,30 @@
+TOKEN
+    Name  = "SgTpv_Library_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable SgTpv Library support in Project"
+    TokenType = Boolean
+    Master = Yes
+End
+
+INFComponent
+    Name  = "PeiSgTpvLib"
+    File  = "PeiSgTpvLib/PeiSgTpvLib.inf"
+    Package  = "AmiChipsetModulePkg"
+End
+
+LibraryMapping
+    Class  = "SgTpvLib"
+    Instance  = "AmiChipsetModulePkg.PeiSgTpvLib"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "AmiChipsetModulePkg.PeiSgTpvLib"
+    Override  = "KabylakeSiliconPkg.SiInitPreMem"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "AmiChipsetModulePkg.PeiSgTpvLib"
+    Override  = "KabylakeSiliconPkg.SiInit"
+End

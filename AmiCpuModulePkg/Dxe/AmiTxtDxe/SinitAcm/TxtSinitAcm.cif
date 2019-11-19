@@ -1,0 +1,12 @@
+<component>
+	name = "TxtSinitAcm"
+	category = ModulePart
+	LocalRoot = "AmiCpuModulePkg\Dxe\AmiTxtDxe\SinitAcm\"
+	RefName = "AmiCpuModulePkg.AmiTxtDxe.TxtSinitAcm"
+[files]
+"TxtSinitAcm.sdl"	
+"SinitAcmFdfFileStatement.txt"	
+"SinitAcDbgRev0160.bin"	
+"SinitAcProdNpwRev0160.bin"	
+"SinitAcProdRev0160.bin"	
+<endComponent>

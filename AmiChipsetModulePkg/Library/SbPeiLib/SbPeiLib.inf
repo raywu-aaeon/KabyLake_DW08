@@ -1,0 +1,53 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SbPeiLib
+  FILE_GUID                      = 6A9A17EB-B017-476A-87E5-0C33DBF30FB9
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = SbPeiLib|PEIM
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  SbPeiLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec 
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+  
+[LibraryClasses]
+  DebugLib
+  IoLib
+  AmiCspLib
+  AmiPeiLib
+  GpioLib
+  AmiOemGpioLib
+  PchCycleDecodingLib
+  AmiGetBoardInfoLib
+
+[Guids]
+  gPlatformInfoHobGuid ## CONSUMES
+  
+[Ppis]
+  gAmiPeiSbCustomPpiGuid
+  gEfiPeiMasterBootModePpiGuid
+  
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+  
+[BuildOptions] 
+#  *_*_*_CC_FLAGS = /D ELINK_PEI
+

@@ -1,0 +1,234 @@
+TOKEN
+    Name  = "I2C_HID_SUPPORT"
+    Value  = "1"
+    Help  = "Switch for Enabling I2c support in the project"
+    TokenType = Boolean
+    Master = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEVICE_NUMBER"
+    Value  = "0x01"
+    Help  = "0x01 - One I2CHID device. 0x00 - At leaset two I2CHID device"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_0_BUS_NUMBER"
+    Value  = "0x05"
+    Help  = "I2c hid device0 bus number."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_0_SLAVE_ADDRESS"
+    Value  = "0x4A"
+    Help  = "I2c hid device0 slave address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_0_HID_DESCRIPTOR_ADDRESS"
+    Value  = "0x0000"
+    Help  = "I2c hid device0 descriptor address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_0_HID_INTERRUPT_ADDRESS"
+    Value  = "0xFED0E0B8"
+    Help  = "I2c hid device0 interrupt address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_0_HID_RESET_ADDRESS"
+    Value  = "0xFED0C508"
+    Help  = "I2c hid device0 reset address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_1_BUS_NUMBER"
+    Value  = "0x06"
+    Help  = "I2c hid device1 bus number."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_1_SLAVE_ADDRESS"
+    Value  = "0x4A"
+    Help  = "I2c hid device1 slave address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_1_HID_DESCRIPTOR_ADDRESS"
+    Value  = "0x0000"
+    Help  = "I2c hid device1 descriptor address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_1_HID_INTERRUPT_ADDRESS"
+    Value  = "0xFFFFFFFF"
+    Help  = "I2c hid device1 interrupt address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_1_HID_RESET_ADDRESS"
+    Value  = "0xFFFFFFFF"
+    Help  = "I2c hid device1 reset address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_2_BUS_NUMBER"
+    Value  = "0x07"
+    Help  = "I2c hid device2 bus number."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_2_SLAVE_ADDRESS"
+    Value  = "0x4A"
+    Help  = "I2c hid device2 slave address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_2_HID_DESCRIPTOR_ADDRESS"
+    Value  = "0x0000"
+    Help  = "I2c hid device2 descriptor address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_2_HID_INTERRUPT_ADDRESS"
+    Value  = "0xFFFFFFFF"
+    Help  = "I2c hid device2 interrupt address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_2_HID_RESET_ADDRESS"
+    Value  = "0xFFFFFFFF"
+    Help  = "I2c hid device2 reset address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_3_BUS_NUMBER"
+    Value  = "0x08"
+    Help  = "I2c hid device3 bus number."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_3_SLAVE_ADDRESS"
+    Value  = "0x4A"
+    Help  = "I2c hid device3 slave address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_3_HID_DESCRIPTOR_ADDRESS"
+    Value  = "0x0000"
+    Help  = "I2c hid device3 descriptor address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_3_HID_INTERRUPT_ADDRESS"
+    Value  = "0xFFFFFFFF"
+    Help  = "I2c hid device3 interrupt address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_DEV_3_HID_RESET_ADDRESS"
+    Value  = "0xFFFFFFFF"
+    Help  = "I2c hid device3 reset address."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2CHID_FUNCTION_NUMBER"
+    Value  = "0x06"
+    Help  = "I2c PCI configuration registers function number."
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ENABLE_I2C_RESET"
+    Value  = "0x01"
+    Help  = "0x01 - Enable I2C reset. 0x00 - Disable I2C reset"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2C_INTERRUPT_GPIO_RX_STATE"
+    Value  = "0x00"
+    Help  = "0x00 - GPIO RX State is Bit0. 0x01 - GPIO RX State is Bit1"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "I2cHid_DEBUG_MESSAGES"
+    Value  = "0"
+    Help  = "Enables/disables debug messages for I2cHid driver"
+    TokenType = Boolean
+    Token = "DEBUG_CODE" "=" "1"
+End
+
+INFComponent
+    Name  = "I2cHid"
+    File  = "I2cHid.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+End
+
+INFComponent
+    Name  = "I2cControllerTemplate.inf"
+    File  = "I2cController/I2cController.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+End
+
+PcdMapping
+    Name  = "PcdFixedDebugPrintErrorLevel"
+    GuidSpace  = "gEfiMdePkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    Value  = "0"
+    Override  = "AmiModulePkg.I2cHid"
+    Offset  = 00h
+    Length  = 00h
+    Help  = "Disables all debug messages based on I2cHid_DEBUG_MESSAGES token value"
+    TargetDSC = Yes
+    Token = "I2cHid_DEBUG_MESSAGES" "=" "0"
+End

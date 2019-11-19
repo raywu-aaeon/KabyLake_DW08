@@ -1,0 +1,137 @@
+TOKEN
+    Name  = "EC_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable EC_H8SMC support in Project"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+TOKEN
+    Name  = "CRB_EC_SUPPORT"
+    Value  = "1"
+    Help  = "This token is for H8SMC EC support"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "EC_H8SMC"
+    Value  = "1"
+    Help  = "This token is for H8SMC EC support"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ACPI_ECDT_TBL"
+    Value  = "1"
+    Help  = "Enable/Disable Embedded Controller Boot Resources Table"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "ECPei_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable ECPei support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "EC_PME_BASE_ADDRESS"
+    Value  = "0680h"
+    Help  = "Don't Change this space for CRB platform.It will be reserved for CRB SIO and EC."
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+    Range  = "00 - 0FFFFh"
+End
+
+TOKEN
+    Name  = "EC_IO_TRAP_Size"
+    Value  = "4"
+    Help  = "This token is for H8SMC EC IO Trap 1 byte Size"
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetH = Yes
+End
+
+PATH
+	Name  = "EC_BSP_PATH"
+	Path  = "AmiModulePkg/EC"
+End
+
+#ELINK
+#   Name  = "$(EC_BSP_PATH)\ec.asl"
+#   Parent  = "GENERIC_ASL"
+#   InvokeOrder = AfterParent
+#End
+
+#ELINK
+#	Name  = "\WECC(Arg0)"
+#	Parent  = "ASL_WAK"
+#	Help  = "Include EC Specific Function at WAK.\Arg0 is a sleep state the System is resuming from. "
+#	InvokeOrder = AfterParent
+#End
+
+INFComponent
+    Name  = "ECPei"
+    File  = "ECPei.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes = "PEIM"
+    Token = "ECPei_SUPPORT" "=" "1"
+End
+
+FFS_FILE
+    Name  = "ECPei"
+    FD_AREA  = "FV_BB"
+    INFComponent  = "ECPei"
+    Apriori_Index  = "10"
+    Token = "ECPei_SUPPORT" "=" "1"    
+End
+
+INFComponent
+    Name  = "EcPlatformHookLib"
+    File  = "EcPlatformHookLib.inf"
+    Package  = "AmiModulePkg"
+    Token = "SIO_SUPPORT" "=" "0"
+    Token = "KabylakePlatSamplePkg_SUPPORT" "=" "0"
+End
+
+LibraryMapping
+    Class  = "PlatformHookLib"
+    Instance  = "AmiModulePkg.EcPlatformHookLib"
+    Token = "SIO_SUPPORT" "=" "0"
+    Token = "KabylakePlatSamplePkg_SUPPORT" "=" "0"
+End
+
+PCIDEVICE
+    Title  = "Embedded Controller"
+    Parent  = "PciHost (Virtual)"
+    Attribute  = "0x0"
+    Dev_type  = "Container"
+    Dev  = 00h
+    Fun  = 00h
+    SleepNum  = 01h
+    ASLfile  = "'AmiModulePkg/EC/EC.asl;After Pci Tree'"
+    DeviceType = OnBoard
+    PCIBusSize = 32bit
+    ROMMain = No
+    Virtual = Yes
+End
+
+ELINK
+    Name  = "-D AMI_CRB_EC_SUPPORT_FLAG"
+    Parent  = "*_*_*_CC_FLAGS"
+    Type  = "BuildOptions"
+    Token = "CRB_EC_SUPPORT" "=" "1"
+    InvokeOrder = AfterParent
+End

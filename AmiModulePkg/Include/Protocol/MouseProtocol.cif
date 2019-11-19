@@ -1,0 +1,8 @@
+<component>
+    name = "MouseProtocol"
+    category = ModulePart
+    LocalRoot = "AmiModulePkg/Include/Protocol/"
+    RefName = "MouseProtocol"
+[files]
+"MouseProtocol.h"
+<endComponent>

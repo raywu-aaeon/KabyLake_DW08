@@ -1,0 +1,78 @@
+TOKEN
+    Name = "FspWrapper_Library_SUPPORT"
+    Value = "1"
+    Help  = "Main switch to enable FspWrapper Library support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+End
+
+INFComponent
+    Name  = "BaseFspWrapperPlatformLib"
+    File  = "BaseFspWrapperPlatformLib\BaseFspWrapperPlatformLib.inf"
+    Package  = "KabylakePlatSamplePkg"   
+End
+
+LibraryMapping
+    Class  = "FspWrapperPlatformLib"
+    Instance  = "KabylakePlatSamplePkg.BaseFspWrapperPlatformLib"   
+End
+
+INFComponent
+    Name  = "DxeFspWrapperPlatformResetLib"
+    File  = "DxeFspWrapperPlatformResetLib\DxeFspWrapperPlatformResetLib.inf"
+    Package  = "KabylakePlatSamplePkg"   
+End
+
+LibraryMapping
+    Class  = "FspWrapperPlatformResetLib"
+    Instance  = "KabylakePlatSamplePkg.DxeFspWrapperPlatformResetLib"   
+    Arch  = "X64"
+End
+
+INFComponent
+    Name  = "PeiFspPolicyInitLib"
+    File  = "PeiFspPolicyInitLib\PeiFspPolicyInitLib.inf"
+    Package  = "KabylakePlatSamplePkg"   
+End
+
+LibraryMapping
+    Class  = "FspPolicyInitLib"
+    Instance  = "KabylakePlatSamplePkg.PeiFspPolicyInitLib"    
+End
+
+INFComponent
+    Name  = "PeiFspWrapperHobProcessLib"
+    File  = "PeiFspWrapperHobProcessLib\PeiFspWrapperHobProcessLib.inf"
+    Package  = "KabylakePlatSamplePkg"    
+End
+
+LibraryMapping
+    Class  = "FspWrapperHobProcessLib"
+    Instance  = "KabylakePlatSamplePkg.PeiFspWrapperHobProcessLib"  
+End
+
+INFComponent
+    Name  = "PeiFspWrapperPlatformResetLib"
+    File  = "PeiFspWrapperPlatformResetLib\PeiFspWrapperPlatformResetLib.inf"
+    Package  = "KabylakePlatSamplePkg"   
+End
+
+LibraryMapping
+    Class  = "FspWrapperPlatformResetLib"
+    Instance  = "KabylakePlatSamplePkg.PeiFspWrapperPlatformResetLib"   
+    Arch  = "IA32"    
+End
+
+INFComponent
+    Name  = "SecFspWrapperPlatformSecLib"
+    File  = "SecFspWrapperPlatformSecLib\SecFspWrapperPlatformSecLib.inf"
+    Package  = "KabylakePlatSamplePkg"   
+End
+
+LibraryMapping
+    Class  = "PlatformSecLib"
+    Instance  = "KabylakePlatSamplePkg.SecFspWrapperPlatformSecLib"   
+End
+

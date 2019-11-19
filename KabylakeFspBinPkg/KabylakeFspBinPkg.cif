@@ -1,0 +1,17 @@
+<component>
+	name = "KabylakeFspBinPkg"
+	category = eChipset
+	LocalRoot = "KabylakeFspBinPkg\"
+	RefName = "KabylakeFspBinPkg"
+[files]
+"KabylakeFspBinPkg.chm"	
+"KabylakeFspBinPkg.dec"	
+"KabylakeFspBinPkg.sdl"	
+"FvFspSFdfFileStatement.txt"
+"Fsp.bsf"	
+"Fsp.fd"	
+[parts]
+"KabylakeFspBinPkg.Include"
+"KabylakeFspBinPkg.Tools"
+"KabylakePlatSamplePkg.FspWrapper"
+<endComponent>

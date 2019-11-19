@@ -1,0 +1,10 @@
+<component>
+	name = "IntelFsp"
+	category = eChipset
+	LocalRoot = "KabylakeFspBinPkg\"
+	RefName = "IntelFsp"
+[parts]
+"IntelFsp2Pkg"
+"IntelFsp2WrapperPkg"
+"KabylakeFspBinPkg"
+<endComponent>

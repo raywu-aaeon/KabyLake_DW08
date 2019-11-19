@@ -1,0 +1,10 @@
+<component>
+	name = "FitPeiProcessFvBeforePublishing"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg\FIT\FitPeiProcessFvBeforePublishing\"
+	RefName = "FitPeiProcessFvBeforePublishing"
+[INF]
+"FitPeiProcessFvBeforePublishing.inf"
+[files]
+"FitPeiProcessFvBeforePublishing.sdl"	
+<endComponent>

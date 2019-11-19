@@ -1,0 +1,1959 @@
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_052                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP482848
+[Category] Improvement
+[Severity] Normal
+[Description] Set token AMI_OEM_SSID_SUPPORT to 1. The definition of PciCfg is removed.
+[Files] AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_051                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP465808
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Fix GCC warnings in chipset code. (AmiChipsetModulePkg)
+[Files] AmiChipsetModulePkg\Include\Protocol\SmbiosUpdateDataProtocol.h
+AmiChipsetModulePkg\NB\SmbiosUpdateData\SmbiosUpdateData.c
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbDxeBoard.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+AmiChipsetModulePkg\Library\NbGetSetupData\GetSetupData.c
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\NbCsmDxeLib\NbCsmDxeLib.c
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\IntelSaGopSetup.c
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\SetBrightnessLevelDuringPostLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_050                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP461425
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] SMBIOS 20 show 0xFFFF Error in "Memory device handle" item with a 32G DIMM
+[Files] AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_049                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP444414
+[Category]      Improvement
+[Severity]      Normal
+[Description]   VBIOS 9.0.1061
+[Files]         AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+
+[TAG]           EIP444615
+[Category]      Improvement
+[Severity]      Normal
+[Description]   B0D1F1 and B0D1F2 will be disabled if B0D1F0 is disabled.
+[Files]         AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_048                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP443780
+[Category] Improvement
+[Severity] Normal
+[Description] Update IGD GOP v9.0.1084
+[Files] AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+
+[TAG] EIP431111
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] EFIAPI function qualifiers for Linux Build.
+[Files] AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_047                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP426038
+[Category] Improvement
+[Severity] Normal
+[Description] NbPei and SbDxe modules don't build with new GCC flags
+[Files] AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.inf
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscPeiLib.c
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscPeiLib.inf
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\SetBrightnessLevelDuringPostLib.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\Nb.sdl
+
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.6                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP433144 
+[Category] Improvement
+[Severity] Normal
+[Description] REF-46694: BIOS Basic Test failed / (BETA)5.12_1ATQO060 Chipset Pre-Test
+[Files] NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+
+[TAG] None 
+[Category] Improvement
+[Severity] Normal
+[Description] Update Intel GOP 9.0.1082
+[Files] NB\GOP\Skylake\x64\IntelGopDriver.efi
+NB\GOP\Skylake\Vbt.bin
+NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+NB\GOP\Skylake\Vbt_RVP_8.bin
+NB\GOP\Skylake\Vbt_RVP_10.bin
+NB\GOP\Skylake\Vbt_RVP_11.bin
+NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.5                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP427935
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Do not use EFI_SPECIFICATION_VERSION and PI_SPECIFICATION_VERSION.
+[Files] AmiChipsetModulePkg\Include\Library\NbCspLib.h
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\IntelSaGopSetup.c
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\SetBrightnessLevelDuringPostLib.c
+
+[TAG] EIP428812
+[Category] Improvement
+[Severity] Normal
+[Description] Remove useless code
+[Files] AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.4                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP427935
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] Do not use EFI_SPECIFICATION_VERSION and PI_SPECIFICATION_VERSION.
+[Files] AmiChipsetModulePkg\Include\Library\NbCspLib.h
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\IntelSaGopSetup.c
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\SetBrightnessLevelDuringPostLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046.1                      **
+**                                                                        **
+****************************************************************************
+[TAG] EIP412209
+[Category] Improvement
+[Severity] Normal
+[Description] Update for Greenlow Refresh WS 035 project label
+[Files] AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_046                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP417697
+[Category] Improvement
+[Severity] Normal
+[Description] Update for KBL RC v3.4.0
+[Files] AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.c
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\NB\AmiMemoryInfoConfig\AmiMemoryInfoConfig.c
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\IntelSaGopSetup.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+AmiChipsetModulePkg\NB\SmbiosUpdateData\SmbiosUpdateData.c
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_045                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP405946 
+[Category] Improvement
+[Severity] Normal
+[Description] SKW159 Processor May Hang When Executing Code In an HLE Transaction Region.
+[Files] AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\Nb.sdl
+
+[TAG] EIP411414 
+[Category] Improvement
+[Severity] Normal
+[Description] Update for KBL RC v3.3.0
+[Files] AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_044                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP404688
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Kaby Lake Platform SiC/Platform Sample Code/FSP 3.2.0
+[Files]         AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\NB\GOP\IntelSaGopDriver.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_043                        **
+**                                                                        **
+****************************************************************************
+[TAG]           None
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Kabylake\IntelGopDriver.efi, vbt.bi (Version: 9.0.1074)
+[Files]         AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt*.bin
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_042                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP384682
+[Category]      Improvement
+[Severity]      Normal
+[Description]   [KBL] NbPegDetectNonComplaint() and NbClearPegCtrlRegVgaEnable() access unexisting table members.
+[Files]         AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_041.1                      **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP381157
+[Category]      Improvement
+[Severity]      Normal
+[Description]   NbProgramPamRegisters() program wrong offsets.
+[Files]         AmiShadowLib\AmiShadowLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_041                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP378496
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Kaby Lake Platform SiC/Platform Sample Code/FSP 2.9.2 for DT
+[Files]         Nb.asl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_040.1                      **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP363121
+[Category]      New Feature
+[Severity]      Normal
+[Description]   Kabylake GOP brightness control
+[Files]         IntelSaGopSetup.sdl
+SetBrightnessLevelDuringPostLib.inf
+SetBrightnessLevelDuringPostLib.c
+IntelSaGopSetup.cif
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_040                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIP363729
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Deprecated Mde APIs for AmiChipsetModulePkg component.
+[Files]         SbPei.c
+NbPei.c
+NB\UpdateMemoryRecord\UpdateMemoryRecord.inf
+NB\UpdateMemoryRecord\UpdateMemoryRecord.h
+NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update GOP to 9.0.1072
+[Files]         
+AmiChipsetModulePkg\NB\GOP\Skylake\x64
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_039.1                      **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Remove TOOL_CHAIN_TAG dependency.
+[Files]         AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_039                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIPNone
+[Category] Improvement
+[Severity] Normal
+[Description] Fix building error when OVER_CLOCK_SUPPORT is disabled.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update GOP to 9.0.1069
+[Files]         
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_038                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIPNone
+[Category] Improvement
+[Severity] Normal
+[Description] Update GOP to 9.0.1068 and VBIOS to 9.0.1054
+[Files]
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+
+[TAG]            EIPNone
+[Category]       Improvement
+[Severity]        Normal
+[Description]    RC2.7.0 change MEMORY_INFO_DATA_HOB structure, so modify 
+code according to the change.
+[Files]           
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.c
+AmiChipsetModulePkg\NB\AmiMemoryInfoConfig\AmiMemoryInfoConfig.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_036                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIPNone
+[Category] Improvement
+[Severity] Normal
+[Description] Update GOP version to 9.0.1067 and VBIOS version to 9.0.1052
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+
+[TAG]           EIPNone
+[Category]      Bug Fix
+[Severity]      Important
+[Symptom]   System may get cpu exception on CFL-S + Z370 platform
+[RootCause] TSEG_SIZE is not enough.
+[Solution]      Change TSEG_SIZE to 8MB
+[Files]         Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_035                        **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Spec Update
+[Severity]      Normal
+[Description]   Update GOP Driver Version 9.0.1066
+[Files]         
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_033.1                      **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update BoardId to meert RC definition change.
+[Files]         AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Change method to check S3DataPtr becuase FSP can't use policy to check.
+[Files]         AmiChipsetModulePkg\NB\NbInit\NbPei.inf
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_033                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP327955
+[Category] New Feature
+[Severity] Normal
+[Description] Update USB RMRR base address of Intel DMAR Table according to AMI USB module.
+This function will be supported with AmiUsb_20 label.
+[Files] NbDxe.inf
+NbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_032.1                      **
+**                                                                        **
+****************************************************************************
+[TAG]           EIPNone
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Add Kabylake Refresh support for SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT feature.
+[Files]         NbPciDxeInitLib\NbPciDxeInitLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_032                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP327958
+[Category] Improvement
+[Severity] Normal
+[Description]
+We should not Install gEfiPciEnumerationCompleteProtocol in the NbDxe.c. (it should installed by Pcibus module)
+[Files]
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.inf
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_031                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+AmiMemoryInfo Protocol Improvement.
+[Files]
+AmiChipsetModulePkg\NB\AmiMemoryInfoConfig\AmiMemoryInfoSample\AmiMemoryInfoSample.c
+AmiChipsetModulePkg\NB\AmiMemoryInfoConfig\AmiMemoryInfoSample\AmiMemoryInfoSample.inf
+AmiChipsetModulePkg\NB\AmiMemoryInfoConfig\AmiMemoryInfoConfig.c
+AmiChipsetModulePkg\NB\AmiMemoryInfoConfig\AmiMemoryInfoConfig.inf
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1050 and GOP Driver Version 9.0.1063
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_030                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP314007
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Update AmiChipsetModulePkg to Sync with Labeled 'AmiChipsetModulePkg_08'
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_028.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP314156
+[Category] BUGFIX
+[Severity] Normal
+[Description] 
+System will hang at POST randomly after rebooting when enable ENABLE_CLEAR_IGFX_FRAME_BUFFER.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\NbInit\NbDxe.inf
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c 
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_026                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated Update GOP Driver Version 9.0.1061
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_025                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated Update GOP Driver Version 9.0.1060
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_024                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1049
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_023.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Update AmiNbMiscLib - NbGetDimmLocInfo function
+Intel RC 1.4.0 provides independent AddressEncodeDecodeLib from MRC. 
+This feature is compatible on our NB feature - NbGetDimmLocInfo(), 
+So modify NB feature to use MRC library.
+[Files] 
+AmiChipsetModulePkg/Library/AmiNbMiscLib/AmiNbMiscLib.c
+AmiChipsetModulePkg/Library/AmiNbMiscLib/AmiNbMiscLib.inf
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_023                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP302888
+[Category] Improvement
+[Severity] Normal
+[Description] Fix event log test failed.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+[Tag] EIP302026 
+[Category] Improvement
+[Severity] Normal
+[Description] Skip dGPU uefi Rom execution when SG mode is Enabled.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\NB\NbOemPciDeviceInitRoutine\NbOemPciDeviceInitRoutine.cif
+AmiChipsetModulePkg\NB\NbOemPciDeviceInitRoutine\NbOemPciDeviceInitRoutine.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_021                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Follow RC1.4.0 to override PcdPeiMinMemorySize with token PEI_MIN_MEMORY_SIZE.
+[Files]
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_021                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Skip dGPU uefiRom display when SG mode enable.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+
+[Tag] EIP297222 
+[Category] Improvement
+[Severity] Normal
+[Description] Clarfications for Debug Messages on AmiCpuModulePkg component
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_020.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1047 and GOP Driver Version 9.0.1056
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_020                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP291544
+[Category] Improvement
+[Severity] Normal 
+[Description] When SMBIOS component is removed, it gets build error
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Include\Protocol\SmbiosUpdateDataProtocol.h
+AmiChipsetModulePkg\NB\SmbiosUpdateData\SmbiosUpdateData.c
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.h
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_019.2                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated GOP Driver Version 9.0.1054
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_018                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated GOP Driver Version 9.0.1053
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_017                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fix NB_ERROR_LOG_SUPPORT enable build error.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+
+[Tag] EIP282282
+[Category] Improvement
+[Severity] Normal
+[Description] Remove Page.c Private file support on KBL project source code.
+Add ENABLE_ABOVE_4G_MEM_DURING_BIOS_POST token.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_016                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated GOP Driver Version 9.0.1052
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+[Tag] None
+[Category] Bug Fix
+[Description] 
+F000Reg, E000Reg and E800Reg registers are 8 bit, 
+previously 32bits were written which modifies 4 PAM registers at a time instead of one PAM register.
+[Files] 
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_015                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1046 and GOP Driver Version 9.0.1051
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_014                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Add AmiGetBoardInfoLib and Kabylake uDIMM GPIO initial support.
+[Files] 
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.inf
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.inf
+KabylakePlatSamplePkg\PlatformInit\PolicyInitDxe\GopPolicyInitDxe.c
+KabylakePlatSamplePkg\PlatformInit\PolicyInitDxe\PolicyInitDxe.inf
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.c
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.cif
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.h
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.inf
+KabylakePlatSamplePkg\Wrapper\AmiGetBoardInfoLib\AmiGetBoardInfoLib.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_013.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Add X-AMI mapping language definition.
+[Files] 
+AmiChipsetModulePkg\NB\NbSetup\Nb.uni
+AmiChipsetModulePkg\NB\GOP\IntelSaGopSetup\IntelSaGopSetup.uni
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_013                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP270420
+[Category] Improvement
+[Severity] Normal
+[Description] NB Non-Compliance function fail.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+[Tag] EIP276615
+[Category] Improvement
+[Severity] Normal
+[Description] 
+The system memory size is got less 256MB after including EIP254172's 
+solution and PCIE base is F80000000 or F00000000.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+KabylakeSiliconPkg\Wrapper\Library\SystemAgentHookLib\AmiSaPolicyUpdatePei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_012                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1043 and GOP Driver Version 9.0.1049
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_011                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1041 and GOP Driver Version 9.0.1048
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\KBL_VBios_S_uDIMM_RVP.dat
+
+[Tag] AMI_OVERRIDE_POLICYINIT0001
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated Runtime load GOP driver and VBIOS process. (for Kaby Lake S uDIMM RVP Power-on)
+[Files] 
+KabylakePlatSamplePkg\Board\RcBoard.sdl
+KabylakePlatSamplePkg\PlatformInit\PlatformInitPei\PlatformInitPreMem.c
+KabylakePlatSamplePkg\PlatformInit\PolicyInitDxe\GopPolicyInitDxe.c
+KabylakePlatSamplePkg\PlatformInit\PolicyInitDxe\PolicyInitDxe.inf
+AmiChipsetModulePkg\LegacyRom\Vbios\VbiosFdfFileStatements.txt
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.inf
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_KBL_S_uDIMM_RVP.bin
+AmiChipsetModulePkg\NB\GOP\GopFdfFileStatements.txt
+AmiChipsetModulePkg\NB\GOP\IntelSaGopDriver.sdl
+AmiChipsetModulePkg\LegacyRom\KBL_VBios_S_uDIMM_RVP.dat
+AmiChipsetModulePkg\Nb.sdl
+
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_009                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1040 and GOP Driver Version 9.0.1047
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_008                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1039 and GOP Driver Version 9.0.1046
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+[Tag] EIP263627
+[Category] Improvement
+[Severity] Normal
+[Description] AmiChipsetModulePkg module build failed with Linux (GCC) compiler.
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_007                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP263372
+[Category] Improvement
+[Severity] Normal
+[Description] Use build\ChipsetReference.dec for all chipset related "includes" if need.
+[Files] 
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.inf
+AmiChipsetModulePkg\Library\NbGetSetupData\GetSetupData.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.inf
+AmiChipsetModulePkg\AmiChipsetModulePkg.dec
+
+[Tag] EIP256229 (AMI_OVERRIDE_SA0023)
+[Category] Improvement
+[Severity] Normal
+[Description] 
+[Kabylake] Dynamic PCIE_BASE_ADDRESS feature implementation
+[Files]
+AmiChipsetModulePkg\Include\NbSetupData.h
+AmiChipsetModulePkg\Include\Sb.h
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.c
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.inf
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.c
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.inf
+AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.c
+AmiChipsetModulePkg\Library\SbPeiLib\SbPeiLib.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.inf
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\NB\NbInit\NbPei.inf
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+AmiChipsetModulePkg\NB\NbSetup\Nb.sd
+AmiChipsetModulePkg\NB\NbSetup\Nb.uni
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.c
+AmiChipsetModulePkg\SB\SbInit\SbRunSmm.inf
+AmiChipsetModulePkg\AmiCspLib.mak
+AmiCpuModulePkg\Library\ProcessorStartup\Ia32\Platform.inc
+KabylakePlatSamplePkg\EC\EC.C
+KabylakePlatSamplePkg\EC\EC.inf
+KabylakePlatSamplePkg\Setup\SaSetup.hfr
+KabylakeSiliconPkg\SampleCode\Library\SecPlatformLib\Ia32\Flat32.asm
+KabylakeSiliconPkg\SampleCode\SecCore\Ia32\TempRamInit.asm
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\Ia32\SecSaLib.asm
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\SecSaLib.inf
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+KabylakeSiliconPkg\Wrapper\Library\SaLinkLib\SaLinkLib.c
+KabylakeSiliconPkg\Wrapper\Library\SystemAgentHookLib\AmiSaPolicyUpdatePei.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_006                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Create a function for Smbios Type17 customization, the token default is disabled (follow Intel RC style)
+[Files] 
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated Intel GOP Driver Version 9.0.1044
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+
+[Tag] EIP259419
+[Category] Improvement
+[Severity] Normal
+[Description] Create AmiNbMiscLib on KBL and SKL platforms.
+[Files] 
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.c
+AmiChipsetModulePkg\Library\AmiNbMiscLib\AmiNbMiscLib.inf
+AmiChipsetModulePkg\Include\Library\AmiNbMiscLib.h
+
+[Tag] EIP259426
+[Category] Improvement
+[Severity] Normal
+[Description] Create AmiShadowLib on KBL and SKL platforms.
+[Files] 
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.c
+AmiChipsetModulePkg\Library\AmiShadowLib\AmiShadowLib.inf
+AmiChipsetModulePkg\Include\Library\AmiShadowLib.h
+
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_005                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1037 and GOP Driver Version 9.0.1043
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Fixed SMBIOS Type 19 isn't matched Type 20 when PCH sku is H110.
+[Files] 
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+
+[Tag] EIP251471
+[Category] Improvement
+[Severity] Normal 
+[Description] Runtime Error Logging improvement.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_004                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Add NB_SMBIOS_TYPE_17_SPEED_UPDATE support
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_003.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] EIP254501
+[Category] Improvement
+[Severity] Normal
+[Description] Fault Tolerance Firmware Recovery Test failed. 
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_003                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1036 and GOP Driver Version 9.0.1042
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_002                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1034 and GOP Driver Version 9.0.1041 for Kaby Lake and Skylake.
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+****************************************************************************
+**                                                                        **
+**                   LABEL AmiChipsetModulePkg_001                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+SA setup item/callback implementing when delete SaSetup module.
+[Files]
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\NB\NbSetup\Nb.sd
+AmiChipsetModulePkg\NB\NbSetup\Nb.uni
+KabylakeSiliconPkg\Wrapper\Library\SaLinkLib\SaLinkLib.c
+KabylakePlatSamplePkg\Setup\SaSetup.c
+KabylakePlatSamplePkg\Setup\SaSetup.hfr
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_024                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Hybrid Memory Down implementation.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Library\SmBusLib\SmBusPorting.c
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+SkylakeSiPkg\Wrapper\Library\SystemAgentHookLib\AmiSaPolicyUpdatePei.c
+SkyBayPkg\Library\CrbLib\CrbLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1033
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated GOP Driver Version 9.0.1037
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_022.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1030 and GOP Driver Version 9.0.1036
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_021                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Update "NbGetDimmLocInfo" function.
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\NbGeneric.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated Intel GOP Driver Version 9.0.1035
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_020                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1028 and GOP Driver Version 9.0.1034
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_019.2                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Severity] Normal
+[Description] 
+Review and implement for EdramTestMode.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\Include\Protocol\NBPlatformData.h
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\Sa.uni
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\Sa.sd
+SkylakeSiPkg\Wrapper\Library\SaLinkLib\SaLinkLib.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_019                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1026
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_018                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1024 and GOP Driver Version 9.0.1031
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+[Tag] AMI_OVERRIDE_SA0029
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Implement Detect Non-Compliance Device item function (Parts of System Agent)
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\Sa.sd
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\Sa.uni
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\SaSetupReset.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_016                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1022 and GOP Driver Version 9.0.1027
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_015                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated intel GOP Driver Version 9.0.1025
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_014.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1020 and GOP Driver Version 9.0.1024
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_013.2                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] BugFix
+[Description] Change PEI_MIN_MEMORY_SIZE to 256MB
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+[TAG]           EIP217811
+[Category]      Improvement
+[Severity]      Normal
+[Description]   There was the abnormal screen garbage when using the 2K 
+and 4K monitor with the legacy support enabled.
+[Files]         
+AmiChipsetModulePkg\NB\NbInit\NbDxe.inf
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_013                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] BugFix
+[Description] 
+Create the PcdMapping "PcdTsegSize" correspond our TSEG_SIZE.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+[Tag] None
+[Category] Improvement
+[Severity] BugFix
+[Description] 
+Fixed the gMemRestoreDataGuid defined in NbGeneric.c is mismatch with SiPkg problem.
+[Files] 
+AmiChipsetModulePkg\AmiCspLib.sdl
+AmiChipsetModulePkg\Library\AmiCspLib\NbGeneric.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Sightings
+[Description] 
+Modify item 'Select VSwing/Pre-Emphasis Table' 
+from "Low Power VSwing/Pre-Emphasis Table" 
+to "Default VSwing/Pre-Emphasis Table" (Panel#01~16)
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1019 and GOP Driver Version 9.0.1022
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_011                        **
+**                                                                        **
+****************************************************************************
+[Tag] EIP198934
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Skylake/Greenlow SA initialize for Runtime Error Logging support.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Library\NbGetSetupData\GetSetupData.c
+AmiChipsetModulePkg\Library\NbLinkLib\NbLinkLib.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.c
+AmiChipsetModulePkg\NB\NbInit\NbSmi.h
+AmiChipsetModulePkg\NB\NbInit\NbSmi.inf
+
+[Tag] EIP190855
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Implement "NbGetDimmLocInfo" and "NbIsDualChannel" function.
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\NbGeneric.c
+
+[Tag] None
+[Category] Improvement
+[Severity] BugFix
+[Description] 
+Updated VBIOS Production Version 9.0.1016
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\IntelVBIOS.cif
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_010.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description]
+Fix boot to OS black screen issue when CSM on and GOP on.
+[Files]
+AmiChipsetModulePkg\Library\NbPcieDxeInitLib\NbPciDxeInitLib.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_010                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Removed the token PERF_TUNE_SUPPORT and related code, it's retired.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Nb.cif
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_009.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] BugFix
+[Description] 
+modify item 'Select VSwing/Pre-Emphasis Table' 
+from "Low Power VSwing/Pre-Emphasis Table" 
+to "Default VSwing/Pre-Emphasis Table" (Panel#3)
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_009                        **
+**                                                                        **
+****************************************************************************
+[Tag] AMI_OVERRIDE_NB0001
+[Category] Improvement
+[Severity] BugFix
+[Description] 
+Fixed SMBIOS Type20 Description.
+[Files] 
+AmiChipsetModulePkg\NB\UpdateMemoryRecord\UpdateMemoryRecord.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Updated VBIOS Production Version 9.0.1015 and GOP Driver Version 9.0.1020
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+EIP205910 - Wrong definition fixed.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_008                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Removed SaAudio and SaHdaVerbTable in northBridge, it's retired in northBridge.
+[Files] 
+SkylakeSiPkg\Wrapper\Include\SaSetupData.h
+SkylakeSiPkg\Wrapper\Library\SaLinkLib\SaLinkLib.c
+AmiChipsetModulePkg\Include\NbSetupData.h
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_007.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] BugFix
+[Description] 
+Updated VBIOS Production Version 9.0.1014 and GOP Driver Version 9.0.1019
+[Files] 
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] BugFix
+[Description] 
+Fixed problem when DIMM_VOLTAGE_CHECK_SUPPORT set enabled will get build error.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_007                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Implement NBGetPlatformEmbeddedRom() for different SKL boards embedded VBIOS.
+[Files] 
+AmiChipsetModulePkg\Library\NbCsmDxeLib\NbCsmDxeLib.inf
+AmiChipsetModulePkg\Library\NbCsmDxeLib\NbCsmDxeLib.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Crate SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT for include all Skylake VBIOS and VBT.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+1. Creation of default VBT ssf files for different SKL boards. (For Intel VBIOS)
+2. Create default VBT ssf files for the different SKL RVP boards. (For Intel GOP)
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_3_rvp_7.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_8.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_10.dat
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios_rvp_11.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP3_RVP7.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_8.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_10.bin
+AmiChipsetModulePkg\NB\GOP\Skylake\Vbt_RVP_11.bin
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_006.4                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Updated VBIOS Production Version 9.0.1012 and GOP Driver Version 9.0.1018
+              GOP Driver for x32 is already retired.
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\IntelSaGopDriver.sdl
+
+[Tag] EIP198000
+[Category] Improvement
+[Severity] BugFix
+[Description] If set token NESTED_FV_MAIN to 0, when MRC warmboot, 
+              will occur error about FV_MAIN driver decompression. Fail phenomenon is hang.
+              Cold boot seems OK.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\Library\AmiCspLib\NbGeneric.c
+
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_006.3                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Updated VBIOS Production Version 9.0.1011 and GOP Driver Version 9.0.1017
+[Files] 
+AmiChipsetModulePkg\LegacyRom\Vbios\SKL_VBios.dat
+AmiChipsetModulePkg\NB\GOP\Skylake\x32\IntelGopDriver.efi
+AmiChipsetModulePkg\NB\GOP\Skylake\x64\IntelGopDriver.efi
+
+[Tag] AMI_OVERRIDE_NB0000_START
+[Category] Improvement
+[Severity] Normal
+[Description] Retired LibAllocCspResource(gNbCspResTable) method and using "RSVCHIPSET" in Nb.sdl and Sb.sdl
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\Sb.sdl
+AmiChipsetModulePkg\SB\SbInit\SbDxe.c
+SkylakeSiPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+SkylakeSiPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_006.2                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Modify PEG Port Slot Fun value for SG function
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_006.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Trimming North/Host Bridge chipset porting library function name
+[Files] 
+AmiChipsetModulePkg\Include\Library\NbCspLib.h
+AmiChipsetModulePkg\Include\NbGeneric.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_006                        **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Change "gMemRestoreDataGuid" value. (Synchronous with SiPkg.dec)
+[Files] 
+AmiChipsetModulePkg\Include\NbGeneric.c
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Update NB PCI Devices SSID Table for program sub-vendor ID and sub-system ID.
+[Files] 
+AmiChipsetModulePkg\Include\Nb.h
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_005.4                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] Create "SA_SPD_DATA_BUFFER" data structure.
+[Files] 
+AmiChipsetModulePkg\Include\NbSetupData.h
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_005.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] add PrimaryPcie number 8~11 for Skylake PCH and Open Select Primary video feature.
+[Files] 
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\Sa.sd
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\Sa.uni
+AmiChipsetModulePkg\Library\NbCsmDxeLib\NbCsmDxeLib.c
+AmiChipsetModulePkg\Nb.sdl
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal 
+[Description] change token PEI_MIN_MEMORY_SIZE = 48MB.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_005                        **
+**                                                                        **
+****************************************************************************
+[Tag] N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Get ACPI_VARIABLE_SET variable from AMI core,then set S3_MEM_VARIABLE_NAME variable for Intel RC.
+[Files] 
+AmiChipsetModulePkg\NB\NbInit\NbDxe.inf
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+
+
+[TAG] EIP 192869
+[Category] Bug fixed
+[Severity] Normal 
+[Description] Fixed build error when PRC_PEG_1 / RC_PEG_2 is disabled.
+[Files] 
+AmiChipsetModulePkg\Include\Nb.h
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_004.1                      **
+**                                                                        **
+****************************************************************************
+[Tag] N/A
+[Category] Improvement
+[Severity] Normal 
+[Description] Increase the minimum memory required for PEI from 64Mb to 384Mb, it's for Sgx's requirement.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+[Tag] AMI_OVERRIDE_SA0003_START
+[Category] Improvement
+[Severity] Normal 
+[Description] EIP191481 Implement the proposal of AMI fxied MMIO.
+[Files] 
+SkylakeSiPkg\SystemAgent\PciHostBridge\PciHostBridge.sdl
+SkylakeSiPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+SkylakeSiPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+SkylakeSiPkg\Wrapper\SystemAgent\SaSetup\Sa.sd
+SkylakeSiPkg\Wrapper\Library\SystemAgentHookLib\AmiSaPolicyUpdatePei.c
+SkylakeSiPkg\Wrapper\Library\PchLinkLib\PchLinkLib.c
+SkylakeSiPkg\Wrapper\Include\PchSetupData.h
+SkylakeSiPkg\Pch\PchInit\Smm\PchInitSmm.c
+SkylakeSiPkg\Pch\PchInit\Smm\PchInitSmm.inf
+SkylakeSiPkg\Pch\PchInit\Dxe\PchInit.c
+SkylakeSiPkg\Pch\PchInit\Dxe\PchRstPcieStorage.c
+SkylakeSiPkg\Pch\PchInit\Dxe\PchInitDxe.inf
+AmiChipsetModulePkg\NB\NbInit\NbDxe.c
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_004                        **
+**                                                                        **
+****************************************************************************
+[TAG] EIP N/A 
+[Category] Improvement
+[Severity] Normal 
+[Description] Fix build error problem when the token "DIMM_VOLTAGE_CHECK_SUPPORT" is enable.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\NbInit\NbPei.inf
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+
+[TAG] EIP190855 
+[Category] Improvement
+[Severity] Normal 
+[Description] Implement "NbGetDimmLocInfo" and "NbIsDualChannel" function
+[Files] 
+AmiChipsetModulePkg\Library\AmiCspLib\NbGeneric.c
+AmiChipsetModulePkg\AmiCspLib.sdl
+[Important] This improvement must set a private file in skylake project, 
+            if not set this file it will build error, 
+            please refer eip190855's attachment "Privatefiles.zip",
+            This is a temporary method.
+[PrivateFiles] 
+AmiModulePkg\RsdpPlus\ManageShadowRam.c
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_003                        **
+**                                                                        **
+****************************************************************************
+[Category] Improvement
+[Severity] Normal 
+[Description] Change PCIEX_BASE_ADDRESS value from 0xF8000000 to 0xE0000000.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove SA HDA Device.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+
+****************************************************************************
+**                                                                        **
+**                    SKL  AmiChipsetModulePkg_002                        **
+**                                                                        **
+****************************************************************************
+[Category] Improvement
+[Severity] Normal 
+[Description] Remove SA HDA define.
+[Files] 
+AmiChipsetModulePkg\Nb.sdl
+AmiChipsetModulePkg\NB\NbInit\NbPei.c
+AmiChipsetModulePkg\Include\Nb.h
+

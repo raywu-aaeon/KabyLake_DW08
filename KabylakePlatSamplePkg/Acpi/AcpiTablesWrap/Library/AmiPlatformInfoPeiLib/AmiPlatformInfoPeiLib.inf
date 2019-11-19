@@ -1,0 +1,39 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmiPlatformInfoPeiLib
+  FILE_GUID                      = 6A9A17EB-B017-476A-87E5-0C33DBF30FB9
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = AmiPlatformInfoPeiLib|PEIM
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  AmiPlatformInfoPeiLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec 
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  
+[LibraryClasses]
+  DebugLib
+  AmiCspLib
+  AmiPeiLib
+
+[Guids]
+
+[Ppis]
+  
+  
+

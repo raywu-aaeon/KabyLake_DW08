@@ -1,0 +1,30 @@
+TOKEN
+	Name  = DptfAcpiTablesKblG_SUPPORT
+	Value  = 1
+	TokenType = Boolean
+	TargetMAK = Yes
+	Master = Yes
+	Help  = "Main switch to enable DptfAcpiTablesKblg support in Project"
+End
+
+ELINK
+    Name  = "DGFCParticipant.asl"
+    Parent  = "DPTF_INCLUDE_FILE_LIST"
+    Help  = "Link the Participant ASL file into Dptf.asl."
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "DGHMParticipant.asl"
+    Parent  = "DPTF_INCLUDE_FILE_LIST"
+    Help  = "Link the Participant ASL file into Dptf.asl."
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "MCPParticipant.asl"
+    Parent  = "DPTF_INCLUDE_FILE_LIST"
+    Help  = "Link the Participant ASL file into Dptf.asl."
+    InvokeOrder = AfterParent
+End
+

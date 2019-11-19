@@ -1,0 +1,10 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/Library"
+	RefName = "Library"
+[INF]
+"PeiSgTpvLib/PeiSgTpvLib.inf"
+[files]
+"Library.sdl"	
+<endComponent>

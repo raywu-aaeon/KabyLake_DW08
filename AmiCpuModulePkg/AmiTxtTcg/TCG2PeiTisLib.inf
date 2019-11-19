@@ -1,0 +1,18 @@
+[Defines]
+INF_VERSION = 0x00010005
+VERSION_STRING = 1.0
+BASE_NAME = TCG2TisLib
+MODULE_TYPE = PEIM
+LIBRARY_CLASS = TCG2PeiTisLib
+FILE_GUID = 1e6a79f9-9d1a-4186-a592-2fd620b90056
+
+[Sources]
+  TPM2Interface/TpmTisLib.c
+  TPM2Interface/TpmTisLib.h
+
+[LibraryClasses]
+
+[Packages]
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  MdePkg/MdePkg.dec
+  AmiModulePkg/AmiModulePkg.dec

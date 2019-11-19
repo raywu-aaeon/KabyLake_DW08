@@ -1,0 +1,10 @@
+<component>
+	name = "AtiUlt"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/AcpiTables/PCH/"
+	RefName = "AtiSGULT"
+[files]
+"ATdGPUPCH.asl"	
+"ATiGPUPCH.asl"	
+"ATiGDmiscPCH.asl"	
+<endComponent>

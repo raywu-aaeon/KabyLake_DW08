@@ -1,0 +1,69 @@
+TOKEN
+    Name  = "IntelFsp2Pkg_Library_SUPPORT"
+    Value  = "1"
+    Help  = "Switch for IntelFsp2Pkg Library support in the project"
+    TokenType = Boolean
+    Master = Yes
+    Token = "FSP_SUPPORT" "=" "1"    
+End
+
+INFComponent
+    Name  = "BaseCacheAsRamLibNull"
+    File  = "BaseCacheAsRamLibNull\BaseCacheAsRamLibNull.inf"
+    Package  = "IntelFsp2Pkg"
+End
+
+LibraryMapping
+    Class  = "CacheAsRamLib"
+    Instance  = "IntelFsp2Pkg.BaseCacheAsRamLibNull"
+    ModuleTypes  = "PEIM"
+End
+
+INFComponent
+    Name  = "BaseCacheLib"
+    File  = "BaseCacheLib\BaseCacheLib.inf"
+    Package  = "IntelFsp2Pkg"
+End
+
+LibraryMapping
+    Class  = "CacheLib"
+    Instance  = "IntelFsp2Pkg.BaseCacheLib"
+    ModuleTypes  = "PEIM"
+End
+
+INFComponent
+    Name  = "BaseFspCommonLib"
+    File  = "BaseFspCommonLib\BaseFspCommonLib.inf"
+    Package  = "IntelFsp2Pkg"    
+End
+
+LibraryMapping
+    Class  = "FspCommonLib"
+    Instance  = "IntelFsp2Pkg.BaseFspCommonLib" 
+End
+
+INFComponent
+    Name  = "BaseFspPlatformLib"
+    File  = "BaseFspPlatformLib\BaseFspPlatformLib.inf"
+    Package  = "IntelFsp2Pkg"    
+End
+
+LibraryMapping
+    Class  = "FspPlatformLib"
+    Instance  = "IntelFsp2Pkg.BaseFspPlatformLib"
+    Arch  = "IA32"
+    ModuleTypes  = "PEI_CORE PEIM SEC"        
+End
+
+INFComponent
+    Name  = "BaseFspSwitchStackLib"
+    File  = "BaseFspSwitchStackLib\BaseFspSwitchStackLib.inf"
+    Package  = "IntelFsp2Pkg"    
+End
+
+LibraryMapping
+    Class  = "FspSwitchStackLib"
+    Instance  = "IntelFsp2Pkg.BaseFspSwitchStackLib"
+    Arch  = "IA32"
+    ModuleTypes  = "PEI_CORE PEIM SEC"        
+End

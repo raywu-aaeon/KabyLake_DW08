@@ -1,0 +1,13 @@
+<component>
+	name = "SgTpv PEG"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/AcpiTables/PEG/"
+	RefName = "SgTpvPEG"
+[INF]
+"SgTpvPegSSDT.inf"
+[files]
+"SgTpvPEG.sdl"	
+[parts]
+"AtiSG"
+"nVidiaSG"
+<endComponent>

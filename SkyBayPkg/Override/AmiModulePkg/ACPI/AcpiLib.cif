@@ -1,0 +1,13 @@
+<component>
+    name = "AcpiLib"
+    category = ModulePart
+    LocalRoot = "SkyBayPkg\Override\AmiModulePkg\ACPI"
+    RefName = "SkyBayPkg.Override.AcpiLib"
+[INF]
+[files]
+"AcpiLib.inf"
+"AcpiBaseLib.c"
+"AcpiCore.h"
+"AtadSmi.h"
+"AcpiSdtPrivate.h"
+<endComponent>

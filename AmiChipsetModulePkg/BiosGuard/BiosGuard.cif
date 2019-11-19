@@ -1,0 +1,26 @@
+<component>
+    name = "Intel Bios Guard Technology"
+    category = eModule
+    LocalRoot = "AmiChipsetModulePkg\BiosGuard\"
+    RefName = "Intel Bios Guard Technology"
+[files]
+"BiosGuard.sdl"	
+"BiosGuard.chm"	
+"GenBiosGuardImage.bat"	
+"BiosGuardBatchConfig.txt"	
+[parts]
+"AmiChipsetModulePkg.BiosGuardInclude"
+"BiosGuardLibrary"
+"BiosGuardBinary"
+"BiosGuardFlashLib"
+"BiosGuardCpuPolicyOverride"
+"BiosGuardPeiApRecoveryCapsule"
+"BiosGuardSetup"
+"BiosGuardPubKeysAndBuildPSL"
+"BiosGuardDxe"
+"BiosGuardNvs"
+"BiosGuardRecovery"
+"BiosGuardEcFwUpdate"
+"BiosGuardKeys"
+"BiosGuardFlashInterface"
+<endComponent>

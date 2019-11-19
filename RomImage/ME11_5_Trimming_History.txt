@@ -1,0 +1,1413 @@
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_038                        **
+**                                                             **
+*****************************************************************
+[Tag] EIP499809 
+[Category] Improvement
+[Severity] Normal
+[Description] [Update] Kit: 133717 Intel Converged Security and Management Engine Firmware 11.8.71.3630 Hot Fix for Skylake and Kaby Lake Platforms
+[Files]
+RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin
+RomImage\ME\ME_11.8_Consumer_D0_H.bin
+RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin
+RomImage\ME\ME_11.8_Corporate_D0_H.bin
+RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+RomImage\Fitc11_8_Consumer\fit.exe
+RomImage\Fitc11_8_Consumer\vsccommn.bin
+RomImage\Fitc11_8_Corporate\fit.exe
+RomImage\Fitc11_8_Corporate\vsccommn.bin
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_037                        **
+**                                                             **
+*****************************************************************
+[Tag] EIP489772 
+[Category] Improvement
+[Severity] Normal
+[Description] [Update] Intel® Converged Security and Management Engine 11.8.70.3626 Intel Platform Update 2019.2 Production Version Release Supporting SKL, KBL, KBL-R, AML Y Consumer and Corporate SKUs, and CFL-S+KBP-H Consumer SKU
+[Files]
+RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin
+RomImage\ME\ME_11.8_Consumer_D0_H.bin
+RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin
+RomImage\ME\ME_11.8_Corporate_D0_H.bin
+RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+RomImage\Fitc11_8_Consumer\fit.exe
+RomImage\Fitc11_8_Consumer\vsccommn.bin
+RomImage\Fitc11_8_Corporate\fit.exe
+RomImage\Fitc11_8_Corporate\vsccommn.bin
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_036                        **
+**                                                             **
+*****************************************************************
+[Tag] EIP477129 
+[Category] Improvement
+[Severity] Normal
+[Description] Update Intel ME Firmware 11.8.65.3590v2 QSR HF for SKL, KBL, KBL-R, AML Y Cons & Corp, CFL-S62+KBP-H Cons
+[Files] 
+RomImage\Fitc11_8_Consumer\fit.exe
+RomImage\Fitc11_8_Corporate\fit.exe
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_035                        **
+**                                                             **
+*****************************************************************
+[Tag] EIP468579 
+[Category] Improvement
+[Severity] Normal
+[Description] Intel® Converged Security and Management Engine 11.8.65.3590 Quarterly Security Release 2019.1 Production
+[Files] 
+RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Consumer_D0_H.bin
+RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin
+RomImage\Fitc11_8_Consumer\fit.exe
+RomImage\Fitc11_8_Consumer\vsccommn.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Corporate_D0_H.bin
+RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin
+RomImage\Fitc11_8_Corporate\fit.exe
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_034                        **
+**                                                             **
+*****************************************************************
+[Tag] EIP461581 
+[Category] Improvement
+[Severity] Normal
+[Description] Update EC 1.34 (WW25 BKC) for AML Y42
+[Files] 
+RomImage\BatchFiles\Pre-Production\Consumer_RVP3_Y42_C.bat
+RomImage\BatchFiles\Pre-Production\Corporate_RVP3_Y42_C.bat
+RomImage\BatchFiles\Production\Consumer_RVP3_Y42_C.bat
+RomImage\BatchFiles\Production\Corporate_RVP3_Y42_C.bat
+RomImage\BatchFiles\Make_RVP3_Y42.bat
+RomImage\EC\Y42\EC.bin
+RomImage\EC\EcRegionPointer.bin
+RomImage\XmlFiles\Pre-Production\Consumer_RVP3_Y42_C.xml
+RomImage\XmlFiles\Pre-Production\Corporate_RVP3_Y42_C.xml
+RomImage\XmlFiles\Production\Consumer_RVP3_Y42_C.xml
+RomImage\XmlFiles\Production\Corporate_RVP3_Y42_C.xml
+RomImage\Build_All.bat
+RomImage\RomImage.mak
+RomImage\RomImage.sdl
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_033                        **
+**                                                             **
+*****************************************************************
+[Tag] EIP445628 
+[Category] Improvement
+[Severity] Normal
+[Description] Update Intel ME Firmware 11.8.60.3561 for SKL/KBL/KBL-R U42 Cons/Corp & CFLS62+KBP-H Cons
+[Files] 
+RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+RomImage\ME\ME_11.8_Consumer_D0_H.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin
+RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin
+RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+RomImage\ME\ME_11.8_Corporate_D0_H.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin
+RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin
+RomImage\Licenses\3rd party Licenses in FW\wpa supplicant license.txt
+RomImage\Licenses\3rd party Licenses in FW\Microsoft TPM 2.0 BSD Two Clause License.txt
+RomImage\Fitc11_8_Consumer\vsccommn.bin
+RomImage\Fitc11_8_Consumer\fit.exe
+RomImage\Fitc11_8_Corporate\vsccommn.bin
+RomImage\Fitc11_8_Corporate\fit.exe
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_032.2                      **
+**                                                             **
+*****************************************************************
+[Tag] EIP432397 
+[Category] Improvement
+[Severity] Normal
+[Description] [KBL] RomImage include 3rd party Licenses
+[Files] 
+RomImage\Licenses\3rd party Licenses in FW\Apache Harmony Apache Version 2.0, January 2004 w header.txt
+RomImage\Licenses\3rd party Licenses in FW\Apache-Xerces-Java-XML-Parser.txt
+RomImage\Licenses\3rd party Licenses in FW\ConvertUTF unicode license.txt
+RomImage\Licenses\3rd party Licenses in FW\CxImage license complete.txt
+RomImage\Licenses\3rd party Licenses in FW\HTTP Client C MIT license.txt
+RomImage\Licenses\3rd party Licenses in FW\llvm.org University of Illinois_NCSA.txt
+RomImage\Licenses\3rd party Licenses in FW\Minix 3.pdf
+RomImage\Licenses\3rd party Licenses in FW\MIT Kerberos for Windows.pdf
+RomImage\Licenses\3rd party Licenses in FW\newlib_licenses.txt
+RomImage\Licenses\3rd party Licenses in FW\zlib license.txt
+RomImage\Licenses\3rd party Licenses in Tools\Android Autogenerated Files Apache 2.0.pdf
+RomImage\Licenses\3rd party Licenses in Tools\EFI tool kit from IP Plan CSE SoC Tools Master Container BSD 1.0 license.txt
+RomImage\Licenses\3rd party Licenses in Tools\EFI tool kit intel BSD 2 clause license.txt
+RomImage\Licenses\3rd party Licenses in Tools\Expat XMLparser MIT license.txt
+RomImage\Licenses\3rd party Licenses in Tools\Jquery MIT license.txt
+RomImage\Licenses\3rd party Licenses in Tools\JsonCpp MIT license.txt
+RomImage\Licenses\3rd party Licenses in Tools\pugixml license.txt
+
+[Tag] None 
+[Category] Improvement
+[Severity] Normal
+[Description] Build failure happening when source with CRB_BOARD = 9 with prikey/pubkey present.
+[Files] 
+RomImage\RomImage.mak
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_032.1                      **
+**                                                             **
+*****************************************************************
+[TAG]           EIP422646
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Intel ME Firmware 11.8.55.3510 for Z370 sku.
+[Files]
+ Modified:
+   1. RomImage\BatchFiles\Pre-Production\Consumer_KBL_Z370_D.bat
+   2. RomImage\BatchFiles\Pre-Production\Consumer_KBL_Z370_D_ME117.bat
+   3. RomImage\BatchFiles\Pre-Production\Corporate_KBL_Z370_D.bat
+   4. RomImage\BatchFiles\Pre-Production\Corporate_KBL_Z370_D_ME117.bat
+   5. RomImage\BatchFiles\Production\Consumer_KBL_Z370_D.bat
+   6. RomImage\BatchFiles\Production\Consumer_KBL_Z370_D_ME117.bat
+   7. RomImage\BatchFiles\Production\Corporate_KBL_Z370_D.bat
+   8. RomImage\BatchFiles\Production\Corporate_KBL_Z370_D_ME117.bat
+   9. RomImage\XmlFiles\Pre-Production\Consumer_KBL_Z370_D.xml
+   10. RomImage\XmlFiles\Pre-Production\Consumer_KBL_Z370_D_ME117.xml
+   11. RomImage\XmlFiles\Pre-Production\Corporate_KBL_Z370_D.xml
+   12. RomImage\XmlFiles\Pre-Production\Corporate_KBL_Z370_D_ME117.xml
+   13. RomImage\XmlFiles\Production\Consumer_KBL_Z370_D.xml
+   14. RomImage\XmlFiles\Production\Consumer_KBL_Z370_D_ME117.xml
+   15. RomImage\XmlFiles\Production\Corporate_KBL_Z370_D.xml
+   16. RomImage\XmlFiles\Production\Corporate_KBL_Z370_D_ME117.xml
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_032                        **
+**                                                             **
+*****************************************************************
+[TAG]           EIP419368
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Intel ME Firmware 11.8.55.3510 for SKL/KBL/KBL-R U42 Cons/Corp & CFLS62+KBP-H Cons
+[Files]
+ Modified:
+   1. RomImage\Fitc11_8_Consumer\fit.exe
+   2. RomImage\Fitc11_8_Consumer\vsccommn.bin
+   3. RomImage\Fitc11_8_Corporate\fit.exe
+   4. RomImage\Fitc11_8_Corporate\vsccommn.bin
+   5. RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+   6. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin
+   7. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin
+   8. RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+   9. RomImage\ME\ME_11.8_Consumer_D0_H.bin
+   10. RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+   11. RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+   12. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin
+   13. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin
+   14. RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+   15. RomImage\ME\ME_11.8_Corporate_D0_H.bin
+   16. RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_031                        **
+**                                                             **
+*****************************************************************
+[TAG]           EIP405992
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Intel ME Firmware 11.8.50.3470 for SKL/KBL/KBL-R U42 Cons/Corp
+[Files]
+ Modified:
+   1. RomImage\BatchFiles\Production\Consumer_RVP17_D.bat
+   2. RomImage\BatchFiles\Production\Corporate_RVP17_D.bat
+   3. RomImage\BatchFiles\Make_RVP17.bat
+   4. RomImage\Fitc11_8_Consumer\fit.exe
+   5. RomImage\Fitc11_8_Consumer\vsccommn.bin
+   6. RomImage\Fitc11_8_Corporate\fit.exe
+   7. RomImage\Fitc11_8_Corporate\vsccommn.bin
+   8. RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+   9. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin
+   10. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin
+   11. RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+   12. RomImage\ME\ME_11.8_Consumer_D0_H.bin
+   13. RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+   14. RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+   15. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin
+   16. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin
+   17. RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+   18. RomImage\ME\ME_11.8_Corporate_D0_H.bin
+   19. RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+   20. RomImage\XmlFiles\Production\Consumer_RVP17_D.xml
+   21. RomImage\XmlFiles\Production\Corporate_RVP17_D.xml
+   22. RomImage\RomImage.mak
+   23. RomImage\RomImage.sdl
+   24. RomImage\Build_All.bat
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_030                        **
+**                                                             **
+*****************************************************************
+[TAG]           EIP401341 
+[Category]      Improvement
+[Severity]      Normal
+[Description]   Update Intel Management Engine Firmware 11.8.50.3460 for SKL/KBL/KBL-R Cons/Corp & CFL-S62/KBP-H Cons
+[Files]
+ Modified:
+   1. RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+   2. RomImage\ME\ME_11.8_Consumer_D0_H.bin
+   3. RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+   4. RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+   5. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin
+   6. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin
+   7. RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+   8. RomImage\ME\ME_11.8_Corporate_D0_H.bin
+   9. RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+   10. RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+   11. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin
+   12. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin
+   13. RomImage\Fitc11_Corporate\vsccommn.bin
+   14. RomImage\Fitc11_Corporate\fit.exe
+   15. RomImage\Fitc11_Consumer\vsccommn.bin
+   16. RomImage\Fitc11_Consumer\fit.exe
+   
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_029                        **
+**                                                             **
+*****************************************************************
+[TAG]			EIP373126
+[Category]   	Improvement
+[Severity]		Normal
+[Description]	 Update Intel Management Engine Firmware HF 11.8.50.3425 for KBL U/Y/S/H and KBL R U4+2
+[Files]
+ Modified:
+   1. RomImage\RomImage.chm
+   2. RomImage\RomImageBinFiles.cif
+   3. RomImage\Fitc11_8_Consumer\fit.exe
+   4. RomImage\Fitc11_8_Corporate\fit.exe
+   5. RomImage\ME\ME_11.8_Consumer_C0_LP.bin
+   6. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM.bin (Rename)
+   7. RomImage\ME\ME_11.8_Consumer_C0_LP_PDM_Production.bin (Rename)
+   8. RomImage\ME\ME_11.8_Consumer_C0_LP_Production.bin
+   9. RomImage\ME\ME_11.8_Consumer_D0_H.bin
+   10. RomImage\ME\ME_11.8_Consumer_D0_H_Production.bin
+   11. RomImage\ME\ME_11.8_Corporate_C0_LP.bin
+   12. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM.bin (Rename)
+   13. RomImage\ME\ME_11.8_Corporate_C0_LP_PDM_Production.bin (Rename)
+   14. RomImage\ME\ME_11.8_Corporate_C0_LP_Production.bin
+   15. RomImage\ME\ME_11.8_Corporate_D0_H.bin
+   16. RomImage\ME\ME_11.8_Corporate_D0_H_Production.bin
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_028                        **
+**                                                             **
+*****************************************************************
+[TAG] EIP366534 
+[Category] Spec Update
+[Severity] Important
+[Description] Intel ME Firmware Cons 11.8.50.3399 for Kaby Lake  U4+2 and U/Y/S/H 
+[Files] 
+ Added:
+   1. Fitc11_8_Consumer\fit.exe
+   2. Fitc11_8_Consumer\newfiletmpl.xml
+   3. Fitc11_8_Consumer\vsccommn.bin
+   4. Fitc11_8_Corporate\fit.exe
+   5. Fitc11_8_Corporate\newfiletmpl.xml
+   6. Fitc11_8_Corporate\vsccommn.bin
+   7. ME\ME_11.8_Consumer_C0_LP.bin
+   8. ME\ME_11.8_Consumer_C0_LP_Power_Down_Mitigation.bin
+   9. ME\ME_11.8_Consumer_C0_LP_Power_Down_Mitigation_Production.bin
+   10. ME\ME_11.8_Consumer_C0_LP_Production.bin
+   11. ME\ME_11.8_Consumer_D0_H.bin
+   12. ME\ME_11.8_Consumer_D0_H_Production.bin
+   13. ME\ME_11.8_Corporate_C0_LP.bin
+   14. ME\ME_11.8_Corporate_C0_LP_Power_Down_Mitigation.bin
+   15. ME\ME_11.8_Corporate_C0_LP_Power_Down_Mitigation_Production.bin
+   16. ME\ME_11.8_Corporate_C0_LP_Production.bin
+   17. ME\ME_11.8_Corporate_D0_H.bin
+   18. ME\ME_11.8_Corporate_D0_H_Production.bin
+ Modified:
+   1. RomImage.chm
+   2. RomImageBinFiles.cif
+   3. RomImageFitc.cif
+   4. BatchFiles\Pre-Production\Consumer_KBL_Refresh_C.bat
+   5. BatchFiles\Pre-Production\Consumer_KBL_Refresh_C_ME116.bat
+   6. BatchFiles\Pre-Production\Consumer_KBL_uDIMM_D.bat
+   7. BatchFiles\Pre-Production\Consumer_KBL_uDIMM_D_ME116.bat
+   8. BatchFiles\Pre-Production\Consumer_KBL_Z370_D.bat
+   9. BatchFiles\Pre-Production\Consumer_RVP10_D.bat
+   10. BatchFiles\Pre-Production\Consumer_RVP10_D_ME116.bat
+   11. BatchFiles\Pre-Production\Consumer_RVP10_D_OC.bat
+   12. BatchFiles\Pre-Production\Consumer_RVP10_D_OC_ME116.bat
+   13. BatchFiles\Pre-Production\Consumer_RVP11_D.bat
+   14. BatchFiles\Pre-Production\Consumer_RVP11_D_ME116.bat
+   15. BatchFiles\Pre-Production\Consumer_RVP3_C.bat
+   16. BatchFiles\Pre-Production\Consumer_RVP3_C_ME115.bat
+   17. BatchFiles\Pre-Production\Consumer_RVP3_C_ME116.bat
+   18. BatchFiles\Pre-Production\Consumer_RVP5_C.bat
+   19. BatchFiles\Pre-Production\Consumer_RVP5_C_ME115.bat
+   20. BatchFiles\Pre-Production\Consumer_RVP5_C_ME116.bat
+   21. BatchFiles\Pre-Production\Consumer_RVP7_C.bat
+   22. BatchFiles\Pre-Production\Consumer_RVP7_C_ME115.bat
+   23. BatchFiles\Pre-Production\Consumer_RVP7_C_ME116.bat
+   24. BatchFiles\Pre-Production\Consumer_RVP8_D.bat
+   25. BatchFiles\Pre-Production\Consumer_RVP8_D_ME116.bat
+   26. BatchFiles\Pre-Production\Consumer_RVP8_D_OC.bat
+   27. BatchFiles\Pre-Production\Consumer_RVP8_D_OC_ME116.bat
+   28. BatchFiles\Pre-Production\Consumer_RVP9_D.bat
+   29. BatchFiles\Pre-Production\Consumer_RVP9_D_ME116.bat
+   30. BatchFiles\Pre-Production\Corporate_KBL_Refresh_C.bat
+   31. BatchFiles\Pre-Production\Corporate_KBL_Refresh_C_ME116.bat
+   32. BatchFiles\Pre-Production\Corporate_KBL_uDIMM_D.bat
+   33. BatchFiles\Pre-Production\Corporate_KBL_uDIMM_D_ME116.bat
+   34. BatchFiles\Pre-Production\Corporate_KBL_Z370_D.bat
+   35. BatchFiles\Pre-Production\Corporate_RVP10_D.bat
+   36. BatchFiles\Pre-Production\Corporate_RVP10_D_ME116.bat
+   37. BatchFiles\Pre-Production\Corporate_RVP10_D_OC.bat
+   38. BatchFiles\Pre-Production\Corporate_RVP10_D_OC_ME116.bat
+   39. BatchFiles\Pre-Production\Corporate_RVP11_D.bat
+   40. BatchFiles\Pre-Production\Corporate_RVP11_D_ME116.bat
+   41. BatchFiles\Pre-Production\Corporate_RVP3_C.bat
+   42. BatchFiles\Pre-Production\Corporate_RVP3_C_ME115.bat
+   43. BatchFiles\Pre-Production\Corporate_RVP3_C_ME116.bat
+   44. BatchFiles\Pre-Production\Corporate_RVP5_C.bat
+   45. BatchFiles\Pre-Production\Corporate_RVP5_C_ME115.bat
+   46. BatchFiles\Pre-Production\Corporate_RVP5_C_ME116.bat
+   47. BatchFiles\Pre-Production\Corporate_RVP7_C.bat
+   48. BatchFiles\Pre-Production\Corporate_RVP7_C_ME115.bat
+   49. BatchFiles\Pre-Production\Corporate_RVP7_C_ME116.bat
+   50. BatchFiles\Pre-Production\Corporate_RVP8_C236_D.bat
+   51. BatchFiles\Pre-Production\Corporate_RVP8_C236_D_ME116.bat
+   52. BatchFiles\Pre-Production\Corporate_RVP8_D.bat
+   53. BatchFiles\Pre-Production\Corporate_RVP8_D_ME116.bat
+   54. BatchFiles\Pre-Production\Corporate_RVP8_D_OC.bat
+   55. BatchFiles\Pre-Production\Corporate_RVP8_D_OC_ME116.bat
+   56. BatchFiles\Pre-Production\Corporate_RVP9_D.bat
+   57. BatchFiles\Pre-Production\Corporate_RVP9_D_ME116.bat
+   58. BatchFiles\Production\Consumer_KBL_Refresh_C.bat
+   59. BatchFiles\Production\Consumer_KBL_Refresh_C_ME116.bat
+   60. BatchFiles\Production\Consumer_KBL_uDIMM_D.bat
+   61. BatchFiles\Production\Consumer_KBL_uDIMM_D_ME116.bat
+   62. BatchFiles\Production\Consumer_KBL_Z370_D.bat
+   63. BatchFiles\Production\Consumer_RVP10_D.bat
+   64. BatchFiles\Production\Consumer_RVP10_D_ME116.bat
+   65. BatchFiles\Production\Consumer_RVP10_D_OC.bat
+   66. BatchFiles\Production\Consumer_RVP10_D_OC_ME116.bat
+   67. BatchFiles\Production\Consumer_RVP11_D.bat
+   68. BatchFiles\Production\Consumer_RVP11_D_ME116.bat
+   69. BatchFiles\Production\Consumer_RVP3_C.bat
+   70. BatchFiles\Production\Consumer_RVP3_C_ME115.bat
+   71. BatchFiles\Production\Consumer_RVP3_C_ME116.bat
+   72. BatchFiles\Production\Consumer_RVP5_C.bat
+   73. BatchFiles\Production\Consumer_RVP5_C_ME115.bat
+   74. BatchFiles\Production\Consumer_RVP5_C_ME116.bat
+   75. BatchFiles\Production\Consumer_RVP7_C.bat
+   76. BatchFiles\Production\Consumer_RVP7_C_ME115.bat
+   77. BatchFiles\Production\Consumer_RVP7_C_ME116.bat
+   78. BatchFiles\Production\Consumer_RVP8_D.bat
+   79. BatchFiles\Production\Consumer_RVP8_D_ME116.bat
+   80. BatchFiles\Production\Consumer_RVP8_D_OC.bat
+   81. BatchFiles\Production\Consumer_RVP8_D_OC_ME116.bat
+   82. BatchFiles\Production\Consumer_RVP9_D.bat
+   83. BatchFiles\Production\Consumer_RVP9_D_ME116.bat
+   84. BatchFiles\Production\Corporate_KBL_Refresh_C.bat
+   85. BatchFiles\Production\Corporate_KBL_Refresh_C_ME116.bat
+   86. BatchFiles\Production\Corporate_KBL_uDIMM_D.bat
+   87. BatchFiles\Production\Corporate_KBL_uDIMM_D_ME116.bat
+   88. BatchFiles\Production\Corporate_KBL_Z370_D.bat
+   89. BatchFiles\Production\Corporate_RVP10_D.bat
+   90. BatchFiles\Production\Corporate_RVP10_D_ME116.bat
+   91. BatchFiles\Production\Corporate_RVP10_D_OC.bat
+   92. BatchFiles\Production\Corporate_RVP10_D_OC_ME116.bat
+   93. BatchFiles\Production\Corporate_RVP11_D.bat
+   94. BatchFiles\Production\Corporate_RVP11_D_ME116.bat
+   95. BatchFiles\Production\Corporate_RVP3_C.bat
+   96. BatchFiles\Production\Corporate_RVP3_C_ME115.bat
+   97. BatchFiles\Production\Corporate_RVP3_C_ME116.bat
+   98. BatchFiles\Production\Corporate_RVP5_C.bat
+   99. BatchFiles\Production\Corporate_RVP5_C_ME115.bat
+   100. BatchFiles\Production\Corporate_RVP5_C_ME116.bat
+   101. BatchFiles\Production\Corporate_RVP7_C.bat
+   102. BatchFiles\Production\Corporate_RVP7_C_ME115.bat
+   103. BatchFiles\Production\Corporate_RVP7_C_ME116.bat
+   104. BatchFiles\Production\Corporate_RVP8_C236_D.bat
+   105. BatchFiles\Production\Corporate_RVP8_C236_D_ME116.bat
+   106. BatchFiles\Production\Corporate_RVP8_D.bat
+   107. BatchFiles\Production\Corporate_RVP8_D_ME116.bat
+   108. BatchFiles\Production\Corporate_RVP8_D_OC.bat
+   109. BatchFiles\Production\Corporate_RVP8_D_OC_ME116.bat
+   110. BatchFiles\Production\Corporate_RVP9_D.bat
+   111. BatchFiles\Production\Corporate_RVP9_D_ME116.bat
+   112. XmlFiles\Pre-Production\Consumer_KBL_Refresh_C.xml
+   113. XmlFiles\Pre-Production\Consumer_KBL_uDIMM_D.xml
+   114. XmlFiles\Pre-Production\Consumer_RVP10_D.xml
+   115. XmlFiles\Pre-Production\Consumer_RVP10_D_OC.xml
+   116. XmlFiles\Pre-Production\Consumer_RVP11_D.xml
+   117. XmlFiles\Pre-Production\Consumer_RVP3_C.xml
+   118. XmlFiles\Pre-Production\Consumer_RVP5_C.xml
+   119. XmlFiles\Pre-Production\Consumer_RVP7_C.xml
+   120. XmlFiles\Pre-Production\Consumer_RVP8_D.xml
+   121. XmlFiles\Pre-Production\Consumer_RVP8_D_OC.xml
+   122. XmlFiles\Pre-Production\Consumer_RVP9_D.xml
+   123. XmlFiles\Pre-Production\Corporate_KBL_Refresh_C.xml
+   124. XmlFiles\Pre-Production\Corporate_KBL_uDIMM_D.xml
+   125. XmlFiles\Pre-Production\Corporate_RVP10_D.xml
+   126. XmlFiles\Pre-Production\Corporate_RVP10_D_OC.xml
+   127. XmlFiles\Pre-Production\Corporate_RVP11_D.xml
+   128. XmlFiles\Pre-Production\Corporate_RVP3_C.xml
+   129. XmlFiles\Pre-Production\Corporate_RVP5_C.xml
+   130. XmlFiles\Pre-Production\Corporate_RVP7_C.xml
+   131. XmlFiles\Pre-Production\Corporate_RVP8_C236_D.xml
+   132. XmlFiles\Pre-Production\Corporate_RVP8_D.xml
+   133. XmlFiles\Pre-Production\Corporate_RVP8_D_OC.xml
+   134. XmlFiles\Pre-Production\Corporate_RVP9_D.xml
+   135. XmlFiles\Production\Consumer_KBL_Refresh_C.xml
+   136. XmlFiles\Production\Consumer_KBL_uDIMM_D.xml
+   137. XmlFiles\Production\Consumer_RVP10_D.xml
+   138. XmlFiles\Production\Consumer_RVP10_D_OC.xml
+   139. XmlFiles\Production\Consumer_RVP11_D.xml
+   140. XmlFiles\Production\Consumer_RVP3_C.xml
+   141. XmlFiles\Production\Consumer_RVP5_C.xml
+   142. XmlFiles\Production\Consumer_RVP7_C.xml
+   143. XmlFiles\Production\Consumer_RVP8_D.xml
+   144. XmlFiles\Production\Consumer_RVP8_D_OC.xml
+   145. XmlFiles\Production\Consumer_RVP9_D.xml
+   146. XmlFiles\Production\Corporate_KBL_Refresh_C.xml
+   147. XmlFiles\Production\Corporate_KBL_uDIMM_D.xml
+   148. XmlFiles\Production\Corporate_RVP10_D.xml
+   149. XmlFiles\Production\Corporate_RVP10_D_OC.xml
+   150. XmlFiles\Production\Corporate_RVP11_D.xml
+   151. XmlFiles\Production\Corporate_RVP3_C.xml
+   152. XmlFiles\Production\Corporate_RVP5_C.xml
+   153. XmlFiles\Production\Corporate_RVP7_C.xml
+   154. XmlFiles\Production\Corporate_RVP8_C236_D.xml
+   155. XmlFiles\Production\Corporate_RVP8_D.xml
+   156. XmlFiles\Production\Corporate_RVP8_D_OC.xml
+   157. XmlFiles\Production\Corporate_RVP9_D.xml
+   
+﻿*****************************************************************
+**                                                             **
+**                   LABEL RomImage_027                        **
+**                                                             **
+*****************************************************************
+[TAG] EIP356443 
+[Category] Spec Update
+[Severity] Important
+[Description] Intel ME Firmware Cons 11.7.4.3314 for Kaby Lake U/Y/S/H/R and CFL_S+KBP_H (Z370 PCH)
+[Files] 
+Fitc11_7_Consumer\fit.exe                                      <----- 11.7.4.3314
+Fitc11_7_Corporate\fit.exe                                     <----- 11.7.4.3314
+RomImage.chm
+ME\ME_11.6_Consumer_C0_LP.bin                                  <----- 11.7.4.3314
+ME\ME_11.6_Consumer_C0_LP_Production.bin                       <----- 11.7.4.3314
+ME\ME_11.6_Consumer_D0_H.bin                                   <----- 11.7.4.3314
+ME\ME_11.6_Consumer_D0_H_Production.bin                        <----- 11.7.4.3314
+
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_021                        **
+**                                                             **
+*****************************************************************
+[TAG] EIP333793
+[Category] Spec Update
+[Severity] Important
+[Description] Intel ME Firmware Cons/Corp HF5 11.6.27.3264 for Kaby Lake U/Y/S/H
+[Files] 
+Fitc11_6_Consumer\fit.exe
+Fitc11_6_Corporate\fit.exe
+RomImage.chm
+ME\ME_11.6_Consumer_C0_LP.bin                                  <----- 11.6.27.3264
+ME\ME_11.6_Consumer_C0_LP_Production.bin                       <----- 11.6.27.3264
+ME\ME_11.6_Consumer_D0_H.bin                                   <----- 11.6.27.3264
+ME\ME_11.6_Consumer_D0_H_Production.bin                        <----- 11.6.27.3264
+ME\ME_11.6_Corporate_C0_LP.bin                                 <----- 11.6.27.3264
+ME\ME_11.6_Corporate_C0_LP_Production.bin                      <----- 11.6.27.3264
+ME\ME_11.6_Corporate_D0_H.bin                                  <----- 11.6.27.3264
+ME\ME_11.6_Corporate_D0_H_Production.bin                       <----- 11.6.27.3264
+
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.26.1246 HF4 for Cons/Corp Kaby Lake S/H/U/Y platforms
+[Files] 
+ME_11.7_Consumer_C0_LP.bin                                     <----- 11.7.0.1229
+ME_11.7_Consumer_C0_LP_Production.bin                          <----- 11.7.0.1229
+ME_11.7_Consumer_D0_H.bin                                      <----- 11.7.0.1229
+ME_11.7_Consumer_D0_H_Production.bin                           <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP.bin                                    <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP_Production.bin                         <----- 11.7.0.1229
+ME_11.7_Corporate_D0_H.bin                                     <----- 11.7.0.1229
+ME_11.7_Corporate_D0_H_Production.bin                          <----- 11.7.0.1229
+ME_11.7_Consumer_C0_LP_Power_Down_Mitigation.bin               <----- 11.7.0.1229
+ME_11.7_Consumer_C0_LP_Power_Down_Mitigation_Production.bin    <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP_Power_Down_Mitigation.bin              <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP_Power_Down_Mitigation_Production.bin   <----- 11.7.0.1229
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.26.1246
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.26.1246
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.26.1246
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.26.1246
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.26.1246
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.26.1246
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.26.1246
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.26.1246
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                   <----- 11.6.25.1229
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin        <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                  <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin       <----- 11.6.25.1229
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_020                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.7.0.1229 Pre-Beta for Consumer/Corporate Kaby Lake R U42 platforms
+[Files] 
+ME_11.7_Consumer_C0_LP.bin                                     <----- 11.7.0.1229
+ME_11.7_Consumer_C0_LP_Production.bin                          <----- 11.7.0.1229
+ME_11.7_Consumer_D0_H.bin                                      <----- 11.7.0.1229
+ME_11.7_Consumer_D0_H_Production.bin                           <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP.bin                                    <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP_Production.bin                         <----- 11.7.0.1229
+ME_11.7_Corporate_D0_H.bin                                     <----- 11.7.0.1229
+ME_11.7_Corporate_D0_H_Production.bin                          <----- 11.7.0.1229
+ME_11.7_Consumer_C0_LP_Power_Down_Mitigation.bin               <----- 11.7.0.1229
+ME_11.7_Consumer_C0_LP_Power_Down_Mitigation_Production.bin    <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP_Power_Down_Mitigation.bin              <----- 11.7.0.1229
+ME_11.7_Corporate_C0_LP_Power_Down_Mitigation_Production.bin   <----- 11.7.0.1229
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.25.1229
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.25.1229
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.25.1229
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.25.1229
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.25.1229
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.25.1229
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                 <----- 11.6.25.1229
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.25.1229
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_019                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Post Manufacturing NVAR Configuration renamed. (NvarPostManLck -> NvarPostManUnLckd, No -> Yes)
+[Files] 
+XmlFiles\*\*.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Support Intel FITC utility for Linux build. (Wine wapper)
+[Files] 
+RomImage.mak
+RomImage.sdl
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.25.1229 (Maintenance Release 3) for Consumer/Corporate Kaby Lake S/H/U/Y platforms.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.25.1229
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.25.1229
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.25.1229
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.25.1229
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.25.1229
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.25.1229
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                 <----- 11.6.25.1229
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.25.1229
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.25.1229
+
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_018.2                      **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Packaging full binary with "Unsigned BIOS rom" if FWCAPSULE_FILE_FORMAT
+is enable.
+[Files] 
+RomImage.mak
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_018.1                      **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Support Kaby Lake Refresh U Bios Guard binary build.
+[Files] 
+RomImage.mak
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_018                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Removed BIOS folder in RomImgae module.
+[Files] 
+BIOS\*.*
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Support Kaby Lake Refresh U platform.
+[Files] 
+RomImage.sdl
+XmlFiles\*\Consumer_KBL_Refresh_C.xml
+XmlFiles\*\Corporate_KBL_Refresh_C.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Change Intel(R) RST for PCIe Configuration value for PCH C236.
+[Files] 
+RomImage.sdl
+XmlFiles\*\Corporate_RVP8_C236_D.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.20.1221 MR2 (Maintenance Release 2) for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.20.1221
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.20.1221
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.20.1221
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.20.1221
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.20.1221
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.20.1221
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.20.1221
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.20.1221
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                 <----- 11.6.20.1221
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.6.20.1221
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.20.1221
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.20.1221
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_017                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.13.1212 HF2 (Hot Fix 2) for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.13.1212
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.13.1212
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.13.1212
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.13.1212
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.13.1212
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.13.1212
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.13.1212
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.13.1212
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                 <----- 11.6.13.1212
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.6.13.1212
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.13.1212
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.13.1212
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_016.1                      **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+1. AmiCrbMeRoms folder for ME included Rom and AMIBIOS.rom should be created in build folder.
+2. BiosGuardPrivate.key shouldn't be generated on original source tree by running clean command
+[Files] 
+XmlFiles\*\*.xml
+BatchFiles\*\*.bat
+RomImage.mak
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_016                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Removed Intel (R) NFC Configuration item for Kaby Lake S uDIMM platform.
+[Files] 
+XmlFiles\*\Consumer_KBL_uDIMM_D.xml
+XmlFiles\*\Corporate_KBL_uDIMM_D.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Included Intel Integrated Sensor Solution for Kaby Lake. (HF1 3.1.0.3364)
+[Files] 
+ISHC\ISHC.bin                            <----- 3.1.0.3364
+PDT\INTC_pdt_KBL_NS_BOM1_SENSORS.bin     <----- Platform Descriptor Table (PDT) Binary File
+PDT\INTC_pdt_KBL_NS_BOM2_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM3_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM4_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM5_SENSORS.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.10.1196 MR1 for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.10.1196
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.10.1196
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.10.1196
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.10.1196
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.10.1196
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.10.1196
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.10.1196
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.10.1196
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                 <----- 11.6.10.1196
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.6.10.1196
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.10.1196
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.10.1196
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_015                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME BIOS Extension version updated to 11.0.0.0010.
+[Files] 
+Mebx_11.0.0.0010.efi
+MebxSetupBrowser_11.0.0.0010.efi
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Disabled Integrated Sensor Hub Supported for Kaby Lake S uDIMM platform.
+[Files] 
+XmlFiles\*\Consumer_KBL_uDIMM_D.xml
+XmlFiles\*\Corporate_KBL_uDIMM_D.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.1.1142 Hot Fix for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.1.1142
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.1.1142
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.1.1142
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.1.1142
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.1.1142
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.1.1142
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.1.1142
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.1.1142
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                 <----- 11.6.1.1142
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.6.1.1142
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.1.1142
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.1.1142
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_014                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1136 Production Candidate (PC) for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                       <----- 11.6.0.1136
+ME_11.6_Consumer_C0_LP_Production.bin                            <----- 11.6.0.1136
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.0.1136
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.0.1136
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.0.1136
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.0.1136
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.0.1136
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.0.1136
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                 <----- 11.6.0.1136
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.6.0.1136
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.0.1136
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.0.1136
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_013                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1136 Production Candidate (PC) for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                     <----- 11.6.0.1126
+ME_11.6_Consumer_C0_LP_Production.bin                          <----- 11.6.0.1126
+ME_11.6_Consumer_D0_H.bin                                        <----- 11.6.0.1136
+ME_11.6_Consumer_D0_H_Production.bin                             <----- 11.6.0.1136
+ME_11.6_Corporate_C0_LP.bin                                      <----- 11.6.0.1136
+ME_11.6_Corporate_C0_LP_Production.bin                           <----- 11.6.0.1136
+ME_11.6_Corporate_D0_H.bin                                       <----- 11.6.0.1136
+ME_11.6_Corporate_D0_H_Production.bin                            <----- 11.6.0.1136
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin               <----- 11.6.0.1126
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin    <----- 11.6.0.1126
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.0.1136
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.0.1136
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Included Intel Integrated Sensor Solution for Kaby Lake. (3.1.0.3359)
+[Files] 
+ISHC\ISHC.bin                            <----- 3.1.0.3359
+PDT\INTC_pdt_KBL_NS_BOM1_SENSORS.bin     <----- Platform Descriptor Table (PDT) Binary File
+PDT\INTC_pdt_KBL_NS_BOM2_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM3_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM4_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM5_SENSORS.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Removed Support SaddleBrook ME setting platform.
+[Files] 
+XmlFiles\*\Corporate_SaddleBrook_D.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Enable SpiOverTpmBusEnable item for Kaby Lake S uDIMM Platform.
+[Files] 
+XmlFiles\*\Consumer_KBL_uDIMM_D.xml
+XmlFiles\*\Corporate_KBL_uDIMM_D.xml
+
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_012                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1126 Production Candidate (PC) for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                                      <----- 11.6.0.1126
+ME_11.6_Consumer_C0_LP_Production.bin                           <----- 11.6.0.1126
+ME_11.6_Consumer_D0_H.bin                                       <----- 11.6.0.1126
+ME_11.6_Consumer_D0_H_Production.bin                            <----- 11.6.0.1126
+ME_11.6_Corporate_C0_LP.bin                                     <----- 11.6.0.1126
+ME_11.6_Corporate_C0_LP_Production.bin                          <----- 11.6.0.1126
+ME_11.6_Corporate_D0_H.bin                                      <----- 11.6.0.1126
+ME_11.6_Corporate_D0_H_Production.bin                           <----- 11.6.0.1126
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.0.1126
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.0.1126
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin               <----- 11.6.0.1126
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin    <----- 11.6.0.1126
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_011                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Support RVP3 RVP5 RVP7 Production Corporate sku.
+[Files] 
+RomImage.mak
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.5.5.1006 Maintenance Release (MR) for Kabylake U/Y Series.
+Intel ME Firmware 11.6.0.1117 Production Candidate (PC) for Kabylake U/Y/S/H Series.
+[Files] 
+ME_11.5_Consumer_C0_LP.bin                                        <----- 11.5.5.1006
+ME_11.5_Consumer_C0_LP_Production.bin                             <----- 11.5.5.1006
+ME_11.5_Corporate_C0_LP.bin                                       <----- 11.5.5.1006
+ME_11.5_Corporate_C0_LP_Production.bin                            <----- 11.5.5.1006
+ME_11.6_Consumer_C0_LP.bin                                      <----- 11.6.0.1117
+ME_11.6_Consumer_C0_LP_Production.bin                           <----- 11.6.0.1117
+ME_11.6_Consumer_D0_H.bin                                       <----- 11.6.0.1117
+ME_11.6_Consumer_D0_H_Production.bin                            <----- 11.6.0.1117
+ME_11.6_Corporate_C0_LP.bin                                     <----- 11.6.0.1117
+ME_11.6_Corporate_C0_LP_Production.bin                          <----- 11.6.0.1117
+ME_11.6_Corporate_D0_H.bin                                      <----- 11.6.0.1117
+ME_11.6_Corporate_D0_H_Production.bin                           <----- 11.6.0.1117
+ME_11.5_Consumer_C0_LP_Power_Down_Mitigation_Production.bin       <----- 11.5.5.1006
+ME_11.5_Corporate_C0_LP_Power_Down_Mitigation.bin                 <----- 11.5.5.1006
+ME_11.5_Corporate_C0_LP_Power_Down_Mitigation_Production.bin      <----- 11.5.5.1006
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin                <----- 11.6.0.1117
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin     <----- 11.6.0.1117
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation.bin               <----- 11.6.0.1117
+ME_11.6_Corporate_C0_LP_Power_Down_Mitigation_Production.bin    <----- 11.6.0.1117
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] Support SaddleBrook ME setting platform. (Corporate Only)
+[Files] 
+XmlFiles\*\Corporate_SaddleBrook_D.xml
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_010.1                      **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Change GbePCIePortSelect form "PORT5" to "PORT4". (For Kaby Lake S uDIMM RVP)
+[Files] 
+XmlFiles\*\Consumer_KBL_uDIMM_D.xml
+XmlFiles\*\Corporate_KBL_uDIMM_D.xml
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_010                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Fully removed ME 11.0 files, ME 11.6 can downward compatibility.
+[Files] 
+ME_11.0_Consumer_D0_H.bin
+ME_11.0_Consumer_D0_H_Production.bin
+ME_11.0_Corporate_D0_H.bin
+ME_11.0_Corporate_D0_H_Production.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware Beta 11.6.0.1069 for Consumer and Corporate SKUs
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                 <----- 11.6.0.1069
+ME_11.6_Consumer_C0_LP_Production.bin      <----- 11.6.0.1069
+ME_11.6_Consumer_D0_H.bin                  <----- 11.6.0.1069
+ME_11.6_Consumer_D0_H_Production.bin       <----- 11.6.0.1069
+ME_11.6_Corporate_C0_LP.bin                <----- 11.6.0.1069
+ME_11.6_Corporate_C0_LP_Production.bin     <----- 11.6.0.1069
+ME_11.6_Corporate_D0_H.bin                 <----- 11.6.0.1069
+ME_11.6_Corporate_D0_H_Production.bin      <----- 11.6.0.1069
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin             <----- 11.6.0.1065
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin  <----- 11.6.0.1065
+ME_11.5_Consumer_C0_LP.bin               <----- 11.5.0.1058
+ME_11.5_Consumer_C0_LP_Production.bin    <----- 11.5.0.1058
+ME_11.5_Corporate_C0_LP.bin              <----- 11.5.0.1058
+ME_11.5_Corporate_C0_LP_Production.bin   <----- 11.5.0.1058
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Change Kaby Lake S uDIMM RVP platforms setting. (Based on PCH Q270)
+[Files] 
+XmlFiles\*\Consumer_KBL_uDIMM_D.xml
+XmlFiles\*\Corporate_KBL_uDIMM_D.xml
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_009                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1065 Beta for Consumer SKU.
+[Files] 
+ME_11.6_Consumer_D0_H.bin                    <----- 11.6.0.1065
+ME_11.6_Consumer_C0_LP.bin                   <----- 11.6.0.1065
+ME_11.5_Consumer_C0_LP.bin                     <----- 11.5.0.1058
+ME_11.5_Consumer_C0_LP_Production.bin          <----- 11.5.0.1058
+ME_11.5_Corporate_C0_LP.bin                    <----- 11.5.0.1058
+ME_11.5_Corporate_C0_LP_Production.bin         <----- 11.5.0.1058
+ME_11.6_Corporate_D0_H.bin                   <----- 11.6.0.1043
+ME_11.6_Corporate_C0_LP.bin                  <----- 11.6.0.1043
+ME_11.6_Consumer_D0_H_Production.bin        <----- 11.6.0.1040
+ME_11.0_Consumer_D0_H.bin                 <----- 11.0.10.1002
+ME_11.0_Consumer_D0_H_Production.bin      <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H.bin                <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H_Production.bin     <----- 11.0.10.1002
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Added Power Down Mitigation ME FW for U/Y Series. 
+If want to know more detail, please refer Intel PCH Specification Update Errata 32.
+[Files] 
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation.bin   <----- 11.6.0.1065
+ME_11.6_Consumer_C0_LP_Power_Down_Mitigation_Production.bin  <----- 11.6.0.1065
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_008                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Change Intel RST for PCIe-C1 and Intel RST for PCIe Controller 1 
+(Correspond Cycle Router #1)
+[Files] 
+RomImage.sdl
+XmlFiles\*\Consumer_KBL_uDIMM_D.xml
+XmlFiles\*\Corporate_KBL_uDIMM_D.xml
+XmlFiles\*\Consumer_RVP8_D.xml
+XmlFiles\*\Consumer_RVP10_D.xml
+XmlFiles\*\Consumer_RVP10_D_OC.xml
+XmlFiles\*\Corporate_RVP8_C236_D.xml
+XmlFiles\*\Corporate_RVP8_D.xml
+XmlFiles\*\Corporate_RVP8_D_OC.xml
+XmlFiles\*\Corporate_RVP10_D.xml
+XmlFiles\*\Corporate_RVP10_D_OC.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Included Intel Integrated Sensor Solution for Kaby Lake. (3.0.41.3258)
+[Files] 
+ISHC\ISHC.bin                            <----- 3.0.41.3258
+PDT\INTC_pdt_KBL_NS_BOM1_SENSORS.bin     <----- Platform Descriptor Table (PDT) Binary File
+PDT\INTC_pdt_KBL_NS_BOM2_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM3_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM4_SENSORS.bin
+PDT\INTC_pdt_KBL_NS_BOM5_SENSORS.bin
+
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_007                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Support Kaby Lake uDIMM DDR4 RVP platform.
+[Files] 
+RomImage.sdl
+XmlFiles\*\Consumer_KBL_uDIMM_D.xml
+XmlFiles\*\Corporate_KBL_uDIMM_D.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME BIOS Extension version updated to 11.0.0.0008.
+[Files] 
+Mebx_11.0.0.0008.efi
+MebxSetupBrowser_11.0.0.0008.efi
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.5.0.1058 PC U/Y for Consumer and Corporate SKUs
+[Files] 
+ME_11.5_Consumer_C0_LP.bin                     <----- 11.5.0.1058
+ME_11.5_Consumer_C0_LP_Production.bin          <----- 11.5.0.1058
+ME_11.5_Corporate_C0_LP.bin                    <----- 11.5.0.1058
+ME_11.5_Corporate_C0_LP_Production.bin         <----- 11.5.0.1058
+ME_11.6_Consumer_D0_H.bin                    <----- 11.6.0.1043
+ME_11.6_Corporate_D0_H.bin                   <----- 11.6.0.1043
+ME_11.6_Consumer_C0_LP.bin                   <----- 11.6.0.1043
+ME_11.6_Corporate_C0_LP.bin                  <----- 11.6.0.1043
+ME_11.6_Consumer_D0_H_Production.bin        <----- 11.6.0.1040
+ME_11.0_Consumer_D0_H.bin                 <----- 11.0.10.1002
+ME_11.0_Consumer_D0_H_Production.bin      <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H.bin                <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H_Production.bin     <----- 11.0.10.1002
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_006                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1043 Alpha for Consumer and Corporate SKUs
+Intel ME Firmware 11.6.0.1040 Alpha for Consumer SKUs (Production)
+Intel ME Firmware 11.0.10.1002 HF for Consumer and Corporate SKUs
+[Files] 
+ME_11.6_Consumer_D0_H.bin                    <----- 11.6.0.1043
+ME_11.6_Corporate_D0_H.bin                   <----- 11.6.0.1043
+ME_11.6_Consumer_C0_LP.bin                   <----- 11.6.0.1043
+ME_11.6_Corporate_C0_LP.bin                  <----- 11.6.0.1043
+ME_11.6_Consumer_D0_H_Production.bin        <----- 11.6.0.1040
+ME_11.5_Consumer_C0_LP.bin                    <----- 11.5.0.1020
+ME_11.5_Consumer_C0_LP_Production.bin         <----- 11.5.0.1020
+ME_11.5_Corporate_C0_LP.bin                   <----- 11.5.0.1020
+ME_11.0_Consumer_D0_H.bin                 <----- 11.0.10.1002
+ME_11.0_Consumer_D0_H_Production.bin      <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H.bin                <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H_Production.bin     <----- 11.0.10.1002
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_005                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1043 Alpha for Consumer and Corporate SKUs
+Intel ME Firmware 11.6.0.1040 Alpha for Consumer SKUs (Production)
+Intel ME Firmware 11.0.10.1002 HF for Consumer and Corporate SKUs
+[Files] 
+ME_11.6_Consumer_D0_H.bin                    <----- 11.6.0.1043
+ME_11.6_Corporate_D0_H.bin                   <----- 11.6.0.1043
+ME_11.6_Consumer_D0_H_Production.bin        <----- 11.6.0.1040
+ME_11.5_Consumer_C0_LP.bin                    <----- 11.5.0.1020
+ME_11.5_Consumer_C0_LP_Production.bin         <----- 11.5.0.1020
+ME_11.5_Corporate_C0_LP.bin                   <----- 11.5.0.1020
+ME_11.0_Consumer_D0_H.bin                 <----- 11.0.10.1002
+ME_11.0_Consumer_D0_H_Production.bin      <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H.bin                <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H_Production.bin     <----- 11.0.10.1002
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_004                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1043 Alpha for Consumer SKUs
+Intel ME Firmware 11.6.0.1040 Alpha for Consumer SKUs (Production)
+Intel ME Firmware 11.0.10.1002 HF for Consumer and Corporate SKUs
+[Files] 
+ME_11.6_Consumer_D0_H.bin                    <----- 11.6.0.1043
+ME_11.6_Consumer_D0_H_Production.bin        <----- 11.6.0.1040
+ME_11.5_Consumer_C0_LP.bin                    <----- 11.5.0.1020
+ME_11.5_Consumer_C0_LP_Production.bin         <----- 11.5.0.1020
+ME_11.5_Corporate_C0_LP.bin                   <----- 11.5.0.1020
+ME_11.0_Consumer_D0_H.bin                 <----- 11.0.10.1002
+ME_11.0_Consumer_D0_H_Production.bin      <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H.bin                <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H_Production.bin     <----- 11.0.10.1002
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+1. Change "Intel(R) ME Power Configuration M3PowerRailConfig" to Yes
+2. Change "Quad Output Read Enabled" to Yes
+[Files] 
+XmlFiles\*.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Removed the Serial Flash Devices "ATF26DF321" (Atmel/Adesto) becasue VSCCommn_bin isn’t included it.
+[Files] 
+XmlFiles\*.xml
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_003                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Create On/Off build Pre-production ME FW token
+[Files] 
+RomImage.sdl
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.6.0.1040 Alpha for Consumer SKUs
+Intel ME Firmware 11.0.10.1002 HF for Consumer and Corporate SKUs
+[Files] 
+ME_11.6_Consumer_C0_LP.bin                  <----- 11.6.0.1040
+ME_11.6_Consumer_C0_LP_Production.bin       <----- 11.6.0.1040
+ME_11.0_Consumer_D0_H.bin                 <----- 11.0.10.1002
+ME_11.0_Consumer_D0_H_Production.bin      <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H.bin                <----- 11.0.10.1002
+ME_11.0_Corporate_D0_H_Production.bin     <----- 11.0.10.1002
+
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_002.1                      **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+1. Change "Quad Output Read Enabled" to Yes
+2. Change "Intel(R) Trace Hub Emergency Mode Enabled" to No
+3. Change "GT_US Power Plane Topology" to 0x3 (CRB RVP5 Only)
+[Files] 
+XmlFiles\Consumer_RVP5_C.xml
+XmlFiles\Consumer_RVP3_C.xml
+XmlFiles\Consumer_RVP7_C.xml
+XmlFiles\Corporate_RVP3_C.xml
+XmlFiles\Corporate_RVP5_C.xml
+XmlFiles\Corporate_RVP7_C.xml
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Included Intel Integrated Sensor Solution. (3.0.30.3209)
+[Files] 
+ISHC\ISHC.bin                         <----- 3.0.30.3209
+PDT\INTC_pdt_SKL_BOM1_SENSORS.bin     <----- Platform Descriptor Table (PDT) Binary File
+PDT\INTC_pdt_SKL_BOM2_SENSORS.bin
+PDT\INTC_pdt_SKL_BOM3_SENSORS.bin
+PDT\INTC_pdt_SKL_BOM4_SENSORS.bin
+PDT\INTC_pdt_SKL_BOM5_SENSORS.bin
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.0.1.1001 HF for Consumer and Corporate SKUs
+[Files] 
+ME_11.0_Consumer_D0_H.bin                   <----- 11.0.1.1001
+ME_11.0_Consumer_D0_H_Production.bin        <----- 11.0.1.1001
+ME_11.0_Corporate_D0_H.bin                <----- 11.0.1.1001
+ME_11.0_Corporate_D0_H_Production.bin     <----- 11.0.1.1001
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_002                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.5 version 11.5.0.1009 Alpha for Kaby Lake-U/Y platforms.
+Intel ME Firmware 11.0 version 11.0.0.1194 HF.
+[Files] 
+ME_11.5_Consumer_C0_LP.bin                    <----- 11.5.0.1020
+ME_11.5_Consumer_C0_LP_Production.bin         <----- 11.5.0.1020
+ME_11.5_Corporate_C0_LP.bin                   <----- 11.5.0.1020
+
+
+*****************************************************************
+**                                                             **
+**                   LABEL RomImage_001                        **
+**                                                             **
+*****************************************************************
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Intel ME Firmware 11.5 version 11.5.0.1009 Alpha for Kaby Lake-U/Y platforms.
+Intel ME Firmware 11.0 version 11.0.0.1194 HF.
+[Files] 
+ME_11.5_Consumer_C0_LP.bin                    <----- 11.5.0.1009
+ME_11.5_Corporate_C0_LP.bin                   <----- 11.5.0.1009
+ME_11.0_Consumer_D0_H.bin                   <----- 11.0.0.1194
+ME_11.0_Consumer_D0_H_Production.bin        <----- 11.0.0.1194
+ME_11.0_Corporate_D0_H.bin                  <----- 11.0.0.1194
+ME_11.0_Corporate_D0_H_Production.bin       <----- 11.0.0.1194
+
+
+[Tag] None
+[Category] Improvement
+[Severity] Normal
+[Description] 
+Included Intel Integrated Sensor Solution. (3.0.20.3165)
+[Files] 
+ISHC\ISHC.bin                         <----- 3.0.20.3165
+PDT\INTC_pdt_SKL_BOM1_SENSORS.bin     <----- Platform Descriptor Table (PDT) Binary File
+PDT\INTC_pdt_SKL_BOM2_SENSORS.bin
+PDT\INTC_pdt_SKL_BOM3_SENSORS.bin
+PDT\INTC_pdt_SKL_BOM4_SENSORS.bin
+PDT\INTC_pdt_SKL_BOM5_SENSORS.bin

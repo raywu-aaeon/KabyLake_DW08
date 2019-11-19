@@ -1,0 +1,44 @@
+#*************************************************************************
+#**                                                                     **
+#**   Copyright (c) 1985-2019, American Megatrends International LLC.   **
+#**                                                                     **
+#**      All rights reserved. Subject to AMI licensing agreement.       **
+#**                                                                     **
+#*************************************************************************
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = AmtFastBootHook
+  FILE_GUID                      = bdb548e6-780c-4204-b0df-99d1631bf531
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = NULL
+ 
+[Sources]
+  AmtFastBootHook.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec 
+  KabylakeSiliconPkg/SiPkg.dec
+  AmiTsePkg/AmiTsePkg.dec
+  
+[LibraryClasses]
+  AmiDxeLib
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+
+[Guids]
+  gEfiGlobalVariableGuid
+
+[Protocols]
+  gAlertStandardFormatProtocolGuid
+
+
+[Depex]
+  gEfiVariableArchProtocolGuid
+

@@ -1,0 +1,13 @@
+TOKEN
+    Name  = "FSP_TOOLS_SUPPORT"
+    Value  = "1"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+    Token = "FSP_SOURCE_BUILD_ENABLE" "=" "1"    
+End
+
+PATH
+    Name  = "FSP_TOOLS_DIR"
+End

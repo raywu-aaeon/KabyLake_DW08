@@ -1,0 +1,145 @@
+## @file
+# Component information file for OthersBoardInitLib.
+#
+# @copyright
+#  INTEL CONFIDENTIAL
+#  Copyright 2015 - 2016 Intel Corporation.
+#
+#  The source code contained or described herein and all documents related to the
+#  source code ("Material") are owned by Intel Corporation or its suppliers or
+#  licensors. Title to the Material remains with Intel Corporation or its suppliers
+#  and licensors. The Material may contain trade secrets and proprietary and
+#  confidential information of Intel Corporation and its suppliers and licensors,
+#  and is protected by worldwide copyright and trade secret laws and treaty
+#  provisions. No part of the Material may be used, copied, reproduced, modified,
+#  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+#  without Intel's prior express written permission.
+#
+#  No license under any patent, copyright, trade secret or other intellectual
+#  property right is granted to or conferred upon you by disclosure or delivery
+#  of the Materials, either expressly, by implication, inducement, estoppel or
+#  otherwise. Any license under such intellectual property rights must be
+#  express and approved by Intel in writing.
+#
+#  Unless otherwise agreed by Intel in writing, you may not remove or alter
+#  this notice or any other notice embedded in Materials by Intel or
+#  Intel's suppliers or licensors in any way.
+#
+#  This file contains a 'Sample Driver' and is licensed as such under the terms
+#  of your license agreement with Intel or your vendor. This file may be modified
+#  by the user, subject to the additional terms of the license agreement.
+#
+# @par Specification Reference:
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PeiOthersBoardInitLib
+  FILE_GUID                      = fdbf14f5-9057-4f23-817a-47172651867f
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = NULL|PEIM
+  CONSTRUCTOR                    = PeiOthersBoardInitLibConstructor
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  GpioLib
+  PeiServicesLib
+  CpuPlatformLib
+
+[Packages]
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+
+[Sources]
+  OthersBoardInitLib.c
+  OthersBoardFuncInit.c
+  OthersBoardFunc.c
+
+[FixedPcd]
+  gSiPkgTokenSpaceGuid.PcdAcpiBaseAddress       ## CONSUMES
+
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid               ## CONSUMES
+
+[Guids]
+  gSetupVariableGuid                            ## CONSUMES
+
+[Pcd]
+  # Board Init Table List
+  gBoardModuleTokenSpaceGuid.PcdPeiBoardInitTableList
+
+  # Board GPIO Table
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTable
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTableSize
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTable2
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTable2Size
+
+  # TouchPanel & SDHC CD GPIO Table
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTableTouchPanel
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTableSdhcSidebandCardDetect
+
+  # Board Expander GPIO Table
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTable
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTableSize
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTable2
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTable2Size
+
+  # HDA Verb Table
+  gBoardModuleTokenSpaceGuid.PcdHdaVerbTable
+  gBoardModuleTokenSpaceGuid.PcdHdaVerbTable2
+  gBoardModuleTokenSpaceGuid.PcdExtHdaVerbTable
+  gBoardModuleTokenSpaceGuid.PcdCommonHdaVerbTable1
+  gBoardModuleTokenSpaceGuid.PcdCommonHdaVerbTable2
+  gBoardModuleTokenSpaceGuid.PcdCommonHdaVerbTable3
+  gBoardModuleTokenSpaceGuid.PcdDisplayAudioHdaVerbTable
+
+  # PCH Misc Configuration
+  gBoardModuleTokenSpaceGuid.PcdDebugUsbUartEnable
+  gBoardModuleTokenSpaceGuid.PcdPhabletPocGpioEnable
+  gBoardModuleTokenSpaceGuid.PcdPantherMtnGpioEnable
+  gBoardModuleTokenSpaceGuid.PcdGrizzlyMtnGpioEnable
+  gBoardModuleTokenSpaceGuid.PcdCoyoteMtnGpioEnable
+  gBoardModuleTokenSpaceGuid.PcdM2GpioEnable
+  gBoardModuleTokenSpaceGuid.PcdSkyCamGpioEnable
+  gBoardModuleTokenSpaceGuid.PcdWwanUsbConfig
+  gBoardModuleTokenSpaceGuid.PcdSarSensorResetWA
+  gBoardModuleTokenSpaceGuid.PcdMipiBridgeConfigInit
+  gBoardModuleTokenSpaceGuid.PcdMipiBridgeI2CPort
+
+  # TBT
+  gBoardModuleTokenSpaceGuid.PcdTbtSupportedPortsInfo
+  gBoardModuleTokenSpaceGuid.PcdTbtDefaultSelectorInfo
+
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioGpioAccessType
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioExpander
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioGpioNumber
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioGpioMode
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioGpioLevel
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioAcpiGpeSignature
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioAcpiGpeStsAddress
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioAcpiGpeStsBit
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioAcpiGpioGpeNumber
+  gBoardModuleTokenSpaceGuid.PcdTbtForcePwrGpioAcpiGpeSignaturePorting
+
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioGpioAccessType
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioExpander
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioGpioNumber
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioGpioMode
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioGpioLevel
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioAcpiGpeSignature
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioAcpiGpeStsAddress
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioAcpiGpeStsBit
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioAcpiGpioGpeNumber
+  gBoardModuleTokenSpaceGuid.PcdTbtCioPlugEventGpioAcpiGpeSignaturePorting
+
+  # Pcd Hook Function
+  gBoardModuleTokenSpaceGuid.PcdFuncPeiBoardSpecificInitPostMem

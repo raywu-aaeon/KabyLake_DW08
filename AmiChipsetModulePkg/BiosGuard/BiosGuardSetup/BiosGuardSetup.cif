@@ -1,0 +1,10 @@
+<component>
+	name = "BiosGuardSetup"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/BiosGuard/BiosGuardSetup"
+	RefName = "BiosGuardSetup"
+[files]
+"BiosGuardSetup.sd"
+"BiosGuardSetup.uni"
+"BiosGuardSetup.sdl"
+<endComponent>

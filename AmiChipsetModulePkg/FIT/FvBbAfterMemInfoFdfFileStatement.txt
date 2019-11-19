@@ -1,0 +1,3 @@
+FILE RAW = 201B32CB-21AD-4AB3-b21d-CEDD1A2053f7 Align=4K{
+  AmiChipsetModulePkg/FIT/ReserveFvBbAfterMemInfo.bin
+}

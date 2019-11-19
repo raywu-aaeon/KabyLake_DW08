@@ -1,0 +1,13 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg\BiosGuard\Library"
+	RefName = "BiosGuardLibrary"
+[files]
+"BiosGuardLibrary.sdl"	
+[INF]
+"AmiBiosGuardMiscLib\AmiBiosGuardMiscLib.inf"
+"AmiBiosGuardVerifyRomPeiLib\AmiBiosGuardVerifyRomPeiLib.inf"
+"AmiBiosGuardVerifyOemBinLib\AmiBiosGuardVerifyOemBinLib.inf"
+"BgtCheckMeStateLib\BgtCheckMeStateLib.inf"
+<endComponent>

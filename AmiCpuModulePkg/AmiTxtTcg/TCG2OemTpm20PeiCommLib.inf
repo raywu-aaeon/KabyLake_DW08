@@ -1,0 +1,28 @@
+[Defines]
+INF_VERSION = 0x00010005
+VERSION_STRING = 1.0
+BASE_NAME = TCG2OemTpm20PeiCommLib
+MODULE_TYPE = PEIM
+LIBRARY_CLASS = TCG2OemTpm20PeiCommLib
+FILE_GUID = E7521B51-B5D4-4f12-A505-B07D4CE64F16
+
+[Sources]
+TPM20CommLib/Tpm2CommandLib.h
+TPM20CommLib/Tpm2Capability.c
+TPM20CommLib/Tpm2GetRandom.c
+TPM20CommLib/Tpm2Help.c
+TPM20CommLib/Tpm2Hierarchy.c
+TPM20CommLib/Tpm2NVStorage.c
+TPM20CommLib/Tpm2PcrRead.c
+TPM20CommLib/Unaligned.c
+TPM20CommLib/Tpm2Startup.c
+
+[LibraryClasses]
+
+[Packages]
+AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+MdePkg/MdePkg.dec
+AmiModulePkg/AmiModulePkg.dec
+
+[BuildOptions]
+*_*_*_CC_FLAGS = -DPEI_INTERNAL_PROTOCOL

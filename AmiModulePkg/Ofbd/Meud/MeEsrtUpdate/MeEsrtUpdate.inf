@@ -1,0 +1,47 @@
+//***********************************************************************
+//*                                                                     *
+//*   Copyright (c) 1985-2019, American Megatrends International LLC.   *
+//*                                                                     *
+//*      All rights reserved. Subject to AMI licensing agreement.       *
+//*                                                                     *
+//***********************************************************************
+
+[Defines]
+    INF_VERSION     = 0x00010005
+    BASE_NAME       = MeEsrtUpdate
+    FILE_GUID       = A91EE51F-0FF0-4A6C-A6F4-9214303AEDF7
+    MODULE_TYPE     = DXE_DRIVER
+    VERSION_STRING  = 1.0
+    ENTRY_POINT     = MeEsrtUpdateEntry
+  
+[Sources]
+    MeEsrtUpdate.c
+    MeEsrtUpdate.h
+
+[Packages]
+    MdeModulePkg/MdeModulePkg.dec
+    MdePkg/MdePkg.dec
+    AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+    AmiModulePkg/AmiModulePkg.dec
+
+[LibraryClasses]
+    BaseMemoryLib
+    DebugLib
+    HobLib
+    MemoryAllocationLib
+    UefiBootServicesTableLib
+    UefiDriverEntryPoint
+    UefiLib
+    UefiRuntimeServicesTableLib
+    AmiDxeLib
+
+[Guids]
+  
+[Protocols]
+    gEsrtManagementProtocolGuid
+    gAmiReflashProtocolGuid
+
+[Pcd]
+
+[Depex]
+    gEsrtManagementProtocolGuid

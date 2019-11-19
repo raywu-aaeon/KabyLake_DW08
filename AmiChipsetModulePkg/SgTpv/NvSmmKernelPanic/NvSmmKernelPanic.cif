@@ -1,0 +1,11 @@
+<component>
+	name = "NvSmmKernelPanic"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/NvSmmKernelPanic/"
+	RefName = "NvSmmKernelPanic"
+[INF]
+"NvSmmKernelPanic.inf"
+[files]
+"NvSmmKernelPanic.sdl"	
+"NvSmmKernelPanicSample.asl"	
+<endComponent>

@@ -1,0 +1,114 @@
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2011, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************
+
+//*************************************************************************
+// $Header: /Alaska/Projects/Intel/Haswell/LynxPoint_SharkBay-MB_Crb_1AQPM/CRB/CRB.sd 1     2/09/12 7:35a Yurenlai $
+//
+// $Revision: 1 $
+//
+// $Date: 2/09/12 7:35a $
+//*************************************************************************
+// Revision History
+// ----------------
+// $Log: /Alaska/Projects/Intel/Haswell/LynxPoint_SharkBay-MB_Crb_1AQPM/CRB/CRB.sd $
+// 
+// 1     2/09/12 7:35a Yurenlai
+// Intel SharkBay CRB initially releases.
+// 
+//*************************************************************************
+//<AMI_FHDR_START>
+//
+// Name:    CRB.sd
+//
+// Description: Chipset Reference Board setup form
+//
+//<AMI_FHDR_END>
+//*************************************************************************
+
+#ifdef SETUP_DATA_DEFINITION
+//---------------------------------------------------------------------------
+// Put NVRAM data definitions here.
+// For example: UINT8 Data1;
+// These definitions will be converted by the build process
+// to a definitions of SETUP_DATA fields.
+//---------------------------------------------------------------------------
+    UINT8   CrbTest;
+#endif
+
+#if defined(VFRCOMPILE) && !defined(CONTROLS_ARE_DEFINED)
+#define CONTROL_DEFINITION
+#endif
+
+#ifdef CONTROL_DEFINITION
+
+#define CRB_CHECKBOX_CRBTEST\
+  checkbox varid = SETUP_DATA.CrbTest,\
+    prompt  = STRING_TOKEN(STR_CRBTEST_PROMPT),\
+    help    = STRING_TOKEN(STR_CRBTEST_HELP),\
+    flags   = 0 | RESET_REQUIRED,\
+    key     = 0,\
+    default = 0,\
+    default = 0, defaultstore = AmiMfgDefault,\
+  endcheckbox;
+             
+#endif //#ifdef CONTROL_DEFINITION
+
+#ifdef CONTROLS_WITH_DEFAULTS
+
+    CRB_CHECKBOX_CRBTEST
+
+#endif //#ifdef CONTROLS_WITH_DEFAULTS
+
+//---------------------------------------------------------------------------
+//                ADVANCED - CRB Configuration Form
+//---------------------------------------------------------------------------
+#ifdef ADVANCED_FORM_SET
+
+    #ifdef FORM_SET_ITEM
+    // Define controls to be added to the main page of the formset
+    #endif
+
+    #ifdef FORM_SET_GOTO
+    // Define goto commands for the forms defined in this file
+//        goto CRB_FORM_ID, 
+//            prompt = STRING_TOKEN(STR_CRB_FORM),
+//            help = STRING_TOKEN(STR_CRB_FORM_HELP);
+    #endif
+
+    #ifdef FORM_SET_FORM
+    // Define forms
+        form formid = AUTO_ID(CRB_FORM_ID),
+        title = STRING_TOKEN(STR_CRB_FORM);
+
+            CRB_CHECKBOX_CRBTEST
+
+        endform;  // CRB_FORM_ID
+
+    #endif  // FORM_SET_FORM
+
+#endif  // ADVANCED_FORM_SET
+
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2011, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************

@@ -1,0 +1,21 @@
+<component>
+	name = "IntelFsp2Pkg"
+	category = eChipset
+	LocalRoot = "IntelFsp2Pkg\"
+	RefName = "IntelFsp2Pkg"
+[INF]
+"FspNotifyPhase\FspNotifyPhasePeim.inf"
+"FspSecCore\FspSecCoreT.inf"
+"FspSecCore\FspSecCoreM.inf"
+"FspSecCore\FspSecCoreS.inf"
+[files]
+"IntelFsp2Pkg.chm"	
+"IntelFsp2Pkg.dec"	
+"IntelFsp2Pkg.sdl"	
+"FspSecCore\Ia32\MicrocodeLoadNasm.inc"	
+"FspSecCore\Ia32\SaveRestoreSseNasm.inc"	
+[parts]
+"IntelFsp2Pkg.Include"
+"IntelFsp2Pkg.Library"
+"IntelFsp2Pkg.Tools"
+<endComponent>

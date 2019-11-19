@@ -1,0 +1,13 @@
+<component>
+	name = "AmiCspGlobalNvs"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg\"
+	RefName = "AmiChipsetModulePkg.AmiCspGlobalNvs"
+[INF]
+"AmiCspGlobalNvs\AmiCspGlobalNvsDxe.inf"
+[files]
+"ASL\AmiCspGlobalNvs.asl"
+"Include\Guid\AmiCspGlobalNvs.h"
+"Include\Protocol\AmiCspGlobalNvsAreaProtocol.h"
+"AmiCspGlobalNvs.sdl"	
+<endComponent>

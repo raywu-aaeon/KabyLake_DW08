@@ -1,0 +1,30 @@
+#
+# If the value of this GUID is changed then make sure to change the
+# corresponding GUID (DPTF_ACPI_TABLE_STORAGE_GUID) in DptfAcpiTableStorage.h.
+#
+
+[Defines]
+  INF_VERSION       = 0x00010005
+  VERSION_STRING    = 1.0
+  BASE_NAME         = SbAcpiTableSsdt
+  MODULE_TYPE       = USER_DEFINED
+  FILE_GUID         = 22046D50-F390-498c-92E5-5BA4F8E7F8B6
+                      
+
+[Sources]
+  Sata.asl
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+
+[Pcd]
+
+[Protocols]
+
+[PPIs]
+
+[Guids]
+
+[Depex]

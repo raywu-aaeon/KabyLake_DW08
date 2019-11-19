@@ -1,0 +1,23 @@
+<component>
+	name = "BiosGuardPubKeysAndBuildPSL"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/BiosGuard/BiosGuardPubKeysAndBuildPSL"
+	RefName = "BiosGuardPubKeysAndBuildPSL"
+
+[files]
+"BiosGuardPubKeysAndBuildPSL.sdl"
+"BiosGuardPubKeysAndBuildPSL.mak"
+"dummy.bin"
+"BiosGuardCertHeader.bin"
+"BuildPSL.bat"
+"BuildAmiBiosGuardHeader.exe"
+"CutRom.exe"
+"keygen.exe"
+"BiosGuardCryptoCon.exe"
+"BIOSGuardPB_PV.2.0.3683.exe"
+"BIOSGuardSL2BIN_PV.2.0.3683.exe"
+"BIOSGuardPB_QS.2.0.4093.exe"
+"BIOSGuardSL2BIN_QS.2.0.4093.exe"
+"RomAlignment.exe"
+".BiosGuardVkeyExp"
+<endComponent>

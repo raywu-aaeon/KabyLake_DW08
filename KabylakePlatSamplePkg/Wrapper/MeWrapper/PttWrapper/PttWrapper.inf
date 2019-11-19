@@ -1,0 +1,54 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2011, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+
+## @file PttWrapper.inf
+#   This driver is PttWrapper DXE driver
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PttWrapper
+  FILE_GUID                      = b19ef33c-10a6-4066-9217-8e5ee011a52f
+  MODULE_TYPE		             = DXE_SMM_DRIVER
+  PI_SPECIFICATION_VERSION       = 0x00010014
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = PttWrapperEntryPoint
+
+[Sources]
+  PttWrapper.c
+
+[Packages]
+  MdePkg/MdePkg.dec 
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec 
+  AmiModulePkg/AmiModulePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec 
+  KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses]
+  AmiCspLib
+  AmiDxeLib
+  UefiDriverEntryPoint
+  
+[Protocols]
+  gEfiSmmBaseProtocolGuid
+  gEfiSmmSwDispatchProtocolGuid
+  
+
+#[Guids]
+
+[Depex]
+  gEfiSmmBase2ProtocolGuid AND
+  gEfiSmmSwDispatch2ProtocolGuid
+ 

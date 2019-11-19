@@ -1,0 +1,126 @@
+TOKEN
+    Name  = "KblG_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable KblG support in Project"
+    TokenType = Boolean
+    Master = Yes
+End
+
+ELINK
+    Name  = "-D KBLG_FLAG"
+    Parent  = "*_*_*_CC_FLAGS"
+    Type  = "BuildOptions"
+    Token = "CRB_BOARD" "=" "12"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "-D KBLG_FLAG"
+    Parent = "*_*_*_VFRPP_FLAGS"
+    Type  = "BuildOptions"
+    Token = "CRB_BOARD" "=" "12"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "-D KBLG_FLAG"
+    Parent  = "*_*_*_ASLPP_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+End
+
+INFComponent
+    Name  = "DxeKabylakeDdr4Rvp17InitLib"
+    File  = "KabylakeDdr4Rvp17\DxeBoardInitLib\KabylakeDdr4Rvp17InitLib.inf"
+    Package  = "KabylakePlatSamplePkg"
+    ModuleTypes  = "DXE_DRIVER"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "KabylakePlatSamplePkg.DxeKabylakeDdr4Rvp17InitLib"
+    ModuleTypes  = "DXE_DRIVER"
+    Override  = "KabylakePlatSamplePkg.DxeBoardConfigInit"
+End
+
+INFComponent
+    Name  = "PeiKabylakeDdr4Rvp17BoardInitLib"
+    File  = "KabylakeDdr4Rvp17\PeiBoardInitLib\PeiKabylakeDdr4Rvp17InitLib.inf"
+    Package  = "KabylakePlatSamplePkg"
+    ModuleTypes  = "PEIM"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "KabylakePlatSamplePkg.PeiKabylakeDdr4Rvp17BoardInitLib"
+    ModuleTypes  = "PEIM"
+    Override  = "KabylakePlatSamplePkg.PeiBoardConfigInit"
+End
+
+INFComponent
+    Name  = "PeiKabylakeDdr4Rvp17BoardInitPreMemLib"
+    File  = "KabylakeDdr4Rvp17\PeiBoardInitLib\PeiKabylakeDdr4Rvp17InitPreMemLib.inf"
+    Package  = "KabylakePlatSamplePkg"
+    ModuleTypes  = "PEIM"
+End
+
+LibraryMapping
+    Class  = "NULL"
+    Instance  = "KabylakePlatSamplePkg.PeiKabylakeDdr4Rvp17BoardInitPreMemLib"
+    ModuleTypes  = "PEIM"
+    Override  = "KabylakePlatSamplePkg.BoardConfigInitPreMem"
+End
+
+#PCIDEVICE
+#    Title  = "ATI OpRom"
+#    Parent  = "PEG Root Port D1F0"
+#    Attribute  = "0x0"
+#    Dev_type  = "PciDevice"
+#    Dev  = 00h
+#    Fun  = 00h
+#    SleepNum  = 01h
+#    ROMFile  = "KabylakePlatSamplePkg\Board\KblG\xxx.bin"
+#    IntA =  LNKA; 16
+#    IntB =  LNKB; 17
+#    IntC =  LNKC; 18
+#    IntD =  LNKD; 19
+#    DeviceType = OnBoard
+#    PCIBusSize = 32bit
+#    OptionROM = Yes
+#    ROMMain = No
+#    Virtual = Yes
+#    PCIExpress = Yes
+#    SuppressDeviceGeneration = Yes
+#    LegacyRom = Yes
+#    FFSFileName  = "ATI ROM Storage"
+#    ROMSectionGuid  = "7FD9A7CF-9406-47fb-8120-E098D523E357"
+#End
+
+#FFS_FILE
+#    Name  = "ATI ROM Storage"
+#    FD_AREA  = "FV_MAIN"
+#    OpRom  = "AmiModulePkg\BoardInfo\PciRomTemplate.txt"
+#    Guid  = "A56C405A-2F54-4e06-83B1-21BF4D43AEA5"
+#End
+
+#PCIDEVICE
+#    Title  = "ATI GOP Driver"
+#    Parent  = "PEG Root Port D1F0"
+#    Attribute  = "0x0"
+#    Dev_type  = "PciDevice"
+#    Dev  = 00h
+#    Fun  = 00h
+#    SleepNum  = 01h
+#    ROMFile  = "KabylakePlatSamplePkg\Board\KblG\xxx.efi"
+#    DeviceType = OnBoard
+#    PCIBusSize = 32bit
+#    OptionROM = Yes
+#    ROMMain = No
+#    Virtual = Yes
+#    PCIExpress = Yes
+#    SuppressDeviceGeneration = Yes    
+#    UefiRom = Yes
+#    FFSFileName  = "ATI ROM Storage"
+#    ROMSectionGuid  = "5ff6d1cf-b118-4f4c-822e-a6a25053d26a" 
+#End
+

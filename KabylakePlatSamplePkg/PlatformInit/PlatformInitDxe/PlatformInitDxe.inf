@@ -1,0 +1,192 @@
+### @file
+# Component information file for the Platform Init DXE module.
+#
+# @copyright
+#  INTEL CONFIDENTIAL
+#  Copyright 2014 - 2017 Intel Corporation.
+#
+#  The source code contained or described herein and all documents related to the
+#  source code ("Material") are owned by Intel Corporation or its suppliers or
+#  licensors. Title to the Material remains with Intel Corporation or its suppliers
+#  and licensors. The Material may contain trade secrets and proprietary and
+#  confidential information of Intel Corporation and its suppliers and licensors,
+#  and is protected by worldwide copyright and trade secret laws and treaty
+#  provisions. No part of the Material may be used, copied, reproduced, modified,
+#  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+#  without Intel's prior express written permission.
+#
+#  No license under any patent, copyright, trade secret or other intellectual
+#  property right is granted to or conferred upon you by disclosure or delivery
+#  of the Materials, either expressly, by implication, inducement, estoppel or
+#  otherwise. Any license under such intellectual property rights must be
+#  express and approved by Intel in writing.
+#
+#  Unless otherwise agreed by Intel in writing, you may not remove or alter
+#  this notice or any other notice embedded in Materials by Intel or
+#  Intel's suppliers or licensors in any way.
+#
+#  This file contains a 'Sample Driver' and is licensed as such under the terms
+#  of your license agreement with Intel or your vendor. This file may be modified
+#  by the user, subject to the additional terms of the license agreement.
+#
+# @par Specification Reference:
+#
+# @par Glossary:
+###
+
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = PlatformInitDxe
+  FILE_GUID                      = C5046EFD-7BC3-4206-987C-32DA45026E6D
+  VERSION_STRING                 = 1.0
+  MODULE_TYPE                    = DXE_DRIVER
+  ENTRY_POINT                    = PlatformInitDxe
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  UefiLib
+  DebugLib
+  S3BootScriptLib
+  BootGuardLib                                  # AdvancedFeaturesContent
+  BootGuardRevocationLib                        # AdvancedFeaturesContent
+  MmPciLib
+  HobLib                                        # AdvancedFeaturesContent
+  PchCycleDecodingLib                           # AdvancedFeaturesContent
+  MemoryAllocationLib
+  BaseMemoryLib
+  PrintLib
+  IoLib
+  CmosAccessLib                                 # AdvancedFeaturesContent
+  CpuPlatformLib
+  GpioLib
+  ConfigBlockLib
+  PchSerialIoLib                                # AdvancedFeaturesContent
+  I2cAccessLib                                  # AdvancedFeaturesContent
+  EcLib                                         # AdvancedFeaturesContent
+  DxeSmbiosProcessorLib                         # AdvancedFeaturesContent
+#AMI_OVERRIDE_START - Use AMI TCG2 module
+#  Tpm2CommandLib                                # AdvancedFeaturesContent
+#AMI_OVERRIDE_END - Use AMI TCG2 module
+#AMI_OVERRIDE_START - Because we disable the token ALWAYS_PUBLISH_HII_RESOURCES, move BiosIshDataPass from PchSetup.c to PlatformInitDxe.c
+  IntrinsicLib
+  DxeMeLib
+#AMI_OVERRIDE_END - Because we disable the token ALWAYS_PUBLISH_HII_RESOURCES, move BiosIshDataPass from PchSetup.c to PlatformInitDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  BpCommonPkg/BpCommonPkg.dec ## gEfiLegacyInterruptHandlerProtocolGuid # AdvancedFeaturesContent
+  ClientCommonPkg/ClientCommonPkg.dec # AdvancedFeaturesContent
+#AMI_OVERRIDE_START - Take care by AMI SecureBoot module
+#  SecurityPkg/SecurityPkg.dec # AdvancedFeaturesContent
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+#AMI_OVERRIDE_END - Take care by AMI SecureBoot module
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress                ## CONSUMES
+#
+# AdvancedFeaturesBegin
+#
+  gClientCommonModuleTokenSpaceGuid.PcdCsmEnable                   ## CONSUMES
+  gBoardModuleTokenSpaceGuid.PcdFuncBoardHookPlatformSetupOverride
+  gBoardModuleTokenSpaceGuid.PcdDDISelection
+  gBoardModuleTokenSpaceGuid.PcdMipiDisplayPresent
+  gBoardModuleTokenSpaceGuid.PcdMipiBridgeI2CPort
+  gBoardModuleTokenSpaceGuid.PcdUsbIvCamSupport
+  gBoardModuleTokenSpaceGuid.PcdSdsSetupOptionOverride
+
+  gSiPkgTokenSpaceGuid.PcdSoftwareGuardEnable                      ## CONSUMES
+#AMI_OVERRIDE_START - Use AMI TCG2 module 
+#  gEfiSecurityPkgTokenSpaceGuid.PcdTpmInstanceGuid                 ## CONSUMES
+#AMI_OVERRIDE_END - Use AMI TCG2 module 
+  gPlatformModuleTokenSpaceGuid.PcdDisplayDimmPopulationError      ## CONSUMES
+  gBoardModuleTokenSpaceGuid.PcdDimmPopulationError                ## CONSUMES
+  gBoardModuleTokenSpaceGuid.PcdPcieWwanEnable                     ## CONSUMES
+#
+# AdvancedFeaturesEnd
+#
+
+[Sources]
+  PlatformInitDxe.c
+  PlatformInitDxe.h
+  SaPlatformInitDxe.c
+  PchPlatformInitDxe.c
+  EcPlatformInitDxe.c # AdvancedFeaturesContent
+  GfxInt15Interface.c # AdvancedFeaturesContent
+
+[Protocols]
+  gMemInfoProtocolGuid                          ## CONSUMES # AdvancedFeaturesContent
+  gCpuInfoProtocolGuid                          ## CONSUMES # AdvancedFeaturesContent
+  gEdkiiVariableLockProtocolGuid                ## CONSUMES # AdvancedFeaturesContent
+  gPlatformInfoProtocolGuid                     ## CONSUMES
+  gEfiEcAccessProtocolGuid                      ## CONSUMES # AdvancedFeaturesContent
+  gEfiPciIoProtocolGuid                         ## CONSUMES
+  gSaPolicyProtocolGuid                         ## CONSUMES
+  gGopPolicyProtocolGuid                        ## CONSUMES
+  gSaGlobalNvsAreaProtocolGuid                  ## CONSUMES # AdvancedFeaturesContent
+  gBdsAllDriversConnectedProtocolGuid           ## CONSUMES
+  gEfiGlobalNvsAreaProtocolGuid                 ## CONSUMES
+#
+# AdvancedFeaturesBegin
+#
+  gEfiLegacyInterruptHandlerProtocolGuid        ## PRODUCES
+  gEfiFirmwareVolume2ProtocolGuid               ## CONSUMES
+  gLegacyUsbProtocolGuid                        ## CONSUMES
+#AMI_OVERRIDE_START - Use AMI TCG2 module
+#  gPchResetCallbackProtocolGuid                 ## PRODUCES
+#AMI_OVERRIDE_END - Use AMI TCG2 module
+#
+# AdvancedFeaturesEnd
+#
+
+[Guids]
+  gEfiEndOfDxeEventGroupGuid                    ## CONSUMES
+  gEpcBiosDataGuid                              ## SOMETIMES_PRODUCES ## Variable # AdvancedFeaturesContent
+  gEpcOsDataGuid                                ## SOMETIMES_PRODUCES ## Variable # AdvancedFeaturesContent
+  gSetupVariableGuid                            ## CONSUMES
+#
+# AdvancedFeaturesBegin
+#
+  gRealModeFileGuid                             ## CONSUMES
+  gSaSetupVariableGuid                          ## CONSUMES
+  gCpuSetupVariableGuid                         ## CONSUMES
+  gMeBiosPayloadHobGuid                         ## CONSUMES
+  gSinitSvnGuid                                 ## CONSUMES ## GUID
+#
+# AdvancedFeaturesEnd
+#
+  gGraphicsDxeConfigGuid                        ## CONSUMES
+#
+# AdvancedFeaturesBegin
+#
+  gMiscDxeConfigGuid                            ## CONSUMES
+#AMI_OVERRIDE_START - Take care by AMI SecureBoot module
+#  gEfiGlobalVariableGuid                        ## CONSUMES
+#  gEfiSecureBootEnableDisableGuid               ## CONSUMES 
+#AMI_OVERRIDE_END - Take care by AMI SecureBoot module
+  gSgxPolicyStatusGuid                          ## SOMETIMES_PRODUCES ## Variable
+  gPchSetupVariableGuid                         ## CONSUMES
+#AMI_OVERRIDE_START - Use AMI TCG2 module
+#  gEfiTpmDeviceInstanceNoneGuid                 ## CONSUMES
+#  gEfiTpmDeviceInstanceTpm12Guid                ## CONSUMES
+#AMI_OVERRIDE_END - Use AMI TCG2 module
+  gTxtInfoHobGuid                               ## CONSUMES
+  gSinitModuleGuid                              ## CONSUMES
+#
+# AdvancedFeaturesEnd
+#
+
+[Depex]
+  gMemInfoProtocolGuid                AND # AdvancedFeaturesContent
+  gDxePolicyProtocolGuid              AND # AdvancedFeaturesContent
+  gCpuInfoProtocolGuid                AND
+  gEfiVariableArchProtocolGuid        AND
+  gEfiVariableWriteArchProtocolGuid   AND
+  gPlatformInfoProtocolGuid           AND # AdvancedFeaturesContent
+  gGopPolicyProtocolGuid

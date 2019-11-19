@@ -1,0 +1,56 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2013, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = NvSmmKernelPanic
+  FILE_GUID                      = 8ab1d576-5977-4a89-9414-099d90b53e79   
+  MODULE_TYPE                    = DXE_SMM_DRIVER
+  VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+  ENTRY_POINT                    = NvSmmKernelPanicEntry
+
+[Sources]
+  NvSmmKernelPanic.c
+  
+[Protocols]
+  gEfiSmmSwDispatch2ProtocolGuid
+  gEfiSmmBase2ProtocolGuid
+  gEfiSmmIoTrapDispatch2ProtocolGuid ## CONSUMES
+  gPchSmmIoTrapControlGuid  
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  Build/Platform.dec
+  KabylakeSiliconPkg/SiPkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  AmiCspLib
+  AmiDxeLib
+  GpioLib
+  MmPciLib
+  
+[Depex]
+  gEfiSmmBase2ProtocolGuid AND
+  gEfiSmmSwDispatch2ProtocolGuid AND
+  gEfiSmmIoTrapDispatch2ProtocolGuid ## CONSUMES
+
+ 
+
+  
+  

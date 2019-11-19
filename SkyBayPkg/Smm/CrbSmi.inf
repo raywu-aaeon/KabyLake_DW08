@@ -1,0 +1,36 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CrbSmi
+  FILE_GUID                      = 221F1D4F-034C-4bea-B2BB-B7A9672B06D7
+  MODULE_TYPE                    = DXE_SMM_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = InitializeCrbSmm
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+
+[Sources]
+  CrbSmi.c
+
+[Packages]
+  MdePkg/MdePkg.dec 
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec 
+  AmiChipsetPkg/AmiChipsetPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses]  
+  UefiDriverEntryPoint
+  AmiDxeLib
+  AmiCspLib
+  SmmServicesTableLib
+ 
+[Protocols]
+  gEfiSmmSwDispatch2ProtocolGuid
+  gEfiSmmSxDispatch2ProtocolGuid
+  gEfiSmmPowerButtonDispatch2ProtocolGuid
+  gEfiSmmVariableProtocolGuid
+
+[Depex]
+  gEfiSmmSwDispatch2ProtocolGuid AND
+  gEfiSmmSxDispatch2ProtocolGuid AND
+  gEfiSmmPowerButtonDispatch2ProtocolGuid

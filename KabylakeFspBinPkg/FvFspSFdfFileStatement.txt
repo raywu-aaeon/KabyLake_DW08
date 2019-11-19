@@ -1,0 +1,5 @@
+
+FILE FV_IMAGE = 3417F275-4CF1-42D8-A0C3-B3F60779dF4D $(FFS_FILE_CHECKSUM_KEYWORD) {
+# Use Padded file which adds 0xC bytes of data (Note: Section will add 4 bytes of SECTION Header). This is done to align the FSP Header to 16 bytes
+  SECTION RAW = Build/Fsp_Rebased_S_padded.fd
+}

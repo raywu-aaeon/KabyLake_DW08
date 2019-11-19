@@ -1,0 +1,89 @@
+TOKEN
+    Name = "IntelFsp2Pkg_SUPPORT"
+    Value = "1"
+    Help  = "Main switch to enable IntelFsp2Pkg in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+    Token = "FSP_SUPPORT" "=" "1"            
+End
+
+INFComponent
+    Name  = "FspNotifyPhasePeim"
+    File  = "FspNotifyPhase\FspNotifyPhasePeim.inf"
+    Package  = "IntelFsp2Pkg"
+    ModuleTypes  = "PEIM" 
+    Token = "FSP_SOURCE_BUILD_ENABLE" "=" "1"
+End
+
+INFComponent
+    Name  = "FspSecCoreT"
+    File  = "FspSecCore\FspSecCoreT.inf"
+    Package  = "IntelFsp2Pkg"
+    ModuleTypes  = "SEC"     
+    Token = "FSP_SOURCE_BUILD_ENABLE" "=" "1"     
+End
+
+INFComponent
+    Name  = "FspSecCoreM"
+    File  = "FspSecCore\FspSecCoreM.inf"
+    Package  = "IntelFsp2Pkg"
+    ModuleTypes  = "SEC"     
+    Token = "FSP_SOURCE_BUILD_ENABLE" "=" "1"     
+End
+
+INFComponent
+    Name  = "FspSecCoreS"
+    File  = "FspSecCore\FspSecCoreS.inf"
+    Package  = "IntelFsp2Pkg"
+    ModuleTypes  = "SEC"     
+    Token = "FSP_SOURCE_BUILD_ENABLE" "=" "1"     
+End
+
+#
+# Pcd Setting for FSP source and wrapper.
+#
+PcdMapping
+    Name  = "PcdTemporaryRamBase"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "0xFEF00000"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdTemporaryRamSize"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "0x00040000"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdFspTemporaryRamSize"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "UINT32"
+    Value  = "0x00026000"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End
+
+PcdMapping
+    Name  = "PcdGlobalDataPointerAddress"
+    GuidSpace  = "gIntelFsp2PkgTokenSpaceGuid"
+    PcdType  = "PcdsFixedAtBuild"
+    DataType  = "Uint32"
+    Value  = "0xFED00148"
+    Offset  = 00h
+    Length  = 04h
+    TargetDSC = Yes
+End

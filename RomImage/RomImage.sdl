@@ -1,0 +1,418 @@
+TOKEN
+    Name  = "ME_ROM_IMAGE_BUILD_SUPPORT"
+    Value  = "1"
+    TokenType = Boolean
+    TargetMAK = Yes
+    Master = Yes
+End
+
+TOKEN
+    Name  = "SKL_BUILD_ALL"
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_EC_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "SKL_BUILD_ALL"
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_EC_SUPPORT" "=" "1"
+    Token = "ZUMBA_BEACH_SERVER_EV" "=" "1"
+End
+
+TOKEN
+    Name  = "SKL_BUILD_CORPORATE"
+    Value  = "1"
+    Help  = "On/Off build this image. (Corporate)"
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "BUILD_NON_PRODUCTION"
+    Value  = "1"
+    Help  = "On/Off build Pre-production ME FW."
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== Consumer ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "Consumer_RVP3_C" 
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "0"
+End
+
+TOKEN
+    Name  = "Consumer_RVP3_Y42_C" 
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "0"
+    Token = "CRB_BOARD_RVP3_Y42" "=" "0"    
+End
+
+TOKEN
+    Name  = "Consumer_RVP3_Y42_C" 
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "0"
+    Token = "CRB_BOARD_RVP3_Y42" "=" "1"    
+End
+
+TOKEN
+    Name  = "Consumer_RVP5_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "1"
+End
+
+TOKEN
+    Name  = "Consumer_RVP7_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "2"
+End
+
+TOKEN
+    Name  = "Consumer_RVP7_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "8" #SKY-U + DDR4 combination
+End
+
+TOKEN
+    Name  = "Consumer_RVP8_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Consumer_RVP8_D_OC"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Consumer_RVP9_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "4"
+End
+
+TOKEN
+    Name  = "Consumer_RVP10_D_OC"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "5"
+End
+
+TOKEN
+    Name  = "Consumer_RVP10_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "5"
+End
+
+TOKEN
+    Name  = "Consumer_RVP11_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "7"
+End
+
+TOKEN
+    Name  = "Consumer_KBL_uDIMM_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "9"
+End
+
+TOKEN
+    Name  = "Consumer_KBL_Refresh_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "11"
+End
+
+TOKEN
+    Name  = "Consumer_RVP17_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "12"
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== Corporate ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "Corporate_RVP3_C" 
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "0"
+End
+
+TOKEN
+    Name  = "Corporate_RVP3_Y42_C" 
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "0"
+    Token = "CRB_BOARD_RVP3_Y42" "=" "0"        
+End
+
+TOKEN
+    Name  = "Corporate_RVP3_Y42_C" 
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "0"
+    Token = "CRB_BOARD_RVP3_Y42" "=" "1"        
+End
+
+TOKEN
+    Name  = "Corporate_RVP5_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "1"
+End
+
+TOKEN
+    Name  = "Corporate_RVP7_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "2"
+End
+
+TOKEN
+    Name  = "Corporate_RVP7_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "8" #SKY-U + DDR4 combination
+End
+
+TOKEN
+    Name  = "Corporate_RVP8_D_OC"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Corporate_RVP8_C236_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Corporate_RVP8_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Corporate_RVP9_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "4"
+End
+
+TOKEN
+    Name  = "Corporate_RVP10_D_OC"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "5"
+End
+
+TOKEN
+    Name  = "Corporate_RVP10_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "5"
+End
+
+TOKEN
+    Name  = "Corporate_RVP11_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "7"
+End
+
+TOKEN
+    Name  = "Corporate_KBL_uDIMM_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "9"
+End
+
+
+TOKEN
+    Name  = "Corporate_KBL_Refresh_C"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "11"
+End
+
+TOKEN
+    Name  = "Corporate_RVP17_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+    Token = "CRB_BOARD" "=" "12"
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== Mebx ======"
+    TokenType = Expression
+End
+
+TOKEN
+    Name  = "ROMIMAGE_PRIVATE_MEBX"
+    Value  = "1"
+    Help  = "On/Off Use ROM Image provide MEBX."
+    TokenType = Boolean
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "EFIMebx_FILE_PATH"
+    Value  = "RomImage/ME_BIOS_Extension/Mebx_11.0.0.0010.efi"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes
+    Help  = "Mebx File name and path"
+    Token = "ROMIMAGE_PRIVATE_MEBX" "=" "1"
+End
+
+TOKEN
+    Name  = "EFIMebxSetup_FILE_PATH"
+    Value  = "RomImage/ME_BIOS_Extension/MebxSetupBrowser_11.0.0.0010.efi"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes
+    Help  = "Mebx Setup Browser File name and path"
+    Token = "ROMIMAGE_PRIVATE_MEBX" "=" "1"
+End
+
+TOKEN
+    Name  = " "
+    TokenType = Integer
+End
+
+TOKEN
+    Name  = "====== Path Configuration ======"
+    TokenType = Expression
+End
+
+PATH
+    Name  = "ROM_IMAGE_DIR"
+End
+
+TOKEN
+    Name  = "ROM_IMAGE_BAT_DIR"
+    Value  = "$(ROM_IMAGE_DIR)$(PATH_SLASH)Batchfiles$(PATH_SLASH)Pre-Production$(PATH_SLASH)"
+    Help  = "PATH: RomImage/Batchfiles/Pre-Production/"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "ROM_IMAGE_BAT_PROD_DIR"
+    Value  = "$(ROM_IMAGE_DIR)$(PATH_SLASH)Batchfiles$(PATH_SLASH)Production$(PATH_SLASH)"
+    Help  = "PATH: RomImage/Batchfiles/Production/"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+MODULE
+    Help  = "Includes RomImage to Project"
+    File  = "RomImage.mak"
+End

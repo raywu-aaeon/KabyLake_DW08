@@ -1,0 +1,16 @@
+<component>
+    name = "MouseDriver"
+    category = eModule
+    LocalRoot = "AmiModulePkg\MouseDriver\"
+    RefName = "MouseDriver"
+    Rank = 32
+[INF]
+"MouseDriver.inf"
+[files]
+"MouseDriver.sdl"	
+"MouseDriver.chm"
+"MouseDriverElinks.txt"	
+[parts]
+"MouseProtocol"
+"AmiTseMouse"
+<endComponent>

@@ -1,0 +1,172 @@
+
+[Tag] AMI_OVERRIDE_SA0000
+[Description] These ASL method will be generated on PCI_TREE.ASL by AMI utility.
+[Files] KabylakeSiliconPkg\SystemAgent\AcpiTables\HostBus.asl       
+
+[Tag] AMI_OVERRIDE_SA0001
+[Description] Modified to support Third Part Vendor(AMD/Nvidia) feature and ASL code(SgTPV component).
+[Files] KabylakeSiliconPkg\SystemAgent\AcpiTables\PegSsdt\PegSsdt.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\SaSsdt\SaSsdt.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\SwitchableGraphics\Pch\SgDgpuPch.asl
+KabylakeSiliconPkg\SystemAgent\Include\Protocol\SaGlobalNvsArea.h
+KabylakeSiliconPkg\SystemAgent\Library\Private\PeiSwitchableGraphicsInitLib\PeiSwitchableGraphicsInit.c
+
+[Tag] AMI_OVERRIDE_SA0002
+[Description] _PRT will be generated on PCI_TREE.ASL by AMI utility.
+[Files] KabylakeSiliconPkg\SystemAgent\AcpiTables\PegSsdt\PegSsdt.asl
+
+[Tag] AMI_OVERRIDE_SA0003
+[Description] EIP219563 : Fixed System will hang at CP 0xA0 when install SUSE11 SP3 if PEG0, PEG1 and PEG2 Device do Not been defined.
+[Files] KabylakeSiliconPkg\SystemAgent\AcpiTables\PegSsdt\PegSsdt.asl
+
+[Tag] AMI_OVERRIDE_SA0004
+[Description] RC ASL only supports SG on RP09(RootPort 9), but customer' board may support on other Root Port. Create Token and Customer can change value by board design.
+[Files] KabylakeSiliconPkg\SystemAgent\AcpiTables\SwitchableGraphics\Pch\SgDgpuPch.asl
+
+[Tag] AMI_OVERRIDE_SA0005
+[Description] RC ASL only supports SG on PEG0(PEG function 0), but customer' board may support on other PEG function. Create Token and Customer can change value by board design.
+[Files] KabylakeSiliconPkg\SystemAgent\AcpiTables\SwitchableGraphics\Peg\SgDgpu.asl
+
+[Tag] AMI_OVERRIDE_SA0006 (Remove)
+[Description] Fixed smbios type 17 anyway report to 4 tables.
+[Files] KabylakeSiliconPkg\SystemAgent\Library\Private\DxeSmbiosMemoryLib\SmbiosType17.c
+
+[Tag] AMI_OVERRIDE_SA0007
+[Description] Our build tool is different to Intel. If we don’t add /GL- , it will build error.
+[Files] KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiMemoryInitLib\PeiMemoryInitLib.inf
+
+[Tag] AMI_OVERRIDE_SA0008
+[Description] Modified for OEM request. OEM needs to implement its function on Before/Compelte Mrc and EndOfMrc.
+[Files] KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiMemoryInitLib\PeiMemoryInitLib.inf
+KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiMemoryInitLib\MemoryInit.c
+
+[Tag] AMI_OVERRIDE_SA0009
+[Description] EIP 102852
+[Files] KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiMemoryInitLib\MemoryInit.c
+
+[Tag] AMI_OVERRIDE_SA0010
+[Description] Avoid building error.
+[Files] KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiMemoryInitLib\Source\Hal\MrcHalRegisterAccess.h
+
+[Tag] AMI_OVERRIDE_SA0011
+[Description] EIP191481 Implement the proposal of AMI fxied MMIO.
+[Files] KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+
+[Tag] AMI_OVERRIDE_SA0012
+[Description] Reserve CSP MMIO and IO reported in AMI_SDL_PCI_DATA.CspResCount trough GCD services.
+[Files] KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+
+[Tag] AMI_OVERRIDE_SA0013
+[Description] Fixed system hangs when insert PCIE card with 8G resource need.
+[Files] KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+
+[Tag] AMI_OVERRIDE_SA0014
+[Description] Use Token to select PCIE COMBINE mode.
+[Files] KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+
+[Tag] AMI_OVERRIDE_SA0015
+[Description] Use Token for PCIEX_BASE_ADDRESS. OEM/Customer may change PCIEX_BASE_BASE, but RC always report PCIE address is 0xE0000000.
+[Files] KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+
+[Tag] AMI_OVERRIDE_SA0016
+[Description] Fixed GenericSio use 0x0 ~ RES_IO_BASE issue.
+[Files] KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+
+[Tag] AMI_OVERRIDE_SA0017
+[Description] Conflict with LegacyBoot in Csm.c
+[Files] KabylakeSiliconPkg\SystemAgent\SaInit\Dxe\SaInitUefi.c
+
+[Tag] AMI_OVERRIDE_SA0018
+[Description] For GOP Version not load to GopVersion when Csm on and GOP on.
+[Files] KabylakeSiliconPkg\SystemAgent\SaInit\Dxe\GraphicsInit.c
+
+[Tag] AMI_OVERRIDE_SA0019
+[Description] Modified for AMI SgTPV.
+[Files] KabylakeSiliconPkg\SystemAgent\SaInit\Dxe\SwitchableGraphicsInit.c
+
+[Tag] AMI_OVERRIDE_SA0020
+[Description] Intel RC has dependency in Platform.fdf, so we need to modify it in our code base.
+[Files] KabylakeSiliconPkg\SystemAgent\IntelGraphicsPeim\Binaries\IntelGraphicsPeim.inf
+
+[Tag] AMI_OVERRIDE_SA0021
+[Description] EIP249153 : Fixed System hangs at CP 0x92 after updating AmiCompatibilityPkg_21 label.
+[Files] KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+
+[Tag] AMI_OVERRIDE_SA0022 (Removed)
+[Description] EIP251843 : Intel MMA function, create a token for compile an MMA Debug BIOS.
+[Files]
+KabylakePlatSamplePkg\Setup\AcpiSetup.hfr
+KabylakePlatSamplePkg\Setup\SaSetup.hfr
+KabylakeSiliconPkg\Wrapper\Library\SaLinkLib\SaLinkLib.c
+KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\Library.sdl
+KabylakeSiliconPkg\SystemAgent\MemoryInit\MemoryInit.sdl
+*KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiEvLoaderLib\EvLoaderPeim.h
+
+[Tag] AMI_OVERRIDE_SA0023
+[Description] Dynamic PCIE_BASE_ADDRESS feature implementation
+[Files]
+KabylakePlatSamplePkg\EC\EC.C
+KabylakePlatSamplePkg\EC\EC.inf
+KabylakePlatSamplePkg\Setup\SaSetup.hfr
+KabylakeSiliconPkg\SampleCode\Library\SecPlatformLib\Ia32\Flat32.asm
+KabylakeSiliconPkg\SampleCode\SecCore\Ia32\TempRamInit.asm
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\Ia32\SecSaLib.asm
+KabylakeSiliconPkg\SystemAgent\Library\SecSaLib\SecSaLib.inf
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.c
+KabylakeSiliconPkg\SystemAgent\PciHostBridge\Dxe\PciHostBridge.inf
+KabylakeSiliconPkg\Wrapper\Library\SaLinkLib\SaLinkLib.c
+KabylakeSiliconPkg\Wrapper\Library\SystemAgentHookLib\AmiSaPolicyUpdatePei.c
+
+[Tag] AMI_OVERRIDE_SA0024
+[Description] Providing TOKEN DD1F_BCL_METHOD override Method _BCL in igfx.asl.
+[Files] 
+KabylakeSiliconPkg\SystemAgent\AcpiTables\SaSsdt\Igfx.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\SaAcpiTables.sdl
+
+[Tag] AMI_OVERRIDE_SA0025 (Removed, RC 2.1.0 supported)
+[Description] The SerialDebugLevel isn't passed to FSP, so modify the default value when creating configblock.
+[Files] 
+KabylakeSiliconPkg\SystemAgent\Library\PeiSaPolicyLib\PeiSaPolicyLib.c
+
+[Tag] AMI_OVERRIDE_SA0026
+[Description] Optimize Smbios Type17 customization function. (Decrease Post time)
+[Files] 
+KabylakeSiliconPkg\SystemAgent\MemoryInit\Include\MrcInterface.h
+KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiMemoryInitLib\MemoryInit.c
+KabylakeSiliconPkg\SystemAgent\MemoryInit\Library\Private\PeiMemoryInitLib\Source\Api\MrcSaveRestore.c
+
+[Tag] AMI_OVERRIDE_SA0027
+[Description] Save/Restore PAM Lock in the Nb.asl
+[Files] 
+KabylakeSiliconPkg\SystemAgent\Library\Private\PeiSaInitLib\SaInit.c
+
+[Tag] AMI_OVERRIDE_SA0028
+[Description] Fix ICC BCLK function and fix ICC BCLK setup information.
+[Files] 
+KabylakeSiliconPkg\SystemAgent\Library\Private\PeiSaOcInitLib\PeiSaOcInitLib.c
+
+[Tag] AMI_OVERRIDE_SA0029
+[Description] 1.Need to report SSDT for SG even though GPIO support disable.
+              2.Update GNVS on dGPU only platform.
+              3.Avoid assert when SG enable on UMA platform.
+[Files] 
+KabylakeSiliconPkg\SystemAgent\SaInit\Dxe\SwitchableGraphicsInit.c
+
+[Tag] AMI_OVERRIDE_SA0030
+[Description] N17P-G0/G1 GPU fail initialization to cause BSOD 0x113
+[Files]
+KabylakeSiliconPkg\SystemAgent\AcpiTables\PegSsdt\PegOnOff.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\PegSsdt\PegSsdt.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\SwitchableGraphics\Pch\SgUlt.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\SwitchableGraphics\Pch\SgUlx.asl
+KabylakeSiliconPkg\SystemAgent\Library\Private\PeiSaPcieInitLib\PeiSaPcieInitLib.c
+
+[Tag] AMI_OVERRIDE_SA0031
+[Description] EIP308339: Fix BQA Ubuntu Firmware Test Live Test failed
+[Files]
+KabylakeSiliconPkg\SystemAgent\AcpiTables\PegSsdt\PegOnOff.asl
+KabylakeSiliconPkg\SystemAgent\AcpiTables\PegSsdt\PegSsdt.asl

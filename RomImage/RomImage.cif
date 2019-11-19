@@ -1,0 +1,18 @@
+<component>
+	name = "RomImage"
+	category = eModule
+	LocalRoot = "RomImage\"
+	RefName = "RomImage"
+[files]
+"ME11_5_Trimming_History.txt"
+"RomImage.chm"
+"RomImage.sdl"
+"RomImage.mak"
+"Build_All.bat"
+[parts]
+"RomImageBatchFiles"
+"RomImageBinFiles"
+"RomImageFitc"
+"RomImageXmlFiles"
+"RomImageLicenses"
+<endComponent>

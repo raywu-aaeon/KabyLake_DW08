@@ -1,0 +1,73 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+## @file I2cHid.inf
+# I2cHid component information file
+##
+
+[Defines]
+  INF_VERSION                 = 0x00010005
+  VERSION_STRING              = 1.0
+  BASE_NAME                   = I2cHid
+  MODULE_TYPE                 = DXE_DRIVER
+  FILE_GUID                   = 75c22fc8-bfcc-48a3-b6da-340c7fab8075
+  ENTRY_POINT                 = I2cHidEntryPoint
+
+[Sources]
+  I2cHid.c
+  I2cHid.h
+  I2cHidAbsPoint.c
+  I2cHidKeyboard.c
+  I2cHidMouse.c
+  I2cHidPorting.c
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseLib
+  UefiDriverEntryPoint
+  UefiLib
+  AmiCspLib
+  DebugLib
+  IoLib
+
+[Protocols]
+  gEfiSimpleTextInputExProtocolGuid
+  gEfiSimpleTextInProtocolGuid
+  gAmiEfiKeycodeProtocolGuid
+  gEfiSimplePointerProtocolGuid
+  gEfiAbsolutePointerProtocolGuid
+
+[Packages]
+  MdePkg/MdePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+  AmiTsePkg/AmiTsePkg.dec
+
+[Depex]
+  TRUE
+
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************

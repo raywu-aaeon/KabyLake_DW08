@@ -1,0 +1,12 @@
+<component>
+	name = "FspWrapper"
+	category = ModulePart
+	LocalRoot = "KabylakePlatSamplePkg\FspWrapper\"
+	RefName = "KabylakePlatSamplePkg.FspWrapper"
+[INF]
+"FspWrapperPeim\FspWrapperPeim.inf"
+[files]
+"FspWrapper.sdl"	
+[parts]
+"KabylakePlatSamplePkg.FspWrapper.Library"
+<endComponent>

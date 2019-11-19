@@ -1,0 +1,13 @@
+<component>
+	name = "BiosGuardFlashInterface"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/BiosGuard/BiosGuardFlashInterface/"
+	RefName = "BiosGuardFlashInterface"
+[INF]
+"BiosGuardSecSMIFlash/BiosGuardSecSMIFlash.inf"
+	
+[files]
+"BiosGuardFlashInterface.sdl"	
+[parts]
+"BiosGuardOfbdHook"
+<endComponent>

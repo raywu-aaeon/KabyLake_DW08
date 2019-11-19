@@ -1,0 +1,44 @@
+[Defines]
+INF_VERSION = 0x00010017
+BASE_NAME = MeNvRamHookDxeLib
+FILE_GUID = f306f0ee-8138-464c-b96a-dfcd858ab128
+VERSION_STRING = 1.0
+MODULE_TYPE = BASE
+LIBRARY_CLASS = MeNvRamHookDxeLib
+# 
+# The following information is for reference only and not required by the build tools.
+# 
+# VALID_ARCHITECTURES = IA32 X64 EBC
+# 
+
+
+
+#[LibraryClasses]
+#DebugLib
+#UefiBootServicesTableLib
+#UefiDriverEntryPoint
+#UefiRuntimeServicesTableLib
+#HobLib
+
+
+[Packages]
+MdePkg/MdePkg.dec
+IntelFrameworkPkg/IntelFrameworkPkg.dec
+IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
+KabylakeSiliconPkg/SiPkg.dec
+KabylakePlatSamplePkg/PlatformPkg.dec
+AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+
+
+
+[Sources]
+MeNvRamHookDxe.c
+
+
+
+[Protocols]
+#gEfiAmtWrapperProtocolGuid ## CONSUMES
+
+[Guids]
+gMeSetupVariableGuid
+

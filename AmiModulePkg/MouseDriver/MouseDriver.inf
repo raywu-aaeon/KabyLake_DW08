@@ -1,0 +1,64 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2012, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+## @file MouseDriver.inf
+# MouseDriver component information file
+##
+
+[Defines]
+ INF_VERSION = 0x00010015
+ VERSION_STRING = 1.0
+ BASE_NAME = MouseDriver
+ MODULE_TYPE = DXE_RUNTIME_DRIVER
+ FILE_GUID = C7A7030C-C3D8-45EE-BED9-5D9E76762953
+ ENTRY_POINT = MouseDriverEntryPoint
+
+[Sources]
+ MouseDriver.c
+ MouseDriver.h
+
+[Packages]
+  AmiModulePkg/AmiModulePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec 
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  
+[LibraryClasses]
+  UefiDriverEntryPoint
+  AmiDxeLib
+  
+[Protocols]
+ gEfiEdidDiscoveredProtocolGuid
+ gEfiDriverBindingProtocolGuid
+ gEfiSimplePointerProtocolGuid
+ gEfiAbsolutePointerProtocolGuid
+ gEfiGraphicsOutputProtocolGuid
+ gEfiDevicePathProtocolGuid
+ 
+[Depex]
+ TRUE
+ 
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2012, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

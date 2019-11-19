@@ -1,0 +1,80 @@
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+#
+#  gSiPkgTokenSpaceGuid.PcdTraceHubEnMode
+#  gSiPkgTokenSpaceGuid.PcdTraceHubEnFwTrace
+#  gSiPkgTokenSpaceGuid.PcdTraceHubDest
+#  gSiPkgTokenSpaceGuid.PcdTraceHubTempCsrMtbBar
+
+
+[Defines]
+INF_VERSION = 0x00010005
+VERSION_STRING = 1.0
+BASE_NAME = ProcessorStartup
+MODULE_TYPE = SEC
+LIBRARY_CLASS = SecPlatformLib
+FILE_GUID = 0833A84D-8A39-431f-BD1C-30965AAE71DD
+CONSTRUCTOR = SecPlatformLibConstructor
+
+[Sources]
+ProcessorStartup.c
+SecPlatformLib.c
+SecPlatformLibrary.h
+
+[Sources.Ia32]
+Ia32/mbiosmac.mac
+Ia32/SecCoreL.asm
+Ia32/mbiosequ.equ
+Ia32/equates.equ
+Ia32/SecCore.inc   | MSFT
+Ia32/Chipset.inc   | MSFT
+Ia32/Platform.inc  | MSFT
+Ia32/Flat32.asm    | MSFT
+Ia32/SecCpuLib.inc | MSFT
+Ia32/SecCpuLib.asm | MSFT
+
+Ia32/SecCore.inc   | INTEL
+Ia32/Chipset.inc   | INTEL
+Ia32/Platform.inc  | INTEL
+Ia32/Flat32.asm    | INTEL
+Ia32/SecCpuLib.inc | INTEL
+Ia32/SecCpuLib.asm | INTEL
+
+Ia32/SecCoreGcc.inc   | GCC
+Ia32/ChipsetGcc.inc   | GCC
+Ia32/PlatformGcc.inc  | GCC
+Ia32/Flat32.S         | GCC
+Ia32/SecCpuLibGcc.inc | GCC
+Ia32/SecCpuLibGcc.S   | GCC
+
+[LibraryClasses]
+PerformanceLib
+LocalApicLib
+SecPchLib
+TraceHubInitLib
+SecSaLib
+
+[Ppis]
+gPeiSecPerformancePpiGuid
+
+[Packages]
+MdePkg/MdePkg.dec
+MdeModulePkg/MdeModulePkg.dec
+UefiCpuPkg/UefiCpuPkg.dec
+AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+AmiCpuModulePkg/AmiCpuModulePkg.dec
+KabylakeSiliconPkg/SiPkg.dec
+ClientCommonPkg/ClientCommonPkg.dec
+
+[Pcd]
+gSiPkgTokenSpaceGuid.PcdTemporaryRamBase
+gSiPkgTokenSpaceGuid.PcdTemporaryRamSize
+gEfiMdePkgTokenSpaceGuid.PcdPciExpressBaseAddress
+gSiPkgTokenSpaceGuid.PcdMchBaseAddress
+gSiPkgTokenSpaceGuid.PcdSmbusBaseAddress
+
+[BuildOptions.IA32]
+GCC:*_*_IA32_ASM_FLAGS = -Wa,-I$(WORKSPACE)/AmiCpuModulePkg/Library/ProcessorStartup/Ia32,-I$(WORKSPACE)/Build

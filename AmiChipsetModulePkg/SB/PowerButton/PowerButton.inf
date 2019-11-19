@@ -1,0 +1,48 @@
+#
+# This file contains code for register and handle Powerbutton functionality.
+#
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PowerButton
+  FILE_GUID                      = E566B097-4378-485f-91D0-1C097C190CE2
+  MODULE_TYPE                    = DXE_SMM_DRIVER
+  VERSION_STRING                 = 1.0
+  PI_SPECIFICATION_VERSION       = 0x0001000A
+  ENTRY_POINT                    = PowerButtonEntry
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+   PowerButton.c
+
+[Packages]
+   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+   MdePkg/MdePkg.dec
+   IntelFrameworkPkg/IntelFrameworkPkg.dec
+   AmiModulePkg/AmiModulePkg.dec
+   AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+   KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses]
+  AmiDxeLib
+  UefiDriverEntryPoint
+  AmiCspLib
+  DebugLib
+  SbGetSetupData
+  GpioLib
+
+[Protocols]
+  gEfiSmmBase2ProtocolGuid
+  gEfiSmmPowerButtonDispatch2ProtocolGuid
+  gEfiStatusCodeRuntimeProtocolGuid
+
+[Depex]
+  gEfiSmmPowerButtonDispatch2ProtocolGuid
+

@@ -1,0 +1,34 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CpuNvRamHookLib
+  FILE_GUID                      = 3aea2284-6726-4887-97c2-7c0c952e22a4
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = CpuNvRamHookLib|DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+#  
+#
+
+[Sources]
+  AmiCpuNvRamHookLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiCpuModulePkg/AmiCpuModulePkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  
+[LibraryClasses]
+  DebugLib
+
+[Ppis]
+ 
+[Guids]
+  gCpuSetupVariableGuid
+

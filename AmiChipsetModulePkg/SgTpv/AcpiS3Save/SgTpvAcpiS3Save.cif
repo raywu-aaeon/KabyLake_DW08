@@ -1,0 +1,10 @@
+<component>
+	name = "Acpi S3 Save"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/AcpiS3Save/"
+	RefName = "SgTpvAcpiS3Save"
+[INF]
+"SgTpvAcpiS3Save.inf"
+[files]
+"SgTpvAcpiS3Save.sdl"	
+<endComponent>

@@ -1,0 +1,27 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = EcPlatformHookLib
+  FILE_GUID                      = FC6C6E00-D6A1-43b0-9831-374EE97428C2
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PlatformHookLib
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  EcPlatformHookLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec  
+  
+[LibraryClasses]
+  AmiChipsetIoLib
+  PchCycleDecodingLib

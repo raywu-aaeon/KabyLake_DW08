@@ -1,0 +1,29 @@
+
+[Defines]
+  INF_VERSION           = 0x00010015
+  VERSION_STRING        = 1.0
+  BASE_NAME             = SmbiosUpdateData
+  MODULE_TYPE           = DXE_DRIVER
+  FILE_GUID             = B98999A4-E96F-475a-99FC-762126F50F5A
+  ENTRY_POINT           = SmbiosUpdateDataDriverEntryPoint
+
+[Sources]
+  SmbiosUpdateData.c
+
+[LibraryClasses]
+  AmiDxeLib
+  UefiDriverEntryPoint
+  DebugLib
+
+[Protocols]
+  gAmiSmbiosProtocolGuid
+  gSmbiosUpdateDataProtocolGuid
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
+
+[Depex]
+  gAmiSmbiosProtocolGuid
+

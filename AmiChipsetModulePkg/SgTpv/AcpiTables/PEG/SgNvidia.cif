@@ -1,0 +1,15 @@
+<component>
+	name = "nVidia"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/AcpiTables/PEG/"
+	RefName = "nVidiaSG"
+[files]
+"NVdGPU.asl"	
+"NViGPU.asl"	
+"NViGDmisc.asl"	
+"NvVentura.asl"	
+"NvGPS.asl"	
+"NvGC6.asl"	
+"NvGC6v2.asl"
+"NVGC6ElinkSample.asl"
+<endComponent>

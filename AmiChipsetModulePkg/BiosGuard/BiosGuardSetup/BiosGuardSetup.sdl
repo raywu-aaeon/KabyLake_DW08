@@ -1,0 +1,71 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+#**********************************************************************
+#<AMI_FHDR_START>
+#
+# Name: BiosGuardSetup.sdl
+#
+# Description: SDL file for BiosGuardSetup
+#
+#<AMI_FHDR_END>
+#**********************************************************************
+
+TOKEN
+	Name  = "BIOS_GUARD_SETUP_SUPPORT"
+	Value  = "1"
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+	Master = Yes
+End
+
+PATH
+	Name  = "BIOS_GUARD_SETUP_PATH"
+End
+
+ELINK
+        Name  = "$(BIOS_GUARD_SETUP_PATH)/BiosGuardSetup.uni"
+        Parent  = "SetupStringFiles"
+        InvokeOrder = AfterParent
+End
+
+ELINK
+	Name  = "$(BIOS_GUARD_SETUP_PATH)/BiosGuardSetup.sd"
+	Parent = "SETUP_DEFINITIONS"
+	Priority = 40
+	InvokeOrder = AfterParent
+End
+
+TOKEN
+	Name = "DEFAULT_BIOS_GUARD_STATE"
+	Value = "0"
+    Help = "1:Enable Bios Guard or  0:Disable Bios Guard by defautlt setting."
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+End
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2017, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************

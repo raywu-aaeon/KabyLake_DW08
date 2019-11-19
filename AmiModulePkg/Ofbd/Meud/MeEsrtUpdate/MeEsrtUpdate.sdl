@@ -1,0 +1,38 @@
+TOKEN
+    Name  = "MeEsrtUpdate_SUPPORT"
+    Value  = "0"
+    Help  = "Main switch to enable MeEsrtUpdate support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    Master = Yes
+    Token = "MEFwUpdLcl_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "ME_ESRT_DEVICE_GUID"
+    Value = "{0x19CF981D, 0x8254, 0x4441, {0x86, 0x75, 0x43, 0xD7, 0x5E, 0x4F, 0x40, 0x17}}"
+    Help  = "Define Guid Of the device firmware in the OS for updating ME."
+    TokenType = Expression
+    TargetH = Yes
+    Range  = "GUID"
+End
+
+ELINK
+    Name  = "$(ME_ESRT_DEVICE_GUID)"
+    Parent  = "AmiFwCapsuleGuids"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "AmiProgressReportLib"
+    Parent  = "FWUPDATELIB_INF_LIBRARY"
+    InvokeOrder = AfterParent
+End
+
+INFComponent
+    Name  = "MeEsrtUpdate"
+    File  = "MeEsrtUpdate.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+End

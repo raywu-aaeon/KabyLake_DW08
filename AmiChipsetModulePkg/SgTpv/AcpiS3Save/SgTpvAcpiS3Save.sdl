@@ -1,0 +1,19 @@
+TOKEN
+    Name  = "SgTpvAcpiS3Save_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable SgAcpiS3Save support in Project"
+    TokenType = Boolean
+    Master = Yes
+End
+
+PATH
+    Name  = "SGTPV_ACPIS3_DIR"
+    Help  = "Path to SG AcpiS3Save folder"
+End
+
+INFComponent
+    Name  = "SgTpvAcpiS3Save"
+    File  = "SgTpvAcpiS3Save.inf"
+    Package  = "AmiChipsetModulePkg"
+    ModuleTypes  = "DXE_DRIVER"
+End

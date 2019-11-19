@@ -1,0 +1,14 @@
+<component>
+	name = "Library"
+	category = ModulePart
+	LocalRoot = "IntelFsp2Pkg\Library\"
+	RefName = "IntelFsp2Pkg.Library"
+[INF]
+"BaseCacheAsRamLibNull\BaseCacheAsRamLibNull.inf"
+"BaseCacheLib\BaseCacheLib.inf"
+"BaseFspCommonLib\BaseFspCommonLib.inf"
+"BaseFspPlatformLib\BaseFspPlatformLib.inf"
+"BaseFspSwitchStackLib\BaseFspSwitchStackLib.inf"
+[files]
+"Library.sdl"	
+<endComponent>

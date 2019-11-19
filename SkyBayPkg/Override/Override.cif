@@ -1,0 +1,18 @@
+<component>
+	name = "Override"
+	category = ModulePart
+	LocalRoot = "SkyBayPkg\Override"
+	RefName = "SkyBayPkg.Override"
+[INF]
+[files]
+"Override.sdl"
+[parts]
+"SkyBayPkg.Override.FvRebaseLib"
+"SkyBayPkg.Override.CapsuleRuntimeDxe"
+"SkyBayPkg.Override.DxeUsbBoardLib"
+"SkyBayPkg.Override.DxeAmiUsbBdsLib"
+"SkyBayPkg.Override.Raid17_7_0_1006"
+"SkyBayPkg.Override.AcpiLib"
+"SkyBayPkg.Override.OA3_SMM"
+"SkyBayPkg.Override.PiSmmCpuDxeSmm"
+<endComponent>

@@ -1,0 +1,1 @@
+@Elink(FORMS_BY_OEM_DEFINED,"#define @Child 1","%n","%n")

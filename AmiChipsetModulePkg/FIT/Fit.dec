@@ -1,0 +1,45 @@
+ ## @file
+ #**********************************************************************
+ #**********************************************************************
+ #**                                                                  **
+ #**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+ #**                                                                  **
+ #**                       All Rights Reserved.                       **
+ #**                                                                  **
+ #**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+ #**                                                                  **
+ #**                       Phone: (770)-246-8600                      **
+ #**                                                                  **
+ #**********************************************************************
+ #**********************************************************************
+ ##
+ 
+ [Defines]
+ DEC_SPECIFICATION              = 0x00010005
+ PACKAGE_NAME                   = IntelFitPkg
+ PACKAGE_GUID                   = 934A78FA-ED23-4C8C-B274-2815733164C6
+ PACKAGE_VERSION                = 0.1
+ 
+[Includes]
+
+
+[LibraryClasses]
+ 
+ 
+[Guids]
+  gIntelFitPkgTokenSpaceGuid = {0x81ee6f8b,0x0e8d,0x4110,{0xbb,0xa4,0x0a,0xb3,0x38,0xdf,0x54,0x36}}
+  
+[Protocols]
+    
+[Ppis]  
+  
+[PcdsFixedAtBuild]
+
+  
+[PcdsDynamic]
+  gIntelFitPkgTokenSpaceGuid.PcdBtgHeap|0x0|UINT32|0x20000017
+  gIntelFitPkgTokenSpaceGuid.PcdBtgHeapSize|0x8000|UINT32|0x20000018
+  gIntelFitPkgTokenSpaceGuid.PcdBtgFirstDesc|0x0|UINT32|0x20000019
+  gIntelFitPkgTokenSpaceGuid.PcdBtgCurDesc|0x0|UINT32|0x20000024
+#  gIntelFitPkgTokenSpaceGuid.PcdBtgMaxAddrReached|0x0|UINT32|0x20000020
+  

@@ -1,0 +1,13 @@
+<component>
+	name = "Aptio 4.x PCI Compatibility"
+	category = eModule
+	Rank = 40
+	LocalRoot = "AmiCompatibilityPkg\PCI\"
+	RefName = "AmiCompatibilityPkg.PciPort"
+[INF]
+"PciPort.inf"
+[files]
+"PciPort.sdl"	
+"PciPort.mak"	
+"PciPort.chm"	
+<endComponent>

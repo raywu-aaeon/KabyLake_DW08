@@ -1,0 +1,85 @@
+[Tag]         AMI_OVERRIDE_TBT0000
+[Description] For AMI and OEM Feature
+[Files]       KabylakePlatSamplePkg\Library\PeiTbtInitLib\PeiTbtInitLib.c
+              KabylakePlatSamplePkg\Platform\TBT\BoardInfo\TbtBoardInfo.h
+              KabylakePlatSamplePkg\Library\PeiBoardConfigLib\PeiUpdateBoardConfigPostMem.c
+
+[Tag]         AMI_OVERRIDE_TBT0001
+[Description] Add for OpRom support
+[Files]       KabylakePlatSamplePkg\Platform\TBT\Dxe\TbtDxe.c
+
+[Tag]         AMI_OVERRIDE_TBT0002
+[Description] Update ThunderboltSmiFunction value by Token
+[Files]       KabylakePlatSamplePkg\Platform\TBT\Dxe\TbtDxe.c
+              KabylakePlatSamplePkg\Platform\TBT\Dxe\TbtDxe.c
+
+[Tag]         AMI_OVERRIDE_TBT0003
+[Description] Read / Write Host Router Status in NVRAM
+[Files]       KabylakePlatSamplePkg\Include\Library\TbtCommonLib.h
+              KabylakePlatSamplePkg\Library\PeiTbtInitLib\PeiTbtInitLib.c
+              KabylakePlatSamplePkg\Platform\TBT\Smm\TbtSmiHandler.c
+              KabylakePlatSamplePkg\Platform\TBT\Smm\TbtSmm.c
+
+[Tag]         AMI_OVERRIDE_TBT0004
+[Description] Save time and avoid to program if TBT isn't enabled
+[Files]       KabylakePlatSamplePkg\Platform\TBT\Smm\TbtSmm.c
+
+[Tag]         AMI_OVERRIDE_TBT0005
+[Description] Fix first tbt hot-plug fail
+[Files]       KabylakePlatSamplePkg\Platform\TBT\Smm\TbtSmiHandler.c
+              KabylakePlatSamplePkg\Platform\TBT\Smm\TbtSmm.c
+
+[Tag]         AMI_OVERRIDE_TBT0006
+[Description] To avoid system detect wrong device
+[Files]       KabylakePlatSamplePkg\Platform\TBT\Smm\TbtSmiHandler.c
+
+[Tag]         AMI_OVERRIDE_TBT0007
+[Description] Support Legacy TBT device boot.
+[Files]       KabylakePlatSamplePkg\Platform\TBT\Smm\TbtSmiHandler.c
+              KabylakePlatSamplePkg\Setup\TbtSetup.c
+
+[Tag]         AMI_OVERRIDE_TBT0008
+[Description] Avoid this address for OEM used
+[Files]       KabylakePlatSamplePkg\Library\PeiTbtInitLib\PeiTbtInitLib.c
+
+[Tag]         AMI_OVERRIDE_TBT0009
+[Description] Already defined by token.
+[Files]       KabylakePlatSamplePkg\Include\Library\TbtCommonLib.h
+
+[Tag]         AMI_OVERRIDE_TBT0010
+[Description] Skip TBT function when disabling Thunderbolt_SUPPORT
+[Files]       KabylakePlatSamplePkg\PlatformInit\Pei\PlatformInit.c
+              KabylakePlatSamplePkg\Acpi\AcpiTables\AcpiPlatform\Dxe\AcpiPlatform.c
+
+[Tag]         AMI_OVERRIDE_TBT0011
+[Description] Fix building error for RC
+[Files]       KabylakePlatSamplePkg\Setup\TbtSetup.c
+
+[Tag]         AMI_OVERRIDE_TBT0012
+[Description] Add for updating the PCIe ClkReqNum
+[Files]       KabylakePlatSamplePkg\Setup\TbtSetup.c
+
+[Tag]         AMI_OVERRIDE_TBT0013
+[Description] For AMI callback function
+[Files]       KabylakePlatSamplePkg\Setup\TbtSetup.c
+
+[Tag]         AMI_OVERRIDE_TBT0014
+[Description] Set the MMIO resource default for OEM when enabling TbtSupport
+[Files]       KabylakePlatSamplePkg\Setup\TbtSetup.c
+
+[Tag]         AMI_OVERRIDE_TBT0015
+[Description] Setting SetupData->TbtSelector by AMI setup option
+[Files]       KabylakePlatSamplePkg\Setup\TbtSetup.c
+
+[Tag]         AMI_OVERRIDE_TBT0016
+[Description] Update the SWSMI value by Token
+[Files]       KabylakePlatSamplePkg\Acpi\AcpiTables\Dsdt\Platform.asl
+
+[Tag]         AMI_OVERRIDE_TBT0017
+[Description] It is for Thunderbolt, AMI thunderbolt module has taken care it already.
+[Files]       KabylakePlatSamplePkg\Acpi\AcpiTables\Dsdt\Platform.asl
+              KabylakePlatSamplePkg\Acpi\AcpiTables\Dsdt\Gpe.asl
+
+[Tag]         AMI_OVERRIDE_TBT0018
+[Description] Add for debug
+[Files]       KabylakePlatSamplePkg\Acpi\AcpiTables\Dsdt\Platform.asl

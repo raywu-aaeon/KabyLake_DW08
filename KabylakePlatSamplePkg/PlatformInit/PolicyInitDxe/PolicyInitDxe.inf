@@ -1,0 +1,120 @@
+### @file
+# Module Information file for the PolicyInit DXE driver.
+#
+# @copyright
+#  INTEL CONFIDENTIAL
+#  Copyright 2013 - 2017 Intel Corporation.
+#
+#  The source code contained or described herein and all documents related to the
+#  source code ("Material") are owned by Intel Corporation or its suppliers or
+#  licensors. Title to the Material remains with Intel Corporation or its suppliers
+#  and licensors. The Material may contain trade secrets and proprietary and
+#  confidential information of Intel Corporation and its suppliers and licensors,
+#  and is protected by worldwide copyright and trade secret laws and treaty
+#  provisions. No part of the Material may be used, copied, reproduced, modified,
+#  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+#  without Intel's prior express written permission.
+#
+#  No license under any patent, copyright, trade secret or other intellectual
+#  property right is granted to or conferred upon you by disclosure or delivery
+#  of the Materials, either expressly, by implication, inducement, estoppel or
+#  otherwise. Any license under such intellectual property rights must be
+#  express and approved by Intel in writing.
+#
+#  Unless otherwise agreed by Intel in writing, you may not remove or alter
+#  this notice or any other notice embedded in Materials by Intel or
+#  Intel's suppliers or licensors in any way.
+#
+#  This file contains a 'Sample Driver' and is licensed as such under the terms
+#  of your license agreement with Intel or your vendor. This file may be modified
+#  by the user, subject to the additional terms of the license agreement.
+#
+# @par Specification Reference:
+#
+# @par Glossary:
+###
+
+[Defines]
+  INF_VERSION                    = 0x00010017
+  BASE_NAME                      = PolicyInitDxe
+  FILE_GUID                      = 490D0119-4448-440D-8F5C-F58FB53EE057
+  VERSION_STRING                 = 1.0
+  MODULE_TYPE                    = DXE_DRIVER
+  ENTRY_POINT                    = PolicyInitDxeEntryPoint
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  CpuPlatformLib
+  DebugLib
+  DxeServicesTableLib
+  IoLib
+  MemoryAllocationLib
+  DxeMePolicyLib          # AdvancedFeaturesContent
+  DxeSaPolicyLib
+  DxeAmtPolicyLib         # AdvancedFeaturesContent
+  MmPciLib
+  PcdLib
+  DxePolicyBoardConfigLib # AdvancedFeaturesContent
+  DxePolicyUpdateLib      # AdvancedFeaturesContent
+  PostCodeLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+  UefiRuntimeServicesTableLib
+  ConfigBlockLib
+  DevicePathLib           # AdvancedFeaturesContent
+  EcMiscLib               # AdvancedFeaturesContent
+#AMI_OVERRIDE_START - Support Runtime load VBT bin file of the RVP sku
+  AmiGetBoardInfoLib
+#AMI_OVERRIDE_END - Support Runtime load VBT bin file of the RVP sku
+
+[Packages]
+  MdePkg/MdePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec # AdvancedFeaturesContent
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+
+[Pcd]
+  gClientCommonModuleTokenSpaceGuid.PcdSmbiosOemTypeFirmwareVersionInfo ## CONSUMES # AdvancedFeaturesContent
+  gPlatformModuleTokenSpaceGuid.PcdGopOverrideDriverEnable              ## CONSUMES # AdvancedFeaturesContent
+  gPlatformModuleTokenSpaceGuid.PcdIntelGopEnable
+  gPlatformModuleTokenSpaceGuid.PcdCpuSmmMsrSaveStateEnable
+  gPlatformModuleTokenSpaceGuid.PcdCpuSmmCodeAccessCheckEnable
+  gPlatformModuleTokenSpaceGuid.PcdCpuSmmUseDelayIndication
+  gPlatformModuleTokenSpaceGuid.PcdCpuSmmUseBlockIndication
+  gPlatformModuleTokenSpaceGuid.PcdCpuSmmUseSmmEnableIndication
+
+[Sources]
+  AmtPolicyInitDxe.c # AdvancedFeaturesContent
+  AmtPolicyInitDxe.h # AdvancedFeaturesContent
+  MePolicyInitDxe.c  # AdvancedFeaturesContent
+  MePolicyInitDxe.h  # AdvancedFeaturesContent
+  PolicyInitDxe.c
+  PolicyInitDxe.h
+  SaPolicyInitDxe.c
+  SaPolicyInitDxe.h
+  SiliconPolicyInitDxe.c # AdvancedFeaturesContent
+  SiliconPolicyInitDxe.h # AdvancedFeaturesContent
+  GopPolicyInitDxe.c
+  GopPolicyInitDxe.h
+
+[Protocols]
+  gEfiFirmwareVolume2ProtocolGuid               ## CONSUMES
+  gSaPolicyProtocolGuid                         ## CONSUMES
+  gDxeSiPolicyProtocolGuid                      ## PRODUCES
+  gGopPolicyProtocolGuid                        ## PRODUCES
+  gPlatformInfoProtocolGuid                     ## CONSUMES
+  gGopOverrideProtocolGuid                      ## CONSUMES # AdvancedFeaturesContent
+
+[Guids]
+  gSetupVariableGuid                            ## CONSUMES # AdvancedFeaturesContent
+  gSaSetupVariableGuid                          ## CONSUMES
+  gIntelGraphicsVbtGuid                         ## CONSUMES # AdvancedFeaturesContent
+  gIntelPeiGraphicsVbtGuid                      ## CONSUMES
+  gCpuSmmGuid                                   ## CONSUMES # AdvancedFeaturesContent
+
+[Depex]
+  gEfiVariableArchProtocolGuid
+

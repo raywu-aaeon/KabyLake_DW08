@@ -1,0 +1,68 @@
+################################################################################
+#
+# Rules are use with the [FV] section's module INF type to define
+# how an FFS file is created for a given INF file. The following Rule are the default
+# rules for the different module type. User can add the customized rules to define the
+# content of the FFS file.
+#
+################################################################################
+  
+[Rule.Common.ACPITABLE]
+  FILE FREEFORM = $(NAMED_GUID) {
+    RAW ACPI  Optional            |.acpi
+    RAW ASL   Optional            |.aml
+    UI       STRING="$(MODULE_NAME)" Optional
+    VERSION  STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+  }
+  
+[Rule.Common.DXE_DRIVER.EfiBinary]
+  FILE DRIVER = $(NAMED_GUID) {
+    DXE_DEPEX   DXE_DEPEX Optional        $(INF_OUTPUT)/$(MODULE_NAME).depex
+    $(COMPRESSION_SECTION) {
+        PE32      PE32                    |.efi
+        UI        STRING="$(MODULE_NAME)" Optional
+        VERSION   STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+    }
+  }
+
+[Rule.Common.RT_DRIVER]
+  FILE DRIVER = $(NAMED_GUID) {
+    DXE_DEPEX DXE_DEPEX Optional          $(INF_OUTPUT)/$(MODULE_NAME).depex
+    $(COMPRESSION_SECTION) {
+        PE32      PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
+        UI        STRING="$(MODULE_NAME)" Optional
+        VERSION   STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+    }
+  }
+  
+  [Rule.Common.BS_DRIVER]
+  FILE DRIVER = $(NAMED_GUID) {
+    DXE_DEPEX    DXE_DEPEX Optional      $(INF_OUTPUT)/$(MODULE_NAME).depex
+        PE32     PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
+        UI       STRING="$(MODULE_NAME)" Optional
+        VERSION  STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+  }
+  
+  [Rule.Common.PE32_PEIM]
+  FILE PEIM = $(NAMED_GUID)               {
+    PEI_DEPEX PEI_DEPEX Optional        $(INF_OUTPUT)/$(MODULE_NAME).depex
+    PE32        PE32                        $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UI        STRING="$(MODULE_NAME)" Optional
+    VERSION   STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+  }
+  
+  [Rule.Common.UEFI_DRIVER.EfiBinary]
+  FILE DRIVER = $(NAMED_GUID) {
+    DXE_DEPEX   DXE_DEPEX Optional        $(INF_OUTPUT)/$(MODULE_NAME).depex
+    $(COMPRESSION_SECTION) {
+        PE32      PE32                    |.efi
+        UI        STRING="$(MODULE_NAME)" Optional
+        VERSION   STRING="$(INF_VERSION)" Optional BUILD_NUM=$(BUILD_NUMBER)
+    }
+  }   
+
+  [Rule.Common.USER_DEFINED.ACPITABLE]
+  FILE FREEFORM = $(NAMED_GUID) {
+    RAW ACPI  Optional     |.acpi
+    RAW ASL   Optional     |.aml
+  }

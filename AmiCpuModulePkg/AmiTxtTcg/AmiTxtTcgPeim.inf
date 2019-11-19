@@ -1,0 +1,35 @@
+[Defines]
+INF_VERSION         = 0x00010005
+VERSION_STRING      = 1.0
+BASE_NAME           = AmiTxtTcgPeim
+MODULE_TYPE         = PEIM
+FILE_GUID           = 9962883c-c025-4ebb-b699-4ea4d147c8a8
+ENTRY_POINT         = AmiTxtTcgPeimEntry
+
+[Sources]
+  AmiTxtTcgPeim.c
+  AmiTxtTcgPeim.h
+  TpmAuxCommLib.h
+  AuxFunc.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiModulePkg/AmiModulePkg.dec
+
+[LibraryClasses]
+  AmiPeiLib
+  PeimEntryPoint
+  TCG2PeiCrbLib
+  TCG2PeiTisLib
+  TCG2OemTpm12PeiCommLib
+  TCG2OemTpm20PeiCommLib
+  TimerLib
+  
+[Ppis]
+  gEfiPeiMasterBootModePpiGuid
+
+[Guids]
+
+[Depex]
+  gEfiPeiReadOnlyVariable2PpiGuid

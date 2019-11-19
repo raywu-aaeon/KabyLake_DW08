@@ -1,0 +1,26 @@
+[Defines]
+	INF_VERSION            = 0x00010015
+	VERSION_STRING         = 1.0
+	FILE_GUID              = C7D4BBCF-EB0A-4C91-BD8B-FCA99F28B011
+	MODULE_TYPE            = PEIM
+	BASE_NAME              = AmiTxtPei
+	ENTRY_POINT            = AmiTxtPeiEntry
+	
+[Sources]
+  AmiTxtPei.c
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  SkyBayPkg/SkyBayPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  
+[Depex]
+  gEfiPeiReadOnlyVariable2PpiGuid
+  
+ [LibraryClasses]
+ PeimEntryPoint
+ PeiServicesLib
+ PeiServicesTablePointerLib
+ BaseLib
+ DebugLib
+ PrintLib

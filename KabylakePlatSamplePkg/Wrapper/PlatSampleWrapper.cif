@@ -1,0 +1,21 @@
+<component>
+	name = "Wrapper"
+	category = ModulePart
+	LocalRoot = "KabylakePlatSamplePkg\Wrapper\"
+	RefName = "KabylakePlatSamplePkg.Wrapper"
+[INF]
+"AmiPlatformBootManagerLib\AmiPlatformBootManagerLib.inf"
+"NvRamDxeHook\NvRamDxeHook.inf"
+"AmiSyncSetupData\AmiSyncSetupData.inf"
+"DxeTpmMeasurementLib\DxeTpmMeasurementLib.inf"
+[files]
+"PlatSampleWrapper.sdl"	
+"AmiPcieDeviceOverrideTable.h"	
+[parts]
+"KabylakePlatSamplePkg.Wrapper.AmiRecoveryRcHobResume"
+"KabylakePlatSamplePkg.Wrapper.MdeModulePkgWrapper"
+"KabylakePlatSamplePkg.Wrapper.MeWrapper"
+"KabylakePlatSamplePkg.Wrapper.AmiGetBoardInfoLib"
+"KabylakePlatSamplePkg.Wrapper.Library"
+"KabylakePlatSamplePkg.Wrapper.TbtWrapper"
+<endComponent>

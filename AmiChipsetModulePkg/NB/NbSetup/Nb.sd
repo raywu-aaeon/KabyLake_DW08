@@ -1,0 +1,186 @@
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2015, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************
+
+//*************************************************************************
+// $Header: $
+//
+// $Revision: $
+//
+// $Date: $
+//*************************************************************************
+//<AMI_FHDR_START>
+//
+// Name:        NB.sd
+//
+// Description: North Bridge setup form
+//
+//<AMI_FHDR_END>
+//*************************************************************************
+
+#ifdef SETUP_DATA_DEFINITION
+//----------------------------------------------------------------------------
+// Put NVRAM data definitions here.
+// For example: UINT8 Data1;
+// These definitions will be converted by the build process
+// to a definitions of SETUP_DATA fields.
+//----------------------------------------------------------------------------
+    UINT8   PrimaryPeg;
+    UINT8   PrimaryPcie;
+    UINT8   DetectNonComplaint; 
+    UINT8   PciExpressLength;
+#endif
+
+#ifdef FORM_SET_TYPEDEF
+	#include <Protocol/NBPlatformData.h>
+#endif
+
+//---------------------------------------------------------------------------
+#if defined(VFRCOMPILE) && !defined(CONTROLS_ARE_DEFINED)
+#define CONTROL_DEFINITION
+#endif
+//---------------------------------------------------------------------------
+
+#ifdef CONTROL_DEFINITION
+#define NB_ONEOF_PRIMARYPEG\
+      oneof varid    = SETUP_DATA.PrimaryPeg,\
+        prompt   = STRING_TOKEN(STR_NB_PRIMARY_PEG),\
+        help     = STRING_TOKEN(STR_NB_PRIMARY_PEG_HELP),\
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PEG1), value = 1, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PEG2), value = 2, flags = RESET_REQUIRED;\
+      endoneof;
+      
+#define NB_ONEOF_PRIMARYPCIE\
+      oneof varid    = SETUP_DATA.PrimaryPcie,\
+        prompt   = STRING_TOKEN(STR_NB_PRIMARY_PCIE),\
+        help     = STRING_TOKEN(STR_NB_PRIMARY_PCIE_HELP),\
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE1), value = 1, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE2), value = 2, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE3), value = 3, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE4), value = 4, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE5), value = 5, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE6), value = 6, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE7), value = 7, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE8), value = 8, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE9), value = 9, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE10), value = 10, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE11), value = 11, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE12), value = 12, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE13), value = 13, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE14), value = 14, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE15), value = 15, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE16), value = 16, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE17), value = 17, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE18), value = 18, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_NB_COMMON_PCIE19), value = 19, flags = RESET_REQUIRED;\
+      endoneof;
+      
+#define NB_ONEOF_DETECTNONCOMPLAINT\
+      oneof varid    = SETUP_DATA.DetectNonComplaint,\
+        prompt   = STRING_TOKEN(STR_NB_NON_COMPLIANCE),\
+        help     = STRING_TOKEN(STR_NB_NON_COMPLIANCE_HELP),\
+        option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags =  DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_ENABLED_STRING), value = 1, flags = RESET_REQUIRED;\
+      endoneof;
+      
+#define NB_ONEOF_PCIEXPRESSLENGTH\
+      oneof varid    = SETUP_DATA.PciExpressLength,\
+        prompt   = STRING_TOKEN(STR_SET_PCIE_LENGTH_PROMPT),\
+        help     = STRING_TOKEN(STR_SET_PCIE_LENGTH_HELP),\
+        option text = STRING_TOKEN(STR_64MB),  value = 1, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_128MB), value = 2, flags = RESET_REQUIRED;\
+        option text = STRING_TOKEN(STR_256MB), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+      endoneof; 
+#endif // CONTROL_DEFINITION
+//---------------------------------------------------------------------------
+#ifdef FORM_SET_TYPEDEF
+    #include <Protocol/NBPlatformData.h>
+#endif
+//---------------------------------------------------------------------------
+#ifdef CHIPSET_FORM_SET
+    #ifndef SUPPRESS_GRAYOUT_ENDIF //old Core
+    #define SUPPRESS_GRAYOUT_ENDIF endif;
+    #endif
+
+    #ifdef FORM_SET_VARSTORE
+       varstore NB_PLATFORM_DATA,
+       key   = AUTO_ID(NB_PLATFORM_DATA_ID),
+       name  = NBPlatformData,
+       guid  = SETUP_GUID;
+    #endif
+
+    #ifdef FORM_SET_ITEM
+    // Define controls to be added to the main page of the formset
+    #endif
+
+    #ifdef FORM_SET_GOTO
+    // Define goto commands for the forms defined in this file
+    #endif
+
+    #ifdef FORM_SET_FORM
+        // 
+        // PEG Port Feature Configuration
+        // 
+       form formid = AUTO_ID(NB_PEG_PORTING_CONFIGURATION_FORM_ID),
+       title = STRING_TOKEN(STR_NB_PEG_PORTING_CONFIGURATION_FORM);
+         SUBTITLE(STRING_TOKEN(STR_NB_PEG_ROOTPORT_PROMPT))
+         SEPARATOR
+         NB_ONEOF_DETECTNONCOMPLAINT
+       endform;
+       
+        // 
+        // External Gfx Card Primary Display Configuration
+        // 
+       form formid = AUTO_ID(NB_CSM_VIDEO_FORM_ID),
+       title = STRING_TOKEN(STR_NB_CSM_VIDEO_FORM);
+         SUBTITLE(STRING_TOKEN(STR_NB_CSM_VIDEO_PROMPT))
+         SEPARATOR
+// >> (EIP76034)
+#if defined(RC_PEG_0) && (RC_PEG_0 == 1)
+         suppressif ideqval SETUP_DATA.PrimaryDisplay == 0 OR
+#if defined(CSM_SUPPORT) && (CSM_SUPPORT == 1)
+                    ideqval SETUP_DATA.VideoOpRom == 1 OR
+                    ideqval SETUP_DATA.CsmSupport == 0 OR
+#endif
+                    ideqval SETUP_DATA.PrimaryDisplay == 4;
+           NB_ONEOF_PRIMARYPEG
+         endif; 
+#endif
+// << (EIP76034)
+         suppressif ideqval SETUP_DATA.PrimaryDisplay == 0 OR
+#if defined(CSM_SUPPORT) && (CSM_SUPPORT == 1)
+                    ideqval SETUP_DATA.VideoOpRom == 1 OR
+                    ideqval SETUP_DATA.CsmSupport == 0 OR
+#endif
+                    ideqval SETUP_DATA.PrimaryDisplay == 4;
+           NB_ONEOF_PRIMARYPCIE
+         endif; 
+       endform; // form formid = AUTO_ID(NB_CSM_VIDEO_FORM_ID)
+    #endif // end FORM_SET_FORM
+#endif // end CHIPSET_SET_FORM
+
+//*************************************************************************
+//*************************************************************************
+//**                                                                     **
+//**        (C)Copyright 1985-2015, American Megatrends, Inc.            **
+//**                                                                     **
+//**                       All Rights Reserved.                          **
+//**                                                                     **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+//**                                                                     **
+//**                       Phone: (770)-246-8600                         **
+//**                                                                     **
+//*************************************************************************
+//*************************************************************************

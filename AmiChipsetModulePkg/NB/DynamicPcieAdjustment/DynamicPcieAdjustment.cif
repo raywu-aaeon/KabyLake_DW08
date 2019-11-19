@@ -1,0 +1,15 @@
+<component>
+	name = "Dynamic Pcie Length Adjustment"
+	category = eModule
+	Rank = 38
+	LocalRoot = "AmiChipsetModulePkg\NB\DynamicPcieAdjustment\"
+	RefName = "AmiChipsetModulePkg.DynamicPcieAdjustment"
+[INF]
+"DynamicSmmBasePciLibPciExpress\DynamicSmmBasePciLibPciExpress.inf"
+"DynamicPciePciLib\DynamicPciePciLib.inf"
+"DynamicSmmPciExpressLib\DynamicSmmPciExpressLib.inf"
+[files]
+"DynamicPcieAdjustment_History.txt"	
+"DynamicPcieAdjustment.chm"	
+"DynamicPcieAdjustment.sdl"	
+<endComponent>

@@ -1,0 +1,13 @@
+<component>
+	name = "SgTpv PCH"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg/SgTpv/AcpiTables/PCH/"
+	RefName = "SgTpvPCH"
+[INF]
+"SgTpvPchSSDT.inf"
+[files]
+"SgTpvPCH.sdl"	
+[parts]
+"AtiSGULT"
+"nVidiaSGULT"
+<endComponent>

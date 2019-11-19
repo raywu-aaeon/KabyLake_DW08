@@ -1,0 +1,83 @@
+## @file
+# Component information file for PEI Skylake-Y Rvp13 Board Init Pre-Mem Library
+#
+# @copyright
+#  INTEL CONFIDENTIAL
+#  Copyright 2016 Intel Corporation.
+#
+#  The source code contained or described herein and all documents related to the
+#  source code ("Material") are owned by Intel Corporation or its suppliers or
+#  licensors. Title to the Material remains with Intel Corporation or its suppliers
+#  and licensors. The Material may contain trade secrets and proprietary and
+#  confidential information of Intel Corporation and its suppliers and licensors,
+#  and is protected by worldwide copyright and trade secret laws and treaty
+#  provisions. No part of the Material may be used, copied, reproduced, modified,
+#  published, uploaded, posted, transmitted, distributed, or disclosed in any way
+#  without Intel's prior express written permission.
+#
+#  No license under any patent, copyright, trade secret or other intellectual
+#  property right is granted to or conferred upon you by disclosure or delivery
+#  of the Materials, either expressly, by implication, inducement, estoppel or
+#  otherwise. Any license under such intellectual property rights must be
+#  express and approved by Intel in writing.
+#
+#  Unless otherwise agreed by Intel in writing, you may not remove or alter
+#  this notice or any other notice embedded in Materials by Intel or
+#  Intel's suppliers or licensors in any way.
+#
+#  This file contains a 'Sample Driver' and is licensed as such under the terms
+#  of your license agreement with Intel or your vendor. This file may be modified
+#  by the user, subject to the additional terms of the license agreement.
+#
+# @par Specification Reference:
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PeiSkylakeYRvp13BoardInitLib
+  FILE_GUID                      = 7459359e-2576-49e4-9042-6397f83742df
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = NULL|PEIM
+  CONSTRUCTOR                    = PeiSkylakeYRvp13BoardInitLibConstructor
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  BaseMemoryLib
+  MemoryAllocationLib
+
+[Packages]
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientCommonPkg/ClientCommonPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec
+
+[Sources]
+  PeiSkylakeYRvp13InitLib.c
+
+[Pcd]
+  gBoardModuleTokenSpaceGuid.PcdPeiBoardInitTableList
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTable
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTableSize
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTable2
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTable2Size
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTableTouchPanel
+  gBoardModuleTokenSpaceGuid.PcdBoardGpioTableSdhcSidebandCardDetect
+
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTable
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTableSize
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTable2
+  gBoardModuleTokenSpaceGuid.PcdGpioExpanderTable2Size
+
+  gBoardModuleTokenSpaceGuid.PcdHdaVerbTable
+  gBoardModuleTokenSpaceGuid.PcdHdaVerbTable2
+
+  gBoardModuleTokenSpaceGuid.PcdDebugUsbUartEnable
+  gBoardModuleTokenSpaceGuid.PcdPhabletPocGpioEnable
+  gBoardModuleTokenSpaceGuid.PcdPantherMtnGpioEnable
+  gBoardModuleTokenSpaceGuid.PcdM2GpioEnable
+  gBoardModuleTokenSpaceGuid.PcdSkyCamGpioEnable

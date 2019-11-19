@@ -1,0 +1,12 @@
+<component>
+	name = "UpdateSmbiosType41"
+	category = ModulePart
+	LocalRoot = "AmiChipsetModulePkg\SB\UpdateSmbiosType41\"
+	RefName = "AmiChipsetModulePkg.UpdateSmbiosType41"
+[INF]
+"UpdateSmbiosType41.inf"
+"AmiOemSmbiosType41LibNull.inf"
+[files]
+"UpdateSmbiosType41.sdl"
+"AmiTempOnboardDevicesTable.h"
+<endComponent>

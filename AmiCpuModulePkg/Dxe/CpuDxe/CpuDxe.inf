@@ -1,0 +1,54 @@
+
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = CpuDxe
+  FILE_GUID                      = B03ABACF-A532-5E78-ACA0-B11F765B3AFD
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = DxeInitializeCpu
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = X64
+#
+#
+
+[Sources]
+  CpuDxe.c
+  CpuDxe.h
+  
+[Packages]
+  MdePkg/MdePkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec 
+  AmiModulePkg/AmiModulePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCpuModulePkg/AmiCpuModulePkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  
+[LibraryClasses] 
+  AmiDxeLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib
+  CpuCspLib
+  CpuBoardLib
+  DxeServicesTableLib
+  DebugLib
+  
+[Pcd]
+  
+[Guids]
+  gEfiEndOfDxeEventGroupGuid
+  gSaDataHobGuid
+
+[Protocols]
+  gEfiMpServiceProtocolGuid
+  gEfiLegacyBiosProtocolGuid
+  
+[Depex] 
+  TRUE
+#  gEfiCpuArchProtocolGuid AND
+#  gEfiVariableWriteArchProtocolGuid
+

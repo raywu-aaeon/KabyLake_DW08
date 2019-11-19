@@ -1,0 +1,22 @@
+#**********************************************************************
+#**********************************************************************
+#**                                                                  **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**                                                                  **
+#**                       All Rights Reserved.                       **
+#**                                                                  **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+#**                                                                  **
+#**                       Phone: (770)-246-8600                      **
+#**                                                                  **
+#**********************************************************************
+#**********************************************************************
+
+[Defines]
+  INF_VERSION                = 0x00010005
+  BASE_NAME                  = ReserveBootGuardSaveResigndata
+  FILE_GUID                  = 4B14BD9E-1112-4DA0-BBF3-6B34CE39E772
+  MODULE_TYPE                = USER_DEFINED
+
+[Binaries]
+  BIN|ReserveBootGuardSaveResigndata.bin

@@ -1,0 +1,80 @@
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = BiosGuardCpuPolicyOverride
+  FILE_GUID                      = FAF79E9F-4D40-4F02-8AC9-4B5512708F7F
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = BiosGuardCpuPolicyOverrideEntryPoint
+
+[Sources]
+  BiosGuardCpuPolicyOverride.c
+  BiosGuardCpuPolicyOverride.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+  AmiCryptoPkg/AmiCryptoPkg.dec
+  KabylakeSiliconPkg/SiPkg.dec
+  KabylakePlatSamplePkg/PlatformPkg.dec
+  ClientSiliconPkg/ClientSiliconPkg.dec 
+
+[LibraryClasses]
+  PeimEntryPoint
+  DebugLib
+  IoLib
+  HobLib
+  CpuLib
+  AmiPeiLib
+  MmPciLib
+  ConfigBlockLib
+#
+# CryptoLib is required for SMRAM integrity check
+#
+  PeiCryptLib
+  BaseCryptLib
+  
+[Ppis]
+  gEfiPeiReadOnlyVariable2PpiGuid
+  gSiPolicyPpiGuid
+  gSiPreMemPolicyPpiGuid
+
+[Pcd]
+
+[Guids]
+  gBiosGuardHobGuid
+  gBiosGuardModuleGuid
+  gBiosGuardConfigGuid
+  gCpuSecurityPreMemConfigGuid
+  
+[Depex]
+  gEfiPeiReadOnlyVariable2PpiGuid
+
+#*************************************************************************
+#*************************************************************************
+#**                                                                     **
+#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**                                                                     **
+#**                       All Rights Reserved.                          **
+#**                                                                     **
+#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+#**                                                                     **
+#**                       Phone: (770)-246-8600                         **
+#**                                                                     **
+#*************************************************************************
+#*************************************************************************
