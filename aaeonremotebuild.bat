@@ -42,3 +42,16 @@ if "%BUILD_ALL%" == "2" (
         )
         ren Build_Ami Build
 )
+
+net use \\172.16.1.26\public\runner-build\%VEB% /user:runner 12345678
+del \\172.16.1.26\public\runner-build\%VEB%\*.* /Q
+copy Build\AmiCrbMeRoms\*.bin \\172.16.1.26\public\runner-build\%VEB% /y /b
+copy Build\Token.* \\172.16.1.26\public\runner-build\%VEB% /y /b
+copy Build\Platform.* \\172.16.1.26\public\runner-build\%VEB% /y /b
+copy Build\SignOnMessage.* \\172.16.1.26\public\runner-build\%VEB% /y /b
+rem copy Build\Microcode.* \\172.16.1.26\public\runner-build\%VEB% /y /b
+copy Build\GSIOSETUPVAR.* \\172.16.1.26\public\runner-build\%VEB% /y /b
+copy Build\*.inf \\172.16.1.26\public\runner-build\%VEB% /y /b
+copy Build\PCIBRDSDL.* \\172.16.1.26\public\runner-build\%VEB% /y /b
+copy Build\*.hfr \\172.16.1.26\public\runner-build\%VEB% /y /b
+net use \\172.16.1.26\public\runner-build\%VEB% /delete
