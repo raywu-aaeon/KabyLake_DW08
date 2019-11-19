@@ -27,11 +27,11 @@ if "%BUILD_ALL%" == "0" goto build
 
 :buildall
 make clean
-call UPW1A.bat rebuild
+call make rebuild
 goto end
 
 :build
-call UPW1A.bat
+call make
 
 :end
 
