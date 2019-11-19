@@ -1,0 +1,16 @@
+<component>
+	name = "SuperI/O - F81216SEC"
+	category = IO
+	LocalRoot = "AaeonIoPkg\F81216SEC\"
+	RefName = "F81216SEC"
+[INF]
+"F81216SECDxeInit.inf"
+"F81216SECPeiInit.inf"
+[files]
+"F81216SEC.sdl"	
+"F81216SEC.mak"	
+"F81216SEC.chm"	
+[parts]
+"F81216SECAsl"
+"F81216SECSetup"
+<endComponent>

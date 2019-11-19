@@ -1,0 +1,22 @@
+<component>
+	name = "AaeonIoPkg"
+	category = Flavor
+	LocalRoot = "AaeonIoPkg\"
+	RefName = "AaeonIoPkg"
+[files]
+"AaeonIoPkg.dec"	
+"AaeonIoPkg.sdl"	
+"AaeonIoSetup.c"	
+"AaeonIoSetup.h"	
+"GenUniFile.exe"
+[parts]
+"SioDynamicSetupLoadDefaults"
+"F81866"
+"F81966"
+"NCT6791D"
+"F81216SEC"
+"IT8728F"
+"W83627DHG"
+"NCT5538D"
+"IT8518"
+<endComponent>

@@ -1,0 +1,1217 @@
+﻿###########################################################################
+Revision:       AaeonIo_19
+Release Date:   11/18/2019
+Change:
+                * Correct module "SuperI/O - F81216SEC" for fixing UART IRQ
+                sharing fail issue 
+                * Update module "SuperI/O - F81216SEC" for supporting RS485 
+                auto flow control
+###########################################################################
+---------------------------------------------------------------------------
+Change:         Correct module "SuperI/O - F81216SEC" for fixing UART IRQ
+                sharing fail issue 
+Root Cause:     * Coding mistake for register "IRQ Channel Select Register"
+Action:
+                * Correct ASL Coding mistake for offset "INTT"
+                * Correct Coding mistake for function "F81216SEC_COM_Init"
+Files:
+                > F81216SEC/F81216SECDEV.asl
+                > F81216SEC/F81216SECDxeInit.c
+STS:
+                https://sts.aaeon.com.tw:12080/issues/8728
+---------------------------------------------------------------------------
+Change:         Update module "SuperI/O - F81216SEC" for supporting RS485 
+                auto flow control
+Root Cause:     Follow SIO Spec
+Action:
+                * Add TOKEN "ONEOF_F81216SECUARTAUTOFLOWCONTROLENABLE_DEFAULT"
+                * Add ELINK "$(F81216SEC_DIR)\F81216SECMiscSetup.sd"
+                * Add ELINK "$(F81216SEC_DIR)\F81216SECMiscSetup.uni"
+                * Disable DXE_DEVICE_INIT_DATA "F81216SEC_DXE_COM_Mode_Init_Table"
+                * Remove TOKEN relate to "F81216SEC_DXE_COM_Mode_Init_Table"
+                * Add function "F81216SECMiscSetupFunction"
+                * Add [Ppis] gEfiPeiReadOnlyVariable2PpiGuid
+                * Add setup item "RS485 Auto Flow Control" for each UART
+Files:
+                > F81216SEC/F81216SEC.sdl
+                > F81216SEC/F81216SECDxeIoTable.h
+                > F81216SEC/F81216SECPeiInit.c
+                > F81216SEC/F81216SECPeiInit.inf
+                > F81216SEC/F81216SECMiscSetup.sd
+                > F81216SEC/F81216SECMiscSetup.uni
+STS:
+                https://sts.aaeon.com.tw:12080/issues/8728
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_18
+Release Date:		10/15/2019
+Change:
+1. Update F81966 -
+        1. Support HWM/DIO/WDT/SMF BFPI
+2. Update CONTRIBUTING.md for BFPI porting.
+3. Fixed system will hang before boot to OS when support SmartFan
+###########################################################################
+---------------------------------------------------------------------------
+Change:	Fixed system will hang before boot to OS when support SmartFan 
+Reason: 
+Files:
+		> F81866/F81866DxeInit.c
+		> F81966/F81966DxeInit.c
+		> IT8728F/IT8728FDxeInit.c
+		> NCT5538D/NCT5538DDxeInit.c
+---------------------------------------------------------------------------
+Change:	Update F81966 module for supporting HWM/DIO/WDT/SMF BFPI. 
+Reason: For BFPI
+Files:
+		> F81966/F81966Bfpi.asl	
+		> F81966/F81966Bfpi.sdl	
+		> F81966/F81966Bfpi.mak	
+		> F81966/F81966Bfpi.cif	
+		> F81966/F81966.cif	
+		> F81966/F81966DEV.asl
+		> F81966/F81966DxeInit.c
+		> CONTRIBUTING.md	
+		> AaeonIoPkg.sdl
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_17
+Release Date:		08/01/2019
+Change:
+1. Update W83627DHG -
+        1. Support BFPI
+		2. Correct LocalRoot path in .cif files.
+		3. Support showing CPU temperature from CPU DTS MSR.
+		4. Support changing HWM setup layout by token. (it's also for BFPI)
+		5. Support changing item name in HWM setup by token. (it's also for BFPI)
+		6. Correct fan speed in setup menu.
+		7. Support changing resistor value for HWM Voltage sensors by tokens. (it's also for BFPI)
+		8. Add standard sensor name string for HWM setup items.  (it's also for BFPI)
+2. Update CONTRIBUTING.md for BFPI porting.
+
+###########################################################################
+---------------------------------------------------------------------------
+Change:	Update CONTRIBUTING.md for BFPI porting.
+
+Files:
+		> CONTRIBUTING.md
+
+---------------------------------------------------------------------------
+Change:	W83627DHG - Support BFPI SMF function. Also finetune HWM HWRC method.
+
+Files:
+		> AaeonIoPkg.sdl
+		> W83627DHG/W83627DHG.sdl
+		> W83627DHG/W83627DHGDEV.asl
+		> W83627DHG/W83627DHGHwmSetup.sd
+
+---------------------------------------------------------------------------
+Change:	Fix compiling error in W83627DHG.mak - missing separator.
+
+Reason: Bad coding.
+
+Files:
+		> W83627DHG/W83627DHG.mak
+
+
+---------------------------------------------------------------------------
+Change:	Update W83627DHG module for supporting BFPI. Also change followings -
+		1. Correct LocalRoot path in .cif files.
+		2. Support showing CPU temperature from CPU DTS MSR.
+		3. Support changing HWM setup layout by token. (it's also for BFPI)
+		4. Support changing item name in HWM setup by token. (it's also for BFPI)
+		4. Correct fan speed in setup menu.
+		5. Support changing resistor value for HWM Voltage sensors by tokens. (it's also for BFPI)
+		6. Add standard sensor name string for HWM setup items.  (it's also for BFPI)
+Reason: For BFPI
+Files:
+		> CHANGELOG.txt
+		> GenUniFile.exe (Add)
+		> AaeonIoPkg.cif
+		> AaeonIoPkg.sdl
+		> W83627DHG/W83627DHG.mak
+		> W83627DHG/W83627DHG.sdl
+		> W83627DHG/W83627DHGAsl.cif
+		> W83627DHG/W83627DHGDEV.asl
+		> W83627DHG/W83627DHGHwMonitor.cif
+		> W83627DHG/W83627DHGHwmSetup.c
+		> W83627DHG/W83627DHGHwmSetup.sd
+		> W83627DHG/W83627DHGHwmSetup.uni
+		> W83627DHG/W83627DHGSetup.cif
+
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_16
+Release Date:		04/26/2019
+Change:
+1. Correct F81216SEC.cif.
+2. Fix ITE8728 can not control GPIO 80~87.
+3. Fix ITE8728 and F81804 build code error.
+4. Add F81866 Shared mode IRQ triggering patch.
+5. Support porting F81866 UART function (Full UART/Simple UART) by token.
+6. Support porting F81866 RS485 mode with individual tokens for each F81866 UART.
+###########################################################################
+---------------------------------------------------------------------------
+Change:	Fine-tune layout of CONTRIBUTING.md to have Gitlab to display more properly.
+Reason: Ease porting
+Files:
+		> CONTRIBUTING.md
+
+---------------------------------------------------------------------------
+Change:	Fine-tune wording in F81866/Porting_Guide.md. Also fine-tune its layout to have Gitlab to display normally.
+Reason: Ease porting
+Files:
+		> F81866/Porting_Guide.md
+ 
+---------------------------------------------------------------------------
+Change:	Let F81866 UART 1 - 6  have own RS485 enabling token.
+Reason: Ease porting
+Files:		
+		> F81866/F81866.sdl
+		> F81866/F81866MiscSetup.sd
+		> F81866/Porting_Guide.md
+ 
+---------------------------------------------------------------------------
+Change:	Add F81866 UART3/4/5/6 Function Select "Full UART" or "Simple UART".
+Reason: For F81866 Datasheet.
+Solution: Add F81866_UART3/4/5/6_FUNC_SEL items
+Files:		
+		> F81866/F81866.sdl
+		> F81866/F81866PeiIoTable.h
+---------------------------------------------------------------------------
+Change:	Add F81866 Shared mode IRQ triggering patch.
+Reason: For F81866 Datasheet.
+Solution: (1) Add F81866_UART3/4/5/6_IRQ_SHARE items
+	  (2) Add F81866_UART3/4/5/6_LEVEL_EDGE_SHARE_MODE items
+	  (3) Add UART3/4/5/6_Edge.asl files
+Files:		
+		> F81866/F81866.sdl
+		> F81866/F81866DEV.asl
+		> F81866/F81866PeiIoTable.h
+		> F81866/UART3_Edge.asl(Add)
+		> F81866/UART4_Edge.asl(Add)
+		> F81866/UART5_Edge.asl(Add)
+		> F81866/UART6_Edge.asl(Add)
+---------------------------------------------------------------------------
+Change:	Fix F81804 build code error.
+Reason: For AAEON.
+Solution: Modify "F81804_SUPPORT" default value.
+Files:		
+		> F81804\F81804.sdl
+---------------------------------------------------------------------------
+Change:	Fix ITE8728 build code error.
+Reason: For code definition.
+Solution: Modify code.
+File:
+		> IT8728F\IT8728FDxeInit.c
+---------------------------------------------------------------------------
+Change:	Fix ITE8728 can not control GPIO 80~87.
+Reason: For ITE8728 Datasheet.
+Solution: For GP80~87 Simple IO Enable:
+	  (1) Parallel Port disabled: LDN 3\Index 30=00h.
+	  (2) SMbue Isolation Disable: Global Index 2Ch<bit 7>=1.
+File:
+		> IT8728F\IT8728FPeiIoTable.h
+---------------------------------------------------------------------------
+Change:	Fix F81216SEC asl link file.
+Reason: asl rename.
+Solution: Change to the correct asl file.
+File:
+		> F81216SEC\F81216SECAsl.cif
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_15
+Release Date:		02/25/2019
+Change:
+1. Update W83627DHG module - Fix Dxe function no work issue with new code base.
+2. Fix system hangs up POST 0xA2 when SIO SmartFan function enabled.
+###########################################################################
+---------------------------------------------------------------------------
+Change:	Fix system hangs up POST 0xA2 when SIO SmartFan function enabled.
+	Confrimed with F81866/F81966/W83627DHG module.
+Reason: Coding grammar and code base related issue.
+Solution: Update coding grammar, follow AMI latest IO module.
+File:
+		> IT8728F/IT8728FDxeInit.c
+		> NCT5538D/NCT5538DDxeInit.c
+		> NCT6791D/NCT6791DDxeInit.c
+		> W83627DHG/W83627DHGDxeInit.c
+---------------------------------------------------------------------------
+Change:	Update W83627DHG module.
+Reason: Fix Dxe function no work issue with new code base.
+File:
+		> W83627DHG/W83627DHG.CIF
+		> W83627DHG/W83627DHG.mak
+		> W83627DHG/W83627DHG.sdl
+		> W83627DHG/W83627DHGDxeInit.c
+		> W83627DHG/W83627DHGHwmSetup.sdl
+		> W83627DHG/W83627DHGPeiIoTable.h
+		> W83627DHG/W83627DHGSMF.h
+		> W83627DHG/W83627DHG.chm
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_14
+Release Date:		02/20/2019
+Change:
+		1. Suppot minus temperature display.
+		2. Remove decimal part of W83627DHG temperature function.
+###########################################################################
+---------------------------------------------------------------------------
+Change:	Remove decimal part of temperature function.
+Reason: Discussed with Drako. Currently customers don't have this need.
+File:
+		> W83627DHG/W83627DHGHwmSetup.c
+---------------------------------------------------------------------------
+Change:	Suppot minus temperature display.
+Reason: Function Improvement
+File:
+		> AaeonIoPkg.cif
+		> AaeonIoPkg.sdl
+		> CONTRIBUTING.md
+		> F81804/F81804HwmSetup.c
+		> F81866/F81866HwmSetup.c
+		> F81966/F81966HwmSetup.c
+		> IT8518/IT851XHWM.C
+		> IT8728F/IT8728FHwmSetup.c
+		> NCT5538D/NCT5538DHwmSetup.c
+		> NCT6791D/NCT6791DHwmSetup.c
+		> W83627DHG/W83627DHGHwmSetup.c
+		> AaeonIoSetup.c
+		> AaeonIoSetup.h
+---------------------------------------------------------------------------
+Change:	Update CONTRIBUTING.md
+Reason:	Rule.
+File:
+		> CONTRIBUTING.md
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_13
+Release Date:		2/20/2019
+Change:
+		1. Fix text error in F81216SEC_CLOCK Help.
+		2. Add F81216SEC index and Data default set patch.
+		3. Add F81216SEC Shared mode IRQ triggering patch.
+		4. Add Porting_Guide for F81216. Also update porting guide in CONTRIBUTING.md
+###########################################################################
+---------------------------------------------------------------------------
+Change:	
+		Add Porting_Guide for F81216. Also update porting guide in CONTRIBUTING.md
+Root Cause:
+Files:		
+		> F81216SEC/Porting_Guide.md (Add)
+		> CONTRIBUTING.md
+---------------------------------------------------------------------------
+Change:		
+		Remove F81216SEC_WDT_PRESENT since it is not used.
+Root Cause:
+Files:		
+		> F81216SEC/F81216SEC.sdl
+---------------------------------------------------------------------------
+Change:		
+		Add F81216SEC Shared mode IRQ triggering patch.
+Root Cause:
+Files:		
+		Modified > F81216SEC/F81216SEC.sdl
+		> F81216SEC/F81216SECDxeInit.c
+		> F81216SEC/F81216SECDEV.asl
+		> F81216SEC/SIO2UART3_Edge.asl(Add)
+		> F81216SEC/SIO2UART4_Edge.asl(Add)
+		> F81216SEC/SIO2UART5_Edge.asl(Add)
+		> F81216SEC/SIO2UART6_Edge.asl(Add)
+		> F81216SEC/UART1.asl(Remove)
+		> F81216SEC/UART2.asl(Remove)
+		> F81216SEC/UART3.asl(Remove)
+		> F81216SEC/UART4.asl(Remove)
+---------------------------------------------------------------------------
+Change:		
+		Add F81216SEC index and Data default set patch.
+Root Cause:
+Files:		
+		Modified > F81216SEC/F81216SEC.sdl
+---------------------------------------------------------------------------
+Change:		
+		Fix text error in F81216SEC_CLOCK Help.
+Root Cause:
+		Confirmation of the specifications do the right change.
+Files:		
+		Modified > F81216SEC/F81216SEC.sdl
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_12
+Release Date:		01/31/2019
+Change:
+		1. Support IT85xx module.
+		2. Update 'F81966_CLOCK' help string.
+		3. Modules update for new code base compiler error issue.
+###########################################################################
+Change:	Remove unnecessary dependency.
+Reason: Code arrangement
+File:
+		> F81216SEC/F81216SEC.sdl
+		> F81804/F81804.sdl
+		> F81866/F81866.sdl
+		> F81966/F81966.sdl
+		> IT8728F/IT8728F.sdl
+		> NCT5538D/NCT5538D.sdl
+		> NCT6791D/NCT6791D.sdl
+		> W83627DHG/W83627DHG.sdl
+---------------------------------------------------------------------------
+Change:	Module update for new code base compiler error issue.
+Reason: Module update
+File:
+		> F81216SEC/F81216SEC.sdl
+---------------------------------------------------------------------------
+Change:	Module update for new code base compiler error issue.
+Reason: Module update
+File:
+		> F81866/F81866.sdl
+		> F81866/F81866DxeInit.c
+---------------------------------------------------------------------------
+Change:	Module update for new code base compiler error issue.
+Reason: Module update
+File:
+		> IT8728F/IT8728FDxeInit.c
+---------------------------------------------------------------------------
+Change:	Module update for new code base compiler error issue.
+Reason: Module update
+File:
+		> NCT5538D/NCT5538D.sdl
+		> NCT5538D/NCT5538DDxeInit.c
+---------------------------------------------------------------------------
+Change:	Module update for new code base compiler error issue.
+Reason: Module update
+File:
+		> NCT6791D/NCT6791D.sdl
+		> NCT6791D/NCT6791DDxeInit.c
+---------------------------------------------------------------------------
+Change:	Module update for new code base compiler error issue.
+Reason: Module update
+File:
+		> W83627DHG/W83627DHG.sdl
+		> W83627DHG/W83627DHGDxeInit.c
+---------------------------------------------------------------------------
+Change:	Module update for new code base compiler error issue.
+Reason: Module update
+File:
+		> F81966/F81966.sdl
+		> F81966/F81966DxeInit.c
+---------------------------------------------------------------------------
+Change:	Update 'F81966_CLOCK' help string.
+Reason: Correct help string.
+File:
+		> F81966/F81966.sdl
+---------------------------------------------------------------------------
+Change:	Support IT85xx module.
+Reason:     Feature Improvement.
+File:
+		> IT8518/ACPI/UART1.asl
+		> IT8518/ACPI/UART2.asl
+		> IT8518/AfterG3/IT85xx_AfterG3.c
+		> IT8518/CIR.asl
+		> IT8518/EcApiProtocol.c
+		> IT8518/EcApiProtocol.h
+		> IT8518/IT8518.chm
+		> IT8518/IT8518.cif
+		> IT8518/IT8518.mak
+		> IT8518/IT8518.sdl
+		> IT8518/IT8518Asl.cif
+		> IT8518/IT8518DEV.asl
+		> IT8518/IT8518DxeInit.c
+		> IT8518/IT8518DxeInit.inf
+		> IT8518/IT8518DxeIoTable.h
+		> IT8518/IT8518EVT.asl
+		> IT8518/IT8518PeiInit.c
+		> IT8518/IT8518PeiInit.inf
+		> IT8518/IT8518PeiIoTable.h
+		> IT8518/IT8518PlatformHookSerialPortLib.c
+		> IT8518/IT8518PlatformHookSerialPortLib.h
+		> IT8518/IT8518PlatformHookSerialPortLib.inf
+		> IT8518/IT8518Setup.c
+		> IT8518/IT8518Setup.cif
+		> IT8518/IT8518Setup.h
+		> IT8518/IT8518Setup.sd
+		> IT8518/IT8518Setup.uni
+		> IT8518/IT851XHWM.C
+		> IT8518/IT851XHWM.H
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_11
+Release Date:		12/28/2018
+Change:
+		1. Support F81804
+###########################################################################
+Change:		
+		1. Reprogram SIO_DEVICE_INIT_DATA F81804PeiInitTable
+		2. Reprogram SIO_DEVICE_INIT_DATA DXE_HWM_Init_Table_After_Active
+		3. Reprogram GPIO0x/1x/2x/5x/6x/7x/9x initial function
+Root Cause:
+		New module
+Files:		
+		> F81804/F81804.chm
+		> F81804/F81804.cif
+		> F81804/F81804.mak
+		> F81804/F81804.sdl
+		> F81804/F81804Asl.cif
+		> F81804/F81804Dev.asl
+		> F81804/F81804DxeInit.c
+		> F81804/F81804DxeInit.inf
+		> F81804/F81804Evt.asl
+		> F81804/F81804HwMonitor.cif
+		> F81804/F81804HwmSetup.c
+		> F81804/F81804HwmSetup.sd
+		> F81804/F81804HwmSetup.sdl
+		> F81804/F81804HwmSetup.uni
+		> F81804/F81804MiscSetup.sd
+		> F81804/F81804MiscSetup.uni
+		> F81804/F81804OemReadyToBootCallback.c
+		> F81804/F81804PeiInit.c
+		> F81804/F81804PeiInit.inf
+		> F81804/F81804PlatformHookSerialPortLib.c
+		> F81804/F81804PlatformHookSerialPortLib.inf
+		> F81804/F81804Setup.c
+		> F81804/F81804Setup.cif
+		> F81804/F81804Setup.h
+		> F81804/F81804Setup.sd
+		> F81804/F81804Setup.uni
+		> F81804/F81804SmartFan.c
+		> F81804/OemDxeIoTable.c
+		> F81804/OemPeiIoTable.c
+		> F81804/OemPlatformHookSerialPortIoTable.c
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonIo_10
+Release Date:		10/5/2018
+Change:
+		1. Fix issue that F81966 SMART FAN failure
+
+###########################################################################
+Change:		
+		Fix issue that F81966 SMART FAN failure.
+Root Cause:
+		Coding error on the FAN output type register. FAN output type register is at 0x94 but the code write it to 0x96 (FAN mode).
+Files:		
+		Modified > F81966/F81966SmartFan.c
+---------------------------------------------------------------------------
+
+###########################################################################
+Source Revision:	AaeonIo_0Z
+Release Date:		09/28/2018
+Change:
+		1. Correct F81966 GPIO7x/8x coding error
+		2. Added IT8728 H/W monitor 3VSB voltage reading (index 27h)
+
+###########################################################################
+Change:		
+		Added IT8728 H/W monitor 3VSB voltage reading (index 27h).
+Root Cause:
+Files:		
+		Modified > IT8728F\IT8728F.sdl
+		Modified > IT8728F\IT8728FHwmSetup.c
+		Modified > IT8728F\IT8728FHwmSetup.sd
+		
+---------------------------------------------------------------------------
+Change:		
+		Correct F81966 GPIO7x/8x coding error
+Root Cause:
+		Some registers have incorrect values.
+Files:		
+		Modified > F81966\F81966PeiInit.c
+
+---------------------------------------------------------------------------
+
+###########################################################################
+Source Revision:	AaeonIo_0Y
+Release Date:		04/25/2018
+Change:
+		1. Add F81966 Fan output type function.
+		2. AaeonIoPkg_F81966_Peter-Fix SMF2/SMF3 can't be disabled issue.
+		3. AaeonIoPkg_F81966_Peter-Fix FAN2 & FAN3 can't full speed when smart fan disable.
+		4. Fixed: SIO IT8728 GPIO7X multi-function selection incorrect.
+
+###########################################################################
+Change:		
+		Fixed: SIO IT8728 GPIO7X multi-function selection incorrect.
+Root Cause:
+		Fixed coding error about AaeonIoPkg Revision:AaeonIO_0E.
+Files:		
+		Modified > IT8728F\IT8728FPeiIoTable.h
+
+---------------------------------------------------------------------------
+Partially Merge [AaeonIoPkg_F81966_Peter]
+
+Change:		
+		1. AaeonIoPkg_F81966_Peter-Fix SMF2/SMF3 can't be disabled issue.
+		2. AaeonIoPkg_F81966_Peter-Fix FAN2 & FAN3 can't full speed when smart fan disable.
+Root Cause:	
+Files:		
+		Modified > F81866/F81866SmartFan.c
+		Modified > F81966/F81966SmartFan.c
+
+---------------------------------------------------------------------------
+Merge [Wythe_Add_Fan_OUTPUT_TYPE]
+
+Change:		
+		1. Add F81966 Fan output type function.
+Root Cause:	
+Files:		
+		> F81966/F81966SmartFan.c
+		> F81966/F81966HwmSetup.uni
+		> F81966/F81966HwmSetup.sd	
+
+---------------------------------------------------------------------------
+
+###########################################################################
+Source Revision:	AaeonIo_0X
+Release Date:		12/12/2017
+Change:		
+		Fix F81966 WDT doesn't work issue
+Root Cause:	
+		Datasheet F81966 V0.15 wrote the wrong offset of WDOUT_EN
+		register and V0.17 has corrected this error.		
+files:
+		> F81966/F81966PeiIoTable.h
+		
+###########################################################################
+Source Revision:	AaeonIo_0W
+Release Date:		06/28/2017
+Action:
+		1. Update F81866 Module for support setup control with 
+		GPIO0X/1X/2X/3X/4X/5X/6X
+files:
+		> F81866/F81866.sdl	
+		> F81866/F81866MiscSetup.sd	
+		> F81866/F81866MiscSetup.uni	
+		> F81866/F81866PeiInit.c	
+		> F81866/F81866PeiIoTable.h	
+Note:
+		*** PLEASE REPORTING GPIO for GPIO0X/1X/2X/3X/4X/5X/6X ***
+
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0V
+Release Date:		2017/06/27
+Action:
+		1. Add F81966 Module
+files:
+		> F81966\*.*
+		> AaeonIoPkg.cif	
+
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0U_HotFix_2
+Release Date:		2017/03/22
+
+Action:
+		1. Support IT8728F CPU DTS temperature reading by MSR.
+		2. Support IT8728F Fan 4 / Fan 5.
+		3. Resolved IT8728F Fan 4 Speed reading incorrect issue.
+
+files:
+		Modified > IT8728F\IT8728F.sdl
+			   IT8728F\IT8728FHwmSetup.c
+			   IT8728F\IT8728FHwmSetup.sd
+			   IT8728F\IT8728FHwmSetup.uni
+			   IT8728F\IT8728FPeiInit.c
+
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0U_HotFix_1
+Release Date:		2016/12/29
+
+Action:
+		1. Resolve F81866 Smart FAN Function building error temporarily.
+
+files:
+		Modified > F81866\F81866SmartFan.c
+
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0U
+Release Date:		2016/12/23
+
+Action:
+		1. Resolve IT8728 Smart Fan Control PWM Slope malfunction
+		   [Root-Cause]: The IT8728 Fan Control Slope PWM value fill in incorrect bit.
+		   [Action]: Shift left 3 bits for correct Slope PWM setup value.
+
+Modified files:
+			IT8728F\IT8728FPeiInit.c
+
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0T
+Release Date:		2016/11/16
+
+Action:
+		1. Add Bypass mode for ITE IT8728 Restore On AC Power Loss function.
+			(Requires paired with AaeonCommon_11 or above)
+		2. Porting IT8728 SIO DXE Init funcitons to PEI phase.
+
+Modified files:
+			IT8728F\IT8728F.sdl
+			IT8728F\IT8728FDxeIoTable.h
+			IT8728F\IT8728FPeiIoTable.h
+			IT8728F\IT8728FMiscSetup.sd
+			IT8728F\IT8728FMiscSetup.uni
+			IT8728F\IT8728FPeiInit.c
+			IT8728F\IT8728FDxeInit.c
+
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0S
+Release Date:		2016/10/28
+
+Action:
+		1. Support ITE IT8728 PECI function.
+		2. Modify ITE IT8278 module to support AMI GenericSio_06.x module
+
+Modified files:
+			IT8728F/IT8728F.sdl
+			IT8728F/IT8728FDxeIoTable.h
+			IT8728F/IT8728FPeiInit.c
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0R
+Release Date:		2016/10/04
+
+Action:
+		1. Fine-tune F81216D, correct ASL code for second SIO
+
+Modified files:
+			F81216SEC\* (Add)
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0Q
+Release Date:		2016/07/28
+
+Action:
+		1. Fine-tune NCT5538D
+
+Modified files:
+			NCT5538D\* (Add)
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0P
+Release Date:		2016/07/06
+
+Action:
+		F81866:
+			1. Add COM5/COM6/LPT/FDC default value patch 
+			   to avoid unexpected value in chip
+			2. If SecDecodePkg_SUPPORT enabled, disable resouce
+			   allocation within SIO.
+			3. Support CRB_USE_VAR_STATEAFTERG3 for CRB uses 
+			   StateAfterG3 for AC power failure setting.
+			4. Support PECI interface
+			
+		NCT5538D: New support SIO
+
+Modified files:
+			AaeonIoPkg.cif
+			NCT5538D\* (Add)
+			F81866\F81866DxeInit.c
+			F81866\F81866PeiInit.c
+			F81866\F81866PeiIoTable.h
+			F81866\F81866DxeIoTable.h
+			F81866\F81866.sdl
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0N
+Release Date:		2016/03/14
+
+Action:
+		IT8728:
+			1. Remove IT8728 DXE Init Table TEMP_ADJUST_1/2/3
+			   dependency token (IT8728F_TEMP_DIODE_MODE_1/2/3_ENABLE)
+			   Because the  Thermal Diode 1/2/3 Zero Degree Adjust
+			   Register also can used with PECI Mapping temperature.
+
+Modified files:
+			IT8728F\IT8728FDxeIoTable.h
+			
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0M
+Release Date:		2015/12/08
+
+Action:
+		NCT6791D:
+			1. Add SYSFANOUT Output Mode select setup item.
+			2. Support Smart Fan IV and Close Loop Fan Control RPM mode
+			   selection.
+
+Modified files:
+			NCT6791D\NCT6791DHwmSetup.sdl
+			NCT6791D\NCT6791DHwmSetup.uni
+			NCT6791D\NCT6791DHwmSetup.sd
+			NCT6791D\NCT6791DPeiInit.c
+			
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0L
+Release Date:		2015/11/03
+
+Action:
+		NCT6791D:
+			1. Add Smart Fan reference temperature select setup items.
+			2. Resovled Smart Fan sometimes can¡¦t output 100% PWM signal
+			   (96~98% only) in the SMART FAN IV mode function.
+			   Refer to http://biosbt.aaeon.com.tw/wikie/index.php/Nuvoton_smartfan_PWM_output_not_full
+
+		IT8728F:
+			1. Remove the garbage dependency "IT8728F_SMF_PRESENT"
+			   define of "Host_Target_Address" token.
+
+Modified files:
+			NCT6791D\NCT6791DHwmSetup.sdl
+			NCT6791D\NCT6791DHwmSetup.uni
+			NCT6791D\NCT6791DHwmSetup.sd
+			NCT6791D\NCT6791DPeiInit.c
+			IT8728F\IT8728F.sdl
+			
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0K
+Release Date:		2015/09/21
+
+Action:
+		NCT6791D:
+			1. LDN A, CR E7h, BIT 4, default as 1 ("NCT6791D_LDNA_CRE7_VAL" 0x00 -> 0x10)
+			(Patched AC POWER LOSS function FAIL)
+
+Modified files:
+			NCT6791D/NCT6791D.sdl
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0J
+Release Date:		2015/09/04
+
+Action:
+		ALL SIO:
+			1. Define PS2 K/M HID, CID
+			2. Create PS2_KB.asl, PS2_MS.asl in AaeonIoPkg
+				>> This will fix OS installation blue screen issue.
+
+			3. Do not use "AmiModulePkg\GenericSio\PS2_KB.asl, PS2_MS.asl"
+
+		NCT6791D:
+			1. Fixed coding error
+
+Modified files:
+			AaeonIoPkg.sdl
+			NCT6791D/NCT6791D.sdl
+			IT8728F/IT8728F.sdl
+			F81866/F81866.sdl
+			W83627DHG/W83627DHG.sdl
+			NCT6791D/NCT6791DPeiIoTable.h
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0I
+Release Date:		2015/09/03
+
+Action:
+		NCT6791D:
+			1. Fix build error
+			2. Re-define SET_NCT6791D_GPIO algorithm
+
+Modified files:
+			NCT6791DMiscSetup.sdl
+			NCT6791DMiscSetup.sd
+			NCT6791DPeiInit.c
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0H
+Release Date:		2015/09/02
+
+Action:		F81866:
+			1. Add missing parts from AaeonIo_0F
+			   (PIN76_EN and F81866_CLEAR_UNUSED_LDN_RES)
+			2. Add workaround for PS2 KB/MS SWAP (F81866_PS2SWAP_Workaround)
+			3. Add WDT configuration when WDT presented
+			4. Set multi-function pin for COM3/4/5/6 to GPIO mode before
+			   changing to UART mode.
+
+Modified files:
+			IT8728F/IT8728FPeiIoTable.h
+			IT8728F/IT8728FPeiInit.c
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0G
+Release Date:		2015/08/26
+
+Action:			IT8728:
+			1. Support IT8728F/FX SMBUS Slave 0 and 1.
+			2. Support IT8728 FAN3 Smart Conrtol.
+			3. Support Smart Fan reference temperature selection.
+
+			NCT6791D:
+			1. Fixed: PS2 devices are abnormal after S3 wake
+
+Modified files:
+			IT8728F/IT8728F.sdl
+			IT8728F/IT8728FPeiIoTable.h
+			IT8728F/IT8728FDxeIoTable.h
+			IT8728F/IT8728FPeiInit.c
+			IT8728F/IT8728FHwmSetup.sd
+			IT8728F/IT8728FHwmSetup.uni
+			NCT6791D/NCT6791DPeiIoTable.h
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIo_0F
+Release Date:		2015/08/17
+
+Action:			IT8728:
+			1. Correct "LocalRoot" in IT8728.cif
+			2. According to Drako's suggestion, modify naming convention "AaeonIOPkg" -> "AaeonIoPkg"
+			3. Fixed: PS2 devices are abnormal after S3 wake
+
+			Support W83627DHG
+
+Modified files:
+			IT8728F/IT8728F.cif
+			IT8728F/IT8728FPeiIoTable.h
+			W83627DHG/*.*
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_0E
+Release Date:		2015/07/28
+
+Action:			IT8728:
+			1. Fixed: GPIO7X multi-function selection un-correct.
+			When GPIO7X as GPIO pins, Bus Selection bit set to 1 (LDN7, 0xE9, bit5)
+			by the way, "IT8728F_BUS_SELECTION" default as 1(Disabled)
+
+Modified files:
+			IT8728F/IT8728FPeiIoTable.h
+			IT8728F/IT8728F.sdl
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_0D
+Release Date:		2015/07/17
+
+Action:			F81866:
+			1. Fine formula of GetVoltage function
+
+Modified files:
+			F81866\F81866HwmSetup.c
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_0C
+Release Date:		2015/06/08
+
+Action:			F81866:
+			1. Add bypass mode for AC power loss
+			2. Re-write ERP with F81866 prefix
+
+Modified files:
+                        F81866\F81866PeiInit.c
+			F81866\F81866MiscSetup.sd
+			F81866\F81866MiscSetup.uni
+                        F81866\F81866DxeInit.c
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_0B
+Release Date:		2015/05/22
+
+Action:			F81866:
+			1. F81866_ERP_Miles: Support ERP(DeepS5)
+			2. F81866_SMF_Miles: Support SmartFan
+			3. F81866_IntelDTS_Miles: Remove dependency for 
+			   specified header file
+
+Modified files:
+                        F81866\F81866.sdl
+                        F81866\F81866DxeInit.c
+			F81866\F81866DxeInit.inf
+			F81866\F81866DxeIoTable.h
+			F81866\F81866EVT.asl
+			F81866\F81866HwmSetup.c
+			F81866\F81866HwmSetup.sd
+			F81866\F81866HwmSetup.uni
+			F81866\F81866MiscSetup.sd
+			F81866\F81866MiscSetup.uni
+			F81866\F81866SmartFan.c(Add)
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_0A
+Release Date:		2015/05/06
+
+Action:
+			IT8728:
+			1. Support Misc setup variable
+			2. Support Restore AC Power Loss function
+			3. Fine tune PEI Initial table
+			4. Smart FAN function transfer from DXE to PEI
+			5. UART IRQ Sharing control in PEI
+
+Modified files:
+			IT8728F/*.*
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_09
+Release Date:		2015/04/23
+
+Action:
+			ALL IO:
+			1. Remove SIO_SUPPORT TOKEN in IO module
+			>> In some cases, compiler misunderstand this TOKEN
+			2. Support "SioDynamicSetupLoadDefaults"
+			>> FOR SIO Dynamic setup restore default value
+
+			IT8728:
+			1. Support IT8728
+
+Modified files:
+			IT8728F/*.*
+			F81866/F81866.sdl
+			F81216SEC/F81216SEC.sdl
+			NCT6791D/NCT6791D.sdl
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_08
+Release Date:		2015/04/15
+
+Action:
+			F81866:
+			1. Support "SETUP_DATA.F81866UartAutoFlowControlEnable"
+			2. Support "SETUP_DATA.F81866RestoreACPowerLoss"
+			3. Supprot "F81866OemReadyToBootCallback()"
+			4. Porting "GPIO_DEC_RANGE" 0x27[5]: 1: GPIO I/O space is 16 byte, 0: 8 byte
+
+Modified files:
+			F81866/F81866PeiInit.c
+			F81866/F81866MiscSetup.uni
+			F81866/F81866.sdl
+			F81866/F81866MiscSetup.sd
+			F81866/F81866OemReadyToBootCallback.c
+			F81866/F81866.sdl
+			F81866/F81866.cif
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_07
+Release Date:		2015/04/14
+
+Action:
+			F81866:
+			1. Fine tune F81866_COM_Init()
+			2. "All UART default as 128 byte FIFO" process transfer to PEI phase
+
+			NCT6791D:
+			1. Fine tune NCT6791D_COM_Init
+
+Modified files:
+			F81866/F81866DxeInit.c
+			F81866/F81866PeiIoTable.h
+			NCT6791D/NCT6791DDxeInit.c
+---------------------------------------------------------------------------
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+F81216SEC version:	5.004_SIO_F81216SEC_Gen03_A00
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_06
+Release Date:		2015/03/26
+
+Label:			
+Action:
+			NCT6791D:
+			(1) Support RS232/422/485 mode switch setup item.
+			(2) Clear Logical Device 1 (Parallel Port) resource if not present.
+			(3) Clear Logical Device 2 (UART A) resource if not present.
+			(4) Clear Logical Device 3 (UART B) resource if not present.
+			(5) Add Restore On AC Power Loss support.
+			(6) Set 3VSBSW# bit default as enabled.
+
+Modified files:
+			AaeonIOPkg\NCT6791D\NCT6791DPeiInit.c
+			AaeonIOPkg\NCT6791D\NCT6791DMiscSetup.sd
+			AaeonIOPkg\NCT6791D\NCT6791DMiscSetup.uni
+
+Added modules:
+
+Removed modules:
+
+---------------------------------------------------------------------------
+Chipset:		Intel SkylakeDT (5.011_1ASOH013)
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+F81216SEC version:	5.004_SIO_F81216SEC_Gen03_A00
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_05
+Release Date:		2015/03/23
+
+Label:			
+Action:
+			NCT6791D:
+			(1) Support PECI temperature monitoring.
+			(2) Resolve Deep S5 can't disabled issue.
+
+Modified files:
+			AaeonIOPkg\NCT6791D\NCT6791DPeiInit.c
+
+Added modules:
+
+Removed modules:
+
+---------------------------------------------------------------------------
+Chipset:		Intel SkylakeDT (5.011_1ASOH012)
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+F81216SEC version:	5.004_SIO_F81216SEC_Gen03_A00
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_04
+Release Date:		2015/03/17
+
+Label:			
+Action:
+			F81866:
+			(1) Support GPIO porting by BIOS setup item.
+
+Modified files:
+
+Added modules:
+
+Removed modules:
+
+---------------------------------------------------------------------------
+Chipset:		Intel SkylakeDT (5.011_1ASBI013)
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+F81216SEC version:	5.004_SIO_F81216SEC_Gen03_A00
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_03
+Release Date:		2015/03/17
+
+Label:			
+Action:
+			NCT6791D:
+			(1) Support GPIO porting by BIOS setup item.
+			(2) Fine tune Hardware Monitor function.
+			(3) Support Smart Fan Control.
+			(4) Support EUP/ERP feature.
+
+
+Modified files:
+	SuperI/O - NCT6791D:
+		AaeonIOPkg\NCT6791D\*.*
+
+Added modules:
+
+Removed modules:
+
+---------------------------------------------------------------------------
+Chipset:		Intel SkylakeDT (5.011_1ASBI013)
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+F81216SEC version:	5.004_SIO_F81216SEC_Gen03_A00
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_02
+Release Date:		2015/03/11
+
+Label:			
+Action:
+			NCT6791D:
+			(1) Fine tune ASL code
+			(2) Fixed AMI coding error; Remove Gpio LDEVICE in SDL
+				Problem: Ldn9 active register; 0x30 will be override by "1" in dxe phase
+
+			F81216SEC:
+			(1) Fine tune ASL code
+
+Modified files:
+
+Added modules:
+
+Removed modules:
+
+---------------------------------------------------------------------------
+Chipset:		Intel Braswell (5.011_1ASBI013)
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+F81216SEC version:	5.004_SIO_F81216SEC_Gen03_A00
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_01
+Release Date:		2015/03/06
+
+Label:			
+Action:
+			1. Support F81216SEC
+
+Modified files:
+
+Added modules:
+	SuperI/O - F81216SEC
+		AaeonIOPkg\F81216SEC\F81216SEC.cif
+		AaeonIOPkg\F81216SEC\F81216SECAsl.cif
+		AaeonIOPkg\F81216SEC\F81216SECSetup.cif
+
+Removed modules:
+
+---------------------------------------------------------------------------
+Chipset:		Intel Braswell (5.011_1ASBI013)
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+F81216SEC version:	5.004_SIO_F81216SEC_Gen03_A00
+
+VEB file:		Aaeon_1ASBI013.veb
+###########################################################################
+###########################################################################
+Source Revision:	AaeonIO_00
+Release Date:		2015/03/04
+
+Label:			
+Action:
+			1. Suport F81866
+			2. Support NCT6791D
+
+Modified files:
+
+Added modules:
+	SuperI/O - F81866:
+		AmiModulePkg\IO\F81866\F81866.cif
+		AmiModulePkg\IO\F81866\F81866Asl.cif
+		AmiModulePkg\IO\F81866\F81866Setup.cif
+		AmiModulePkg\IO\F81866\F81866HwMonitor.cif
+	SuperI/O - NCT6791D:
+		AaeonIOPkg\NCT6791D\NCT6791D.cif
+		AaeonIOPkg\NCT6791D\NCT6791DAsl.cif
+		AaeonIOPkg\NCT6791D\NCT6791DSetup.cif
+		AaeonIOPkg\NCT6791D\NCT6791DHwMonitor.cif
+
+Removed modules:
+
+---------------------------------------------------------------------------
+Chipset:		Intel Braswell (5.011_1ASBI013)
+Compiling Env:		Aptio_5.x_TOOLS_25_6
+
+GenericSio version:	GenericSio_05a
+F81866 version:		5.004_SIO_F81866_Gen03_A00
+NCT6791D version:	5.004_SIO_NCT6791D_Gen03_A00
+
+VEB file:		Aaeon_1ASBI013.veb
+###########################################################################
