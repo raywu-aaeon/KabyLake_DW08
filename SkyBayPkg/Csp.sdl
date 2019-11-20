@@ -738,3 +738,40 @@ TOKEN
 End
 
 ##ray_override / [XI-BringUp] Support F81866 / added <<
+
+##ray_override / [XI-BringUp] Support F81216D / added >>
+TOKEN
+	Name  = "F81216SEC_SUPPORT"
+	Value  = "1"
+	Help  = "Main switch to enable F81216SEC support in Project"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetH = Yes
+#	Master = Yes
+End
+
+TOKEN
+	Name  = "F81216SEC_CONFIG_INDEX_DATA_DEFAULT"
+	Value  = "1"
+	Help  = "0: index to 0x2E and data to 0x2F / 1: index to 0x4E and data to 0x4F"
+	TokenType = Integer
+	TargetEQU = Yes
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "F81216SEC_CONFIG_MODE_ENTER_VALUE"
+	Value  = "0x67"
+	Help  = "Value to enter the SIO Configuration Mode."
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "F81216SEC_CLOCK"
+	Value  = "1"
+	Help  = "0/1 for 24Mhz/48MHz"
+	TokenType = Integer
+	TargetH = Yes
+End
+##ray_override / [XI-BringUp] Support F81216D / added <<
