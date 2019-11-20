@@ -612,7 +612,9 @@ TOKEN
 #	Master = Yes
 #	Token = "AmiCryptoPkg_SUPPORT" "=" "1"
 End
+##ray_override / [XI-BringUp] Disable Unused Feature / added <<
 
+##ray_override / [XI-BringUp] Support F81866 / added >>
 TOKEN
 	Name  = "AaeonIoPkg_SUPPORT"
 	Value  = "1"
@@ -669,4 +671,4 @@ TOKEN
 	TargetH = Yes
 	Token = "CRB_USE_VAR_STATEAFTERG3" "=" "1"
 End
-##ray_override / [XI-BringUp] Disable Unused Feature / added <<
+##ray_override / [XI-BringUp] Support F81866 / added <<
