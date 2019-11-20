@@ -671,4 +671,70 @@ TOKEN
 	TargetH = Yes
 	Token = "CRB_USE_VAR_STATEAFTERG3" "=" "1"
 End
+
+TOKEN
+	Name  = "SIO_SETUP_USE_UID_AS_NUMBERS"
+	Value  = "1"
+	Help  = "If multiple number of same type devices shown in Setup\this will tell to use LDs UID as Device Number in Setup\If set to OFF 1 base ordering numbers will be used."
+	TokenType = Boolean
+	TargetH = Yes
+End
+
+TOKEN
+    Name  = "F81866_PARALLEL_PORT_PRESENT"
+    Value  = "0"
+    Help  = "LPT Port Present / Not Present."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+	Name  = "SCL_PIN67_EN"
+	Value  = "0"
+	Help  = "0: Disable SCL\1: Enable SCL"
+	TokenType = Integer
+	TargetH = Yes
+End
+TOKEN
+	Name  = "SDA_PIN68_EN"
+	Value  = "0"
+	Help  = "0: Disable SDA\1: Enable SDA"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+## ray_todo / PME function porting
+TOKEN
+	Name  = "GPIO65_EN"
+	Value  = "0"
+	Help  = "0: PME#\1: GPIO65"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "GPIO66_EN"
+	Value  = "0"
+	Help  = "0: DPWROK\1: GPIO66"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+## ray_todo / Enabled ERP_CTRL0# later
+TOKEN
+	Name  = "GPIO00_EN"
+	Value  = "1"
+	Help  = "0: ERP_CTRL0#\1: GPIO00"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "GPIO01_EN"
+	Value  = "1"
+	Help  = "0: ERP_CTRL1#\1: GPIO01"
+	TokenType = Integer
+	TargetH = Yes
+End
+
 ##ray_override / [XI-BringUp] Support F81866 / added <<
