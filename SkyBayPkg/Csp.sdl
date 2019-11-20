@@ -612,6 +612,17 @@ TOKEN
 #	Master = Yes
 #	Token = "AmiCryptoPkg_SUPPORT" "=" "1"
 End
+
+TOKEN
+    Name  = "BiosGuard_SUPPORT"
+    Value  = "0"
+    Help  = "Switch for Enabling BiosGuard support in the project"
+    TokenType = Boolean
+#    Master = Yes
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
 ##ray_override / [XI-BringUp] Disable Unused Feature / added <<
 
 ##ray_override / [XI-BringUp] Support F81866 / added >>
@@ -775,3 +786,74 @@ TOKEN
 	TargetH = Yes
 End
 ##ray_override / [XI-BringUp] Support F81216D / added <<
+
+##ray_override / [XI-BringUp] Bring Up Porting / Added >>
+TOKEN
+    Name  = "CRB_BOARD"
+    Value  = "3"
+    Help  = "Select CRB Broad, 0:RVP3 \ 1:RVP5 \ 2:RVP7 \ 3:RVP8 \ 4:RVP9 \ 5:RVP10 \ 6:ZumbaBeachServerEV \ 7:RVP11 \ 8: SKY-U + DDR4 combination \ 9: KBL-S DDR4 UDIMM CRB \ 11: KBL-Refresh U CRB \ 12: KBL-G CRB"
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "Consumer_RVP8_D"
+    Value  = "1"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+#    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Consumer_RVP8_D_OC"
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+#    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Corporate_RVP8_D_OC"
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+#    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Corporate_RVP8_C236_D"
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+#    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "Corporate_RVP8_D"
+    Value  = "0"
+    Help  = "On/Off build this image."
+    TokenType = Boolean
+    TargetMAK = Yes
+#    Token = "CRB_BOARD" "=" "3"
+End
+
+TOKEN
+    Name  = "BUILD_NON_PRODUCTION"
+    Value  = "0"
+    Help  = "On/Off build Pre-production ME FW."
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "ULT_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+End
+##ray_override / [XI-BringUp] Bring Up Porting / Added <<
