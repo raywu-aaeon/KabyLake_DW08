@@ -613,4 +613,60 @@ TOKEN
 #	Token = "AmiCryptoPkg_SUPPORT" "=" "1"
 End
 
+TOKEN
+	Name  = "AaeonIoPkg_SUPPORT"
+	Value  = "1"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	TargetH = Yes
+#	Master = Yes
+End
+
+TOKEN
+    Name  = "F81866_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable F81866 support in Project"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetH = Yes
+#    Master = Yes
+End
+
+TOKEN
+	Name  = "F81866_SMF1_SUPPORT"
+	Value  = "1"
+	Help  = "F81866 SmartFan 1 control support"
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+	Token = "F81866_SMF_SUPPORT" "=" "1"
+End
+
+TOKEN
+	Name  = "F81866_SMF2_SUPPORT"
+	Value  = "1"
+	Help  = "F81866 SmartFan 2 control support"
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+	Token = "F81866_SMF_SUPPORT" "=" "1"
+End
+
+TOKEN
+	Name = "CRB_USE_VAR_STATEAFTERG3"
+	Value = "1"
+	Help = "1: CRB code provide StateAfterG3\0: CRB provide LastState"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name = "STATEAFTERG3_MAP"
+	Value = "{2, 0, 1}"
+	Help = "{LastState, Always-on, Always-off}"
+	TokenType = Expression
+	TargetH = Yes
+	Token = "CRB_USE_VAR_STATEAFTERG3" "=" "1"
+End
 ##ray_override / [XI-BringUp] Disable Unused Feature / added <<
