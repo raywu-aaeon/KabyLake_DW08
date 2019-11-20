@@ -1061,8 +1061,12 @@ SIODEVICE
     SleepNum  = 03h
     ASLfile  = "'AaeonIoPkg\F81866\F81866DEV.asl','AaeonIoPkg\F81866\F81866EVT.asl'"
     ASLdeviceName  = "SIO1"
-    ASL_PTS  = "Method;\_SB.PCI0.SBRG.SIO1.SIOS(Arg0)"
-    ASL_WAK  = "Method;\_SB.PCI0.SBRG.SIO1.SIOW(Arg0)"
+##ray_override / [XI-BringUp] Support F81866 / Fixed Build Error / Modified >>
+##    ASL_PTS  = "Method;\_SB.PCI0.SBRG.SIO1.SIOS(Arg0)"
+##    ASL_WAK  = "Method;\_SB.PCI0.SBRG.SIO1.SIOW(Arg0)"
+    ASL_PTS  = "Method;\_SB.PCI0.LPCB.SIO1.SIOS(Arg0)"
+    ASL_WAK  = "Method;\_SB.PCI0.LPCB.SIO1.SIOW(Arg0)"
+##ray_override / [XI-BringUp] Support F81866 / Fixed Build Error / Modified <<
 End
 
 LDEVICE

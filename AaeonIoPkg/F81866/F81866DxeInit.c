@@ -51,6 +51,10 @@ extern VOID SmartFanBootScript(EFI_S3_SAVE_STATE_PROTOCOL *BootScriptProtocol);
   #else
     UINT8 MapToACPowerLoss[3] = STATEAFTERG3_MAP {2, 1, 0}
   #endif
+//ray_override / [XI-BringUp] Support F81866 / Fixed Build Error / Added >>
+#else
+    UINT8 MapToACPowerLoss[3] = STATEAFTERG3_MAP ;
+//ray_override / [XI-BringUp] Support F81866 / Fixed Build Error / Added <<
 #endif
 
 #endif
@@ -88,7 +92,10 @@ EFI_STATUS F81866ErpModeCfg(VOID)
 			if(SetupData->AaeonRestoreACPowerLoss == 2)
 #else
 #if CRB_USE_VAR_STATEAFTERG3
-       		if((SetupData->F81866RestoreACPowerLoss == 0x02) || ((SetupData->F81866RestoreACPowerLoss == 0x03) && (SetupData.StateAfterG3 == MapToACPowerLoss[AAEON_ACLOSS_ALWAYS_OFF])))
+//ray_override / [XI-BringUp] Support F81866 / Fixed Build Error / Modified >>
+//       		if((SetupData->F81866RestoreACPowerLoss == 0x02) || ((SetupData->F81866RestoreACPowerLoss == 0x03) && (SetupData.StateAfterG3 == MapToACPowerLoss[AAEON_ACLOSS_ALWAYS_OFF])))
+       		if((SetupData->F81866RestoreACPowerLoss == 0x02) || ((SetupData->F81866RestoreACPowerLoss == 0x03) && (SetupData->StateAfterG3 == MapToACPowerLoss[AAEON_ACLOSS_ALWAYS_OFF])))
+//ray_override / [XI-BringUp] Support F81866 / Fixed Build Error / Modified <<
 #else
     		if((SetupData->F81866RestoreACPowerLoss == 0x02) || ((SetupData->F81866RestoreACPowerLoss == 0x03) && (SetupData->LastState == MapToACPowerLoss[AAEON_ACLOSS_ALWAYS_OFF])))
 #endif
