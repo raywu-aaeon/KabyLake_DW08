@@ -1151,62 +1151,92 @@ VOID AdjustEfiOsBootOrder(VOID)
     pBS->FreePool(Options);
 }
 
-#if (CSM_SUPPORT == 1) && (RemoveLegacyGptHddDevice == 1)
-/**
-    Determine whether boot device is a UEFI HDD(GPT format).
-
-    @param  Device  Boot device to be checked.
-
-    @retval  TRUE   Boot Device is a UEFI HDD.
-    @retval  FALSE  Boot Device is not a UEFI HDD.
-*/
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//#if (CSM_SUPPORT == 1) && (RemoveLegacyGptHddDevice == 1)
+///**
+//    Determine whether boot device is a UEFI HDD(GPT format).
+//
+//    @param  Device  Boot device to be checked.
+//
+//    @retval  TRUE   Boot Device is a UEFI HDD.
+//    @retval  FALSE  Boot Device is not a UEFI HDD.
+//*/
+//BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
+//    EFI_BLOCK_IO_PROTOCOL *BlkIo;
+//    EFI_STATUS Status;
+//    UINT8 *Buffer = NULL;
+//    UINTN index;
+//    PARTITION_ENTRY *pEntries;
+//
+//    if (   Device->DeviceHandle == INVALID_HANDLE
+//            || Device->BbsEntry == NULL
+//       ) return FALSE;
+//
+//    if ( Device->BbsEntry->DeviceType != BBS_HARDDISK ) return FALSE;
+//
+//    Status=pBS->HandleProtocol(
+//               Device->DeviceHandle, &gEfiBlockIoProtocolGuid, &BlkIo
+//           );
+//
+//    if (EFI_ERROR(Status) || BlkIo->Media->RemovableMedia) return FALSE;	//USB device?
+//
+//    Status = pBS->AllocatePool( EfiBootServicesData, BlkIo->Media->BlockSize, &Buffer );
+//    if ( Buffer == NULL ) return FALSE;
+//
+//    // read the first sector
+//    BlkIo->ReadBlocks ( BlkIo,
+//                        BlkIo->Media->MediaId,
+//                        0,
+//                        BlkIo->Media->BlockSize,
+//                        (VOID*)Buffer);
+//
+//    if(Buffer[0x1fe]==(UINT8)0x55 && Buffer[0x1ff]==(UINT8)0xaa)	//MBR Signature
+//    {
+//        pEntries=(PARTITION_ENTRY *)(Buffer+0x1be);
+//
+//        for (index=0; index<4; index++)
+//        {
+//            if ( pEntries[index].PartitionType == 0xee) 	//Check GPT Partition?
+//            {
+//                pBS->FreePool( Buffer );
+//                return TRUE;			//Set Can't Boot.
+//            }
+//        } //for(index=0;index<4;index++)
+//    }//if(Buffer[0x1fe] == 0x55 && Buffer[0x1ff] == 0xaa)
+//
+//    pBS->FreePool( Buffer );
+//    return FALSE;
+//}
+//#endif
 BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     EFI_BLOCK_IO_PROTOCOL *BlkIo;
     EFI_STATUS Status;
     UINT8 *Buffer = NULL;
-    UINTN index;
-    PARTITION_ENTRY *pEntries;
-
-    if (   Device->DeviceHandle == INVALID_HANDLE
-            || Device->BbsEntry == NULL
-       ) return FALSE;
-
-    if ( Device->BbsEntry->DeviceType != BBS_HARDDISK ) return FALSE;
+    SETUP_DATA SetupData;
+    UINTN Size = sizeof(SETUP_DATA);
+    EFI_GUID SetupGuid = SETUP_GUID;
 
     Status=pBS->HandleProtocol(
                Device->DeviceHandle, &gEfiBlockIoProtocolGuid, &BlkIo
            );
 
-    if (EFI_ERROR(Status) || BlkIo->Media->RemovableMedia) return FALSE;	//USB device?
+    Status = pRS->GetVariable(L"Setup", &SetupGuid, NULL, &Size, &SetupData);
 
-    Status = pBS->AllocatePool( EfiBootServicesData, BlkIo->Media->BlockSize, &Buffer );
-    if ( Buffer == NULL ) return FALSE;
+    if ( SetupData.OnlyBootHDD == 1 ) {
+        if ( Device->BbsEntry == NULL ) {
+            if ( BlkIo->Media->RemovableMedia == FALSE )
+                return FALSE ;
+            else
+                return TRUE ;
+        } else {
+            if( Device->BbsEntry->Class != PCI_CL_MASS_STOR ) return TRUE;
+            return FALSE;
+        }
+    }
 
-    // read the first sector
-    BlkIo->ReadBlocks ( BlkIo,
-                        BlkIo->Media->MediaId,
-                        0,
-                        BlkIo->Media->BlockSize,
-                        (VOID*)Buffer);
-
-    if(Buffer[0x1fe]==(UINT8)0x55 && Buffer[0x1ff]==(UINT8)0xaa)	//MBR Signature
-    {
-        pEntries=(PARTITION_ENTRY *)(Buffer+0x1be);
-
-        for (index=0; index<4; index++)
-        {
-            if ( pEntries[index].PartitionType == 0xee) 	//Check GPT Partition?
-            {
-                pBS->FreePool( Buffer );
-                return TRUE;			//Set Can't Boot.
-            }
-        } //for(index=0;index<4;index++)
-    }//if(Buffer[0x1fe] == 0x55 && Buffer[0x1ff] == 0xaa)
-
-    pBS->FreePool( Buffer );
     return FALSE;
 }
-#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 
 /**
     Check whether the target boot option by NameMap.

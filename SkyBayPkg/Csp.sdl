@@ -989,4 +989,12 @@ TOKEN
 	Token = "CRB_BOARD" "=" "3" #For RVP8
 	Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "0"
 End
+
+ELINK
+	Name  = "RemoveLegacyGptHdd,"
+	Parent  = "BootOptionBootDeviceFilteringFunctions"
+#	Token = "RemoveLegacyGptHddDevice" "=" "1"
+#	Token = "CSM_SUPPORT" "=" "1"
+	InvokeOrder = AfterParent
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
