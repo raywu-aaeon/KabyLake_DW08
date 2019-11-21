@@ -785,6 +785,95 @@ TOKEN
 	TokenType = Integer
 	TargetH = Yes
 End
+
+LDEVICE
+	Name  = "Com11"
+	SioDevice  = "F81216SEC"
+	Dev_Type  = "dsUART"
+	LDev_Num  = "00h"
+	##UID  = "10h"
+	UID  = "07h"
+	PnPID  = "0501h"
+	SIO_RES_Flag  = "0x0"
+	HasSetup = Yes
+	ResBaseAddr1  = "00h"
+	ResLength1  = "00h"
+	ResBaseAddr2  = "00h"
+	ResLength2  = "00h"
+	InitRoutine  = "F81216SEC_COM_Init"
+	SleepNum  = 01h
+	ASLfile  = "'AaeonIoPkg\ACPI\SIO2UART3.asl'"
+	ASLdeviceName  = "UR11"
+	Token = "F81216SEC_SERIAL_PORT1_PRESENT" "=" "1"
+	Token = "F81216SEC_URIRQ_MODE" "=" "0"
+End
+
+LDEVICE
+	Name  = "Com12"
+	SioDevice  = "F81216SEC"
+	Dev_Type  = "dsUART"
+	LDev_Num  = "01h"
+	##UID  = "11h"
+	UID  = "08h"
+	PnPID  = "0501h"
+	SIO_RES_Flag  = "0x4"
+	HasSetup = Yes
+	ResBaseAddr1  = "00h"
+	ResLength1  = "00h"
+	ResBaseAddr2  = "00h"
+	ResLength2  = "00h"
+	InitRoutine  = "F81216SEC_COM_Init"
+	SleepNum  = 01h
+	ASLfile  = "'AaeonIoPkg\ACPI\SIO2UART4.asl'"
+	ASLdeviceName  = "UR12"
+	Token = "F81216SEC_SERIAL_PORT2_PRESENT" "=" "1"
+	Token = "F81216SEC_URIRQ_MODE" "=" "0"
+End
+
+LDEVICE
+	Name  = "Com13"
+	SioDevice  = "F81216SEC"
+	Dev_Type  = "dsUART"
+	LDev_Num  = "02h"
+	##UID  = "12h"
+	UID  = "09h"
+	PnPID  = "0501h"
+	SIO_RES_Flag  = "0x4"
+	HasSetup = Yes
+	ResBaseAddr1  = "00h"
+	ResLength1  = "00h"
+	ResBaseAddr2  = "00h"
+	ResLength2  = "00h"
+	InitRoutine  = "F81216SEC_COM_Init"
+	SleepNum  = 01h
+	##ASLfile  = "'AmiModulePkg\IO\F81216SEC\UART3.asl'"
+	ASLfile  = "'AaeonIoPkg\ACPI\SIO2UART5.asl'"
+	ASLdeviceName  = "UR13"
+	Token = "F81216SEC_SERIAL_PORT3_PRESENT" "=" "1"
+	Token = "F81216SEC_URIRQ_MODE" "=" "0"
+End
+
+LDEVICE
+	Name  = "Com14"
+	SioDevice  = "F81216SEC"
+	Dev_Type  = "dsUART"
+	LDev_Num  = "03h"
+	##UID  = "13h"
+	UID  = "010h"
+	PnPID  = "0501h"
+	SIO_RES_Flag  = "0x4"
+	HasSetup = Yes
+	ResBaseAddr1  = "00h"
+	ResLength1  = "00h"
+	ResBaseAddr2  = "00h"
+	ResLength2  = "00h"
+	InitRoutine  = "F81216SEC_COM_Init"
+	SleepNum  = 01h
+	ASLfile  = "'AaeonIoPkg\ACPI\SIO2UART6.asl'"
+	ASLdeviceName  = "UR14"
+	Token = "F81216SEC_SERIAL_PORT4_PRESENT" "=" "1"
+	Token = "F81216SEC_URIRQ_MODE" "=" "0"
+End
 ##ray_override / [XI-BringUp] Support F81216D / added <<
 
 ##ray_override / [XI-BringUp] Bring Up Porting / Added >>

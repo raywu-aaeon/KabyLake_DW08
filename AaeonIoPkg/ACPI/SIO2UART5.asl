@@ -26,12 +26,20 @@
 //    Name(_UID, 5)            //Generic ID for COME
 //    Name(_HID, EISAID("PNP0501"))                 //PnP Device ID 16550 Type
 //======================================================================
-    Name(_DDN, "COM5") //RayWu, ADD 2014/12/10
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//    Name(_DDN, "COM5") //RayWu, ADD 2014/12/10
+//
+//    Method(_STA, 0) {Return(^^SIO2.DSTA(0x13))}     //Get UART status
+//    Method(_DIS, 0) {^^SIO2.DCNT(0x13, 0)}          //Disable UART
+//    Method(_CRS, 0) {Return(^^SIO2.DCR3(0x13, 0))}  //Get UART current resources
+//    Method(_SRS, 1) {^^SIO2.DSR3(Arg0, 0x13)}       //Set UART resources
+    Name(_DDN, "COM9") //RayWu, ADD 2014/12/10
 
-    Method(_STA, 0) {Return(^^SIO2.DSTA(0x13))}     //Get UART status
-    Method(_DIS, 0) {^^SIO2.DCNT(0x13, 0)}          //Disable UART
-    Method(_CRS, 0) {Return(^^SIO2.DCR3(0x13, 0))}  //Get UART current resources
-    Method(_SRS, 1) {^^SIO2.DSR3(Arg0, 0x13)}       //Set UART resources
+    Method(_STA, 0) {Return(^^SIO2.DSTA(0x04))}     //Get UART status
+    Method(_DIS, 0) {^^SIO2.DCNT(0x04, 0)}          //Disable UART
+    Method(_CRS, 0) {Return(^^SIO2.DCR3(0x04, 0))}  //Get UART current resources
+    Method(_SRS, 1) {^^SIO2.DSR3(Arg0, 0x04)}       //Set UART resources
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 //----------------------------------------------------------------------
 // UART4 Possible Resources
 //----------------------------------------------------------------------
@@ -39,17 +47,30 @@
 //to have GENERICSIO.C working right! 
 //----------------------------------------------------------------------
 //RayWu, ADD 2014/12/05 >>
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//    Name(_PRS, ResourceTemplate() {
+//        StartDependentFn(0, 0) {
+//            IO(Decode16, 0x2D0, 0x2D0, 1, 8)
+//            IRQ(Level,ActiveLow,Shared) {11}
+//        }
+//        StartDependentFnNoPri() {
+//            IO(Decode16, 0x2C0, 0x2C0, 1, 8)
+//            IRQ(Level,ActiveLow,Shared) {11}
+//        }
+//        EndDependentFn()
+//    })
     Name(_PRS, ResourceTemplate() {
         StartDependentFn(0, 0) {
-            IO(Decode16, 0x2D0, 0x2D0, 1, 8)
-            IRQ(Level,ActiveLow,Shared) {11}
+            IO(Decode16, 0x288, 0x288, 1, 8)
+            IRQ(Level,ActiveLow,Shared) {10}
         }
         StartDependentFnNoPri() {
-            IO(Decode16, 0x2C0, 0x2C0, 1, 8)
-            IRQ(Level,ActiveLow,Shared) {11}
+            IO(Decode16, 0x298, 0x298, 1, 8)
+            IRQ(Level,ActiveLow,Shared) {10}
         }
         EndDependentFn()
     })
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 //RayWu, ADD 2014/12/05 <<
 //RayWu, REMOVE 2014/12/05 >>
 //    Name(_PRS, ResourceTemplate() {

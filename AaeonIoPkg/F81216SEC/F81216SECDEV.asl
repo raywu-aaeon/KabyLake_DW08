@@ -85,12 +85,12 @@
         0xFF,    //   01 - Serial B (SP2)
         0xFF,    //   02 - LPT
         0xFF,    //   03 - FDD
-        0xFF,    //   04 - SB16 Audio
-        0xFF,    //   05 - MIDI
+        0x02,    //   04 - SB16 Audio                       // ray_override / [XI-BringUp] Bring Up Porting / Modified
+        0x03,    //   05 - MIDI                     // ray_override / [XI-BringUp] Bring Up Porting / Modified
         0xFF,    //   06 - MSS Audio
         0xFF,    //   07 - AdLib sound (FM synth)
-        0xFF,    //   08 - Game port #1
-        0xFF,    //   09 - Game port #2
+        0x00,    //   08 - Game port #1                     // ray_override / [XI-BringUp] Bring Up Porting / Modified
+        0x01,    //   09 - Game port #2                     // ray_override / [XI-BringUp] Bring Up Porting / Modified
         0xFF,    //   0A - KBC 60 & 64
         0xFF,    //   0B - EC 62 & 66
         0xFF,    //   0C - Reserved 

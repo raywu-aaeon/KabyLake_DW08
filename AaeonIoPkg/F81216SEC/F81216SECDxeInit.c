@@ -192,25 +192,41 @@ EFI_STATUS F81216SEC_COM_Init(
 //                dsdt->Checksum = ChsumTbl((UINT8*)dsdt, dsdt->Length);
 //            }
 //        }
-        //Programm Device to PCI IRQ shanre mode
-        if((dev->DeviceInfo->Flags & SIO_SHR_IRQ1) && dev->ResOwner) {
-            //Programm ResOwner
-            Status=AmiSio->Access((AMI_SIO_PROTOCOL *)dev->ResOwner,FALSE,FALSE,0x70,&rv);
-            ASSERT_EFI_ERROR(Status);
-            rv &= 0xCF;
-            rv |= ((F81216SEC_URIRQ_MODE << 5) | (F81216SEC_URIRQ_SHAR << 4));  //Bit4 = 1: IRQ is ahring with other device
-            //Bit5 = 0: PCI IRQ sharing mode
-            Status=AmiSio->Access((AMI_SIO_PROTOCOL *)dev->ResOwner,TRUE,FALSE,0x70,&rv);
-            ASSERT_EFI_ERROR(Status);
-            //Programm Device
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//        //Programm Device to PCI IRQ shanre mode
+//        if((dev->DeviceInfo->Flags & SIO_SHR_IRQ1) && dev->ResOwner) {
+//            //Programm ResOwner
+//            Status=AmiSio->Access((AMI_SIO_PROTOCOL *)dev->ResOwner,FALSE,FALSE,0x70,&rv);
+//            ASSERT_EFI_ERROR(Status);
+//            rv &= 0xCF;
+//            rv |= ((F81216SEC_URIRQ_MODE << 5) | (F81216SEC_URIRQ_SHAR << 4));  //Bit4 = 1: IRQ is ahring with other device
+//            //Bit5 = 0: PCI IRQ sharing mode
+//            Status=AmiSio->Access((AMI_SIO_PROTOCOL *)dev->ResOwner,TRUE,FALSE,0x70,&rv);
+//            ASSERT_EFI_ERROR(Status);
+//            //Programm Device
+//            Status=AmiSio->Access(AmiSio,FALSE,FALSE,0x70,&rv);
+//            ASSERT_EFI_ERROR(Status);
+//            rv &= 0xCF;
+//            rv |= ((F81216SEC_URIRQ_MODE << 5) | (F81216SEC_URIRQ_SHAR << 4));  //Bit4 = 1: IRQ is ahring with other device
+//            //Bit5 = 0: PCI IRQ sharing mode
+//            Status=AmiSio->Access(AmiSio,TRUE,FALSE,0x70,&rv);
+//            ASSERT_EFI_ERROR(Status);
+//        }
             Status=AmiSio->Access(AmiSio,FALSE,FALSE,0x70,&rv);
-            ASSERT_EFI_ERROR(Status);
-            rv &= 0xCF;
-            rv |= ((F81216SEC_URIRQ_MODE << 5) | (F81216SEC_URIRQ_SHAR << 4));  //Bit4 = 1: IRQ is ahring with other device
-            //Bit5 = 0: PCI IRQ sharing mode
+            switch ( dev->NvData.DevMode )
+            {
+                default:
+                case 0: // PCI Share Mode
+                    rv &= ~(BIT5) ;
+                    rv |= BIT4 ;
+                    break;
+                case 1: // ISA Share Mode
+                    rv |= BIT5 ;
+                    rv |= BIT4 ;
+                    break;
+            }
             Status=AmiSio->Access(AmiSio,TRUE,FALSE,0x70,&rv);
-            ASSERT_EFI_ERROR(Status);
-        }
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
         break;
 
     case isGetModeData:
@@ -240,6 +256,26 @@ EFI_STATUS F81216SEC_COM_Init(
 //            dev->DevModeStr[4]=&IrdaModeStr5[0];
 //            dev->DevModeStr[5]=&IrdaModeHelp[0];
 //        }
+//ray_override / [XI-BringUp] Bring Up Porting / Added >>
+        {
+    		static CHAR16 AaeonUartModeStr1[] = L"PCI Share Mode";
+    		static CHAR16 AaeonUartModeStr2[] = L"ISA Share Mode";
+    		//static CHAR16 AaeonUartModeStr3[] = L"IRQ Share Mode";
+    		static CHAR16 AaeonUartModeHelp[] = L"IRQ Mode Selection";
+    
+    		dev->DevModeCnt = 2;
+    		dev->DevModeStr = MallocZ(sizeof(CHAR16*)*(dev->DevModeCnt+1));
+    		if(dev->DevModeStr == NULL) {
+    		        Status = EFI_OUT_OF_RESOURCES;
+    		        ASSERT_EFI_ERROR(Status);
+    		        return Status;
+    		}
+    		dev->DevModeStr[0] = &AaeonUartModeStr1[0];
+    		dev->DevModeStr[1] = &AaeonUartModeStr2[0];
+    		//dev->DevModeStr[2] = &AaeonUartModeStr3[0];
+    		dev->DevModeStr[2] = &AaeonUartModeHelp[0];
+        }
+//ray_override / [XI-BringUp] Bring Up Porting / Added <<
         break;
 
     case isAfterActivate:
