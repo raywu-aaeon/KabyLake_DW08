@@ -1,7 +1,7 @@
 
 PAGE VBT Information
 
-PAGE General platform Configuration
+PAGE General Platform Configuration
 $Embedded_Platform 00
 $bmp_Dynamic_CdClock_Supported 01
 $Kvmr_Session_Enable 00
@@ -24,12 +24,12 @@ PAGE Boot Display Algorithm
 TABLE $Dev_Boot_Table 0C 08 04 48 08 40 28 08 20 18 08 10 44 04 40 24 04 20 14 04 10 50 40 10 60 40 20 30 20 10 4C 04 40 2C 04 20 1C 08 10 30 20 10 58 40 10 58 10 40
 
 PAGE System BIOS Hooks 
-$H14_Get_Misc_Status 01
-$H34_Set_LFP_Fitting 01
+$H14_Get_Misc_Status 00
+$H34_Set_LFP_Fitting 00
 $H35_Bootup_Display 01
-$H40_Set_Panel_Type 01
-$H49_Get_BL_Inv_Pol 01
-$H51_LFP_Panel_Type 01
+$H40_Set_Panel_Type 00
+$H49_Get_BL_Inv_Pol 00
+$H51_LFP_Panel_Type 00
 
 PAGE Windows Graphics driver Configuration
 
@@ -1312,10 +1312,10 @@ $DP_SSC_Enb 00
 $DP_SSC_Dongle_Enb 00
 
 PAGE Device 1 (EFP1)
-$Int_EFP1_Type D6 60
+$Int_EFP1_Type D2 68
 $Int_EFP1_Port 07
 $Int_EFP1_DDC_Pin 05
-$Int_EFP1_AUX_Channel 10
+$Int_EFP1_AUX_Channel 00
 $Int_EFP1_HDMI_LS_Type 08
 $Int_EFP1_IBoost_Enable 00
 $Int_EFP1_Dp_Boost_Magnitude 00
@@ -1323,8 +1323,8 @@ $Int_EFP1_Hdmi_Boost_Magnitude 02
 $LSPcon1_Options 00
 $Int_EFP1_Lane_Reversal 00
 $Int_EFP1_Port_Dockable 00
-$EFP1_USB_C_DongleFeature_Enabled 00
 $EFP1_DP_Port_Trace_Length 00
+$EFP1_USB_C_DongleFeature_Enabled 00
 
 PAGE Select DisplayPort Redriver Configuration ( Dock/ OnBoard )
 $Int_EFP1_OnBoard_Redriver_Present 00
@@ -1335,7 +1335,7 @@ $Int_EFP1_Dock_Pre_emphasis 00
 $Int_EFP1_Dock_Voltage_swing 02
 
 PAGE Device 2 (EFP2)
-$Int_EFP2_Type D2 60
+$Int_EFP2_Type D2 68
 $Int_EFP2_Port 02
 $Int_EFP2_DDC_Pin 04
 $Int_EFP2_AUX_Channel 00
@@ -1346,8 +1346,8 @@ $Int_EFP2_Hdmi_Boost_Magnitude 02
 $LSPcon2_Options 00
 $Int_EFP2_Lane_Reversal 00
 $Int_EFP2_Port_Dockable 00
-$EFP2_USB_C_DongleFeature_Enabled 00
 $EFP2_DP_Port_Trace_Length 00
+$EFP2_USB_C_DongleFeature_Enabled 00
 
 PAGE Select DisplayPort Redriver Configuration ( Dock/ OnBoard )
 $Int_EFP2_OnBoard_Redriver_Present 00
@@ -1358,7 +1358,7 @@ $Int_EFP2_Dock_Pre_emphasis 00
 $Int_EFP2_Dock_Voltage_swing 02
 
 PAGE Device 3 (EFP3)
-$Int_EFP3_Type D6 60
+$Int_EFP3_Type 00 00
 $Int_EFP3_Port 09
 $Int_EFP3_DDC_Pin 06
 $Int_EFP3_AUX_Channel 30
@@ -1369,8 +1369,8 @@ $Int_EFP3_Hdmi_Boost_Magnitude 02
 $LSPcon3_Options 00
 $Int_EFP3_Lane_Reversal 00
 $Int_EFP3_Port_Dockable 00
-$EFP3_USB_C_DongleFeature_Enabled 00
 $EFP3_DP_Port_Trace_Length 00
+$EFP3_USB_C_DongleFeature_Enabled 00
 
 PAGE Select DisplayPort Redriver Configuration ( Dock/ OnBoard )
 $Int_EFP3_OnBoard_Redriver_Present 00
@@ -1480,6 +1480,3 @@ $SV_Dis_Arbiter 00
 $SV_Setmode_No_DVO 00
 $SV_Wait_Timeout_Hang 00
 $RelStage 01
-
-
-

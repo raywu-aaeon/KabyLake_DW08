@@ -856,4 +856,48 @@ TOKEN
     TargetMAK = Yes
     TargetH = Yes
 End
+
+TOKEN
+    Name  = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT"
+    Value  = "0"
+    Help  = "[1] - Skylake all VBIOS and VBT include / [0] - By select Token CRB_BOARD"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+    TargetFDF = Yes 
+    Token = "CSM_SUPPORT" "=" "1"
+End
+
+PCIDEVICE
+	Title  = "IGFX"
+	Parent  = "PciRoot"
+	Attribute  = "0x0"
+	Dev_type  = "PciDevice"
+	Dev  = 02h
+	Fun  = 00h
+	SleepNum  = 01h
+	ROMFile  = "AmiChipsetModulePkg/LegacyRom/Vbios/skl_1066.dat"
+	IntA = 	LNKA; 16
+	DeviceType = OnBoard
+	PCIBusSize = 32bit
+	OptionROM = Yes
+	ROMMain = No
+	SuppressDeviceGeneration = Yes
+	LegacyRom = Yes
+	FFSFileName  = "ROM Storage"
+	ROMSectionGuid  = "c5a4306e-e247-4ecd-a9d8-5b1985d3dcda"
+	InitRoutine  = "CspNbPciInitPciRoot"
+	Token = "CRB_BOARD" "=" "3" #For RVP8
+	Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "0" 
+End
+
+TOKEN
+	Name  = "OEM_INTEL_GOP_VBT_BIN_FILE"
+	Value  = "AmiChipsetModulePkg/NB/GOP/Skylake/Vbt.bin"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetFDF = Yes	
+	Token = "CRB_BOARD" "=" "3" #For RVP8
+	Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "0"
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<

@@ -76,7 +76,7 @@ TABLE $ALS_Response_Data 46 00 00 00 49 00 0A 00 55 00 50 00 64 00 2C 01 96 00 E
 PAGE Integrated Display Configuration
 
 PAGE LFP Configuration
-$LFP_Device_Class 06 18
+$LFP_Device_Class 00 00
 $Int_eDP_Port 0A
 $Int_LFP_AUX_Channel 40
 $bmp_Panel_type 02
@@ -1628,10 +1628,10 @@ $DP_SSC_Enb 00
 $DP_SSC_Dongle_Enb 00
 
 PAGE Device 1 (EFP1)
-$Int_EFP1_Type D6 60
+$Int_EFP1_Type D2 68
 $Int_EFP1_Port 07
 $Int_EFP1_DDC_Pin 05
-$Int_EFP1_AUX_Channel 10
+$Int_EFP1_AUX_Channel 00
 $Int_EFP1_HDMI_LS_Type 08
 $Int_EFP1_IBoost_Enable 00
 $Int_EFP1_Dp_Boost_Magnitude 00
@@ -1655,7 +1655,7 @@ PAGE EDID-less EFP Panel DTD Timings
 TABLE $EFP1_DTD D6 09 80 90 20 E0 1D 10 08 60 22 00 00 00 00 00 00 1E
 
 PAGE Device 2 (EFP2)
-$Int_EFP2_Type D2 60
+$Int_EFP2_Type D2 68
 $Int_EFP2_Port 02
 $Int_EFP2_DDC_Pin 04
 $Int_EFP2_AUX_Channel 00
@@ -1682,7 +1682,7 @@ PAGE EDID-less EFP Panel DTD Timings
 TABLE $EFP2_DTD D6 09 80 90 20 E0 1D 10 08 60 22 00 00 00 00 00 00 1E
 
 PAGE Device 3 (EFP3)
-$Int_EFP3_Type D6 60
+$Int_EFP3_Type 00 00
 $Int_EFP3_Port 09
 $Int_EFP3_DDC_Pin 06
 $Int_EFP3_AUX_Channel 30
