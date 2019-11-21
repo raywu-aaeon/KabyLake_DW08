@@ -298,6 +298,16 @@ formset guid  = SETUP_FORM_SET_GUID,
             default = 1, defaultstore = AmiMfgDefault,
         endoneof;
 
+//ray_override / [XI-BringUp] Bring Up Porting / Added >>
+        SEPARATOR
+        oneof varid = SETUP_DATA.OnlyBootHDD,\
+            prompt = STRING_TOKEN(STR_ONLY_BOOT_HDD),\
+            help = STRING_TOKEN(STR_ONLY_BOOT_HDD),\
+            option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;\
+            option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;\
+        endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / Added <<
+
         #define FORM_SET_ITEM
         #include <SetupDefinitions.h>
         #undef FORM_SET_ITEM

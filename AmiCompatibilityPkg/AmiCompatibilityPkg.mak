@@ -69,12 +69,16 @@ $(BUILD_DIR)/SetupDefinitions.h : $(SETUP_DEFINITIONS) $(BUILD_DIR)/Token.mak Am
 "#pragma pack(1)$(EOL)\
 typedef struct{$(EOL)\
   UINT8 Numlock;$(EOL)\
+  UINT8 OnlyBootHDD;$(EOL)\
   #define SETUP_DATA_DEFINITION$(EOL)\
   #include <SetupDefinitions.h>$(EOL)\
   #undef SETUP_DATA_DEFINITION$(EOL)\
 } SETUP_DATA;$(EOL)\
 #pragma pack()$(EOL)"\
 >$(BUILD_DIR)/GenericSetupDataDefinition.h
+##ray_override / [XI-BringUp] Bring Up Porting / Added Above >>
+## UINT8 OnlyBootHDD;
+##ray_override / [XI-BringUp] Bring Up Porting / Added Above <<
 
 	$(ECHO) \
 "$(SETUP_DATA_LAYOUT_OVERRIDE_SECTION)\
