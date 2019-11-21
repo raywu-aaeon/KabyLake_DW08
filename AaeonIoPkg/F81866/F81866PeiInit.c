@@ -416,13 +416,15 @@ EFI_STATUS F81866PeiInitEntryPoint(
     IN CONST EFI_PEI_SERVICES     **PeiServices
 )
 {
-#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
-    UINT8 index;
+//ray_override / [XI-BringUp] Bring Up Porting / Remove >>
+//#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
+//    UINT8 index;
+//
+//    for(index=0; index<sizeof(F81866PeiDecodeTable)/sizeof(IO_DECODE_DATA); index++)
+//        AmiSioLibSetLpcDeviceDecoding(NULL, F81866PeiDecodeTable[index].BaseAdd, F81866PeiDecodeTable[index].UID, F81866PeiDecodeTable[index].Type);
+//#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove <<
 
-    for(index=0; index<sizeof(F81866PeiDecodeTable)/sizeof(IO_DECODE_DATA); index++)
-        AmiSioLibSetLpcDeviceDecoding(NULL, F81866PeiDecodeTable[index].BaseAdd, F81866PeiDecodeTable[index].UID, F81866PeiDecodeTable[index].Type);
-#endif
-    
     ProgramRtRegisterTable(0, F81866PeiInitTable, sizeof(F81866PeiInitTable)/sizeof(SIO_DEVICE_INIT_DATA));
     // Enter Configuration Mode.
 

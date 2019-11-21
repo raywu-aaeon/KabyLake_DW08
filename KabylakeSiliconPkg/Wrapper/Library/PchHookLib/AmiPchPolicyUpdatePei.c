@@ -664,117 +664,124 @@ OemUpdateLpcDecode (
   IN EFI_PEI_SERVICES       **PeiServices
   )
 {
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//    EFI_STATUS                          Status;
+//    EFI_PEI_READ_ONLY_VARIABLE2_PPI     *ReadOnlyVariable;
+//    SIO_DEV_NV_DATA                     SioDevNvData;
+//    EFI_GUID                            ssg = SIO_VARSTORE_GUID;
+//    UINTN                               VariableSize;
+//    
+//    DEBUG((EFI_D_INFO, "OemUpdateLpcDecode\n"));
+//    
+//    Status = (*PeiServices)->LocatePpi ((CONST EFI_PEI_SERVICES **) PeiServices, 
+//                                        &gEfiPeiReadOnlyVariable2PpiGuid,
+//                                        0,
+//                                        NULL,
+//                                        (VOID **) &ReadOnlyVariable);
+//    if (EFI_ERROR(Status)) return;
+//    
+//    VariableSize = sizeof(SIO_DEV_NV_DATA);
+//    // Get COMA decode setting from variable
+//    Status = ReadOnlyVariable->GetVariable (ReadOnlyVariable,
+//#if (SIO_SETUP_USE_APTIO_4_STYLE==1)		// [ EIP435639 ]
+//											L"PNP0501_0_NV",
+//#else
+//                                            L"NV_SIO0_LD0",
+//#endif	// #if (SIO_SETUP_USE_APTIO_4_STYLE==1)
+//                                            &ssg,
+//                                            NULL,
+//                                            &VariableSize,
+//                                            &SioDevNvData); 
+//    
+//    if(!EFI_ERROR(Status) && (SioDevNvData.DevEnable != 0)) {
+//      switch(SioDevNvData.DevPrsId) {
+//        default:
+//        case 0:
+//        case 1:
+//        case 2:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3F8, 0, dsUART); 
+//            break;
+//        case 3:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2F8, 0, dsUART); 
+//            break;
+//        case 4:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3E8, 0, dsUART); 
+//            break;
+//        case 5:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2E8, 0, dsUART); 
+//            break;
+//      }
+//    }
+//
+//    // Get COMB decode setting from variable
+//    Status = ReadOnlyVariable->GetVariable (ReadOnlyVariable,
+//#if (SIO_SETUP_USE_APTIO_4_STYLE==1)		// [ EIP435639 ]
+//											L"PNP0501_1_NV",
+//#else
+//                                            L"NV_SIO0_LD1",
+//#endif	// #if (SIO_SETUP_USE_APTIO_4_STYLE==1)
+//                                            &ssg,
+//                                            NULL,
+//                                            &VariableSize,
+//                                            &SioDevNvData); 
+//    
+//    if(!EFI_ERROR(Status) && (SioDevNvData.DevEnable != 0)) {
+//      switch(SioDevNvData.DevPrsId) {
+//        default:
+//        case 0:
+//        case 1:
+//        case 2:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3F8, 1, dsUART); 
+//            break;
+//        case 3:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2F8, 1, dsUART); 
+//            break;
+//        case 4:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3E8, 1, dsUART); 
+//            break;
+//        case 5:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2E8, 1, dsUART); 
+//            break;
+//      }
+//    }
+//    
+//    // Get LPT decode setting from variable
+//    Status = ReadOnlyVariable->GetVariable (ReadOnlyVariable,
+//#if (SIO_SETUP_USE_APTIO_4_STYLE==1)		// [ EIP435639 ]
+//											L"PNP0501_2_NV",
+//#else
+//                                            L"NV_SIO0_LD2",
+//#endif	// #if (SIO_SETUP_USE_APTIO_4_STYLE==1)
+//                                            &ssg,
+//                                            NULL,
+//                                            &VariableSize,
+//                                            &SioDevNvData); 
+//    
+//    if(!EFI_ERROR(Status) && (SioDevNvData.DevEnable != 0)) {
+//      switch(SioDevNvData.DevPrsId) {
+//        default:
+//        case 0:
+//        case 1:
+//        case 2:
+//        case 5:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x378, 0, dsLPT); 
+//            break;
+//        case 3:
+//        case 6:     
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x278, 0, dsLPT);
+//            break;
+//        case 4:
+//        case 7:
+//            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3BC, 0, dsLPT);
+//            break;
+//      }    
+//    }  
     EFI_STATUS                          Status;
-    EFI_PEI_READ_ONLY_VARIABLE2_PPI     *ReadOnlyVariable;
-    SIO_DEV_NV_DATA                     SioDevNvData;
-    EFI_GUID                            ssg = SIO_VARSTORE_GUID;
-    UINTN                               VariableSize;
-    
-    DEBUG((EFI_D_INFO, "OemUpdateLpcDecode\n"));
-    
-    Status = (*PeiServices)->LocatePpi ((CONST EFI_PEI_SERVICES **) PeiServices, 
-                                        &gEfiPeiReadOnlyVariable2PpiGuid,
-                                        0,
-                                        NULL,
-                                        (VOID **) &ReadOnlyVariable);
-    if (EFI_ERROR(Status)) return;
-    
-    VariableSize = sizeof(SIO_DEV_NV_DATA);
-    // Get COMA decode setting from variable
-    Status = ReadOnlyVariable->GetVariable (ReadOnlyVariable,
-#if (SIO_SETUP_USE_APTIO_4_STYLE==1)		// [ EIP435639 ]
-											L"PNP0501_0_NV",
-#else
-                                            L"NV_SIO0_LD0",
-#endif	// #if (SIO_SETUP_USE_APTIO_4_STYLE==1)
-                                            &ssg,
-                                            NULL,
-                                            &VariableSize,
-                                            &SioDevNvData); 
-    
-    if(!EFI_ERROR(Status) && (SioDevNvData.DevEnable != 0)) {
-      switch(SioDevNvData.DevPrsId) {
-        default:
-        case 0:
-        case 1:
-        case 2:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3F8, 0, dsUART); 
-            break;
-        case 3:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2F8, 0, dsUART); 
-            break;
-        case 4:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3E8, 0, dsUART); 
-            break;
-        case 5:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2E8, 0, dsUART); 
-            break;
-      }
-    }
 
-    // Get COMB decode setting from variable
-    Status = ReadOnlyVariable->GetVariable (ReadOnlyVariable,
-#if (SIO_SETUP_USE_APTIO_4_STYLE==1)		// [ EIP435639 ]
-											L"PNP0501_1_NV",
-#else
-                                            L"NV_SIO0_LD1",
-#endif	// #if (SIO_SETUP_USE_APTIO_4_STYLE==1)
-                                            &ssg,
-                                            NULL,
-                                            &VariableSize,
-                                            &SioDevNvData); 
-    
-    if(!EFI_ERROR(Status) && (SioDevNvData.DevEnable != 0)) {
-      switch(SioDevNvData.DevPrsId) {
-        default:
-        case 0:
-        case 1:
-        case 2:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3F8, 1, dsUART); 
-            break;
-        case 3:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2F8, 1, dsUART); 
-            break;
-        case 4:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3E8, 1, dsUART); 
-            break;
-        case 5:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x2E8, 1, dsUART); 
-            break;
-      }
-    }
-    
-    // Get LPT decode setting from variable
-    Status = ReadOnlyVariable->GetVariable (ReadOnlyVariable,
-#if (SIO_SETUP_USE_APTIO_4_STYLE==1)		// [ EIP435639 ]
-											L"PNP0501_2_NV",
-#else
-                                            L"NV_SIO0_LD2",
-#endif	// #if (SIO_SETUP_USE_APTIO_4_STYLE==1)
-                                            &ssg,
-                                            NULL,
-                                            &VariableSize,
-                                            &SioDevNvData); 
-    
-    if(!EFI_ERROR(Status) && (SioDevNvData.DevEnable != 0)) {
-      switch(SioDevNvData.DevPrsId) {
-        default:
-        case 0:
-        case 1:
-        case 2:
-        case 5:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x378, 0, dsLPT); 
-            break;
-        case 3:
-        case 6:     
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x278, 0, dsLPT);
-            break;
-        case 4:
-        case 7:
-            AmiSioLibSetLpcDeviceDecoding(NULL, 0x3BC, 0, dsLPT);
-            break;
-      }    
-    }  
+    Status = AmiSioLibSetLpcDeviceDecoding(NULL, 0, 0, 0);
+    Status = AmiSioLibSetLpcGenericDecoding(NULL, PCH_GEN_DECODE_RANGE_1, PCH_GEN_DECODE_MASK_1, TRUE) ;
+    Status = AmiSioLibSetLpcGenericDecoding(NULL, PCH_GEN_DECODE_RANGE_2, PCH_GEN_DECODE_MASK_2, TRUE) ;
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 }
 
 EFI_STATUS

@@ -263,14 +263,16 @@ EFI_STATUS F81866_FDC_Init(
         break;
 
     case isBeforeActivate:
-#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
-        //Decode?
-        if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
-            AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-        } else {
-            AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-        }
-#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove >>
+//#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
+//        //Decode?
+//        if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
+//            AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//        } else {
+//            AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//        }
+//#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove <<
         //AMI_TODO: please check the register define and program FDC mode
         //Read FDC Mode register
         Status=AmiSio->Access(AmiSio,FALSE,FALSE,0xF0,&rv);
@@ -380,16 +382,18 @@ EFI_STATUS F81866_COM_Init(
     case isBeforeActivate:
         //Only decode UART1/UART2. More others UART port is decode in PEI
         //Attention! Remove the more com ports to PEI decode.
-#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
-        if(Dev->DeviceInfo->Uid < 0x02) {
-            //Decode?
-            if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
-                AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-            } else {
-                AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-            }
-        }
-#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove >>
+//#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
+//        if(Dev->DeviceInfo->Uid < 0x02) {
+//            //Decode?
+//            if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
+//                AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//            } else {
+//                AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//            }
+//        }
+//#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove <<
 //RayWu, REMOVE 2015/04/14 >>
 //        //Program COM RS485/RS232 Mode Registers.
 //        if(F81866_DXE_COM_Mode_Init_Table[Dev->DeviceInfo->Uid].AndData8 == 0xFF) {
@@ -639,15 +643,17 @@ EFI_STATUS F81866_LPT_Init(
         break;
 
     case isBeforeActivate:
-#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
-
-        //Decode?
-        if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
-            AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-        } else {
-            AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-        }
-#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove >>
+//#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
+//
+//        //Decode?
+//        if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
+//            AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//        } else {
+//            AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//        }
+//#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove <<
         //Programm Device Mode register here(if NEEDED)use AmiSioProtocol
         //AMI_TODO: You can program device mode as follow:
         Status=AmiSio->Access(AmiSio,FALSE,FALSE,0xF0,&rv);    //LPT Configuration Reg, Read the reg value
@@ -789,14 +795,16 @@ EFI_STATUS F81866_KBC_Init(
         break;
 
     case isBeforeActivate:
-#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
-        //Decode?
-        if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
-            AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-        } else {
-            AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
-        }
-#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove >>
+//#if !defined(SecDecodePkg_SUPPORT) || (SecDecodePkg_SUPPORT == 0)
+//        //Decode?
+//        if(Dev->DeviceInfo->Implemented && Dev->NvData.DevEnable) {
+//            AmiSioLibSetLpcDeviceDecoding(PciIo,Dev->VlData.DevBase1, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//        } else {
+//            AmiSioLibSetLpcDeviceDecoding(PciIo,0, Dev->DeviceInfo->Uid, Dev->DeviceInfo->Type);
+//        }
+//#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Remove <<
         break;
 
 #if  AMI_SIO_MINOR_VERSION >= 6     

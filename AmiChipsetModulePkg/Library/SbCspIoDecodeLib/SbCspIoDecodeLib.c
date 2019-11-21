@@ -30,6 +30,9 @@
 #include <Library/IoLib.h>
 #include <PchAccess.h>
 #include <AmiCspLib.h>
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+#include <Token.h>
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 //-------------------------------------------------------------------------
 // Constants, Macros and Type Definitions
 //-------------------------------------------------------------------------
@@ -176,145 +179,153 @@ AmiSioLibSetLpcDeviceDecoding(
 {
     EFI_STATUS              Status = EFI_UNSUPPORTED;
     UINT32                  NumOfBdf;
-    // Porting Required
-    UINT16                  ComRange[] = { 0x3f8, 0x2f8, 0x220, 0x228,\
-                                           0x238, 0x2e8, 0x338, 0x3e8, 0x2f0, 0x2e0, 0};
-    UINT16                  LptRange[] = { 0x378, 0x278, 0x3bc, 0};
-    UINT16                  FpcRange[] = { 0x3f0, 0x370, 0};
-    UINT16                  IoRangeMask16 = 0xffff;
-    UINT16                  IoRangeSet16 = 0;
-    UINT16                  IoEnMask16 = 0xffff;
-    UINT16                  IoEnSet16 = 0;
-    UINT8                   i;
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//    // Porting Required
+//    UINT16                  ComRange[] = { 0x3f8, 0x2f8, 0x220, 0x228,\
+//                                           0x238, 0x2e8, 0x338, 0x3e8, 0x2f0, 0x2e0, 0};
+//    UINT16                  LptRange[] = { 0x378, 0x278, 0x3bc, 0};
+//    UINT16                  FpcRange[] = { 0x3f0, 0x370, 0};
+//    UINT16                  IoRangeMask16 = 0xffff;
+//    UINT16                  IoRangeSet16 = 0;
+//    UINT16                  IoEnMask16 = 0xffff;
+//    UINT16                  IoEnSet16 = 0;
+//    UINT8                   i;
+//    UINT16                  Tmp16;
+//    EFI_PCI_IO_PROTOCOL     *LpcPciIoProtocol = (EFI_PCI_IO_PROTOCOL*)LpcPciIo;
+//
+//    switch (Type) {
+//        // FDC Address Range
+//        case (dsFDC) :
+//            if (Base == 0) IoEnMask16 &= ~BIT03;
+//            else {
+//                for (i = 0; (FpcRange[i] != 0) && (FpcRange[i] != Base); i++);
+//                if (FpcRange[i]) {
+//                    IoEnSet16 |= BIT03;
+//                    IoRangeMask16 &= ~BIT12;
+//                    IoRangeSet16 |= (i << 12);
+//                }
+//                else return EFI_UNSUPPORTED;
+//            }
+//            break;
+//
+//        // LPT Address Range
+//        case (dsLPT) :
+//            if (Base == 0) IoEnMask16 &= ~BIT02;
+//            else {
+//                for (i = 0; (LptRange[i] != 0) && (LptRange[i] != Base); i++);
+//                if (LptRange[i]) {
+//                    IoEnSet16 |= BIT02;
+//                    IoRangeMask16 &= ~(BIT09 | BIT08);
+//                    IoRangeSet16 |= (i << 8);
+//                } else return EFI_UNSUPPORTED;
+//            }
+//            break;
+//
+//        // ComA Address Range
+//        case (dsUART) :
+//            if (Base == 0) {
+//                if (DevUid) IoEnMask16 &= ~BIT01;
+//                else IoEnMask16 &= ~BIT00;
+//            } else {
+//                if ((Base == 0x3F8) || (Base == 0x3E8) || (Base == 0x2F8) || (Base == 0x2E8)) {
+//                    IoEnSet16 |= (BIT01 | BIT00);
+//                    IoRangeMask16 &= ~(BIT06 | BIT05 | BIT04 | BIT02 | BIT01 | BIT00);
+//                    IoRangeSet16 |= (BIT06 | BIT05 | BIT04);
+//                    AmiSioLibSetLpcGenericDecoding(LpcPciIo, 0x200, 0x100, TRUE);
+//                } else {
+//                    if (DevUid < 2) {
+//                        for (i = 0; (ComRange[i] != 0) && (ComRange[i] != Base); i++);
+//                        if (ComRange[i]) {
+//                            if (DevUid) {
+//                                IoEnSet16 |= BIT01;
+//                                IoRangeMask16 &= ~(BIT06 | BIT05 | BIT04);
+//                                IoRangeSet16 |= (i << 4);
+//                            } else {
+//                                IoEnSet16 |= BIT00;
+//                                IoRangeMask16 &= ~(BIT02 | BIT01 | BIT00);
+//                                IoRangeSet16 |= i;
+//                            }
+//                        } else return EFI_UNSUPPORTED;
+//                    } 
+//                }
+//            }
+//            break;
+//
+//        // KBC Address Enable
+//        case (dsPS2K) :
+//        case (dsPS2M) :
+//        case (dsPS2CK) :
+//        case (dsPS2CM) :
+//            if (Base == 0) IoEnMask16 &= ~BIT10;
+//            else IoEnSet16 |= BIT10;
+//            break;
+//
+//        // Game Port Address Enable
+//        case (dsGAME) :
+//            if (Base == 0) IoEnMask16 &= ~(BIT09 | BIT08);
+//            else {
+//                if (Base == 0x200) {
+//                    IoEnSet16 |= BIT08;
+//                } else {
+//                    if (Base == 0x208) IoEnSet16 |= BIT09;
+//                    else return EFI_UNSUPPORTED;
+//                }
+//            }
+//            break;
+//
+//        // LPC CFG Address Enable
+//        default :
+//            if (Type != 0xFF)
+//                return EFI_UNSUPPORTED;
+//
+//            switch(Base)
+//            {
+//                case 0:
+//                    return EFI_UNSUPPORTED;
+//                    break;
+//                case 0x2e:
+//                    IoEnSet16 |= BIT12;
+//                    break;
+//                case 0x4e:
+//                    IoEnSet16 |= BIT13;
+//                    break;
+//                case 0x62:
+//                case 0x63:
+//                case 0x64:
+//                case 0x65:
+//                case 0x66:
+//                    IoEnSet16 |= BIT11;
+//                    break;
+//                default:
+//                    AmiSioLibSetLpcGenericDecoding( LpcPciIo, \
+//                                                    Base , \
+//                                                    DevUid, \
+//                                                    TRUE );
+//                    return EFI_SUCCESS;
+//            } // end of switch
+/////            if (Base == 0x2e) IoEnSet16 |= BIT12;
+/////            else {
+/////                if (Base == 0x4e) IoEnSet16 |= BIT13;
+/////                else {
+/////                    if (Base == 0x62) IoEnSet16 |= BIT11;
+/////                    else {
+/////                    if (Base) AmiSioLibSetLpcGenericDecoding( LpcPciIo, \
+/////                                                           Base , \
+/////                                                           4, \
+/////                                                           TRUE );
+/////                        else return EFI_UNSUPPORTED;
+/////                    }
+/////                }
+/////            }
+//            break;
+//    }
     UINT16                  Tmp16;
     EFI_PCI_IO_PROTOCOL     *LpcPciIoProtocol = (EFI_PCI_IO_PROTOCOL*)LpcPciIo;
-
-    switch (Type) {
-        // FDC Address Range
-        case (dsFDC) :
-            if (Base == 0) IoEnMask16 &= ~BIT03;
-            else {
-                for (i = 0; (FpcRange[i] != 0) && (FpcRange[i] != Base); i++);
-                if (FpcRange[i]) {
-                    IoEnSet16 |= BIT03;
-                    IoRangeMask16 &= ~BIT12;
-                    IoRangeSet16 |= (i << 12);
-                }
-                else return EFI_UNSUPPORTED;
-            }
-            break;
-
-        // LPT Address Range
-        case (dsLPT) :
-            if (Base == 0) IoEnMask16 &= ~BIT02;
-            else {
-                for (i = 0; (LptRange[i] != 0) && (LptRange[i] != Base); i++);
-                if (LptRange[i]) {
-                    IoEnSet16 |= BIT02;
-                    IoRangeMask16 &= ~(BIT09 | BIT08);
-                    IoRangeSet16 |= (i << 8);
-                } else return EFI_UNSUPPORTED;
-            }
-            break;
-
-        // ComA Address Range
-        case (dsUART) :
-            if (Base == 0) {
-                if (DevUid) IoEnMask16 &= ~BIT01;
-                else IoEnMask16 &= ~BIT00;
-            } else {
-                if ((Base == 0x3F8) || (Base == 0x3E8) || (Base == 0x2F8) || (Base == 0x2E8)) {
-                    IoEnSet16 |= (BIT01 | BIT00);
-                    IoRangeMask16 &= ~(BIT06 | BIT05 | BIT04 | BIT02 | BIT01 | BIT00);
-                    IoRangeSet16 |= (BIT06 | BIT05 | BIT04);
-                    AmiSioLibSetLpcGenericDecoding(LpcPciIo, 0x200, 0x100, TRUE);
-                } else {
-                    if (DevUid < 2) {
-                        for (i = 0; (ComRange[i] != 0) && (ComRange[i] != Base); i++);
-                        if (ComRange[i]) {
-                            if (DevUid) {
-                                IoEnSet16 |= BIT01;
-                                IoRangeMask16 &= ~(BIT06 | BIT05 | BIT04);
-                                IoRangeSet16 |= (i << 4);
-                            } else {
-                                IoEnSet16 |= BIT00;
-                                IoRangeMask16 &= ~(BIT02 | BIT01 | BIT00);
-                                IoRangeSet16 |= i;
-                            }
-                        } else return EFI_UNSUPPORTED;
-                    } 
-                }
-            }
-            break;
-
-        // KBC Address Enable
-        case (dsPS2K) :
-        case (dsPS2M) :
-        case (dsPS2CK) :
-        case (dsPS2CM) :
-            if (Base == 0) IoEnMask16 &= ~BIT10;
-            else IoEnSet16 |= BIT10;
-            break;
-
-        // Game Port Address Enable
-        case (dsGAME) :
-            if (Base == 0) IoEnMask16 &= ~(BIT09 | BIT08);
-            else {
-                if (Base == 0x200) {
-                    IoEnSet16 |= BIT08;
-                } else {
-                    if (Base == 0x208) IoEnSet16 |= BIT09;
-                    else return EFI_UNSUPPORTED;
-                }
-            }
-            break;
-
-        // LPC CFG Address Enable
-        default :
-            if (Type != 0xFF)
-                return EFI_UNSUPPORTED;
-
-            switch(Base)
-            {
-                case 0:
-                    return EFI_UNSUPPORTED;
-                    break;
-                case 0x2e:
-                    IoEnSet16 |= BIT12;
-                    break;
-                case 0x4e:
-                    IoEnSet16 |= BIT13;
-                    break;
-                case 0x62:
-                case 0x63:
-                case 0x64:
-                case 0x65:
-                case 0x66:
-                    IoEnSet16 |= BIT11;
-                    break;
-                default:
-                    AmiSioLibSetLpcGenericDecoding( LpcPciIo, \
-                                                    Base , \
-                                                    DevUid, \
-                                                    TRUE );
-                    return EFI_SUCCESS;
-            } // end of switch
-///            if (Base == 0x2e) IoEnSet16 |= BIT12;
-///            else {
-///                if (Base == 0x4e) IoEnSet16 |= BIT13;
-///                else {
-///                    if (Base == 0x62) IoEnSet16 |= BIT11;
-///                    else {
-///                    if (Base) AmiSioLibSetLpcGenericDecoding( LpcPciIo, \
-///                                                           Base , \
-///                                                           4, \
-///                                                           TRUE );
-///                        else return EFI_UNSUPPORTED;
-///                    }
-///                }
-///            }
-            break;
-    }
+    UINT16                  IoRangeMask16 = (BIT15 + BIT14 + BIT13 + BIT11 + BIT10 + BIT7 + BIT3) ; // Chipset Reserved Bits
+    UINT16                  IoEnMask16 = (BIT15 + BIT14 + BIT7 + BIT6 + BIT5 + BIT4) ; // Chipset Reserved Bits
+    UINT16                  IoRangeSet16 = PCH_LPC_IO_DECODE_RANGE ;
+    UINT16                  IoEnSet16 = PCH_LPC_IO_DECODE_EN ;
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 
     if (LpcPciIo==NULL) NumOfBdf = (UINT32)(PCI_CF8_LIB_ADDRESS(SIO_SB_BUS_NUMBER,SIO_SB_DEV_NUMBER, SIO_SB_FUNC_NUMBER, 0));
 
