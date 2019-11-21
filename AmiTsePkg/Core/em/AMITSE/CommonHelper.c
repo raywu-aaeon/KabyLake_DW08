@@ -86,13 +86,22 @@ EfiLibAllocateZeroPool (
 #include "AcpiOemElinks.h"
 #endif
 
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//#ifdef ACPI_OEM_ID_MAK
+//UINT8   OemIdMak [7] = ACPI_OEM_ID_MAK;
+//#endif
+//
+//#ifdef ACPI_OEM_TBL_ID_MAK
+//UINT8   OemTblIdMak [8] = ACPI_OEM_TBL_ID_MAK;
+//#endif
 #ifdef ACPI_OEM_ID_MAK
-UINT8   OemIdMak [7] = ACPI_OEM_ID_MAK;
+UINT8   OemIdMak [7] = T_ACPI_OEM_ID;
 #endif
 
 #ifdef ACPI_OEM_TBL_ID_MAK
-UINT8   OemTblIdMak [8] = ACPI_OEM_TBL_ID_MAK;
+UINT8   OemTblIdMak [8] = T_ACPI_OEM_TBL_ID;
 #endif
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 
 /////////////OEM_SPECIAL_CONTROL////////////////
 #if SETUP_OEM_SPECIAL_CONTROL_SUPPORT

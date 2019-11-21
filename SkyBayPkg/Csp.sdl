@@ -997,4 +997,64 @@ ELINK
 #	Token = "CSM_SUPPORT" "=" "1"
 	InvokeOrder = AfterParent
 End
+
+TOKEN
+    Name  = "OA1_SUPPORT"
+    Value = "1"
+    Help  = "Main switch to enable OA1 support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+#    Master = Yes
+End
+
+TOKEN
+    Name = "OA1_STRING"
+    Value = "GRGBankingIPC1"
+    Help = "OEM Activation 1.0 string"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+	Name  = "OA2_SUPPORT"
+	Value  = "1"
+	Help  = "Main switch to enable OA2 support in Project"
+	TokenType = Boolean
+	TargetH = Yes
+#	Master = Yes
+End
+
+TOKEN
+	Name  = "MARKER_BIN"
+	Value  = "$(OA2_SUPPORT_DIR)/OA20Marker.bin"
+	Help  = "Directory where Maker.bin is placed."
+	TokenType = Expression
+End
+
+TOKEN
+	Name  = "PUBKEY_BIN"
+	Value  = "$(OA2_SUPPORT_DIR)/OA20PubKey.bin"
+	Help  = "Directory where PubKey.bin is placed."
+	TokenType = Expression
+End
+
+TOKEN
+	Name  = "T_ACPI_OEM_ID"
+	Value  = "{'G','R','G','B',0x20,0x20}"
+	Help  = "ACPI OEM Id -\a string value to be filled into ACPI table headers"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetH = Yes
+	Range  = "1-6 characters"
+End
+
+TOKEN
+	Name  = "T_ACPI_OEM_TBL_ID"
+	Value  = "{'G','R','G','B','I','P','C',0x20}"
+	Help  = "ACPI OEM Id -\a string value to be filled into ACPI table headers"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetH = Yes
+	Range  = "1-8 characters"
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<

@@ -1507,8 +1507,12 @@ VOID NbAmiConOutStartedProtocolCallback (
 //----------------------------------------------------------------------------
 #if (ACPI_SUPPORT)
 
-UINT8    ACPI_OEM_ID[6]     = ACPI_OEM_ID_MAK;
-UINT8    ACPI_OEM_TBL_ID[8] = ACPI_OEM_TBL_ID_MAK;
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//UINT8    ACPI_OEM_ID[6]     = ACPI_OEM_ID_MAK;
+//UINT8    ACPI_OEM_TBL_ID[8] = ACPI_OEM_TBL_ID_MAK;
+UINT8       ACPI_OEM_ID[6]     = T_ACPI_OEM_ID;
+UINT8       ACPI_OEM_TBL_ID[8] = T_ACPI_OEM_TBL_ID;
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 
 UINTN           mMcfgTblHandle=0;
 EFI_EVENT       mAcpiEvent;
