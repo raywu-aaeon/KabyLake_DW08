@@ -1386,4 +1386,78 @@ TOKEN
 	Range  = "$(CSMSETUP_ENABLE_ALL_BOOT_OPTIONS) - Both UEFI and Legacy boot options enabled\$(CSMSETUP_LEGACY_ONLY_BOOT_OPTIONS) - Only Legacy boot options enabled\$(CSMSETUP_UEFI_ONLY_BOOT_OPTIONS) - Only UEFI boot options enabled"
 	Token = "CSM_SUPPORT" "=" "1"
 End
+
+TOKEN
+	Name  = "AaeonDio2Pkg_SUPPORT"
+	Value  = "1"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	TargetH = Yes
+#	Master = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_0_GPIO_DEFAULT"
+	Value  = "80"
+	Help = "Default value of the <GPIO Number> option for DIO 1.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_1_GPIO_DEFAULT"
+	Value  = "81"
+	Help = "Default value of the <GPIO Number> option for DIO 2.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_2_GPIO_DEFAULT"
+	Value  = "82"
+	Help = "Default value of the <GPIO Number> option for DIO 3.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_3_GPIO_DEFAULT"
+	Value  = "83"
+	Help = "Default value of the <GPIO Number> option for DIO 4.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_4_GPIO_DEFAULT"
+	Value  = "84"
+	Help = "Default value of the <GPIO Number> option for DIO 5.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_5_GPIO_DEFAULT"
+	Value  = "85"
+	Help = "Default value of the <GPIO Number> option for DIO 6.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_6_GPIO_DEFAULT"
+	Value  = "86"
+	Help = "Default value of the <GPIO Number> option for DIO 7.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "NUMERIC_AAEON_DIO_7_GPIO_DEFAULT"
+	Value  = "87"
+	Help = "Default value of the <GPIO Number> option for DIO 8.\minimum: 0\maximum: 100\step: 1"
+	TokenType = Integer
+	TargetH = Yes
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<

@@ -337,7 +337,10 @@
 			SUBTITLE(STRING_TOKEN(STR_DIO_FORM))
 			SEPARATOR
 			// Do not remove this item >>
-			suppressif ideqval AAEON_SETUP_DATA.EgrMode == 0;
+//ray_override / [XI-BringUp] Bring Up Porting / Support F81866 DIO / Tuning for Build Error / Modified >>
+//			suppressif ideqval AAEON_SETUP_DATA.EgrMode == 0;
+			suppressif TRUE;
+//ray_override / [XI-BringUp] Bring Up Porting / Support F81866 DIO / Tuning for Build Error / Modified <<
 				INTERACTIVE_TEXT(STRING_TOKEN(STR_EMPTY), STRING_TOKEN(STR_AAEON_DIO_CALLBACK), STRING_TOKEN(STR_AAEON_DIO_DUMMY),  AUTO_ID(AAEON_DIO_INTERACTIVE_KEY))
 				SEPARATOR
 

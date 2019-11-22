@@ -909,6 +909,7 @@
 "A5Debugger\AptioVDebuggerUSBDbgr.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Debugger/AptioVDebugger;Debugger_42"
 "AaeonIoPkg\AaeonIoPkg.cif"
 "AaeonCommonPkg\AaeonCommonPkg.cif"
+"AaeonCommonPkg\AaeonDio2Pkg\AaeonDio2Pkg.cif"
 "SkyBayPkg\Crb.cif"= Private
 "SkyBayPkg\CrbSetup\CrbSetup.cif"= Private
 "SkyBayPkg\Include\Include.cif"= Private
