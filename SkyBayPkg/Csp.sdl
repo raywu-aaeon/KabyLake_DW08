@@ -636,6 +636,14 @@ TOKEN
 #	Token = "HOTPLUG_SUPPORT" "=" "1"
 End
 
+TOKEN
+    Name  = "SgTpv_SUPPORT"
+    Value  = "0"
+    TokenType = Boolean
+#    Master = Yes
+    TargetH = Yes
+    Help  = "Main switch to enable SwitchableGraphics TPV support in Project"
+End
 ##ray_override / [XI-BringUp] Disable Unused Feature / added <<
 
 ##ray_override / [XI-BringUp] Support F81866 / added >>
