@@ -143,77 +143,137 @@ DefinitionBlock (
 
   } //end scope RHUB
 
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / USB Port Group Mapping /Modified >>
+//  Scope (\_SB.PCI0.XHC.RHUB.HS01) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,1)) } //walkup usb2 port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS02) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,2)) } //walkup usb2 port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS03) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,3)) } //walkup usb2 port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS04) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,4)) } //walkup usb2 port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS05) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,5)) } //walkup port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS06) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,6)) } //walkup port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS07) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,7)) } //walkup port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS08) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,8)) } //walkup port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS09) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,9)) } //walkup port
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.HS10) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,10)) } //walkup port
+//  }
+//
+//  If(LEqual(PCHV(),SPTH)) {
+//    Scope (\_SB.PCI0.XHC.RHUB.HS11) {
+//      Method(_UPC) { Return (GUPC(1)) }
+//      Method(_PLD) { Return (GPLD(0,11)) } //m.2 BT
+//    }
+//
+//    Scope (\_SB.PCI0.XHC.RHUB.HS12) {
+//      Method(_UPC) { Return (GUPC(1)) }
+//      Method(_PLD) { Return (GPLD(1,12)) } //walkup port
+//    }
+//
+//    Scope (\_SB.PCI0.XHC.RHUB.HS13) {
+//      Method(_UPC) { Return (GUPC(1)) }
+//      Method(_PLD) { Return (GPLD(1,13)) } //walkup port
+//    }
+//
+//    Scope (\_SB.PCI0.XHC.RHUB.HS14) {
+//      Method(_UPC) { Return (GUPC(1)) }
+//      Method(_PLD) { Return (GPLD(1,14)) }
+//    }
+//  }
   Scope (\_SB.PCI0.XHC.RHUB.HS01) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,1)) } //walkup usb2 port
+    Method(_PLD) { Return (GPLD(1,1)) } // LAN1_USB1B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.HS02) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,2)) } //walkup usb2 port
+    Method(_PLD) { Return (GPLD(1,1)) } // LAN1_USB1B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.HS03) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,3)) } //walkup usb2 port
+    Method(_PLD) { Return (GPLD(1,2)) } //LAN2_USB2B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.HS04) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,4)) } //walkup usb2 port
+    Method(_PLD) { Return (GPLD(1,2)) } //LAN2_USB2B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.HS05) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,5)) } //walkup port
+    Method(_PLD) { Return (GPLD(1,3)) } //USB1
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.HS06) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,6)) } //walkup port
+    Method(_PLD) { Return (GPLD(1,3)) } //USB1
   }
-
-  Scope (\_SB.PCI0.XHC.RHUB.HS07) {
-    Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,7)) } //walkup port
-  }
-
-  Scope (\_SB.PCI0.XHC.RHUB.HS08) {
-    Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,8)) } //walkup port
-  }
-
   Scope (\_SB.PCI0.XHC.RHUB.HS09) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,9)) } //walkup port
+    Method(_PLD) { Return (GPLD(1,3)) } //USB1
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.HS10) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,10)) } //walkup port
+    Method(_PLD) { Return (GPLD(1,3)) } //USB1
   }
-
+  Scope (\_SB.PCI0.XHC.RHUB.HS07) {
+    Method(_UPC) { Return (GUPC(1)) }
+    Method(_PLD) { Return (GPLD(1,4)) } //MPCIE1
+  }
+  Scope (\_SB.PCI0.XHC.RHUB.HS08) {
+    Method(_UPC) { Return (GUPC(1)) }
+    Method(_PLD) { Return (GPLD(1,5)) } //USB HUB
+  }
   If(LEqual(PCHV(),SPTH)) {
     Scope (\_SB.PCI0.XHC.RHUB.HS11) {
-      Method(_UPC) { Return (GUPC(1)) }
-      Method(_PLD) { Return (GPLD(0,11)) } //m.2 BT
+      Method(_UPC) { Return (GUPC(0)) }
+      Method(_PLD) { Return (GPLD(0,0)) } //NOT USED
     }
-
     Scope (\_SB.PCI0.XHC.RHUB.HS12) {
-      Method(_UPC) { Return (GUPC(1)) }
-      Method(_PLD) { Return (GPLD(1,12)) } //walkup port
+      Method(_UPC) { Return (GUPC(0)) }
+      Method(_PLD) { Return (GPLD(0,0)) } //NOT USED
     }
-
     Scope (\_SB.PCI0.XHC.RHUB.HS13) {
-      Method(_UPC) { Return (GUPC(1)) }
-      Method(_PLD) { Return (GPLD(1,13)) } //walkup port
+      Method(_UPC) { Return (GUPC(0)) }
+      Method(_PLD) { Return (GPLD(0,0)) } //NOT USED
     }
-
     Scope (\_SB.PCI0.XHC.RHUB.HS14) {
-      Method(_UPC) { Return (GUPC(1)) }
-      Method(_PLD) { Return (GPLD(1,14)) }
+      Method(_UPC) { Return (GUPC(0)) }
+      Method(_PLD) { Return (GPLD(0,0)) } //NOT USED
     }
   }
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / USB Port Group Mapping /Modified <<
 
   Scope (\_SB.PCI0.XHC.RHUB.USR1) {
     Method(_UPC) { Return (GUPC(0)) }
@@ -225,50 +285,98 @@ DefinitionBlock (
     Method(_PLD) { Return (GPLD(0,0)) } //walkup port
   }
 
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / USB Port Group Mapping /Modified >>
+//  Scope (\_SB.PCI0.XHC.RHUB.SS01) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,7)) } //walkup port - USB3 PD #1
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.SS02) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,5)) } //walkup port - USB3 BP #1
+//  }
+//  Scope (\_SB.PCI0.XHC.RHUB.SS03) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,6)) } //walkup port - USB3 BP #2
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.SS04) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,14)) } //walkup port - USB3 FP #1
+//  }
+//  Scope (\_SB.PCI0.XHC.RHUB.SS05) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(1,8)) } //walkup port - USB3 FP #2
+//  }
+//
+//  Scope (\_SB.PCI0.XHC.RHUB.SS06) {
+//    Method(_UPC) { Return (GUPC(1)) }
+//    Method(_PLD) { Return (GPLD(0,15)) } //camera
+//  }
+//  If(LEqual(PCHV(),SPTH)) {
+//    Scope (\_SB.PCI0.XHC.RHUB.SS07) {
+//      Method(_UPC) { Return (GUPC(1)) }
+//      Method(_PLD) { Return (GPLD(1,1)) } //walkup port - USB3 FP#3
+//    }
+//
+//    Scope (\_SB.PCI0.XHC.RHUB.SS08) {
+//      Method(_UPC) { Return (GUPC(1)) }
+//      Method(_PLD) { Return (GPLD(1,10)) } //walkup port - USB3 FP#4
+//    }
+//
+//    Scope (\_SB.PCI0.XHC.RHUB.SS09) {
+//      Method(_UPC) { Return (GUPC(1)) }
+//      Method(_PLD) { Return (GPLD(1,13)) } //walkup port - USB3 WP
+//    }
+//
+//    Scope (\_SB.PCI0.XHC.RHUB.SS10) {
+//      Method(_UPC) { Return (GUPC(0)) }
+//      Method(_PLD) { Return (GPLD(0,0)) } //not connected
+//    }
+//
+//   Scope(\_SB.PCI0.XDCI) {
+//     Method (_PLD)  { Return ( \_SB.PCI0.XHC.RHUB.TPLD(1,14) ) }
+//     Method (_UPC)  { Return ( \_SB.PCI0.XHC.RHUB.TUPC(8) ) }
+//   } // Type C port directly under xDCI device and making it SS device only
+//  }
   Scope (\_SB.PCI0.XHC.RHUB.SS01) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,7)) } //walkup port - USB3 PD #1
+    Method(_PLD) { Return (GPLD(1,1)) } // LAN1_USB1B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.SS02) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,5)) } //walkup port - USB3 BP #1
+    Method(_PLD) { Return (GPLD(1,1)) } // LAN1_USB1B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.SS03) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,6)) } //walkup port - USB3 BP #2
+    Method(_PLD) { Return (GPLD(1,2)) } //LAN2_USB2B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.SS04) {
     Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,14)) } //walkup port - USB3 FP #1
+    Method(_PLD) { Return (GPLD(1,2)) } //LAN2_USB2B
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.SS05) {
-    Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(1,8)) } //walkup port - USB3 FP #2
+    Method(_UPC) { Return (GUPC(0)) }
+    Method(_PLD) { Return (GPLD(0,0)) } // NOT USED
   }
-
   Scope (\_SB.PCI0.XHC.RHUB.SS06) {
-    Method(_UPC) { Return (GUPC(1)) }
-    Method(_PLD) { Return (GPLD(0,15)) } //camera
+    Method(_UPC) { Return (GUPC(0)) }
+    Method(_PLD) { Return (GPLD(0,0)) } // NOT USED
   }
-
   If(LEqual(PCHV(),SPTH)) {
     Scope (\_SB.PCI0.XHC.RHUB.SS07) {
-      Method(_UPC) { Return (GUPC(1)) }
-      Method(_PLD) { Return (GPLD(1,1)) } //walkup port - USB3 FP#3
+      Method(_UPC) { Return (GUPC(0)) }
+      Method(_PLD) { Return (GPLD(0,0)) } //walkup port - USB3 FP#3
     }
 
     Scope (\_SB.PCI0.XHC.RHUB.SS08) {
-      Method(_UPC) { Return (GUPC(1)) }
-      Method(_PLD) { Return (GPLD(1,10)) } //walkup port - USB3 FP#4
+      Method(_UPC) { Return (GUPC(0)) }
+      Method(_PLD) { Return (GPLD(0,0)) } //walkup port - USB3 FP#4
     }
 
     Scope (\_SB.PCI0.XHC.RHUB.SS09) {
-      Method(_UPC) { Return (GUPC(1)) }
-      Method(_PLD) { Return (GPLD(1,13)) } //walkup port - USB3 WP
+      Method(_UPC) { Return (GUPC(0)) }
+      Method(_PLD) { Return (GPLD(0,0)) } //walkup port - USB3 WP
     }
 
     Scope (\_SB.PCI0.XHC.RHUB.SS10) {
@@ -277,8 +385,9 @@ DefinitionBlock (
     }
 
    Scope(\_SB.PCI0.XDCI) {
-     Method (_PLD)  { Return ( \_SB.PCI0.XHC.RHUB.TPLD(1,14) ) }
+     Method (_PLD)  { Return ( \_SB.PCI0.XHC.RHUB.TPLD(0,0) ) }
      Method (_UPC)  { Return ( \_SB.PCI0.XHC.RHUB.TUPC(8) ) }
    } // Type C port directly under xDCI device and making it SS device only
   }
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / USB Port Group Mapping /Modified <<
 }
