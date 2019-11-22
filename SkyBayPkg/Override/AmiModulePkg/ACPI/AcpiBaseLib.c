@@ -173,8 +173,12 @@ ISO_PARAMETER_TABLE IsoTbl[]=
 static UINTN    IsoCnt=sizeof(IsoTbl)/sizeof(ISO_PARAMETER_TABLE);
 
 
-UINT8    ACPI_OEM_ID[6]     = ACPI_OEM_ID_MAK;     
-UINT8    ACPI_OEM_TBL_ID[8] = ACPI_OEM_TBL_ID_MAK; 
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//UINT8    ACPI_OEM_ID[6]     = ACPI_OEM_ID_MAK;     
+//UINT8    ACPI_OEM_TBL_ID[8] = ACPI_OEM_TBL_ID_MAK; 
+UINT8    ACPI_OEM_ID[6]     = T_ACPI_OEM_ID;     
+UINT8    ACPI_OEM_TBL_ID[8] = T_ACPI_OEM_TBL_ID; 
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 
 #if defined(OemActivation_SUPPORT) && (OemActivation_SUPPORT == 1)
 #define EFI_OA3_MSDM_VARIABLE   L"OA3MSDMvariable"
