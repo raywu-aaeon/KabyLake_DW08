@@ -260,7 +260,7 @@
                         <Register name="DBUF_CFG1_SRC12" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC13" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC15" mask="0xFFFFFFFF" value="0x3F0000" />
-                        <Register name="ENCCKRQ" mask="0xFFFFFFFF" value="0x1F1" />
+                        <Register name="ENCCKRQ" mask="0xFFFFFFFF" value="0xB1" />
                     </Registers>
                 </Profile>
             </Profiles>

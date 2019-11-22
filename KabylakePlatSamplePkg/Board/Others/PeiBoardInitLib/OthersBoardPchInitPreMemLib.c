@@ -53,6 +53,9 @@ OthersRootPortClkInfoInit (
 {
   PCD64_BLOB *RootPort;
   PCD64_BLOB Lan;
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / PCIe Clock Mapping / Added >>
+  UINT8 i ;
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / PCIe Clock Mapping / Added <<
 
   RootPort = AllocateZeroPool (32 * sizeof (PCD64_BLOB));
   ASSERT (RootPort != NULL);
@@ -68,120 +71,135 @@ OthersRootPortClkInfoInit (
   /// For H,  Set 0 - 15
   /// Note that if GbE is enabled, ClkReq assigned to GbE will not be available for Root Port.
   ///
-  switch (BoardId) {
-    case BoardIdSkylakeULpddr3Rvp5:
-    case BoardIdSkylakeULpddr3Rvp5Ppv:
-    case BoardIdSkylakeLpdimmDoe:
-      RootPort[2].Info.ClkReqSupported = TRUE;
-      RootPort[2].Info.ClkReqNumber = 5;
-      RootPort[3].Info.ClkReqSupported = TRUE;
-      RootPort[3].Info.ClkReqNumber = 2;
-      RootPort[4].Info.ClkReqSupported = TRUE;
-      RootPort[4].Info.ClkReqNumber = 3;
-      RootPort[5].Info.ClkReqSupported = TRUE;
-      RootPort[5].Info.ClkReqNumber = 4;
-      RootPort[6].Info.ClkReqSupported = TRUE;
-      RootPort[6].Info.ClkReqNumber = 0;
-      RootPort[8].Info.ClkReqSupported = TRUE;
-      RootPort[8].Info.ClkReqNumber = 1;
-      Lan.Info.ClkReqSupported = TRUE;
-      Lan.Info.ClkReqNumber    = 2;
-      break;
-
-    case BoardIdSkylakeSds:
-    case BoardIdSkylakeStarbrook:
-      RootPort[1].Info.ClkReqSupported = TRUE;
-      RootPort[1].Info.ClkReqNumber = 1;
-      RootPort[2].Info.ClkReqSupported = TRUE;
-      RootPort[2].Info.ClkReqNumber = 5;
-      RootPort[3].Info.ClkReqSupported = TRUE;
-      RootPort[3].Info.ClkReqNumber = 4;
-      RootPort[4].Info.ClkReqSupported = TRUE;
-      RootPort[4].Info.ClkReqNumber = 3;
-      RootPort[8].Info.ClkReqSupported = TRUE;
-      RootPort[8].Info.ClkReqNumber = 2;
-      break;
-
-    case BoardIdSkylakePhabletPoc: // ClockReq to Clock Source -- needs to be done in Softstrap
-      RootPort[2].Info.ClkReqSupported = TRUE; //Root port 2 in Bios corresponds to 3 in Schematic and is connected to WLAN
-      RootPort[9].Info.ClkReqSupported = TRUE; //Root port 9 in Bios corresponds to 10 in Schematic and is connected to WIGIG
-      //In softstrap connect ClkReqNumber = 2 to ClockSource = 5 -- For WLAN
-      RootPort[2].Info.ClkReqNumber = 2; //WLAN is mapped to root port 2 in Bios (3 in schematic) is connected to ClkReqNumber 2
-      //In softstrap connect ClkReqNumber = 3 to ClockSource = 3 -- For WIGIG
-      RootPort[9].Info.ClkReqNumber = 3; //WIGIG is mapped to root port 9 in Bios (10 in schematic) is connected to ClkReqNumber
-      break;
-
-    case BoardIdSkylakePantherMtn:
-      RootPort[2].Info.ClkReqSupported = TRUE;
-      RootPort[2].Info.ClkReqNumber = 5;
-      break;
-
-    case BoardIdKabylakeGrizzlyMtn:
-      RootPort[2].Info.ClkReqSupported = TRUE;
-      RootPort[2].Info.ClkReqNumber = 5;
-      RootPort[4].Info.ClkReqSupported = TRUE;
-      RootPort[4].Info.ClkReqNumber = 3;
-      break;
-
-    case BoardIdKabylakeCoyoteMtn:
-      RootPort[2].Info.ClkReqSupported = TRUE; //WLAN
-      RootPort[2].Info.ClkReqNumber = 5;
-      RootPort[3].Info.ClkReqSupported = TRUE; //PCIE Modem
-      RootPort[3].Info.ClkReqNumber = 4;
-      RootPort[4].Info.ClkReqSupported = TRUE; //SSD
-      RootPort[4].Info.ClkReqNumber = 3;
-      break;
-
-    case BoardIdSkylakeDtRvp8Crb:
-    case BoardIdSkylakeAioRvp9Crb:
-    case BoardIdSkylakeAioRvp10Crb:
-    case BoardIdSkylakeAioRvp10Evp:
-    case BoardIdSkylakeAioRvp10CrbPpv:
-    case BoardIdSkylakeAioRvp10Erb:
-    case BoardIdSkylakeSlpfPpv:
-      if ((BoardIdOrgValue == BoardIdKabyLakeSDdr4UdimmEvCrb) || (BoardIdOrgValue == BoardIdKabyLakeSDdr4UdimmCrb)) {
-        RootPort[3].Info.ClkReqSupported = TRUE;   // PCIe port 4
-        RootPort[3].Info.ClkReqNumber = 2;
-        RootPort[4].Info.ClkReqSupported = TRUE;
-        RootPort[4].Info.ClkReqNumber = 1;
-
-        RootPort[20].Info.ClkReqSupported = TRUE;   // PCIe port 21
-        RootPort[20].Info.ClkReqNumber = 10;
-      }
-      else {
-        RootPort[3].Info.ClkReqSupported = TRUE;   // PCIe port 4
-        RootPort[3].Info.ClkReqNumber = 1;
-        RootPort[4].Info.ClkReqSupported = TRUE;
-        RootPort[4].Info.ClkReqNumber = 2;
-      }
-
-
-      RootPort[ 5].Info.ClkReqSupported = TRUE;
-      RootPort[ 5].Info.ClkReqNumber = 3;
-      RootPort[ 6].Info.ClkReqSupported = TRUE;
-      RootPort[ 6].Info.ClkReqNumber = 4;
-      RootPort[ 7].Info.ClkReqSupported = TRUE;
-      RootPort[ 7].Info.ClkReqNumber = 5;
-      RootPort[ 8].Info.ClkReqSupported = TRUE;
-      RootPort[ 8].Info.ClkReqNumber = 6;
-      RootPort[16].Info.ClkReqSupported = TRUE;   // PCIe port 17
-      RootPort[16].Info.ClkReqNumber = 7;
-      Lan.Info.ClkReqSupported = TRUE;
-      Lan.Info.ClkReqNumber    = 2;
-      break;
-    case BoardIdSkylakeSdlBrk:
-      RootPort[ 5].Info.ClkReqSupported = TRUE; // PCIe port 6 / M.2 WIFI
-      RootPort[ 5].Info.ClkReqNumber    = 0;
-      RootPort[12].Info.ClkReqSupported = TRUE; // PCIe port 13 / M.2 SSD
-      RootPort[12].Info.ClkReqNumber    = 1;
-      Lan.Info.ClkReqSupported = TRUE;
-      Lan.Info.ClkReqNumber    = 3;
-      break;
-
-    default:
-      break;
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / PCIe Clock Mapping / Modified >>
+//  switch (BoardId) {
+//    case BoardIdSkylakeULpddr3Rvp5:
+//    case BoardIdSkylakeULpddr3Rvp5Ppv:
+//    case BoardIdSkylakeLpdimmDoe:
+//      RootPort[2].Info.ClkReqSupported = TRUE;
+//      RootPort[2].Info.ClkReqNumber = 5;
+//      RootPort[3].Info.ClkReqSupported = TRUE;
+//      RootPort[3].Info.ClkReqNumber = 2;
+//      RootPort[4].Info.ClkReqSupported = TRUE;
+//      RootPort[4].Info.ClkReqNumber = 3;
+//      RootPort[5].Info.ClkReqSupported = TRUE;
+//      RootPort[5].Info.ClkReqNumber = 4;
+//      RootPort[6].Info.ClkReqSupported = TRUE;
+//      RootPort[6].Info.ClkReqNumber = 0;
+//      RootPort[8].Info.ClkReqSupported = TRUE;
+//      RootPort[8].Info.ClkReqNumber = 1;
+//      Lan.Info.ClkReqSupported = TRUE;
+//      Lan.Info.ClkReqNumber    = 2;
+//      break;
+//
+//    case BoardIdSkylakeSds:
+//    case BoardIdSkylakeStarbrook:
+//      RootPort[1].Info.ClkReqSupported = TRUE;
+//      RootPort[1].Info.ClkReqNumber = 1;
+//      RootPort[2].Info.ClkReqSupported = TRUE;
+//      RootPort[2].Info.ClkReqNumber = 5;
+//      RootPort[3].Info.ClkReqSupported = TRUE;
+//      RootPort[3].Info.ClkReqNumber = 4;
+//      RootPort[4].Info.ClkReqSupported = TRUE;
+//      RootPort[4].Info.ClkReqNumber = 3;
+//      RootPort[8].Info.ClkReqSupported = TRUE;
+//      RootPort[8].Info.ClkReqNumber = 2;
+//      break;
+//
+//    case BoardIdSkylakePhabletPoc: // ClockReq to Clock Source -- needs to be done in Softstrap
+//      RootPort[2].Info.ClkReqSupported = TRUE; //Root port 2 in Bios corresponds to 3 in Schematic and is connected to WLAN
+//      RootPort[9].Info.ClkReqSupported = TRUE; //Root port 9 in Bios corresponds to 10 in Schematic and is connected to WIGIG
+//      //In softstrap connect ClkReqNumber = 2 to ClockSource = 5 -- For WLAN
+//      RootPort[2].Info.ClkReqNumber = 2; //WLAN is mapped to root port 2 in Bios (3 in schematic) is connected to ClkReqNumber 2
+//      //In softstrap connect ClkReqNumber = 3 to ClockSource = 3 -- For WIGIG
+//      RootPort[9].Info.ClkReqNumber = 3; //WIGIG is mapped to root port 9 in Bios (10 in schematic) is connected to ClkReqNumber
+//      break;
+//
+//    case BoardIdSkylakePantherMtn:
+//      RootPort[2].Info.ClkReqSupported = TRUE;
+//      RootPort[2].Info.ClkReqNumber = 5;
+//      break;
+//
+//    case BoardIdKabylakeGrizzlyMtn:
+//      RootPort[2].Info.ClkReqSupported = TRUE;
+//      RootPort[2].Info.ClkReqNumber = 5;
+//      RootPort[4].Info.ClkReqSupported = TRUE;
+//      RootPort[4].Info.ClkReqNumber = 3;
+//      break;
+//
+//    case BoardIdKabylakeCoyoteMtn:
+//      RootPort[2].Info.ClkReqSupported = TRUE; //WLAN
+//      RootPort[2].Info.ClkReqNumber = 5;
+//      RootPort[3].Info.ClkReqSupported = TRUE; //PCIE Modem
+//      RootPort[3].Info.ClkReqNumber = 4;
+//      RootPort[4].Info.ClkReqSupported = TRUE; //SSD
+//      RootPort[4].Info.ClkReqNumber = 3;
+//      break;
+//
+//    case BoardIdSkylakeDtRvp8Crb:
+//    case BoardIdSkylakeAioRvp9Crb:
+//    case BoardIdSkylakeAioRvp10Crb:
+//    case BoardIdSkylakeAioRvp10Evp:
+//    case BoardIdSkylakeAioRvp10CrbPpv:
+//    case BoardIdSkylakeAioRvp10Erb:
+//    case BoardIdSkylakeSlpfPpv:
+//      if ((BoardIdOrgValue == BoardIdKabyLakeSDdr4UdimmEvCrb) || (BoardIdOrgValue == BoardIdKabyLakeSDdr4UdimmCrb)) {
+//        RootPort[3].Info.ClkReqSupported = TRUE;   // PCIe port 4
+//        RootPort[3].Info.ClkReqNumber = 2;
+//        RootPort[4].Info.ClkReqSupported = TRUE;
+//        RootPort[4].Info.ClkReqNumber = 1;
+//
+//        RootPort[20].Info.ClkReqSupported = TRUE;   // PCIe port 21
+//        RootPort[20].Info.ClkReqNumber = 10;
+//      }
+//      else {
+//        RootPort[3].Info.ClkReqSupported = TRUE;   // PCIe port 4
+//        RootPort[3].Info.ClkReqNumber = 1;
+//        RootPort[4].Info.ClkReqSupported = TRUE;
+//        RootPort[4].Info.ClkReqNumber = 2;
+//      }
+//
+//
+//      RootPort[ 5].Info.ClkReqSupported = TRUE;
+//      RootPort[ 5].Info.ClkReqNumber = 3;
+//      RootPort[ 6].Info.ClkReqSupported = TRUE;
+//      RootPort[ 6].Info.ClkReqNumber = 4;
+//      RootPort[ 7].Info.ClkReqSupported = TRUE;
+//      RootPort[ 7].Info.ClkReqNumber = 5;
+//      RootPort[ 8].Info.ClkReqSupported = TRUE;
+//      RootPort[ 8].Info.ClkReqNumber = 6;
+//      RootPort[16].Info.ClkReqSupported = TRUE;   // PCIe port 17
+//      RootPort[16].Info.ClkReqNumber = 7;
+//      Lan.Info.ClkReqSupported = TRUE;
+//      Lan.Info.ClkReqNumber    = 2;
+//      break;
+//    case BoardIdSkylakeSdlBrk:
+//      RootPort[ 5].Info.ClkReqSupported = TRUE; // PCIe port 6 / M.2 WIFI
+//      RootPort[ 5].Info.ClkReqNumber    = 0;
+//      RootPort[12].Info.ClkReqSupported = TRUE; // PCIe port 13 / M.2 SSD
+//      RootPort[12].Info.ClkReqNumber    = 1;
+//      Lan.Info.ClkReqSupported = TRUE;
+//      Lan.Info.ClkReqNumber    = 3;
+//      break;
+//
+//    default:
+//      break;
+//  }
+  for ( i = 0; i < 32; i++)
+  {
+    RootPort[i].Info.ClkReqSupported = FALSE;
+    RootPort[i].Info.ClkReqNumber = i;
   }
-
+  RootPort[7].Info.ClkReqSupported = TRUE;
+  RootPort[7].Info.ClkReqNumber = 4;
+  RootPort[8].Info.ClkReqSupported = TRUE;
+  RootPort[8].Info.ClkReqNumber = 5;
+  // Doc #546955
+  // Chapter 31.1.2
+  //Software must never map multiple Express Ports to the same CLKREQ# pin. The hardware behavior is undefined if this ever happens.
+  RootPort[4].Info.ClkReqNumber = 7;
+  RootPort[5].Info.ClkReqNumber = 8;
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / PCIe Clock Mapping / Modified <<
   PcdSet64S (PcdRootPort0ClkInfo, RootPort[ 0].Blob);
   PcdSet64S (PcdRootPort1ClkInfo, RootPort[ 1].Blob);
   PcdSet64S (PcdRootPort2ClkInfo, RootPort[ 2].Blob);

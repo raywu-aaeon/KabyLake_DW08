@@ -293,7 +293,7 @@ static GPIO_INIT_CONFIG mGpioTableDtRvp8Crb[] =
 //  // {GPIO_SKL_H_GPP_H1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //SRCCLKREQB_7/CLK_REQ7_M.2_SSD_SLOT_N
 //  {GPIO_SKL_H_GPP_H2,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //SRCCLKREQB_8/PCIEX16_PRSNT2_N
   {GPIO_SKL_H_GPP_H0, {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
-  {GPIO_SKL_H_GPP_H1, {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
+  {GPIO_SKL_H_GPP_H1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //SRCCLKREQB_7/CLK_REQ7_M.2_SSD_SLOT_N
   {GPIO_SKL_H_GPP_H2, {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
 //ray_override / [XI-BringUp] Bring Up Porting / Modified <<
   // {GPIO_SKL_H_GPP_H3,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //SRCCLKREQB_9/CLK_REQ9_SATAE_N
