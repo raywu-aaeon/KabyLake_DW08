@@ -432,69 +432,97 @@ OthersUsbConfigInit (
 
   switch (BoardId) {
     case BoardIdSkylakeDtRvp8Crb:
-      if ((OrgBoardId == BoardIdKabyLakeSDdr4UdimmEvErb) ||
-        (OrgBoardId == BoardIdKabyLakeSDdr4UdimmEvCrb) ||
-        (OrgBoardId == BoardIdKabyLakeSDdr4UdimmCrb)) {
-        // Based on KBL-S schematic
-
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / USB Port OC Mapping / Modified >>
+//      if ((OrgBoardId == BoardIdKabyLakeSDdr4UdimmEvErb) ||
+//        (OrgBoardId == BoardIdKabyLakeSDdr4UdimmEvCrb) ||
+//        (OrgBoardId == BoardIdKabyLakeSDdr4UdimmCrb)) {
+//        // Based on KBL-S schematic
+//
+//        // OC Map for USB2 Ports
+//        PcdSet8S (PcdUsb20OverCurrentPinPort0, PchUsbOverCurrentPin0);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort1, PchUsbOverCurrentPin0); // Port unused on KBL-S
+//        PcdSet8S (PcdUsb20OverCurrentPinPort2, PchUsbOverCurrentPin3);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort3, PchUsbOverCurrentPin4);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort4, PchUsbOverCurrentPin5);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort5, PchUsbOverCurrentPin6);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort6, PchUsbOverCurrentPin4);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort7, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort8, PchUsbOverCurrentPinSkip);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort9, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort10, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort11, PchUsbOverCurrentPin5);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort12, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort13, PchUsbOverCurrentPinSkip);
+//
+//        // OC Map for USB3 Ports
+//        PcdSet8S (PcdUsb30OverCurrentPinPort0, PchUsbOverCurrentPin0);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort1, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort2, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort3, PchUsbOverCurrentPinSkip);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort4, PchUsbOverCurrentPin0); // Port unused on KBL-S
+//        PcdSet8S (PcdUsb30OverCurrentPinPort5, PchUsbOverCurrentPin3);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort6, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort7, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort8, PchUsbOverCurrentPin6);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort9, PchUsbOverCurrentPinSkip);
+//      } else {
+//        // Based on SKL AIO RVP8 schematic
+//
+//        // OC Map for USB2 Ports
+//        PcdSet8S (PcdUsb20OverCurrentPinPort0, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort1, PchUsbOverCurrentPin5);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort2, PchUsbOverCurrentPin4);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort3, PchUsbOverCurrentPin4);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort4, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort5, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort6, PchUsbOverCurrentPinSkip);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort7, PchUsbOverCurrentPin0);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort8, PchUsbOverCurrentPin5);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort9, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort10, PchUsbOverCurrentPinSkip);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort11, PchUsbOverCurrentPin6);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort12, PchUsbOverCurrentPin3);
+//        PcdSet8S (PcdUsb20OverCurrentPinPort13, PchUsbOverCurrentPin6);
+//
+//        // OC Map for USB3 Ports
+//        PcdSet8S (PcdUsb30OverCurrentPinPort0, PchUsbOverCurrentPinSkip);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort1, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort2, PchUsbOverCurrentPin1);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort3, PchUsbOverCurrentPin0);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort4, PchUsbOverCurrentPin0);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort5, PchUsbOverCurrentPinSkip);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort6, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort7, PchUsbOverCurrentPin2);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort8, PchUsbOverCurrentPin3);
+//        PcdSet8S (PcdUsb30OverCurrentPinPort9, PchUsbOverCurrentPinSkip);
+//      }
         // OC Map for USB2 Ports
         PcdSet8S (PcdUsb20OverCurrentPinPort0, PchUsbOverCurrentPin0);
-        PcdSet8S (PcdUsb20OverCurrentPinPort1, PchUsbOverCurrentPin0); // Port unused on KBL-S
-        PcdSet8S (PcdUsb20OverCurrentPinPort2, PchUsbOverCurrentPin3);
-        PcdSet8S (PcdUsb20OverCurrentPinPort3, PchUsbOverCurrentPin4);
-        PcdSet8S (PcdUsb20OverCurrentPinPort4, PchUsbOverCurrentPin5);
-        PcdSet8S (PcdUsb20OverCurrentPinPort5, PchUsbOverCurrentPin6);
-        PcdSet8S (PcdUsb20OverCurrentPinPort6, PchUsbOverCurrentPin4);
-        PcdSet8S (PcdUsb20OverCurrentPinPort7, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb20OverCurrentPinPort8, PchUsbOverCurrentPinSkip);
-        PcdSet8S (PcdUsb20OverCurrentPinPort9, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb20OverCurrentPinPort10, PchUsbOverCurrentPin1);
-        PcdSet8S (PcdUsb20OverCurrentPinPort11, PchUsbOverCurrentPin5);
-        PcdSet8S (PcdUsb20OverCurrentPinPort12, PchUsbOverCurrentPin1);
+        PcdSet8S (PcdUsb20OverCurrentPinPort1, PchUsbOverCurrentPin0);
+        PcdSet8S (PcdUsb20OverCurrentPinPort2, PchUsbOverCurrentPin1);
+        PcdSet8S (PcdUsb20OverCurrentPinPort3, PchUsbOverCurrentPin1);
+        PcdSet8S (PcdUsb20OverCurrentPinPort4, PchUsbOverCurrentPin4);
+        PcdSet8S (PcdUsb20OverCurrentPinPort5, PchUsbOverCurrentPin4);
+        PcdSet8S (PcdUsb20OverCurrentPinPort6, PchUsbOverCurrentPinSkip);
+        PcdSet8S (PcdUsb20OverCurrentPinPort7, PchUsbOverCurrentPinSkip);
+        PcdSet8S (PcdUsb20OverCurrentPinPort8, PchUsbOverCurrentPin4);
+        PcdSet8S (PcdUsb20OverCurrentPinPort9, PchUsbOverCurrentPin4);
+        PcdSet8S (PcdUsb20OverCurrentPinPort10, PchUsbOverCurrentPinSkip);
+        PcdSet8S (PcdUsb20OverCurrentPinPort11, PchUsbOverCurrentPinSkip);
+        PcdSet8S (PcdUsb20OverCurrentPinPort12, PchUsbOverCurrentPinSkip);
         PcdSet8S (PcdUsb20OverCurrentPinPort13, PchUsbOverCurrentPinSkip);
-
         // OC Map for USB3 Ports
         PcdSet8S (PcdUsb30OverCurrentPinPort0, PchUsbOverCurrentPin0);
-        PcdSet8S (PcdUsb30OverCurrentPinPort1, PchUsbOverCurrentPin1);
+        PcdSet8S (PcdUsb30OverCurrentPinPort1, PchUsbOverCurrentPin0);
         PcdSet8S (PcdUsb30OverCurrentPinPort2, PchUsbOverCurrentPin1);
-        PcdSet8S (PcdUsb30OverCurrentPinPort3, PchUsbOverCurrentPinSkip);
-        PcdSet8S (PcdUsb30OverCurrentPinPort4, PchUsbOverCurrentPin0); // Port unused on KBL-S
-        PcdSet8S (PcdUsb30OverCurrentPinPort5, PchUsbOverCurrentPin3);
-        PcdSet8S (PcdUsb30OverCurrentPinPort6, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb30OverCurrentPinPort7, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb30OverCurrentPinPort8, PchUsbOverCurrentPin6);
-        PcdSet8S (PcdUsb30OverCurrentPinPort9, PchUsbOverCurrentPinSkip);
-      } else {
-        // Based on SKL AIO RVP8 schematic
-
-        // OC Map for USB2 Ports
-        PcdSet8S (PcdUsb20OverCurrentPinPort0, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb20OverCurrentPinPort1, PchUsbOverCurrentPin5);
-        PcdSet8S (PcdUsb20OverCurrentPinPort2, PchUsbOverCurrentPin4);
-        PcdSet8S (PcdUsb20OverCurrentPinPort3, PchUsbOverCurrentPin4);
-        PcdSet8S (PcdUsb20OverCurrentPinPort4, PchUsbOverCurrentPin1);
-        PcdSet8S (PcdUsb20OverCurrentPinPort5, PchUsbOverCurrentPin1);
-        PcdSet8S (PcdUsb20OverCurrentPinPort6, PchUsbOverCurrentPinSkip);
-        PcdSet8S (PcdUsb20OverCurrentPinPort7, PchUsbOverCurrentPin0);
-        PcdSet8S (PcdUsb20OverCurrentPinPort8, PchUsbOverCurrentPin5);
-        PcdSet8S (PcdUsb20OverCurrentPinPort9, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb20OverCurrentPinPort10, PchUsbOverCurrentPinSkip);
-        PcdSet8S (PcdUsb20OverCurrentPinPort11, PchUsbOverCurrentPin6);
-        PcdSet8S (PcdUsb20OverCurrentPinPort12, PchUsbOverCurrentPin3);
-        PcdSet8S (PcdUsb20OverCurrentPinPort13, PchUsbOverCurrentPin6);
-
-        // OC Map for USB3 Ports
-        PcdSet8S (PcdUsb30OverCurrentPinPort0, PchUsbOverCurrentPinSkip);
-        PcdSet8S (PcdUsb30OverCurrentPinPort1, PchUsbOverCurrentPin1);
-        PcdSet8S (PcdUsb30OverCurrentPinPort2, PchUsbOverCurrentPin1);
-        PcdSet8S (PcdUsb30OverCurrentPinPort3, PchUsbOverCurrentPin0);
-        PcdSet8S (PcdUsb30OverCurrentPinPort4, PchUsbOverCurrentPin0);
+        PcdSet8S (PcdUsb30OverCurrentPinPort3, PchUsbOverCurrentPin1);
+        PcdSet8S (PcdUsb30OverCurrentPinPort4, PchUsbOverCurrentPinSkip);
         PcdSet8S (PcdUsb30OverCurrentPinPort5, PchUsbOverCurrentPinSkip);
-        PcdSet8S (PcdUsb30OverCurrentPinPort6, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb30OverCurrentPinPort7, PchUsbOverCurrentPin2);
-        PcdSet8S (PcdUsb30OverCurrentPinPort8, PchUsbOverCurrentPin3);
+        PcdSet8S (PcdUsb30OverCurrentPinPort6, PchUsbOverCurrentPinSkip);
+        PcdSet8S (PcdUsb30OverCurrentPinPort7, PchUsbOverCurrentPinSkip);
+        PcdSet8S (PcdUsb30OverCurrentPinPort8, PchUsbOverCurrentPinSkip);
         PcdSet8S (PcdUsb30OverCurrentPinPort9, PchUsbOverCurrentPinSkip);
-      }
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / USB Port OC Mapping / Modified <<
       break;
 
     case BoardIdSkylakeAioRvp9Crb:

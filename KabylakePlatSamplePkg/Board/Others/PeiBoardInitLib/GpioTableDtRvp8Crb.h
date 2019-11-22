@@ -192,8 +192,12 @@ static GPIO_INIT_CONFIG mGpioTableDtRvp8Crb[] =
   {GPIO_SKL_H_GPP_E8,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirOut     , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //SATA_LEDB_VISA2CH1_D7/PCH_SATA_LED_N(All SKU)
   {GPIO_SKL_H_GPP_E9,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioHostDeepReset   , GpioTermNone }}, //USB2_OCB_0_VISA2CH2_D0/USB_OC0_R_N
   {GPIO_SKL_H_GPP_E10, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioHostDeepReset   , GpioTermNone }}, //USB2_OCB_1_VISA2CH2_D1/USB_OC1_R_N
-  {GPIO_SKL_H_GPP_E11, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioHostDeepReset   , GpioTermNone }}, //USB2_OCB_2_VISA2CH2_D2/USB_OC2_R_N
-  {GPIO_SKL_H_GPP_E12, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioHostDeepReset   , GpioTermNone }}, //USB2_OCB_3__VISA2CH2_D3/USB_OC3_R_N
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//  {GPIO_SKL_H_GPP_E11, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioHostDeepReset   , GpioTermNone }}, //USB2_OCB_2_VISA2CH2_D2/USB_OC2_R_N
+//  {GPIO_SKL_H_GPP_E12, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioHostDeepReset   , GpioTermNone }}, //USB2_OCB_3__VISA2CH2_D3/USB_OC3_R_N
+  {GPIO_SKL_H_GPP_E11,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
+  {GPIO_SKL_H_GPP_E12,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
   {GPIO_SKL_H_GPP_F0,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
 //  {GPIO_SKL_H_GPP_F1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpu20K  }}, //SATAXPCIE_4_SATAGP_4_VISA2CH2_D5
