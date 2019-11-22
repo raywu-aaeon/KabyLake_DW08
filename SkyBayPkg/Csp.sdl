@@ -623,6 +623,19 @@ TOKEN
     TargetMAK = Yes
     TargetH = Yes
 End
+
+TOKEN
+	Name  = "Thunderbolt_SUPPORT"
+	Value  = "0"
+	Help  = "Main switch to enable Thunderbolt support in Project"
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+#	Master = Yes
+#	Token = "AmiPciBus_SUPPORT" "=" "1"
+#	Token = "HOTPLUG_SUPPORT" "=" "1"
+End
+
 ##ray_override / [XI-BringUp] Disable Unused Feature / added <<
 
 ##ray_override / [XI-BringUp] Support F81866 / added >>

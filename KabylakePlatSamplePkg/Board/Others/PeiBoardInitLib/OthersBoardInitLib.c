@@ -562,7 +562,12 @@ OthersBoardInit (
   Status = OthersSidebandCardDetectGpioInit (PlatformInfo, BoardId);
   Status = OthersHdaVerbTableInit (PlatformInfo, BoardId, BoardIdOrgValue);
   Status = OthersBoardMiscInit (PlatformInfo, BoardId);
+//ray_override / [XI-BringUp] Bring Up Porting / Disable Thunderbolt / Modified >>
+//  Status = OthersBoardTbtInit (PlatformInfo, BoardId);
+#if defined(Thunderbolt_SUPPORT) && (Thunderbolt_SUPPORT == 1)
   Status = OthersBoardTbtInit (PlatformInfo, BoardId);
+#endif
+//ray_override / [XI-BringUp] Bring Up Porting / Disable Thunderbolt / Modified <<
   Status = OthersBoardFunctionInit (PlatformInfo, BoardId);
 
   return EFI_SUCCESS;
