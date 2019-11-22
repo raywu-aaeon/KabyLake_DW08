@@ -1132,24 +1132,27 @@ InitCommonPlatformConfigBlock (
       break;
   }
 
-  //
-  // H8S2113 SIO
-  //
-  switch (BoardId) {
-    case BoardIdSkylakeAioRvp10Crb:
-    case BoardIdSkylakeAioRvp10CrbPpv:
-    case BoardIdSkylakeAioRvp10Evp:
-    case BoardIdSkylakeSlpfPpv:
-    case BoardIdSkylakeDtRvp8Crb:
-      PcdSetBoolS (PcdH8S2113SIO, TRUE);
-      if (BoardIdOrgValue == BoardIdKabyLakeOc) {
-        PcdSetBoolS (PcdH8S2113SIO, FALSE);
-      }
-      break;
-    default:
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//  //
+//  // H8S2113 SIO
+//  //
+//  switch (BoardId) {
+//    case BoardIdSkylakeAioRvp10Crb:
+//    case BoardIdSkylakeAioRvp10CrbPpv:
+//    case BoardIdSkylakeAioRvp10Evp:
+//    case BoardIdSkylakeSlpfPpv:
+//    case BoardIdSkylakeDtRvp8Crb:
+//      PcdSetBoolS (PcdH8S2113SIO, TRUE);
+//      if (BoardIdOrgValue == BoardIdKabyLakeOc) {
+//        PcdSetBoolS (PcdH8S2113SIO, FALSE);
+//      }
+//      break;
+//    default:
+//      PcdSetBoolS (PcdH8S2113SIO, FALSE);
+//      break;
+//  }
       PcdSetBoolS (PcdH8S2113SIO, FALSE);
-      break;
-  }
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 
   //
   // NCT6776F COM, SIO & HWMON
