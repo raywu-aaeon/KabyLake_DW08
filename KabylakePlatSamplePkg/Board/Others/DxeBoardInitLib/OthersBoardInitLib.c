@@ -1243,33 +1243,36 @@ InitCommonPlatformConfigBlock (
       break;
   }
 
-  //
-  // SMC Runtime Sci Pin
-  //
-  switch (BoardId) {
-    case BoardIdSkylakeULpddr3Rvp5:
-    case BoardIdSkylakeULpddr3Rvp5Ppv:
-    case BoardIdSkylakeLpdimmDoe:
-    case BoardIdSkylakeSds:
-    case BoardIdSkylakePhabletPoc:
-    case BoardIdSkylakePantherMtn:
-    case BoardIdKabylakeGrizzlyMtn:
-    case BoardIdKabylakeCoyoteMtn:
-    case BoardIdSkylakeStarbrook:
-      PcdSet32S (PcdSmcRuntimeSciPin, (UINT32) GPIO_SKL_LP_GPP_E16);
-      break;
-    case BoardIdSkylakeDtRvp8Crb:
-    case BoardIdSkylakeAioRvp9Crb:
-    case BoardIdSkylakeAioRvp10Crb:
-    case BoardIdSkylakeAioRvp10CrbPpv:
-    case BoardIdSkylakeAioRvp10Evp:
-    case BoardIdSkylakeSlpfPpv:
-      PcdSet32S (PcdSmcRuntimeSciPin, (UINT32) GPIO_SKL_H_GPP_G3);
-      break;
-    default:
-      PcdSet32S (PcdSmcRuntimeSciPin, 0x00);
-      break;
-  }
+//ray_override / [XI-BringUp] Bring Up Porting / Modified >>
+//  //
+//  // SMC Runtime Sci Pin
+//  //
+//  switch (BoardId) {
+//    case BoardIdSkylakeULpddr3Rvp5:
+//    case BoardIdSkylakeULpddr3Rvp5Ppv:
+//    case BoardIdSkylakeLpdimmDoe:
+//    case BoardIdSkylakeSds:
+//    case BoardIdSkylakePhabletPoc:
+//    case BoardIdSkylakePantherMtn:
+//    case BoardIdKabylakeGrizzlyMtn:
+//    case BoardIdKabylakeCoyoteMtn:
+//    case BoardIdSkylakeStarbrook:
+//      PcdSet32S (PcdSmcRuntimeSciPin, (UINT32) GPIO_SKL_LP_GPP_E16);
+//      break;
+//    case BoardIdSkylakeDtRvp8Crb:
+//    case BoardIdSkylakeAioRvp9Crb:
+//    case BoardIdSkylakeAioRvp10Crb:
+//    case BoardIdSkylakeAioRvp10CrbPpv:
+//    case BoardIdSkylakeAioRvp10Evp:
+//    case BoardIdSkylakeSlpfPpv:
+//      PcdSet32S (PcdSmcRuntimeSciPin, (UINT32) GPIO_SKL_H_GPP_G3);
+//      break;
+//    default:
+//      PcdSet32S (PcdSmcRuntimeSciPin, 0x00);
+//      break;
+//  }
+  PcdSet32S (PcdSmcRuntimeSciPin, 0x00);
+//ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 
   //
   // Convertable Dock Support
