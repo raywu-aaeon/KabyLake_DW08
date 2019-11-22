@@ -66,6 +66,79 @@
 // Function Definition(s)
 
 //----------------------------------------------------------------------------
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / Support ALC662 / Added >>
+UINT32 Deepware_H110_ALC662[] = {
+//===== HDA Codec Subsystem ID Verb-table =====
+//HDA Codec Subsystem ID  : 0x10EC0662
+0x00172062,
+0x00172106,
+0x001722EC,
+0x00172310,
+
+//===== Pin Widget Verb-table =====
+//Widget node 0x01 :
+0x0017FF00,
+0x0017FF00,
+0x0017FF00,
+0x0017FF00,
+//Pin widget 0x14 - FRONT (Port-D)
+0x01471C10,
+0x01471D40,
+0x01471E01,
+0x01471F01,
+//Pin widget 0x15 - SURR (Port-A)
+0x01571C00,
+0x01571DC0,
+0x01571E0C,
+0x01571F40,
+//Pin widget 0x16 - CEN/LFE (Port-G)
+0x01671CF0,
+0x01671D11,
+0x01671E11,
+0x01671F41,
+//Pin widget 0x18 - MIC1 (Port-B)
+0x01871C20,
+0x01871D90,
+0x01871EA1,
+0x01871F01,
+//Pin widget 0x19 - MIC2 (Port-F)
+0x01971CF0,
+0x01971D11,
+0x01971E11,
+0x01971F41,
+//Pin widget 0x1A - LINE1 (Port-C)
+0x01A71C2F,
+0x01A71D30,
+0x01A71E81,
+0x01A71F01,
+//Pin widget 0x1B - LINE2 (Port-E)
+0x01B71CF0,
+0x01B71D11,
+0x01B71E11,
+0x01B71F41,
+//Pin widget 0x1C - CD-IN
+0x01C71CF0,
+0x01C71D11,
+0x01C71E11,
+0x01C71F41,
+//Pin widget 0x1D - BEEP-IN
+0x01D71C01,
+0x01D71D00,
+0x01D71EB0,
+0x01D71F40,
+//Pin widget 0x1E - S/PDIF-OUT
+0x01E71CF0,
+0x01E71D11,
+0x01E71E11,
+0x01E71F41,
+//Widget node 0x20 :
+0x02050004,
+0x02040001,
+0x02050004,
+0x02040001
+};
+//ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / Support ALC662 / Added <<
+
 UINT32 OemHdaVerbTableDisplayAudio[] = {
     //
     // Display Audio Verb Table

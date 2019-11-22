@@ -1132,4 +1132,13 @@ TOKEN
 	TargetH = Yes
 	Range  = "00 - 0FFFFh"
 End
+
+ELINK
+    Name  = "{{0x10EC, 0x0662, 0xFF, 0xFF, 52}, Deepware_H110_ALC662},"
+    Parent  = "OEM_HDA_VERB_TABLE"
+    Help  = "CRB HDA Verb Table"
+    Token = "CRB_HDA_VERB_TABLE_PRESENT" "=" "1"
+#    Token = "CRB_EC_SUPPORT" "=" "0"
+    InvokeOrder = AfterParent
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
