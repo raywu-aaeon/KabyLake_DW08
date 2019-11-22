@@ -1320,4 +1320,70 @@ TOKEN
 	Range =  "From PASSWORD_MIN_SIZE to SETUP_PASSWORD_LENGTH"
 	Token = "TSE_DEFAULT_SETUP_PASSWORD_SUPPORT" "=" "1"
 End
+
+TOKEN
+	Name  = "BEEP_ENABLE"
+	Value  = "1"
+	Help  = "This flag enables/disables all firmware beeps"
+	TokenType = Boolean
+	TargetH = Yes
+	TargetMAK = Yes
+End
+
+TOKEN
+	Name  = "SETUP_PRINT_EVAL_MSG"
+	Value  = "0"
+	Help  = "Enable/Disable Evaluation message in Post screen"
+	TokenType = Boolean
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "DEFAULT_CSM_LAUNCH_POLICY"
+	Value  = "1"
+	Help  = "Controls default value of CSM Launch Policy setup control"
+	TokenType = Integer
+	TargetH = Yes
+	Range  = "0 - do not launch CSM, 1 - launch CSM"
+End
+
+TOKEN
+	Name  = "DEFAULT_PXE_OPROM_POLICY"
+	Value  = "$(CSMSETUP_SKIP_OPROMS)"
+	Help  = "Default value of Launch PXE OpROM policy setup control"
+	TokenType = Integer
+	TargetH = Yes
+	Range  = "$(CSMSETUP_SKIP_OPROMS) - Do not launch\$(CSMSETUP_UEFI_ONLY_OPROMS) - Launch UEFI OpROM only\$(CSMSETUP_LEGACY_ONLY_OPROMS) - Launch Legacy OpROM only"
+	Token = "CSM_SUPPORT" "=" "1"
+End
+
+TOKEN
+	Name  = "DEFAULT_MASS_STORAGE_OPROM_POLICY"
+	Value  = "$(CSMSETUP_LEGACY_ONLY_OPROMS)"
+	Help  = "Default value of Launch Storage OpROM policy setup control"
+	TokenType = Integer
+	TargetH = Yes
+	Range  = "$(CSMSETUP_SKIP_OPROMS) - Do not launch\$(CSMSETUP_UEFI_ONLY_OPROMS) - Launch UEFI OpROM only\$(CSMSETUP_LEGACY_ONLY_OPROMS) - Launch Legacy OpROM only"
+	Token = "CSM_SUPPORT" "=" "1"
+End
+
+TOKEN
+	Name  = "DEFAULT_VIDEO_OPROM_POLICY"
+	Value  = "$(CSMSETUP_LEGACY_ONLY_OPROMS)"
+	Help  = "Default value of Launch Video OpROM policy setup control"
+	TokenType = Integer
+	TargetH = Yes
+	Range  = "$(CSMSETUP_SKIP_OPROMS) - Do not launch\$(CSMSETUP_UEFI_ONLY_OPROMS) - Launch UEFI OpROM only\$(CSMSETUP_LEGACY_ONLY_OPROMS) - Launch Legacy OpROM only"
+	Token = "CSM_SUPPORT" "=" "1"
+End
+
+TOKEN
+	Name  = "DEFAULT_BOOT_OPTION_FILTERING_POLICY"
+	Value  = "$(CSMSETUP_ENABLE_ALL_BOOT_OPTIONS)"
+	Help  = "Controls default value of Boot Option Filter setup control"
+	TokenType = Integer
+	TargetH = Yes
+	Range  = "$(CSMSETUP_ENABLE_ALL_BOOT_OPTIONS) - Both UEFI and Legacy boot options enabled\$(CSMSETUP_LEGACY_ONLY_BOOT_OPTIONS) - Only Legacy boot options enabled\$(CSMSETUP_UEFI_ONLY_BOOT_OPTIONS) - Only UEFI boot options enabled"
+	Token = "CSM_SUPPORT" "=" "1"
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<

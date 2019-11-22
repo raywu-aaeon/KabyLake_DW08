@@ -908,6 +908,7 @@
 "AMIDebuggerPkg\Debugger\UefiTimerLib\UefiTimerLib.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Debugger/UefiTimerLib;Debugger_42"
 "A5Debugger\AptioVDebuggerUSBDbgr.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Debugger/AptioVDebugger;Debugger_42"
 "AaeonIoPkg\AaeonIoPkg.cif"
+"AaeonCommonPkg\AaeonCommonPkg.cif"
 "SkyBayPkg\Crb.cif"= Private
 "SkyBayPkg\CrbSetup\CrbSetup.cif"= Private
 "SkyBayPkg\Include\Include.cif"= Private
