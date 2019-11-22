@@ -844,6 +844,55 @@ TOKEN
 	TargetH = Yes
 End
 
+TOKEN
+	Name  = "F81866_T2_MODE"
+	Value  = "0"
+	Help  = "0: TEMP2 is connected to a thermistor.\1: TEMP2 is connected to a BJT. (default)"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "VIN2_RA"
+	Value  = "200"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "VIN2_RB"
+	Value  = "47"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "VIN3_RA"
+	Value  = "200"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "VIN3_RB"
+	Value  = "20"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "VIN4_RA"
+	Value  = "100"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "VIN4_RB"
+	Value  = "100"
+	TokenType = Integer
+	TargetH = Yes
+End
 ##ray_override / [XI-BringUp] Support F81866 / added <<
 
 ##ray_override / [XI-BringUp] Support F81216D / added >>
