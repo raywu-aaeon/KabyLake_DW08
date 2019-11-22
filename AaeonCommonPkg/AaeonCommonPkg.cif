@@ -1,0 +1,44 @@
+<component>
+	name = "AaeonCommonPkg"
+	category = Flavor
+	LocalRoot = "AaeonCommonPkg\"
+	RefName = "AaeonCommonPkg"
+[INF]
+"AaeonCommonDxe.inf"
+"AaeonPowerButtonSmiPkg\AaeonPowerButtonSmi.inf"
+"AaeonSxSmiPkg\AaeonSxSmi.inf"
+"AaeonDxeLib\AaeonDxeLib.inf"
+
+[files]
+"AaeonCommonPkg.dec"
+"AaeonCommonPkg.sdl"
+"AaeonCommonPkg.sd"
+"AaeonCommonPkg.uni"
+"AaeonCommonCallback.c"
+
+[parts]
+"AaeonBfpi"
+"F75111PeiPkg"
+"SecDecodePkg"
+"AaeonSetup"
+"AaeonDioPkg"
+"AaeonDio2Pkg"
+"AaeonDio3"
+"Ptn3460PeiPkg"
+"AaeonMagicWordPkg"
+"AaeonUartModePkg"
+"AaeonUartMode2Pkg"
+"AaeonMultiVbiosPkg"
+"AaeonOemBeepMap"
+"AaeonRtcWakePkg"
+"AaeonCommonPkg.AaeonPowerMode"
+"AaeonGpioIdPkg"
+"PTN3460Cfg"
+"AutoLoadDefault"
+"IPCBU_BiosInfoPeiPkg"
+"HiManagerUUID"
+"AaeonLanUefiDriver"
+"SioLdnDefaultDisable"
+"MacToUUID"
+"AaeonDefaultPwd"
+<endComponent>

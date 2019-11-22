@@ -1,0 +1,16 @@
+<component>
+	name = "AaeonBfpi"
+	category = ModulePart
+	Rank = 60
+	LocalRoot = "AaeonCommonPkg\AaeonBfpi\"
+	RefName = "AaeonBfpi"
+[files]
+"AaeonBfpi.sdl"	
+"AaeonBfpi.asl"	
+"AaeonBfpiWdt.asl"	
+"AaeonBfpiDxe.c"	
+"AaeonBfpiDxe.inf"	
+"OemBfpiTemplate.asl" 
+[parts]
+"AaeonBfpiReportCapability" 
+<endComponent>

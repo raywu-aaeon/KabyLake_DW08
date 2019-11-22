@@ -1,0 +1,51 @@
+###########################################################################
+                	AaeonUartMode2Pkg
+###########################################################################
+---------------------------------------------------------------------------
+Porting Guide:
+1. Enable MAIN TOKEN "AaeonUartMode2Pkg_SUPPORT"
+2. Set transceiver of UART mode by TOKEN "ONEOF_AAEON_UARTMODE_TRANSCEIVER_DEFAULT"
+3. Make sure truth table is correct by TOKEN "XXXXXX_TRUTH_TABLE" which use
+   for control RS232/422/485 mode
+4. Enable the UART mode support by TOKEN "CHECKBOX_AAEON_UARTMODE_DEFAULT"
+5. Set UID for target UART by TOKEN "NUMERIC_AAEON_UARTMODE_UID_DEFAULT"
+6. Set GPIO source chip for target UART mode by TOKEN "ONEOF_AAEON_UARTMODE_SOURCE_DEFAULT"
+7. Set GPIO number which use for control transceiver by TOKEN "NUMERIC_AAEON_UARTMODE_GPIO_DEFAULT"
+8. There are 6 UART mode control item in this module
+
+---------------------------------------------------------------------------
+###########################################################################
+Source Revision:	AaeonUartMode2Pkg_01
+Release Date:		11/09/2018
+Action:
+			1. Add function "UartModeDefaultInit" for set UART
+			mode default before AaeonCommonFeaturesSyncReady
+			2. Add file "AaeonUartMode2LoadDefaults" for set 
+			UART mode when user load default
+			3. Add setup item "UART Mode Default" for each
+			UART Control item
+			4. Add TOKEN "DEFAULT_AAEON_UART1/2/3/4/5/6MODE"
+			for set UART mode default
+Dependencies:
+			AaeonDxeLib
+File:
+			> AaeonUartMode2Pkg/AaeonUartMode2Pkg.c
+			> AaeonUartMode2Pkg/AaeonUartMode2Pkg.cif
+			> AaeonUartMode2Pkg/AaeonUartMode2Pkg.sd
+			> AaeonUartMode2Pkg/AaeonUartMode2Pkg.sdl
+			> AaeonUartMode2Pkg/AaeonUartMode2Pkg.uni
+			> AaeonUartMode2Pkg/AaeonUartMode2LoadDefaults.c
+---------------------------------------------------------------------------
+Compiling Env:		Aptio_5.x_TOOLS_28
+###########################################################################
+Source Revision:	AaeonUartMode2Pkg_00
+Release Date:		07/18/2017
+Action:
+			1. First release - This module use setup menu "UART 
+			Mode Configuration" to control UART Mode 
+Dependencies:
+			AaeonDxeLib
+---------------------------------------------------------------------------
+Compiling Env:		Aptio_5.x_TOOLS_28
+
+###########################################################################
