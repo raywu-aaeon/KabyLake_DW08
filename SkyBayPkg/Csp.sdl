@@ -1141,4 +1141,59 @@ ELINK
 #    Token = "CRB_EC_SUPPORT" "=" "0"
     InvokeOrder = AfterParent
 End
+
+TOKEN
+	Name  = "LOGO_FILE_NAME"
+	Value  = "SkyBayPkg\GRG_Logo_800x600.jpg"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetFDF = Yes
+End
+
+TOKEN
+	Name  = "SETUP_ENTRY_SCAN"
+	Value  = "EFI_SCAN_F11"
+	Help  = "Set to one of the defined constants from EFI_SIMPLE_TEXT_INPUT protocol. Remember to check STR_DEL_ENTER_SETUP string in AmiTSEStr.uni, and STR_DEL_ENTER_SETUP_SREDIR in Terminal.uni if using Serial Redirection"
+	TokenType = Expression
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "POPUP_MENU_ENTRY_SCAN"
+	Value  = "EFI_SCAN_F10"
+	Help  = "Set to one of the defined constants from EFI_SIMPLE_TEXT_INPUT protocol.Remember to check STR_BBS_POPUP_SREDIR in Terminal.uni if using Serial Redirection. "
+	TokenType = Expression
+	TargetH = Yes
+	Token = "SETUP_BBS_POPUP_ENABLE" "!=" "0"
+End
+
+TOKEN
+	Name  = "TSE_DEFAULT_SETUP_PASSWORD_SUPPORT"
+	Value  = "1"
+	Help  = "0 is default.set 1=> to Enable default setup password"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "DEFAULT_SETUP_PWD_AT_FIRSTBOOT_ONLY"
+	Value  = "0"
+	Help  = "1 is default. 1 => Sets the TSE_ADMIN_PASSWORD and TSE_USER_PASSWORD at first boot only. 0 => Sets TSE_ADMIN_PASSWORD and TSE_USER_PASSWORD in TSE defaults, on load defaults these data will be loaded"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetH = Yes
+	Token = "TSE_DEFAULT_SETUP_PASSWORD_SUPPORT" "=" "1"
+End
+
+TOKEN
+	Name  = "TSE_ADMIN_PASSWORD"
+	Value  ='"Grg90#@B"'
+	Help  = "If default admin password is not required, it will not be set; in that case keep EMPTY_DATA as a default value. Otherwise, replace EMPTY_DATA with the new value of default admin password. Keep the double quotes - they are necessary to support special characters. String length should be less than SETUP_PASSWORD_LENGTH"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetH = Yes
+	Range =  "From PASSWORD_MIN_SIZE to SETUP_PASSWORD_LENGTH"
+	Token = "TSE_DEFAULT_SETUP_PASSWORD_SUPPORT" "=" "1"
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
