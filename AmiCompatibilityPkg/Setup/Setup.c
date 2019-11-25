@@ -216,7 +216,10 @@ EFI_STATUS InitSystemVersionString(EFI_HII_HANDLE HiiHandle)
         STR(PROJECT_TAG), PROJECT_MAJOR_VERSION, PROJECT_MINOR_VERSION, PROJECT_BUILD
 #else //#if PROJECT_BUILD_NUMBER_IN_TITLE_SUPPORTED && defined(PROJECT_BUILD)
 #ifdef EFIx64
-        L"%s %d.%02d x64",
+//ray_override / [XI-BringUp] Bring Up Porting / Project Naming : DW05 / Modified >>
+//        L"%s %d.%02d x64",
+        L"%s%d%d x64",
+//ray_override / [XI-BringUp] Bring Up Porting / Project Naming : DW05 / Modified <<
 #else
         L"%s %d.%02d",
 #endif
