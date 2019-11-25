@@ -1460,4 +1460,120 @@ TOKEN
 	TokenType = Integer
 	TargetH = Yes
 End
+
+TOKEN
+    Name  = "KBC_SUPPORT"
+    Value  = "1"
+    Help  = "Enable/Disable KBC support"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+#    Token = "CRB_EC_SUPPORT" "=" "1"    
+End
+
+TOKEN
+    Name  = "PS2Ctl_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable PS2 Controller support in the project."
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+#    Master = Yes
+End
+
+TOKEN
+    Name  = "EMUL6064_SUPPORT"
+    Value  = "1"
+    Help  = "Main switch to enable KBC Emulation support in Project"
+    TokenType = Boolean
+    TargetH = Yes
+    Token = "USB_RUNTIME_DRIVER_IN_SMM" "!=" "0"     
+End
+
+TOKEN
+    Name  = "DEFAULT_USB_EMUL6064_OPTION"
+    Value  = "1"
+    Help  = "Default value of the I/O port 60h/64h emulation support option"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+PCIDEVICE
+	Title  = "PCIE Port #5 Slot"
+	Parent  = "PCIE Root Port #5"
+	Attribute  = "0x0"
+	Dev_type  = "PciDevice"
+	Dev  = 00h
+	Slot  = 024h
+	Fun  = 0ffh
+	SleepNum  = 09h
+	IntA = 	LNKA; 16
+	IntB = 	LNKB; 17
+	IntC = 	LNKC; 18
+	IntD = 	LNKD; 19
+	DeviceType = Slot
+	PCIBusSize = 32bit
+	ROMMain = No
+	PCIExpress = Yes
+	SuppressDeviceGeneration = Yes
+    Disable = Yes
+End
+
+PCIDEVICE
+	Title  = "PCIE Port #6 Slot"
+	Parent  = "PCIE Root Port #6"
+	Attribute  = "0x0"
+	Dev_type  = "PciDevice"
+	Dev  = 00h
+	Slot  = 025h
+	Fun  = 0ffh
+	SleepNum  = 09h
+	IntA = 	LNKB; 17
+	IntB = 	LNKC; 18
+	IntC = 	LNKD; 19
+	IntD = 	LNKA; 16
+	DeviceType = Slot
+	PCIBusSize = 32bit
+	ROMMain = No
+	PCIExpress = Yes
+	SuppressDeviceGeneration = Yes
+    Disable = Yes
+End
+
+PCIDEVICE
+	Title  = "PCIe Realtek LAN #1"
+	Parent  = "PCIE Root Port #5"
+	Attribute  = "0x0"
+	Dev_type  = "Container"
+	Dev  = 00h
+	Fun  = 00h
+	ROMFile  = "SkyBayPkg\Override\RTEG263.LOM"
+	DeviceType = OnBoard
+	PCIBusSize = 32bit
+	ROMMain = No
+	Virtual = Yes
+	LegacyRom = Yes
+	SuppressDeviceGeneration = Yes
+	FFSFileName  = "ROM Storage"
+	ROMSectionGuid  = "1a3f982c-5bd8-4c81-8194-0d63b01c9341"
+End
+
+PCIDEVICE
+	Title  = "PCIe Realtek LAN #2"
+	Parent  = "PCIE Root Port #6"
+	Attribute  = "0x0"
+	Dev_type  = "Container"
+	Dev  = 00h
+	Fun  = 00h
+	ROMFile  = "SkyBayPkg\Override\RTEG263.LOM"
+	DeviceType = OnBoard
+	PCIBusSize = 32bit
+	ROMMain = No
+	Virtual = Yes
+	LegacyRom = Yes
+	SuppressDeviceGeneration = Yes
+	FFSFileName  = "ROM Storage"
+	ROMSectionGuid  = "1a3f982c-5bd8-4c81-8194-0d63b01c9341"
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
