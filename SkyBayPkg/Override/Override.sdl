@@ -1576,4 +1576,92 @@ PCIDEVICE
 	FFSFileName  = "ROM Storage"
 	ROMSectionGuid  = "1a3f982c-5bd8-4c81-8194-0d63b01c9341"
 End
+
+TOKEN
+    Name  = "PROJECT_TAG"
+    Value  = "DW05AR"
+    Help  = "This value should only be 5 characters max"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "PROJECT_MAJOR_VERSION"
+    Value  = "0"
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "PROJECT_MINOR_VERSION"
+    Value  = "1"
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+	Name  = "SYSTEM_MANUFACTURER"
+	Value  = "Deepware"
+	Help  = "Specifies the System Manufacturer Name."
+	TokenType = Expression
+	TargetEQU = Yes
+End
+
+TOKEN
+	Name  = "SYSTEM_PRODUCT_NAME"
+	Value  = "DW05"
+	Help  = "Specifies the System Product Name"
+	TokenType = Expression
+	TargetEQU = Yes
+End
+
+TOKEN
+	Name  = "SYSTEM_VERSION"
+	Value  = "V1.01"
+	Help  = "Specifies the System Product Version."
+	TokenType = Expression
+	TargetEQU = Yes
+End
+
+TOKEN
+	Name  = "BASE_BOARD_MANUFACTURER"
+	Value  = "Deepware"
+	Help  = "Specifies the Board Manufacturer."
+	TokenType = Expression
+	TargetEQU = Yes
+	Token = "BASE_BOARD_INFO" "=" "1"
+	Token = "NUMBER_OF_BASEBOARDS" "=" "1"
+End
+
+TOKEN
+	Name  = "BASE_BOARD_PRODUCT_NAME"
+	Value  = "DW05"
+	Help  = "Specifies the Product Name"
+	TokenType = Expression
+	TargetEQU = Yes
+	Token = "BASE_BOARD_INFO" "=" "1"
+	Token = "NUMBER_OF_BASEBOARDS" "=" "1"
+End
+
+TOKEN
+	Name  = "BASE_BOARD_VERSION"
+	Value  = "V1.01"
+	Help  = "Specifies the Product Version."
+	TokenType = Expression
+	TargetEQU = Yes
+	Token = "BASE_BOARD_INFO" "=" "1"
+	Token = "NUMBER_OF_BASEBOARDS" "=" "1"
+End
+
+TOKEN
+	Name  = "OEM_USB_PER_PORT_DISABLE_SUPPORT"
+	Value  = "1"
+	TokenType = Boolean
+	TargetH = Yes
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
