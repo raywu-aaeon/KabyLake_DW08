@@ -241,7 +241,10 @@ UINT32 CheckSystemPassword(UINT32 EmptyPasswordType, UINTN *NoOfRetries, UINTN *
                 (!(PasswordInstalled & AMI_PASSWORD_USER ))&&
                 (EmptyPasswordType & AMI_PASSWORD_USER)
                 )
-                PasswordCheck = AMI_PASSWORD_USER;
+//ray_override / [XI-BringUp] Bring Up Porting / Not Support User Level Setup Entry / Modified >>
+//                PasswordCheck = AMI_PASSWORD_USER;
+                PasswordCheck = AMI_PASSWORD_NONE;
+//ray_override / [XI-BringUp] Bring Up Porting / Not Support User Level Setup Entry / Modified <<
             if(
                 (!(PasswordInstalled & AMI_PASSWORD_ADMIN ))&&
                 (EmptyPasswordType & AMI_PASSWORD_ADMIN)
