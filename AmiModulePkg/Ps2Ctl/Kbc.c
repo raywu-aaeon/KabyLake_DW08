@@ -41,6 +41,36 @@ extern  EFI_LEGACY_8259_PROTOCOL *mLegacy8259;
 BOOLEAN InsidePS2DataDispatcher = FALSE;
 extern BOOLEAN InsideKbdReadKey;
 
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Added >>
+VOID F81866ConfigRegisterWrite(UINT8 Index, UINT8 Data)
+{
+	IoWrite8(F81866_CONFIG_INDEX, Index);
+	IoWrite8(F81866_CONFIG_DATA, Data);
+}
+UINT8 F81866ConfigRegisterRead(UINT8 Index)
+{
+	UINT8 Data8;
+	IoWrite8(F81866_CONFIG_INDEX, Index);
+	Data8 = IoRead8(F81866_CONFIG_DATA);
+	return Data8;
+}
+VOID F81866LDNSelect(UINT8 Ldn)
+{
+	IoWrite8(F81866_CONFIG_INDEX, F81866_LDN_SEL_REGISTER);
+	IoWrite8(F81866_CONFIG_DATA, Ldn);
+}
+VOID F81866EnterConfigMode()
+{
+	IoWrite8(F81866_CONFIG_INDEX, F81866_CONFIG_MODE_ENTER_VALUE);
+	IoWrite8(F81866_CONFIG_INDEX, F81866_CONFIG_MODE_ENTER_VALUE);
+}
+VOID F81866ExitConfigMode()
+{
+	// Exit config mode
+	IoWrite8(F81866_CONFIG_INDEX, F81866_CONFIG_MODE_EXIT_VALUE);
+}
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Added <<
+
 /**
     Reads keyboard data port to clear it
 
@@ -153,22 +183,34 @@ VOID
 AutodetectKbdMousePorts ()
 {
     UINT8           bData, Index;
-    EFI_STATUS      Status;
-    
-    Status = IbFreeTimeout(IbFreeMaxTimeoutValue);
-    if (EFI_ERROR(Status)) {
-        return;
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified >>
+//    EFI_STATUS      Status;
+//    
+//    Status = IbFreeTimeout(IbFreeMaxTimeoutValue);
+//    if (EFI_ERROR(Status)) {
+//        return;
+//    }
+//    WriteKeyboardCommand(0x60);         // Lock KBD
+    {
+        UINT8 Data8 ;
+
+        F81866EnterConfigMode() ;
+        F81866LDNSelect(0x05) ;
+        Data8 = F81866ConfigRegisterRead(0xFE) ;
+        F81866ConfigRegisterWrite(0xFE , Data8 & ~BIT4) ;
+        F81866ExitConfigMode() ;
     }
-    WriteKeyboardCommand(0x60);         // Lock KBD
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified <<
     IoRead8(KBC_DATA_PORT);             // Discard any data
 
     Write8042CommandByte(0x74);         // KBD and Aux device disabled
 
     // Check for KBC version
     IoRead8(KBC_DATA_PORT);             // Discard any data
-    WriteKeyboardCommand(0xa1);         //
-    if (!ObFullReadTimeout(&bData, 20, TRUE) && bData == 0x35) {
-
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed >>
+//    WriteKeyboardCommand(0xa1);         //
+//    if (!ObFullReadTimeout(&bData, 20, TRUE) && bData == 0x35) {
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed <<
         WriteKeyboardCommand(0x60);
         WriteKeyboardData(4);
 
@@ -185,12 +227,19 @@ AutodetectKbdMousePorts ()
 
         if (bData == rKeyboardID) goto PortSwap;
 
-        if (bData == KB_ACK_COM) {
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed >>
+//        if (bData == KB_ACK_COM) {
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed <<
             ObFullReadTimeout(&bData, 100, TRUE);
             // When Mouse is connected to KBD port, control goes to PortSwap here
-            if (!bData) goto PortSwap;
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified >>
+//            if (!bData) goto PortSwap;
+            if (bData != 0xAB) goto PortSwap;
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified <<
             ObFullReadTimeout(&bData, 100, TRUE);
-        }
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed >>
+//        }
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed <<
         bData = IoRead8(KBC_CMDSTS_PORT);
         // When KBD is connected to the KBD port, control returns here
         if (!(bData & KBC_TIMEOUT_ERR)) return;
@@ -210,9 +259,22 @@ AutodetectKbdMousePorts ()
         if (bData & KBC_TIMEOUT_ERR) return;
 
 PortSwap:
-        WriteKeyboardCommand(0xC9);
-        return;
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified >>
+//        WriteKeyboardCommand(0xC9);
+    {
+        UINT8 Data8 ;
+
+        F81866EnterConfigMode() ;
+        F81866LDNSelect(0x05) ;
+        Data8 = F81866ConfigRegisterRead(0xFE) ;
+        F81866ConfigRegisterWrite(0xFE , Data8 | BIT4) ;
+        F81866ExitConfigMode() ;
     }
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified <<
+        return;
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed >>
+//    }
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Removed <<
 }
 
 

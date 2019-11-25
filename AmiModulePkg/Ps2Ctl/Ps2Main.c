@@ -281,7 +281,10 @@ PS2CtlStart (
             }
         }
         // Swap ports if needed
-        if (AutodetectKbdMousePortsPtr!=NULL) AutodetectKbdMousePortsPtr();
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified >>
+//        if (AutodetectKbdMousePortsPtr!=NULL) AutodetectKbdMousePortsPtr();
+        AutodetectKbdMousePorts() ;
+//ray_override , [XI-BringUp] Bring Up Porting / Support PS2 Auto Swap , Modified <<
     
         gDriverStartCounter++;
     }
