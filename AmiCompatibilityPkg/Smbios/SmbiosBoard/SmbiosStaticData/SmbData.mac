@@ -70,6 +70,9 @@ CreateBiosInfo          macro   xHandle:REQ
    xBVersion TEXTEQU MKF_SYSTEM_BIOS_VERSION
   ENDIF
  ENDIF
+;;ray_override / [XI-BringUp] Bring Up Porting / SMBIOS Info. BIOS Version / Added >>
+ xBVersion TEXTEQU @CATSTR (%MKF_BIOS_TAG)
+;;ray_override / [XI-BringUp] Bring Up Porting / SMBIOS Info. BIOS Version / Added <<
  IF MKF_SMBIOS_SPEC_VERSION LT 310
   BIOSINFO_STRUC  {\
    { 0, sizeof(BIOSINFO_STRUC), xHandle },
