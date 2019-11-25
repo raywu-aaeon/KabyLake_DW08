@@ -924,6 +924,7 @@
 "AMIDebuggerPkg\Debugger\UefiTimerLib\UefiTimerLib.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Debugger/UefiTimerLib;Debugger_42"
 "A5Debugger\AptioVDebuggerUSBDbgr.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Debugger/AptioVDebugger;Debugger_42"
 "AmiTsePkg\TseEDKIIPkg\TseEDKIIPkg.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
+"AmiModulePkg\NTFS\NTFS.cif"
 "AaeonIoPkg\AaeonIoPkg.cif"
 "AaeonCommonPkg\AaeonCommonPkg.cif"
 "AaeonCommonPkg\AaeonDio2Pkg\AaeonDio2Pkg.cif"
