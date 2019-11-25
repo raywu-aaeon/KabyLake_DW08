@@ -1267,6 +1267,25 @@ ELINK
 End
 
 TOKEN
+	Name  = "SETUP_BMP_LOGO_SUPPORT"
+	Value  = "0"
+	Help  = "BMP Logo support in Setup"
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "SETUP_JPEG_LOGO_SUPPORT"
+	Value  = "1"
+	Help  = "JPEG Logo support in Setup."
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	TargetH = Yes
+End
+
+TOKEN
 	Name  = "LOGO_FILE_NAME"
 	Value  = "SkyBayPkg\GRG_Logo_800x600.jpg"
 	TokenType = Expression
