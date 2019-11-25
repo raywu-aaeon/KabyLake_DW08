@@ -1700,4 +1700,22 @@ TOKEN
 	TokenType = Boolean
 	TargetH = Yes
 End
+
+ELINK
+	Name  = "SkyBayPkg\Override\AaeonWakeLib\AaeonWakeLib.c"
+	Parent  = "AMI_CSP_DXE_SOURCES"
+	InvokeOrder = AfterParent
+End
+
+ELINK
+	Name  = "PchPmeWakeConfiguration,"
+	Parent  = "AAEON_S3_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
+
+ELINK
+	Name  = "PchPmeWakeConfiguration,"
+	Parent  = "AAEON_S4_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
