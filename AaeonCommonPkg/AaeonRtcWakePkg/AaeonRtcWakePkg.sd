@@ -141,6 +141,11 @@
 //	goto S5_RTCWAKE_FORM_ID, 
 //	    prompt = STRING_TOKEN(STR_S5_RTCWAKE_FORM),
 //	    help = STRING_TOKEN(STR_S5_RTCWAKE_FORM_HELP);
+//ray_override / [XI-BringUp] Bring Up Porting / Support RTC Wake / Added >>
+		goto S5_RTCWAKE_FORM_ID, 
+		    prompt = STRING_TOKEN(STR_S5_RTCWAKE_FORM),
+		    help = STRING_TOKEN(STR_S5_RTCWAKE_FORM_HELP);
+//ray_override / [XI-BringUp] Bring Up Porting / Support RTC Wake / Added <<
 
 	#endif //FORM_SET_GOTO
 	
@@ -148,6 +153,21 @@
 	#endif //AAEON_FORM_SET_GOTO
 	
 	#ifdef FORM_SET_FORM
+//ray_override / [XI-BringUp] Bring Up Porting / Support RTC Wake / Added >>
+		form formid = AUTO_ID(S5_RTCWAKE_FORM_ID),
+			title = STRING_TOKEN(STR_S5_RTCWAKE_FORM);
+			AAEON_WAKEONRTC
+			suppressif NOT ideqval SETUP_DATA.AaeonWakeOnRtc == 1;
+				AAEON_NUM_RTCWAKEUP_TIMEDAY
+				AAEON_NUM_RTCWAKEUP_TIMEHOUR
+				AAEON_NUM_RTCWAKEUP_TIMEMINUTE
+				AAEON_NUM_RTCWAKEUP_TIMESECOND
+			endif;
+			suppressif NOT ideqval SETUP_DATA.AaeonWakeOnRtc == 2;
+				AAEON_NUM_RTCWAKEUP_TIMEMINUTEINCREASE
+			endif;
+		endform;
+//ray_override / [XI-BringUp] Bring Up Porting / Support RTC Wake / Added <<
 	#endif //FORM_SET_FORM
 
 //	#define AAEON_S5_RTCWAKE_FORM
