@@ -1331,6 +1331,15 @@ TOKEN
 End
 
 TOKEN
+    Name  = "USB_BEEP_ENABLE"
+    Value  = "0"
+    Help  = "Enables/disables sounds on USB devices connection or removal."
+    TokenType = Boolean
+    TargetH = Yes
+#    Token = "BEEP_ENABLE" "=" "1"
+End
+
+TOKEN
 	Name  = "SETUP_PRINT_EVAL_MSG"
 	Value  = "0"
 	Help  = "Enable/Disable Evaluation message in Post screen"
