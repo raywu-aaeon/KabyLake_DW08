@@ -74,9 +74,13 @@
 
     #ifdef FORM_SET_GOTO
         // Define goto commands for the forms defined in this file
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed >>
+suppressif TRUE;
 		goto CPUTXT_FORM_ID, 
         prompt = STRING_TOKEN(STR_CPUTXT_FORM),
         help = STRING_TOKEN(STR_CPUTXT_HELP);
+endif;
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed <<
     #endif
 
     #ifdef FORM_SET_FORM

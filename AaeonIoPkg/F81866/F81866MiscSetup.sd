@@ -739,9 +739,13 @@
 //----------------------------------------------------------------------
 #ifdef FORM_SET_GOTO
 
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed >>
+suppressif TRUE;
 	goto F81866_GPIO_CONFIGURATION_FORM_ID, 
 	prompt = STRING_TOKEN(STR_F81866_GPIO_CONFIGURATION),
 	help    = STRING_TOKEN(STR_F81866_GPIO_CONFIGURATION);
+endif;
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed <<
 
 #endif
 

@@ -209,9 +209,13 @@ AUTO_ID(ACOUSTIC_LEVEL_KEY_17)
 #ifdef ADVANCED_FORM_SET
 
     #ifdef FORM_SET_GOTO
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed >>
+suppressif TRUE;
         goto SATA_ACOUSTIC_DEVICE_OPTIONS_FORM_ID,
         prompt  = STRING_TOKEN(STR_ACOUSTIC_SUBTITLE),
         help    = STRING_TOKEN(STR_ACOUSTIC_SUBTITLE_HELP);
+endif;
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed <<
     #endif // End of FORM_SET_GOTO
     
     #ifdef FORM_SET_FORM

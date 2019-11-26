@@ -116,9 +116,13 @@ typedef struct {
         //
         // Define goto commands for the forms defined in this file
         //
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed >>
+suppressif TRUE;
         goto SDIO_CONFIG_FORM_ID,
             prompt  = STRING_TOKEN(STR_SDIO_CONFIGURATION),
             help    = STRING_TOKEN(STR_SDIO_CONFIGURATION_HELP);
+endif;
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed <<
 
     #endif
 

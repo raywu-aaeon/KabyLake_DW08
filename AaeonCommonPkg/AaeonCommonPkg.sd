@@ -59,9 +59,13 @@
 	#endif
 
 	#ifdef FORM_SET_GOTO
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed >>
+suppressif TRUE;
         goto AAEON_COMMON_FORM_ID,
         prompt  = STRING_TOKEN(STR_AAEON_COMMON_FORM),
         help    = STRING_TOKEN(STR_AAEON_COMMON_FORM);
+endif;
+//ray_override / [XI-Tuning] Arrange Setup Layout / Removed <<
 	#endif //FORM_SET_GOTO
 
 	#ifdef FORM_SET_FORM

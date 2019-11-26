@@ -1306,10 +1306,11 @@
 // AMI_OVERRIDE_START	
 //          default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb ? 0x1:0x0), defaultstore = MyStandardDefault,  // AdvancedFeaturesContent
 // AMI_OVERRIDE_END	
-          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
       endoneof;
     endif;
+//ray_override / [XI-Tuning] Arrange Setup Default Setting
 
 // AMI_OVERRIDE_START >>> Add the SATA Controller Speed
       oneof varid      = PCH_SETUP.SataControllerSpeed,
@@ -12038,10 +12039,11 @@ form formid = AUTO_ID(STR_122_FORM_ID), // AMI_OVERRIDE
 // AMI_OVERRIDE_START  
 //        default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb ? 0x1:0x0), defaultstore = MyStandardDefault,
 // AMI_OVERRIDE_END  
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
       endoneof;
     endif;
+//ray_override / [XI-Tuning] Arrange Setup Default Setting
 
     grayoutif ideqval PCH_SETUP.PchSerialIoDevice[SERIAL_IO_I2C0] == 0;
       oneof varid  = PCH_SETUP.PchSerialIoDevice[SERIAL_IO_I2C1],
@@ -12050,10 +12052,11 @@ form formid = AUTO_ID(STR_122_FORM_ID), // AMI_OVERRIDE
 // AMI_OVERRIDE_START        
 //        default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb BoardIdSkylakeSdlBrk ? 0x1:0x0), defaultstore = MyStandardDefault,
 // AMI_OVERRIDE_END        
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
       endoneof;
     endif;
+//ray_override / [XI-Tuning] Arrange Setup Default Setting
 
     grayoutif ideqval PCH_SETUP.PchSerialIoDevice[SERIAL_IO_I2C0] == 0;
       oneof varid  = PCH_SETUP.PchSerialIoDevice[SERIAL_IO_I2C2],
@@ -12165,10 +12168,11 @@ form formid = AUTO_ID(STR_122_FORM_ID), // AMI_OVERRIDE
 // AMI_OVERRIDE_START  
 //        default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb BoardIdSkylakeSdlBrk ? 0x1:0x0), defaultstore = MyStandardDefault,
 // AMI_OVERRIDE_END  
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
       endoneof;
     endif;
+//ray_override / [XI-Tuning] Arrange Setup Default Setting
 
     grayoutif  ideqval PCH_SETUP.PchSerialIoDevice[SERIAL_IO_UART0] == 0 OR
                ideqval SETUP_DATA.GnssConnection == 1;
@@ -13231,10 +13235,11 @@ form formid = AUTO_ID(STR_124_FORM_ID), // AMI_OVERRIDE
     oneof varid  = PCH_SETUP.PchIshEnable,
       prompt   = STRING_TOKEN(STR_ISH_PROMPT),
       help     = STRING_TOKEN(STR_ISH_HELP),
-      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
-      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
     endoneof;
     endif;
+//ray_override / [XI-Tuning] Arrange Setup Default Setting
 
     suppressif ideqval PCH_SETUP.PchIshEnable == 0;
       checkbox varid  = PCH_SETUP.PchIshPdtUnlock,
