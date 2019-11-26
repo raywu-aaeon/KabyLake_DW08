@@ -810,7 +810,6 @@ TOKEN
 	TargetH = Yes
 End
 
-## ray_todo / PME function porting
 TOKEN
 	Name  = "GPIO65_EN"
 	Value  = "0"
@@ -1034,7 +1033,7 @@ LDEVICE
 	Dev_Type  = "dsUART"
 	LDev_Num  = "03h"
 	##UID  = "13h"
-	UID  = "010h"
+	UID  = "0Ah"
 	PnPID  = "0501h"
 	SIO_RES_Flag  = "0x4"
 	HasSetup = Yes
@@ -1655,7 +1654,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "2"
+    Value  = "3"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
