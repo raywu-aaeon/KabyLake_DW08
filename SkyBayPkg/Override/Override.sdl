@@ -931,6 +931,36 @@ TOKEN
 	TargetH = Yes
 End
 
+SIODEVICE
+	Name  = "F81216SEC"
+	Parent  = "LpcBridge"
+	IndexPort  = 04eh
+	DataPort  = 04fh
+	StdSioType  = "Yes"
+	DevSelReg  = 07h
+	ActivateReg  = 030h
+	ActivateVal  = 01h
+	DeActivateVal  = 00h
+	BaseHiReg1  = 060h
+	BaseLoReg1  = 061h
+	BaseHiReg2  = 062h
+	BaseLoReg2  = 063h
+	Irq1Reg  = 070h
+	Irq2Reg  = 072h
+	Dma1Reg  = 074h
+	Dma2Reg  = 075h
+	GblRegFlag  = "0xa000000000"
+	LocalRegFlag  = "0xffffffff0000000000000000000000000033000f000000000001000000000000"
+	EnterConfig  = "Script,'Index;Write;67h','Index;Write;67h'"
+	ExitConfig  = "Script,'Index;Write;aah'"
+	SMBIOSStr  = "Test String"
+	GPEbit  = 01dh
+	SleepNum  = 03h
+	ASLfile  = "'AaeonIoPkg\F81216SEC\F81216SECDEV.asl'"
+	ASLdeviceName  = "SIO2"
+	Token = "F81216SEC_CONFIG_INDEX_DATA_DEFAULT" "=" "1"
+End
+
 LDEVICE
 	Name  = "Com11"
 	SioDevice  = "F81216SEC"
@@ -1625,7 +1655,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "1"
+    Value  = "2"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
