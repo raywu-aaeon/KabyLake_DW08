@@ -140,11 +140,13 @@ End
 #	InvokeOrder = AfterParent
 #End
 
-ELINK
-	Name  = "ForceRecovery,"
-	Parent  = "IsRecovery"
-	InvokeOrder = AfterParent
-End
+##ray_override / [XI-BringUp] Bring Up Porting / Not Support Recovery / Removed >>
+##ELINK
+##	Name  = "ForceRecovery,"
+##	Parent  = "IsRecovery"
+##	InvokeOrder = AfterParent
+##End
+##ray_override / [XI-BringUp] Bring Up Porting / Not Support Recovery / Removed <<
 
 ELINK
 	Name  = "$(BOARD_DIR)/OemPort.c"

@@ -5028,14 +5028,16 @@ ELINK
 	InvokeOrder = AfterParent
 End
 
-ELINK
-	Name  = "IsCtrlHomePressed,"
-	Parent  = "IsRecovery"
-	Help  = "Ctr+Home detection"
-	Token = "KBC_SUPPORT" "=" "1"
-	Token = "AMI_COMPATIBILITY_PKG_VERSION" ">" "18"
-	InvokeOrder = AfterParent
-End
+##ray_override / [XI-BringUp] Bring Up Porting / Not Support Recovery / Removed >>
+##ELINK
+##	Name  = "IsCtrlHomePressed,"
+##	Parent  = "IsRecovery"
+##	Help  = "Ctr+Home detection"
+##	Token = "KBC_SUPPORT" "=" "1"
+##	Token = "AMI_COMPATIBILITY_PKG_VERSION" ">" "18"
+##	InvokeOrder = AfterParent
+##End
+##ray_override / [XI-BringUp] Bring Up Porting / Not Support Recovery / Removed <<
 
 ELINK
 	Name  = "SB_RUN_GUIDS"
