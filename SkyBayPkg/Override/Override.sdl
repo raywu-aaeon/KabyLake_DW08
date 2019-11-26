@@ -1608,6 +1608,7 @@ PCIDEVICE
 	ROMFile  = "SkyBayPkg\Override\RTEG263.LOM"
 	DeviceType = OnBoard
 	PCIBusSize = 32bit
+	OptionROM = Yes
 	ROMMain = No
 	Virtual = Yes
 	LegacyRom = Yes
@@ -1626,6 +1627,7 @@ PCIDEVICE
 	ROMFile  = "SkyBayPkg\Override\RTEG263.LOM"
 	DeviceType = OnBoard
 	PCIBusSize = 32bit
+	OptionROM = Yes
 	ROMMain = No
 	Virtual = Yes
 	LegacyRom = Yes
