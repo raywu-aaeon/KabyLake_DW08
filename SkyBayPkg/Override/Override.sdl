@@ -1750,4 +1750,28 @@ ELINK
 	Parent  = "AAEON_POWER_BUTTON_SMI_FUNCTIONS"
 	InvokeOrder = BeforeParent
 End
+
+ELINK
+	Name  = "PciExpressWakeConfiguration,"
+	Parent  = "AAEON_S3_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
+
+ELINK
+	Name  = "PciExpressWakeConfiguration,"
+	Parent  = "AAEON_S4_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
+
+ELINK
+	Name  = "PciExpressWakeConfiguration,"
+	Parent  = "AAEON_S5_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
+
+ELINK
+	Name  = "PciExpressWakeConfiguration,"
+	Parent  = "AAEON_POWER_BUTTON_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
