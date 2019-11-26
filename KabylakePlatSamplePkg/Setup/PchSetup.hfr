@@ -373,6 +373,9 @@
       help     = STRING_TOKEN(STR_STATE_AFTER_G3_HELP),
       option text = STRING_TOKEN(STR_S0_AFTER_G3_STRING), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
       option text = STRING_TOKEN(STR_S5_AFTER_G3_STRING), value = 1, flags = RESET_REQUIRED;
+//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added >>
+      option text = STRING_TOKEN(STR_LAST_AFTER_G3_STRING), value = 2, flags = RESET_REQUIRED;
+//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added <<
     endoneof;
 
     oneof varid = PCH_SETUP.IchPort80Route,

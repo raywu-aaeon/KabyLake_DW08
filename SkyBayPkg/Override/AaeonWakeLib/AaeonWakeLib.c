@@ -24,3 +24,16 @@ PchPmeWakeConfiguration (SETUP_DATA *SetupData)
         SbSetGpe0En(TYPE_PME) ;
 	return Status;
 }
+
+//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added >>
+EFI_STATUS
+EFIAPI
+SmmSetTheStateToGoAfterG3 (SETUP_DATA *SetupData)
+{
+	EFI_STATUS Status = EFI_SUCCESS;
+
+        SetAfterG3Bit( SetupData->StateAfterG3 == 0 ? 0 : 1  );
+
+	return Status;
+}
+//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added <<

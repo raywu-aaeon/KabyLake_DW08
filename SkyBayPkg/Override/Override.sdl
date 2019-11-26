@@ -1718,4 +1718,36 @@ ELINK
 	Parent  = "AAEON_S4_SMI_FUNCTIONS"
 	InvokeOrder = BeforeParent
 End
+
+TOKEN
+	Name = "ONEOF_F81866RESTOREACPOWERLOSS_DEFAULT"
+	Value = "3"
+	Help = "0: Last State\1: Always On\2: Always Off"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+ELINK
+	Name  = "SmmSetTheStateToGoAfterG3,"
+	Parent  = "AAEON_S3_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
+
+ELINK
+	Name  = "SmmSetTheStateToGoAfterG3,"
+	Parent  = "AAEON_S4_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
+
+ELINK
+	Name  = "SmmSetTheStateToGoAfterG3,"
+	Parent  = "AAEON_S5_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
+
+ELINK
+	Name  = "SmmSetTheStateToGoAfterG3,"
+	Parent  = "AAEON_POWER_BUTTON_SMI_FUNCTIONS"
+	InvokeOrder = BeforeParent
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
