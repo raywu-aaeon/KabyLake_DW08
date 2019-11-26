@@ -1774,4 +1774,12 @@ ELINK
 	Parent  = "AAEON_POWER_BUTTON_SMI_FUNCTIONS"
 	InvokeOrder = BeforeParent
 End
+
+TOKEN
+	Name  = "ALWAYS_PUBLISH_HII_RESOURCES"
+	Value  = "1"
+	Help  = "This token controls loading of the Setup related HII resources \(setup screens and strings). If this token is '0', setup resources are \only published into HII database if the user enters setup. If \this token is '1', setup resources are always published into the HiiDatabase. Keep it off for speed \optimization.  Set it to on if Runtime resources processing support is required."
+	TokenType = Boolean
+	TargetH = Yes
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
