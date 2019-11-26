@@ -1947,12 +1947,13 @@
         oneof varid   = SA_SETUP.PegAspm[0],
           prompt      = STRING_TOKEN(STR_PEG0_ASPM_PROMPT),
           help        = STRING_TOKEN(STR_PEG0_ASPM_HELP),
-          option text = STRING_TOKEN(STR_DISABLED_STRING),        value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_AUTO_STRING),            value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DISABLED_STRING),        value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_AUTO_STRING),            value = 4, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_PROMPT),   value = 1, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L1_PROMPT),    value = 2, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_PROMPT), value = 3, flags = RESET_REQUIRED;
         endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
         suppressif ideqval SA_SETUP.PegAspm[0] == 0x0
             OR ideqval SA_SETUP.PegAspm[0] == 2
             OR ideqval SA_SETUP.PegAspm[0] == 4;
@@ -2133,12 +2134,13 @@
         oneof varid   = SA_SETUP.PegAspm[1],
           prompt      = STRING_TOKEN(STR_PEG1_ASPM_PROMPT),
           help        = STRING_TOKEN(STR_PEG1_ASPM_HELP),
-          option text = STRING_TOKEN(STR_DISABLED_STRING),        value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_AUTO_STRING),            value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DISABLED_STRING),        value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_AUTO_STRING),            value = 4, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_PROMPT),   value = 1, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L1_PROMPT),    value = 2, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_PROMPT), value = 3, flags = RESET_REQUIRED;
         endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
         suppressif ideqval SA_SETUP.PegAspm[1] == 0x0
             OR ideqval SA_SETUP.PegAspm[1] == 2
             OR ideqval SA_SETUP.PegAspm[1] == 4;
@@ -2305,12 +2307,13 @@
         oneof varid   = SA_SETUP.PegAspm[2],
           prompt      = STRING_TOKEN(STR_PEG2_ASPM_PROMPT),
           help        = STRING_TOKEN(STR_PEG2_ASPM_HELP),
-          option text = STRING_TOKEN(STR_DISABLED_STRING),        value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_AUTO_STRING),            value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DISABLED_STRING),        value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_AUTO_STRING),            value = 4, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_PROMPT),   value = 1, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L1_PROMPT),    value = 2, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_PROMPT), value = 3, flags = RESET_REQUIRED;
         endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
         suppressif ideqval SA_SETUP.PegAspm[2] == 0x0
             OR ideqval SA_SETUP.PegAspm[2] == 2
             OR ideqval SA_SETUP.PegAspm[2] == 4;

@@ -2896,7 +2896,7 @@ endoneof;
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT1),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
 // AMI_OVERRIDE_START
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
 //        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds BoardIdKabylakeRDdr4 BoardIdKabylakeRLpddr3
 //                                                                     ? 0x4:0x2), defaultstore = MyStandardDefault,
 //        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
@@ -2904,8 +2904,9 @@ endoneof;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[0],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT1),
@@ -3261,7 +3262,7 @@ endoneof;
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT2),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
 // AMI_OVERRIDE_START
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
 //        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds
 //                                                                     ? 0x4:0x2), defaultstore = MyStandardDefault,
 //        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
@@ -3269,8 +3270,9 @@ endoneof;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[1],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT2),
@@ -3623,7 +3625,7 @@ endoneof;
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT3),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
 // AMI_OVERRIDE_START
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
 //        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds
 //                                                                     ? 0x4:0x2), defaultstore = MyStandardDefault,
 //        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
@@ -3631,8 +3633,9 @@ endoneof;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[2],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT3),
@@ -3993,7 +3996,7 @@ endoneof;
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT4),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
 // AMI_OVERRIDE_START
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
 //        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds
 //                                                                     ? 0x4:0x2), defaultstore = MyStandardDefault,
 //        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
@@ -4001,8 +4004,9 @@ endoneof;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[3],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT4),
@@ -4365,7 +4369,7 @@ endoneof;
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT5),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
 // AMI_OVERRIDE_START
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
 //        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds
 //                                                                     ? 0x4:0x2), defaultstore = MyStandardDefault,
 //        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
@@ -4373,8 +4377,9 @@ endoneof;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[4],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT5),
@@ -4731,12 +4736,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[5],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT6),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[5],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT6),
@@ -5094,12 +5100,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[6],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT7),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[6],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT7),
@@ -5457,12 +5464,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[7],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT8),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[7],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT8),
@@ -5826,7 +5834,7 @@ endoneof;
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT9),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
 // AMI_OVERRIDE_START
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
 //        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds
 //                                                                     ? 0x4:0x2), defaultstore = MyStandardDefault,
 //        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
@@ -5834,8 +5842,9 @@ endoneof;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[8],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT9),
@@ -6196,12 +6205,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[9],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT10),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[9],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT10),
@@ -6559,12 +6569,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[10],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT11),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[10],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT11),
@@ -6917,12 +6928,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[11],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT12),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[11],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT12),
@@ -7280,12 +7292,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[12],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT13),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[12],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT13),
@@ -7638,12 +7651,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[13],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT14),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[13],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT14),
@@ -7996,12 +8010,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[14],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT15),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[14],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT15),
@@ -8354,12 +8369,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[15],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT16),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[15],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT16),
@@ -8717,12 +8733,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[16],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT17),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[16],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT17),
@@ -9075,12 +9092,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[17],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT18),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[17],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT18),
@@ -9433,12 +9451,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[18],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT19),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[18],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT19),
@@ -9789,12 +9808,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[19],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT20),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[19],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT20),
@@ -10143,12 +10163,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[20],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT21),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[20],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT21),
@@ -10474,12 +10495,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[21],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT22),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[21],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT22),
@@ -10805,12 +10827,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[22],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT23),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[22],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT23),
@@ -11136,12 +11159,13 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortAspm[23],
         prompt      = STRING_TOKEN(STR_PCIE_ASPM_PROMPT24),
         help        = STRING_TOKEN(STR_PCIE_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0S_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L1_STRING), value = 2, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_ASPM_L0SL1_STRING), value = 3, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_AUTO_STRING), value = 4, flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-BringUp] Bring Up Porting / PCIe ASPM Disabled
 
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[23],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT24),
