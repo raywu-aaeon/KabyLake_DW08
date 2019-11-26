@@ -1,3 +1,12 @@
+Commit:        92e9190dd3ccfaa8f51d6ccd88e1212b1d6011d8
+CommitDate:    Tue Nov 26 12:16:26 2019
+Version:       DW05AR02
+Change:
+                1. Fixed SIO F81216 Failed
+                2. Fixed Setup Menu Layout Mismatch
+
 Commit:        3716d2f783993b35f4729394a4f7ffa458a4bdc1
 CommitDate:    Tue Nov 26 10:48:48 2019
 Version:       DW05AR01
+Change:
+                Bring up
