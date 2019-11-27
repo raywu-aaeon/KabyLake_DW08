@@ -53,6 +53,9 @@
 	UINT8   Fan1Mode3AutoDutyF3;
 	UINT8   Fan1Mode3AutoDutyF4;
    	UINT8   Fan1Mode3AutoDutyF5;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+	UINT8   Fan1OutputType;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 	#endif //F81866_SMF1_SUPPORT == 1
 
 	#if defined(F81866_SMF2_SUPPORT) && (F81866_SMF2_SUPPORT == 1)
@@ -78,6 +81,9 @@
 	UINT8   Fan2Mode3AutoDutyF3;
 	UINT8   Fan2Mode3AutoDutyF4;
    	UINT8   Fan2Mode3AutoDutyF5;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+	UINT8   Fan2OutputType;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 	#endif //F81866_SMF2_SUPPORT == 1
 
 	#if defined(F81866_SMF3_SUPPORT) && (F81866_SMF3_SUPPORT == 1)
@@ -103,6 +109,9 @@
 	UINT8   Fan3Mode3AutoDutyF3;
 	UINT8   Fan3Mode3AutoDutyF4;
    	UINT8   Fan3Mode3AutoDutyF5;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+	UINT8   Fan3OutputType;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 	#endif //F81866_SMF3_SUPPORT == 1
 	#endif //F81866_SMF_SUPPORT == 1
 	//INTERNAL_085_RayWu, ADD 2015/01/28 <<
@@ -146,8 +155,8 @@
 			oneof varid     = SETUP_DATA.Fan1TempSrc,\
 				prompt      = STRING_TOKEN(STR_F81866_SMARTFAN_TMPSRC),\
 				help        = STRING_TOKEN(STR_F81866_SMARTFAN_TMPSRC_HELP),\
-				option text = STRING_TOKEN(STR_F81866_SMARTFAN_TMPSRC_T3), value = 0, flags = RESET_REQUIRED;\
-				option text = STRING_TOKEN(STR_F81866_SMARTFAN_TMPSRC_T1), value = 1, flags = DEFAULT | RESET_REQUIRED;\
+				option text = STRING_TOKEN(STR_F81866_SMARTFAN_TMPSRC_T3), value = 0, flags = DEFAULT | RESET_REQUIRED;\
+				option text = STRING_TOKEN(STR_F81866_SMARTFAN_TMPSRC_T1), value = 1, flags = RESET_REQUIRED;\
 				option text = STRING_TOKEN(STR_F81866_SMARTFAN_TMPSRC_T2), value = 2, flags = RESET_REQUIRED;\
 			endoneof;
 
@@ -370,6 +379,18 @@
         			step      = 1, \
         			default   = FAN1_AUTO_DUTY_F5, \
     			endnumeric;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+		#define FAN1_OUTPUT_TYPE\
+            oneof varid     = SETUP_DATA.Fan1OutputType,\
+                prompt      = STRING_TOKEN(STR_AAEON_FAN1_OUTPUT_MODE_FORM),\
+                help        = STRING_TOKEN(STR_AAEON_FAN_OUTPUT_MODE_FORM_HELP),\
+                default = FAN1_TYPE,\
+                default = FAN1_TYPE, defaultstore = AmiMfgDefault,\
+                option text = STRING_TOKEN(STR_AAEON_OUTPUT_PWM_MODE_O), value = 2, flags =  RESET_REQUIRED;\
+                option text = STRING_TOKEN(STR_AAEON_LINEAR_FAN_APPLICATION), value = 1, flags = RESET_REQUIRED;\
+                option text = STRING_TOKEN(STR_AAEON_OUTPUT_PWM_MODE_P), value = 0, flags =  RESET_REQUIRED;\
+            endoneof;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 		#endif //F81866_SMF1_SUPPORT == 1
 
 		#if defined(F81866_SMF2_SUPPORT) && (F81866_SMF2_SUPPORT == 1)
@@ -611,6 +632,19 @@
         			step      = 1, \
         			default   = FAN2_AUTO_DUTY_F5, \
     			endnumeric;
+
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+		#define FAN2_OUTPUT_TYPE\
+            oneof varid     = SETUP_DATA.Fan2OutputType,\
+                prompt      = STRING_TOKEN(STR_AAEON_FAN2_OUTPUT_MODE_FORM),\
+                help        = STRING_TOKEN(STR_AAEON_FAN_OUTPUT_MODE_FORM_HELP),\
+                default = FAN2_TYPE,\
+                default = FAN2_TYPE, defaultstore = AmiMfgDefault,\
+                option text = STRING_TOKEN(STR_AAEON_OUTPUT_PWM_MODE_O), value = 2, flags =  RESET_REQUIRED;\
+                option text = STRING_TOKEN(STR_AAEON_LINEAR_FAN_APPLICATION), value = 1, flags = RESET_REQUIRED;\
+                option text = STRING_TOKEN(STR_AAEON_OUTPUT_PWM_MODE_P), value = 0, flags =  RESET_REQUIRED;\
+            endoneof;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 		#endif //F81866_SMF2_SUPPORT == 1
 		
 		#if defined(F81866_SMF3_SUPPORT) && (F81866_SMF3_SUPPORT == 1)
@@ -852,6 +886,19 @@
         			step      = 1, \
         			default   = FAN3_AUTO_DUTY_F5, \
     			endnumeric;
+
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+		#define FAN3_OUTPUT_TYPE\
+            oneof varid     = SETUP_DATA.Fan3OutputType,\
+                prompt      = STRING_TOKEN(STR_AAEON_FAN3_OUTPUT_MODE_FORM),\
+                help        = STRING_TOKEN(STR_AAEON_FAN_OUTPUT_MODE_FORM_HELP),\
+                default = FAN3_TYPE,\
+                default = FAN3_TYPE, defaultstore = AmiMfgDefault,\
+                option text = STRING_TOKEN(STR_AAEON_OUTPUT_PWM_MODE_O), value = 2, flags =  RESET_REQUIRED;\
+                option text = STRING_TOKEN(STR_AAEON_LINEAR_FAN_APPLICATION), value = 1, flags = RESET_REQUIRED;\
+                option text = STRING_TOKEN(STR_AAEON_OUTPUT_PWM_MODE_P), value = 0, flags =  RESET_REQUIRED;\
+            endoneof;
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 #endif //F81866_SMF3_SUPPORT == 1
 #endif //F81866_SMF_SUPPORT == 1
 #endif //CONTROL_DEFINITION
@@ -1013,7 +1060,11 @@
         
         HWM1_TEXT_FAN1_SPEED
         HWM1_TEXT_FAN2_SPEED
+//ray_override / [XI-Tuning] H/W Monitor Setup Layout / Removed >>
+suppressif TRUE;
         HWM1_TEXT_FAN3_SPEED
+endif;
+//ray_override / [XI-Tuning] H/W Monitor Setup Layout / Removed <<
 
         HWM1_TEXT_VIN1
         HWM1_TEXT_VIN2
@@ -1047,6 +1098,9 @@
 		SEPARATOR
 
 		#if defined(F81866_SMF1_SUPPORT) && (F81866_SMF1_SUPPORT == 1)
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+		FAN1_OUTPUT_TYPE
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 		suppressif ideqval SETUP_DATA.SmartFanEnable == 0x00;
 			FAN1SMARTFANMODE
 		endif;
@@ -1087,6 +1141,9 @@
 		SEPARATOR
 
 		#if defined(F81866_SMF2_SUPPORT) && (F81866_SMF2_SUPPORT == 1)
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+		FAN2_OUTPUT_TYPE
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 		suppressif ideqval SETUP_DATA.SmartFanEnable == 0x00;
 			FAN2SMARTFANMODE
 		endif;
@@ -1124,6 +1181,10 @@
 		endif;
 		#endif //F81866_SMF2_SUPPORT == 1
 		#if defined(F81866_SMF3_SUPPORT) && (F81866_SMF3_SUPPORT == 1)
+		SEPARATOR
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+		FAN3_OUTPUT_TYPE
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 		suppressif ideqval SETUP_DATA.SmartFanEnable == 0x00;
 			FAN3SMARTFANMODE
 		endif;

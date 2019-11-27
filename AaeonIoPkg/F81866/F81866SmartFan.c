@@ -50,6 +50,9 @@
 #define IDX_SPEED_SEG4     11
 #define IDX_SPEED_SEG5     12
 #define IDX_TEMP_SRCSEL    13
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+#define IDX_FAN_TYPE       14
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 
 typedef  struct _DXE_SMF_INIT_DATA{
   UINT8       Reg8;
@@ -80,6 +83,9 @@ DXE_SMF_INIT_DATA   DXE_FAN1_INIT_TABLE[] = {
     {0xAD, 0xFF, 0x00},
     {0xAE, 0xFF, 0x00},
     {0xAF, 0xFC, 0x00},
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+    {0x94, 0xFC, 0x00},
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 };
 #endif
 
@@ -99,6 +105,9 @@ DXE_SMF_INIT_DATA   DXE_FAN2_INIT_TABLE[] = {
 	{0xBD, 0xFF, 0x00},
 	{0xBE, 0xFF, 0x00},
 	{0xBF, 0xFC, 0x00},
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+	{0x94, 0xF3, 0x00},
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 };
 #endif
 
@@ -118,6 +127,9 @@ DXE_SMF_INIT_DATA   DXE_FAN3_INIT_TABLE[] = {
 	{0xCD, 0xFF, 0x00},
 	{0xCE, 0xFF, 0x00},
 	{0xCF, 0xFC, 0x00},
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+	{0x94, 0xCF, 0x00},
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
 };
 #endif
 
@@ -260,17 +272,26 @@ void  F81866_SMF1_INIT(SETUP_DATA *SetupData)
     case 0:
     // Manual RPM Mode
       DXE_FAN1_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = 0x02;//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN1_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = SetupData->Fan1OutputType; //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN1_INIT_TABLE[ IDX_FAN_SPEED_MSB ].OrData8 = (UINT8)(1500000/SetupData->Fan1Mode0FixedSpeed >> 8);//mode
       DXE_FAN1_INIT_TABLE[ IDX_FAN_SPEED_LSB ].OrData8 = (UINT8)(1500000/SetupData->Fan1Mode0FixedSpeed & 0xFF);//mode
     break;
     case 1:
       // Manual Duty Mode
       DXE_FAN1_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = 0x03;//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN1_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = SetupData->Fan1OutputType; //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN1_INIT_TABLE[ IDX_FAN_SPEED_LSB ].OrData8 = (UINT8)SetupData->Fan1Mode1FixedDuty*0xFF/100;//mode
     break;
     case 2:
       // Auto RPM Mode
       DXE_FAN1_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = 0x00;//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN1_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = SetupData->Fan1OutputType; //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN1_INIT_TABLE[ IDX_TEMP_HYS ].OrData8 = 0x02; // Set hysteresis as 2
       DXE_FAN1_INIT_TABLE[ IDX_TEMP_BOUND1 ].OrData8 = SetupData->Fan1Mode2AutoRpmT1;
       DXE_FAN1_INIT_TABLE[ IDX_TEMP_BOUND2 ].OrData8 = SetupData->Fan1Mode2AutoRpmT2;
@@ -286,6 +307,9 @@ void  F81866_SMF1_INIT(SETUP_DATA *SetupData)
     case 3:
       // Auto Duty-Cycle Mode
       DXE_FAN1_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = 0x01;//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN1_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = SetupData->Fan1OutputType; //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN1_INIT_TABLE[ IDX_TEMP_HYS ].OrData8 = 0x02; // Set hysteresis as 2      
       DXE_FAN1_INIT_TABLE[ IDX_TEMP_BOUND1 ].OrData8 = SetupData->Fan1Mode3AutoDutyT1;
       DXE_FAN1_INIT_TABLE[ IDX_TEMP_BOUND2 ].OrData8 = SetupData->Fan1Mode3AutoDutyT2;
@@ -337,17 +361,26 @@ void  F81866_SMF2_INIT(SETUP_DATA *SetupData)
     case 0:
     // Manual RPM Mode
       DXE_FAN2_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = (0x02 << 2);//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN2_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan2OutputType << 2); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN2_INIT_TABLE[ IDX_FAN_SPEED_MSB ].OrData8 = (UINT8)(1500000/SetupData->Fan2Mode0FixedSpeed >> 8);//mode
       DXE_FAN2_INIT_TABLE[ IDX_FAN_SPEED_LSB ].OrData8 = (UINT8)(1500000/SetupData->Fan2Mode0FixedSpeed & 0xFF);//mode
     break;
     case 1:
       // Manual Duty Mode
       DXE_FAN2_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = (0x03 << 2);//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN2_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan2OutputType << 2); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN2_INIT_TABLE[ IDX_FAN_SPEED_LSB ].OrData8 = (UINT8)SetupData->Fan2Mode1FixedDuty*0xFF/100;//mode
     break;
     case 2:
       // Auto RPM Mode
       DXE_FAN2_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = 0x00;//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN2_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan2OutputType << 2); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN2_INIT_TABLE[ IDX_TEMP_HYS ].OrData8 = (0x02 << 4); // Set hysteresis as 2
       DXE_FAN2_INIT_TABLE[ IDX_TEMP_BOUND1 ].OrData8 = SetupData->Fan2Mode2AutoRpmT1;
       DXE_FAN2_INIT_TABLE[ IDX_TEMP_BOUND2 ].OrData8 = SetupData->Fan2Mode2AutoRpmT2;
@@ -363,6 +396,9 @@ void  F81866_SMF2_INIT(SETUP_DATA *SetupData)
     case 3:
       // Auto Duty-Cycle Mode
       DXE_FAN2_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = (0x01 << 2);//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN2_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan2OutputType << 2); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN2_INIT_TABLE[ IDX_TEMP_HYS ].OrData8 = (0x02 << 4); // Set hysteresis as 2
       DXE_FAN2_INIT_TABLE[ IDX_TEMP_BOUND1 ].OrData8 = SetupData->Fan2Mode3AutoDutyT1;
       DXE_FAN2_INIT_TABLE[ IDX_TEMP_BOUND2 ].OrData8 = SetupData->Fan2Mode3AutoDutyT2;
@@ -414,17 +450,26 @@ void  F81866_SMF3_INIT(SETUP_DATA *SetupData)
     case 0:
     // Manual RPM Mode
       DXE_FAN3_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = (0x02 << 4);//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN3_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan3OutputType << 4); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN3_INIT_TABLE[ IDX_FAN_SPEED_MSB ].OrData8 = (UINT8)(1500000/SetupData->Fan3Mode0FixedSpeed >> 8);//mode
       DXE_FAN3_INIT_TABLE[ IDX_FAN_SPEED_LSB ].OrData8 = (UINT8)(1500000/SetupData->Fan3Mode0FixedSpeed & 0xFF);//mode
     break;
     case 1:
       // Manual Duty Mode
       DXE_FAN3_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = (0x03 << 4);//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN3_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan3OutputType << 4); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN3_INIT_TABLE[ IDX_FAN_SPEED_LSB ].OrData8 = (UINT8)SetupData->Fan3Mode1FixedDuty*0xFF/100;//mode
     break;
     case 2:
       // Auto RPM Mode
       DXE_FAN3_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = 0x00;//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN3_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan3OutputType << 4); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN3_INIT_TABLE[ IDX_TEMP_HYS ].OrData8 = 0x02; // Set hysteresis as 2
       DXE_FAN3_INIT_TABLE[ IDX_TEMP_BOUND1 ].OrData8 = SetupData->Fan3Mode2AutoRpmT1;
       DXE_FAN3_INIT_TABLE[ IDX_TEMP_BOUND2 ].OrData8 = SetupData->Fan3Mode2AutoRpmT2;
@@ -440,6 +485,9 @@ void  F81866_SMF3_INIT(SETUP_DATA *SetupData)
     case 3:
       // Auto Duty-Cycle Mode
       DXE_FAN3_INIT_TABLE[ IDX_FAN_MODE ].OrData8 = (0x01 << 4);//mode
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added >>
+      DXE_FAN3_INIT_TABLE[ IDX_FAN_TYPE ].OrData8 = (SetupData->Fan3OutputType << 4); //output type
+//ray_override / [XI-Tuning] H/W Monitor Smart FAN Corrected / Added <<
       DXE_FAN3_INIT_TABLE[ IDX_TEMP_HYS ].OrData8 = 0x02; // Set hysteresis as 2      
       DXE_FAN3_INIT_TABLE[ IDX_TEMP_BOUND1 ].OrData8 = SetupData->Fan3Mode3AutoDutyT1;
       DXE_FAN3_INIT_TABLE[ IDX_TEMP_BOUND2 ].OrData8 = SetupData->Fan3Mode3AutoDutyT2;
