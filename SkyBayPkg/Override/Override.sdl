@@ -1819,4 +1819,14 @@ TOKEN
 	TokenType = Boolean
 	TargetH = Yes
 End
+
+## [XI-Fixed] Spec. Changed / Password Maximum Length : 12 / Added >>
+TOKEN
+	Name  = "SETUP_PASSWORD_LENGTH"
+	Value  = "12"
+	Help  = "Default maximum password length. TSE Source needed to change the length"
+	TokenType = Integer
+	TargetH = Yes
+End
+## [XI-Fixed] Spec. Changed / Password Maximum Length : 12 / Added <<
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
