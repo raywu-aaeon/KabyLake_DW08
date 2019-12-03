@@ -1836,4 +1836,16 @@ TOKEN
 	TargetH = Yes
 End
 ## [XI-Fixed] Spec. Changed / Password Maximum Length : 12 / Added <<
+
+TOKEN
+	Name  = "SioDynamicSetup_LoadDefaults"
+	Value  = "0"
+	Help  = "Main switch to enable SioDynamicSetup load defaults support in Project"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	TargetH = Yes
+#	Master = Yes
+	Token = "SIO_SETUP_USE_APTIO_4_STYLE" "=" "0"
+End
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<

@@ -373,7 +373,19 @@ VOID EFIAPI EFIAPI LoadLdDefaults(EFI_QUESTION_ID KeyValue){
     
     gotodata->SetupNvData.DevEnable = 1;
     gotodata->SetupNvData.DevPrsId = 0;
-    gotodata->SetupNvData.DevMode = 0;
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified >>
+//    gotodata->SetupNvData.DevMode = 0;
+            switch ( gotodata->SioIdx )
+            {
+                default:
+                case 0: /* F81866 */
+                    gotodata->SetupNvData.DevMode = 0;
+                    break;
+                case 1: /* F81216D */
+                    gotodata->SetupNvData.DevMode = 1;
+                    break;
+            }
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified <<
 }
 
 /**
@@ -442,6 +454,19 @@ EFI_STATUS EFIAPI UpdateLdConfigForm(
     //Using KeyValue - locate Goto Form Data...
     gotodata=gSioIfrInfo.LdSetupData[i];   
 
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified >>
+    {
+       switch ( gotodata->SioIdx )
+       {
+            default:
+            case 0: /* F81866 */
+                break;
+            case 1: /* F81216D */
+                gotodata->SetupNvData.DevMode = 1 ;
+                break;
+       }
+    }
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified <<
     //Update Browser Data with Local Cache...
     HiiLibSetBrowserData(vs, &gotodata->SetupNvData, &ssg, gotodata->NvVarName);
 //EFI_DEADLOOP();    
@@ -569,8 +594,22 @@ EFI_STATUS EFIAPI UpdateLdConfigForm(
        	for(i=0; i<gotodata->ModeItemCount; i++){
 			UINT8	flags;
        		//Ad a set of One of items
-			if(i==0) flags=(EFI_IFR_OPTION_DEFAULT | EFI_IFR_OPTION_DEFAULT_MFG);
-			else flags=0;
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified >>
+//			if(i==0) flags=(EFI_IFR_OPTION_DEFAULT | EFI_IFR_OPTION_DEFAULT_MFG);
+//			else flags=0;
+            switch ( gotodata->SioIdx )
+            {
+                default:
+                case 0: /* F81866 */
+                    if(i==0) flags=(EFI_IFR_OPTION_DEFAULT | EFI_IFR_OPTION_DEFAULT_MFG);
+                    else flags=0;
+                    break;
+                case 1: /* F81216D */
+                    if(i==1) flags=(EFI_IFR_OPTION_DEFAULT | EFI_IFR_OPTION_DEFAULT_MFG);
+                    else flags=0;
+                    break;
+            }
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified <<
        		if(gotodata->ModeStrId[i]!=0){
        			// OneOf of 
        			HiiCreateOneOfOptionOpCode (
