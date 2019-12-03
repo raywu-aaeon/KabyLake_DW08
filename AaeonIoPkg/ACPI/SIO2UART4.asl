@@ -62,11 +62,17 @@
     Name(_PRS, ResourceTemplate() {
         StartDependentFn(0, 0) {
             IO(Decode16, 0x2C8, 0x2C8, 1, 8)
-            IRQ(Level,ActiveLow,Shared) {10}
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified >>
+//            IRQ(Level,ActiveLow,Shared) {10}
+            IRQ(Edge,ActiveLow,Shared) {10}
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified <<
         }
         StartDependentFnNoPri() {
             IO(Decode16, 0x2D8, 0x2D8, 1, 8)
-            IRQ(Level,ActiveLow,Shared) {10}
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified >>
+//            IRQ(Level,ActiveLow,Shared) {10}
+            IRQ(Edge,ActiveLow,Shared) {10}
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified <<
         }
         EndDependentFn()
     })
