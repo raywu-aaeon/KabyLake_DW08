@@ -1286,6 +1286,12 @@ TOKEN
 	Range  = "00 - 0FFFFh"
 End
 
+TOKEN
+    Name  = "INSTALL_OEM_HDA_VERB_TABLE"
+    Value  = "1"
+    TokenType = Boolean
+End
+
 ELINK
     Name  = "{{0x10EC, 0x0662, 0xFF, 0xFF, 52}, Deepware_H110_ALC662},"
     Parent  = "OEM_HDA_VERB_TABLE"
