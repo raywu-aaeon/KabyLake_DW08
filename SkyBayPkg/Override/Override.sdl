@@ -1835,6 +1835,15 @@ TOKEN
 	TokenType = Integer
 	TargetH = Yes
 End
+
+TOKEN
+	Name  = "TSE_HASH_PASSWORD"
+	Value  = "0"
+	Help  = "1 is Default. 1 => To encode the entered password using hash algorithm. Make it enabled only when cryptopkg or amicryptopkg is available. 0 => Encode entered password using TSE logic."
+	TokenType = Boolean
+	TargetMAK = Yes
+	TargetH = Yes
+End
 ## [XI-Fixed] Spec. Changed / Password Maximum Length : 12 / Added <<
 
 TOKEN
