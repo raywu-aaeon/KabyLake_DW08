@@ -894,6 +894,20 @@ TOKEN
 End
 ##ray_override / [XI-BringUp] Support F81866 / added <<
 
+##ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Added >>
+TOKEN
+	Name  = "SioDynamicSetup_LoadDefaults"
+	Value  = "0"
+	Help  = "Main switch to enable SioDynamicSetup load defaults support in Project"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	TargetH = Yes
+#	Master = Yes
+	Token = "SIO_SETUP_USE_APTIO_4_STYLE" "=" "0"
+End
+##ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Added <<
+
 ##ray_override / [XI-BringUp] Support F81216D / added >>
 TOKEN
 	Name  = "F81216SEC_SUPPORT"
