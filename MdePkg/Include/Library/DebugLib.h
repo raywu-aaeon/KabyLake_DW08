@@ -269,8 +269,22 @@ DebugPrintLevelEnabled (
       }                                              \
     } while (FALSE)
   #define _DEBUG(Expression)   _DEBUG_PRINT Expression
+//ray_override / Added >>
+#if defined(RAY_DEBUG_FLAG)
+  #define _DEBUG_PRINT_RAYDEBUG(PrintLevel, ...)              \
+    do {                                             \
+        DebugPrint (PrintLevel, ##__VA_ARGS__);      \
+    } while (FALSE)
+  #define _DEBUG_RAYDEBUG(Expression)   _DEBUG_PRINT_RAYDEBUG Expression
+#endif
+//ray_override / Added <<
 #else
 #define _DEBUG(Expression)   DebugPrint Expression
+//ray_override / Added >>
+#if defined(RAY_DEBUG_FLAG)
+#define _DEBUG_RAYDEBUG(Expression)   DebugPrint Expression
+#endif
+//ray_override / Added <<
 #endif
 
 /**  
@@ -320,6 +334,14 @@ DebugPrintLevelEnabled (
     } while (FALSE)
 #else
   #define DEBUG(Expression)
+//ray_override / Added >>
+#if defined(RAY_DEBUG_FLAG)
+  #define DEBUG_RAYDEBUG(Expression)        \
+    do {                           \
+        _DEBUG_RAYDEBUG (Expression);       \
+    } while (FALSE)
+#endif
+//ray_override / Added <<
 #endif
 
 /**  

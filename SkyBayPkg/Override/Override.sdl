@@ -1940,4 +1940,39 @@ TOKEN
     TargetH = Yes
 #    Token = "SERIAL_DEBUGGER_SUPPORT" "=" "1"
 End
+
+TOKEN
+	Name  = "RAY_DEBUG_MODE"
+	Value  = "0"
+	Help  = "Main switch to enable/disable debug mode.\When this switch is off, all debugging capabilities are disabled."
+	TokenType = Boolean
+	TargetMAK = Yes
+End
+
+ELINK
+    Name  = "-D RAY_DEBUG_FLAG"
+    Parent  = "*_*_*_CC_FLAGS"
+    Type  = "BuildOptions"
+    InvokeOrder = AfterParent
+    Token = "RAY_DEBUG_MODE" "=" "1"
+End
+
+TOKEN
+	Name  = "STRING_STATUS_SUPPORT"
+	Value  = "1"
+	Help  = "Enables/Disables all string-based status code routines \defined by the ReportStringStatus eLink"
+	TokenType = Boolean
+	TargetH = Yes
+	Token = "RAY_DEBUG_MODE" "=" "1"
+End
+
+TOKEN
+	Name  = "SERIAL_STATUS_SUPPORT"
+	Value  = "1"
+	Help  = "Enables/Disables serail port status code routine"
+	TokenType = Boolean
+	TargetH = Yes
+#	Token = "STRING_STATUS_SUPPORT" "=" "1"
+	Token = "RAY_DEBUG_MODE" "=" "1"
+End
 ##raydebug <<
