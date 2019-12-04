@@ -1867,3 +1867,77 @@ TOKEN
 End
 ## [XI-Fixed] Spec. Changed / Password Maximum Length : 12 / Added <<
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
+
+##raydebug >>
+TOKEN
+	Name  = "DEBUG_MODE"
+	Value  = "0"
+	Help  = "Main switch to enable/disable debug mode.\When this switch is off, all debugging capabilities are disabled."
+	TokenType = Boolean
+	TargetMAK = Yes
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	ModuleTypes  = "DXE_DRIVER UEFI_APPLICATION UEFI_DRIVER"
+	Token = "STATUS_CODE_VERSION" ">" "17"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	ModuleTypes  = "PEIM"
+	Token = "STATUS_CODE_VERSION" ">" "17"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	ModuleTypes  = "DXE_SMM_DRIVER"
+	Token = "STATUS_CODE_VERSION" ">" "17"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	ModuleTypes  = "DXE_RUNTIME_DRIVER"
+	Token = "STATUS_CODE_VERSION" ">" "17"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	ModuleTypes  = "DXE_CORE"
+	Token = "STATUS_CODE_VERSION" ">" "17"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	ModuleTypes  = "PEI_CORE"
+	Token = "STATUS_CODE_VERSION" ">" "17"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	ModuleTypes  = "SMM_CORE"
+	Token = "STATUS_CODE_VERSION" ">" "17"
+End
+
+TOKEN
+    Name = "TRACE_HUB_STATUS_CODE_SUPPORT"
+    Value = "0"
+    Help  = "Enables/Disables Trace Hub Status Code support in Project"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
+#    Token = "SERIAL_DEBUGGER_SUPPORT" "=" "1"
+End
+##raydebug <<
