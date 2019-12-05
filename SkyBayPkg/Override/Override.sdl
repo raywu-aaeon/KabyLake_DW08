@@ -1885,6 +1885,16 @@ End
 ## [XI-Fixed] Spec. Changed / Password Maximum Length : 12 / Added <<
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
 
+##ray_override / [XI-Tuning] Too much Memory Used by PCIe Devices under Windows 7 / Added >>
+TOKEN
+	Name  = "PCI_MMIO_RES_TOP_ALLIGN"
+	Value  = "1"
+	Help  = "Tells what resource allocation rule to use.\ OFF - Biggest resource alligned to the bottom of the window,\ ON - to the TOP."
+	TokenType = Boolean
+	TargetH = Yes
+	Range  = "ON or OFF. Default is OFF!"
+End
+##ray_override / [XI-Tuning] Too much Memory Used by PCIe Devices under Windows 7 / Added <<
 
 ##ray_override / [XI-Tuning] Full Screen Logo / Added >>
 TOKEN
