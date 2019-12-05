@@ -1,3 +1,17 @@
+Commit:        60bca906c6d759914b299c6fba57fc5b77c62c93
+CommitDate:    Thu Dec 5 16:50:06 2019
+Version:       DW05AR03
+Change:
+                Issue Fixed : LPC Decode too Late
+                Full Screen Logo
+                Issue Fixed : Unknown Loading under Windows 7
+                Spec. Changed / Password Minimum Length : 8
+                Disable Non-production Microcode
+                Spec. Changed / Password Maximum Length : 12
+                Issue Fixed / Audio Verb Table Lost
+                Issue Fixed / Legacy PXE ROM Decompress Failed
+                Issue Fixed / COM10 UID Mismatch
+
 Commit:        92e9190dd3ccfaa8f51d6ccd88e1212b1d6011d8
 CommitDate:    Tue Nov 26 12:16:26 2019
 Version:       DW05AR02
