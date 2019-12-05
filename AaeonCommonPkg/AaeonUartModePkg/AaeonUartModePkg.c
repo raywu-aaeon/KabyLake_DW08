@@ -47,52 +47,56 @@ AaeonUartModeInit (
     	UINTN		VariableSize = sizeof(SetupData);
     	UINT32		Attribute = 0;
 
-	EFI_HANDLE	*Handle = NULL;
-	UINTN		Count, i;
-    	EFI_GUID	gEfiAmiSioProtocolGuid = EFI_AMI_SIO_PROTOCOL_GUID;
-	AMI_SIO_PROTOCOL    *AmiSio;
-	SIO_DEV2            *Dev = NULL;
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Removed >>
+//	EFI_HANDLE	*Handle = NULL;
+//	UINTN		Count, i;
+//    	EFI_GUID	gEfiAmiSioProtocolGuid = EFI_AMI_SIO_PROTOCOL_GUID;
+//	AMI_SIO_PROTOCOL    *AmiSio;
+//	SIO_DEV2            *Dev = NULL;
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Removed <<
 
 	Status = pRS->GetVariable( L"Setup", &SetupGuid, &Attribute, &VariableSize, &SetupData );
 	if(EFI_ERROR(Status)) return Status;
 
-	Status = pBS->LocateHandleBuffer(ByProtocol, &gEfiAmiSioProtocolGuid, NULL, &Count, &Handle);
-	if(EFI_ERROR(Status)) return Status;
-
-	{
-		for (i = 0; i < Count; i++)
-		{
-			Status = pBS->HandleProtocol(Handle[i],&gEfiAmiSioProtocolGuid, &AmiSio);
-			if (EFI_ERROR(Status)) continue;
-
-			Dev = (SIO_DEV2*)(UINTN)AmiSio;
-			if (Dev->DeviceInfo->Type != dsUART) continue;  // not COM port
-			if (Dev->VlData.DevImplemented == 0)
-			{
-				continue;
-			}
-
-			{
-				static CHAR16 AaeonUartModeStr1[] = L"RS232";
-				static CHAR16 AaeonUartModeStr2[] = L"RS422";
-				static CHAR16 AaeonUartModeStr3[] = L"RS485";
-				static CHAR16 AaeonUartModeHelp[] = L"UART RS232, 422, 485 selection";
-				
-				Dev->DevModeCnt = 3;
-				Dev->DevModeStr = MallocZ(sizeof(CHAR16*)*(Dev->DevModeCnt+1));
-				if(Dev->DevModeStr == NULL) {
-				        Status = EFI_OUT_OF_RESOURCES;
-				        ASSERT_EFI_ERROR(Status);
-				        return Status;
-				}
-				Dev->DevModeStr[0] = &AaeonUartModeStr1[0];
-				Dev->DevModeStr[1] = &AaeonUartModeStr2[0];
-				Dev->DevModeStr[2] = &AaeonUartModeStr3[0];
-				Dev->DevModeStr[3] = &AaeonUartModeHelp[0];
-			}
-		}
-	}
-	pBS->FreePool(Handle);
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Removed >>
+//	Status = pBS->LocateHandleBuffer(ByProtocol, &gEfiAmiSioProtocolGuid, NULL, &Count, &Handle);
+//	if(EFI_ERROR(Status)) return Status;
+//
+//	{
+//		for (i = 0; i < Count; i++)
+//		{
+//			Status = pBS->HandleProtocol(Handle[i],&gEfiAmiSioProtocolGuid, &AmiSio);
+//			if (EFI_ERROR(Status)) continue;
+//
+//			Dev = (SIO_DEV2*)(UINTN)AmiSio;
+//			if (Dev->DeviceInfo->Type != dsUART) continue;  // not COM port
+//			if (Dev->VlData.DevImplemented == 0)
+//			{
+//				continue;
+//			}
+//
+//			{
+//				static CHAR16 AaeonUartModeStr1[] = L"RS232";
+//				static CHAR16 AaeonUartModeStr2[] = L"RS422";
+//				static CHAR16 AaeonUartModeStr3[] = L"RS485";
+//				static CHAR16 AaeonUartModeHelp[] = L"UART RS232, 422, 485 selection";
+//				
+//				Dev->DevModeCnt = 3;
+//				Dev->DevModeStr = MallocZ(sizeof(CHAR16*)*(Dev->DevModeCnt+1));
+//				if(Dev->DevModeStr == NULL) {
+//				        Status = EFI_OUT_OF_RESOURCES;
+//				        ASSERT_EFI_ERROR(Status);
+//				        return Status;
+//				}
+//				Dev->DevModeStr[0] = &AaeonUartModeStr1[0];
+//				Dev->DevModeStr[1] = &AaeonUartModeStr2[0];
+//				Dev->DevModeStr[2] = &AaeonUartModeStr3[0];
+//				Dev->DevModeStr[3] = &AaeonUartModeHelp[0];
+//			}
+//		}
+//	}
+//	pBS->FreePool(Handle);
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Removed <<
 
 	// RunOnce supported for setup variable API
 	{
@@ -104,31 +108,49 @@ AaeonUartModeInit (
 				SIO_DEV_NV_DATA		SioSetupData;
 				EFI_STRING		SioNvDataName;
 
-				// Reference to Build/GSIOSETUPVAR.H for "SioNvDataName" definition
-				// Define what UART port you want to support UART modes selection
-				SioNvDataName = L"";
-				Status = pRS->GetVariable( SioNvDataName, &SioSetupGuid, NULL, &SioVariableSize, &SioSetupData );
-				// Coding here for project function support
-				// >>
-				// Source:
-				//		SioSetupData.DevMode
-				{
-					switch(SioSetupData.DevMode)
-					{
-						case 0: //RS232
-							break;
-
-						case 1: //RS422
-							break;
-
-						case 2: //RS485
-							break;
-
-						default:
-							break;
-
-					}
-				}
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified >>
+//				// Reference to Build/GSIOSETUPVAR.H for "SioNvDataName" definition
+//				// Define what UART port you want to support UART modes selection
+//				SioNvDataName = L"";
+//				Status = pRS->GetVariable( SioNvDataName, &SioSetupGuid, NULL, &SioVariableSize, &SioSetupData );
+//				// Coding here for project function support
+//				// >>
+//				// Source:
+//				//		SioSetupData.DevMode
+//				{
+//					switch(SioSetupData.DevMode)
+//					{
+//						case 0: //RS232
+//							break;
+//
+//						case 1: //RS422
+//							break;
+//
+//						case 2: //RS485
+//							break;
+//
+//						default:
+//							break;
+//
+//					}
+//				}
+				SioNvDataName = L"NV_SIO1_LD0" ;
+				Status = pRS->GetVariable( SioNvDataName, &SioSetupGuid, &Attribute, &SioVariableSize, &SioSetupData );
+				SioSetupData.DevMode = 1;
+				Status = pRS->SetVariable(SioNvDataName, &SioSetupGuid, Attribute, SioVariableSize, &SioSetupData);
+				SioNvDataName = L"NV_SIO1_LD1" ;
+				Status = pRS->GetVariable( SioNvDataName, &SioSetupGuid, &Attribute, &SioVariableSize, &SioSetupData );
+				SioSetupData.DevMode = 1;
+				Status = pRS->SetVariable(SioNvDataName, &SioSetupGuid, Attribute, SioVariableSize, &SioSetupData);
+				SioNvDataName = L"NV_SIO1_LD2" ;
+				Status = pRS->GetVariable( SioNvDataName, &SioSetupGuid, &Attribute, &SioVariableSize, &SioSetupData );
+				SioSetupData.DevMode = 1;
+				Status = pRS->SetVariable(SioNvDataName, &SioSetupGuid, Attribute, SioVariableSize, &SioSetupData);
+				SioNvDataName = L"NV_SIO1_LD3" ;
+				Status = pRS->GetVariable( SioNvDataName, &SioSetupGuid, &Attribute, &SioVariableSize, &SioSetupData );
+				SioSetupData.DevMode = 1;
+				Status = pRS->SetVariable(SioNvDataName, &SioSetupGuid, Attribute, SioVariableSize, &SioSetupData);
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Modified <<
 
 				//SioNvDataName = L"";
 				//Status = pRS->GetVariable( SioNvDataName, &SioSetupGuid, NULL, &SioVariableSize, &SioSetupData );

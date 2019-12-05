@@ -906,6 +906,23 @@ TOKEN
 #	Master = Yes
 	Token = "SIO_SETUP_USE_APTIO_4_STYLE" "=" "0"
 End
+
+TOKEN
+	Name  = "AaeonUartModePkg_SUPPORT"
+	Value  = "1"
+	TokenType = Boolean
+	TargetEQU = Yes
+	TargetMAK = Yes
+	TargetH = Yes
+#	Master = Yes
+End
+
+ELINK
+	Name  = "ITEM_CALLBACK(ADVANCED_FORM_SET_CLASS, 0, AAEON_UARTMODE_INTERACTIVE_KEY, AaeonUartModeCallbackEntry),"
+	Parent  = "SetupItemCallbacks"
+	InvokeOrder = AfterParent
+	Disable = Yes
+End
 ##ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Added <<
 
 ##ray_override / [XI-BringUp] Support F81216D / added >>

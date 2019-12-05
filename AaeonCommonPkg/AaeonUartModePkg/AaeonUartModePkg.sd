@@ -59,9 +59,13 @@
 	#endif
 
 	#ifdef FORM_SET_GOTO
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Hided >>
+suppressif TRUE;
         goto AAEON_UARTMODE_FORM_ID,
         prompt  = STRING_TOKEN(STR_UARTMODE_FORM),
         help    = STRING_TOKEN(STR_UARTMODE_FORM_HELP);
+endif;
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Hided <<
 	#endif //FORM_SET_GOTO
 
 	#ifdef FORM_SET_FORM
@@ -75,7 +79,10 @@
 			SUBTITLE(STRING_TOKEN(STR_UARTMODE_FORM))
 			SEPARATOR
 			// Do not remove this item >>
-			suppressif ideqval AAEON_SETUP_DATA.EgrMode == 0;
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Hided >>
+//			suppressif ideqval AAEON_SETUP_DATA.EgrMode == 0;
+			suppressif TRUE;
+//ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Hided <<
 				INTERACTIVE_TEXT(STRING_TOKEN(STR_EMPTY), STRING_TOKEN(STR_AAEON_UARTMODE_CALLBACK), STRING_TOKEN(STR_AAEON_UARTMODE_DUMMY),  AUTO_ID(AAEON_UARTMODE_INTERACTIVE_KEY))
 			endif;
 			// Do not remove this item <<
