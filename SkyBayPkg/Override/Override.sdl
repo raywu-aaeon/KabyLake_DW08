@@ -1888,7 +1888,7 @@ End
 ##ray_override / [XI-Tuning] Too much Memory Used by PCIe Devices under Windows 7 / Added >>
 TOKEN
 	Name  = "PCI_MMIO_RES_TOP_ALLIGN"
-	Value  = "1"
+	Value  = "0"
 	Help  = "Tells what resource allocation rule to use.\ OFF - Biggest resource alligned to the bottom of the window,\ ON - to the TOP."
 	TokenType = Boolean
 	TargetH = Yes

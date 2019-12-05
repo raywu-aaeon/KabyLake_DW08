@@ -536,7 +536,7 @@
 // AMI_OVERRIDE_START                        
 //        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds
 //                             ? MAX_TOLUD_DYNAMIC:MAX_TOLUD_1G), defaultstore = MyStandardDefault,
-        option text = STRING_TOKEN(STR_MAX_TOLUD_DYNAMIC_STRING), value = MAX_TOLUD_DYNAMIC, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_DYNAMIC_STRING), value = MAX_TOLUD_DYNAMIC, flags = RESET_REQUIRED;
 // AMI_OVERRIDE_END	
         option text = STRING_TOKEN(STR_MAX_TOLUD_1G_STRING),      value = MAX_TOLUD_1G,      flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_MAX_TOLUD_1_25G_STRING),   value = MAX_TOLUD_1_25G,   flags = RESET_REQUIRED;
@@ -547,9 +547,12 @@
         option text = STRING_TOKEN(STR_MAX_TOLUD_2_5G_STRING),    value = MAX_TOLUD_2_5G,    flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_MAX_TOLUD_2_75G_STRING),   value = MAX_TOLUD_2_75G,   flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_MAX_TOLUD_3G_STRING),      value = MAX_TOLUD_3G,      flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_MAX_TOLUD_3_25G_STRING),   value = MAX_TOLUD_3_25G,   flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_3_25G_STRING),   value = MAX_TOLUD_3_25G,   flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_MAX_TOLUD_3_5G_STRING),    value = MAX_TOLUD_3_5G,    flags = RESET_REQUIRED;
       endoneof;
+//ray_override / [XI-Tuning] Too much Memory Used by PCIe Devices under Windows 7 / Modified >>
+// MAX_TOLUD_DYNAMIC -> MAX_TOLUD_3_25G
+//ray_override / [XI-Tuning] Too much Memory Used by PCIe Devices under Windows 7 / Modified <<
 #endif
 // AMI_OVERRIDE_START >>>
 #ifdef SIMICS_FLAG
