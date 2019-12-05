@@ -424,7 +424,15 @@ EFI_STATUS F81866PeiInitEntryPoint(
 //        AmiSioLibSetLpcDeviceDecoding(NULL, F81866PeiDecodeTable[index].BaseAdd, F81866PeiDecodeTable[index].UID, F81866PeiDecodeTable[index].Type);
 //#endif
 //ray_override / [XI-BringUp] Bring Up Porting / Remove <<
+//ray_override / [XI-Fixed] Issue Fixed : LPC Decode too Late / Added >>
+{
+    EFI_STATUS                          Status;
 
+    Status = AmiSioLibSetLpcDeviceDecoding(NULL, 0, 0, 0);
+    Status = AmiSioLibSetLpcGenericDecoding(NULL, PCH_GEN_DECODE_RANGE_1, PCH_GEN_DECODE_MASK_1, TRUE) ;
+    Status = AmiSioLibSetLpcGenericDecoding(NULL, PCH_GEN_DECODE_RANGE_2, PCH_GEN_DECODE_MASK_2, TRUE) ;
+}
+//ray_override / [XI-Fixed] Issue Fixed : LPC Decode too Late / Added <<
     ProgramRtRegisterTable(0, F81866PeiInitTable, sizeof(F81866PeiInitTable)/sizeof(SIO_DEVICE_INIT_DATA));
     // Enter Configuration Mode.
 
