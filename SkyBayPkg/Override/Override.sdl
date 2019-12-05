@@ -1885,6 +1885,17 @@ End
 ## [XI-Fixed] Spec. Changed / Password Maximum Length : 12 / Added <<
 ##ray_override / [XI-BringUp] Bring Up Porting / Added <<
 
+
+##ray_override / [XI-Tuning] Full Screen Logo / Added >>
+TOKEN
+	Name  = "TSE_SUPPORT_NATIVE_RESOLUTION"
+	Value  = "0"
+	Help  = "Sets the graphics mode for quiet boot from EDID. 1 - Defaultly enable make 0 to disable the feature"
+	TokenType = Boolean
+	TargetH = Yes
+End
+##ray_override / [XI-Tuning] Full Screen Logo / Added <<
+
 ##raydebug >>
 TOKEN
 	Name  = "DEBUG_MODE"
