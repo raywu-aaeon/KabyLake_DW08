@@ -177,6 +177,9 @@ Scope(\_SB_.PCI0) {
     }
 
     Method(_INI) {
+//raydebug >>
+      ADBG("XHC _INI")
+//raydebug <<
       If(CondRefOf(\_SB.PCI0.XHC.RHUB.INIR)) {      // _INI for RTD3
         \_SB.PCI0.XHC.RHUB.INIR()
       }
