@@ -1,0 +1,14 @@
+stages:
+  - build
+
+job_build:
+  stage: build
+  only:
+    - /^CI-.*$/
+  tags:
+    - TEST
+  script:
+    - 'b:'
+    - 'cd B:\33ebd919\0\raywu\Kaby'
+    - 'aaeonremotebuild.bat 1'
+    - 'c:'
