@@ -1883,18 +1883,43 @@ EFI_STATUS FboBootModeFormCallback(
 {
 
     CALLBACK_PARAMETERS *CallbackValues = GetCallbackParameters();
+//ray_override / [XI-Tuning] Dynamic Show and Hide Fixed Boot Order Menu / Modified >>
+//#if (EFI_SPECIFICATION_VERSION >= 0x2000A)
+//    if (CallbackValues->Action == EFI_BROWSER_ACTION_CHANGING)
+//        return EFI_SUCCESS;
+//    else if (CallbackValues->Action == EFI_BROWSER_ACTION_DEFAULT_STANDARD)
+//        return EFI_UNSUPPORTED;
+//    else if (CallbackValues->Action != EFI_BROWSER_ACTION_CHANGED)
+//        return EFI_INVALID_PARAMETER;
+//#endif
+//
+//
+//    ShowHideBbsPrioritySubmenu();
+    {
+        EFI_STATUS Status = EFI_SUCCESS;
+        SETUP_DATA Setup;
+        UINTN Size = sizeof(Setup);
+        static EFI_GUID SetupGuid = SETUP_GUID;
+        Status = HiiLibGetBrowserData(&Size, &Setup, &SetupGuid, L"Setup");
+        if(EFI_ERROR(Status))
+            return Status;
 
-#if (EFI_SPECIFICATION_VERSION >= 0x2000A)
-    if (CallbackValues->Action == EFI_BROWSER_ACTION_CHANGING)
-        return EFI_SUCCESS;
-    else if (CallbackValues->Action == EFI_BROWSER_ACTION_DEFAULT_STANDARD)
-        return EFI_UNSUPPORTED;
-    else if (CallbackValues->Action != EFI_BROWSER_ACTION_CHANGED)
-        return EFI_INVALID_PARAMETER;
-#endif
+        switch ( Setup.BootMode )
+        {
+            case 0: /* STR_BOOT_MODE_LEGACY */
+                Setup.MassStorageOpRom = CSMSETUP_LEGACY_ONLY_OPROMS ;
+                Setup.VideoOpRom = CSMSETUP_LEGACY_ONLY_OPROMS ;
+                break;
+            default:
+            case 1: /* STR_BOOT_MODE_UEFI */
+                Setup.MassStorageOpRom = CSMSETUP_UEFI_ONLY_OPROMS ;
+                Setup.VideoOpRom = CSMSETUP_UEFI_ONLY_OPROMS ;
+                break;
+        }
 
-
-    ShowHideBbsPrioritySubmenu();
+        Status = HiiLibSetBrowserData(Size, &Setup, &SetupGuid, L"Setup");
+    }
+//ray_override / [XI-Tuning] Dynamic Show and Hide Fixed Boot Order Menu / Modified >>
     return EFI_SUCCESS;
 }
 #endif
