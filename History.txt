@@ -1,3 +1,9 @@
+Commit:        e6359133daf415bb3154af7b658e8fc285557689
+CommitDate:    Tue Dec 17 14:18:30 2019
+Version:       DW05AR05
+Change:
+                F81866 ERP Mode Supported as Default
+
 Commit:        2798666edd46d5e2cbb97b5ab91d2721a7163e57
 CommitDate:    Fri Dec 13 10:10:05 2019
 Version:       DW05AR04
