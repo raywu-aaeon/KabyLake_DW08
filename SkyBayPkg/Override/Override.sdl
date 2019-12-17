@@ -829,7 +829,7 @@ End
 ## ray_todo / Enabled ERP_CTRL0# later
 TOKEN
 	Name  = "GPIO00_EN"
-	Value  = "1"
+	Value  = "0"
 	Help  = "0: ERP_CTRL0#\1: GPIO00"
 	TokenType = Integer
 	TargetH = Yes
@@ -837,8 +837,32 @@ End
 
 TOKEN
 	Name  = "GPIO01_EN"
-	Value  = "1"
+	Value  = "0"
 	Help  = "0: ERP_CTRL1#\1: GPIO01"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "GPIO02_EN"
+	Value  = "0"
+	Help  = "0: SUS_WARN#\1: GPIO02"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "GPIO03_EN"
+	Value  = "0"
+	Help  = "0: SUS_ACK#\1: GPIO03"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "GPIO04_EN"
+	Value  = "0"
+	Help  = "0: SLP_SUS#\1: GPIO04"
 	TokenType = Integer
 	TargetH = Yes
 End
@@ -1700,7 +1724,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "4"
+    Value  = "5"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
