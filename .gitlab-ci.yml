@@ -6,9 +6,7 @@ job_build:
   only:
     - /^CI-.*$/
   tags:
-    - TEST
+    - BIOS1
   script:
-    - 'b:'
-    - 'cd B:\33ebd919\0\raywu\Kaby'
-    - 'aaeonremotebuild.bat 1'
-    - 'c:'
+    - 'AaeonRemoteBuild.bat 1 1'
+
