@@ -103,7 +103,7 @@ if not exist "%OUTPUT_PATH%\" mkdir %OUTPUT_PATH%\
 if not exist "%OUTPUT_PATH%\Build" mkdir %OUTPUT_PATH%\Build\
 
 :CopyBuildFiles
-@copy *.bin %OUTPUT_PATH% /y /b
+@copy Build\AmiCrbMeRoms\*.bin %OUTPUT_PATH% /y /b
 @copy Build\Token.* %OUTPUT_PATH%\Build /y /b
 @copy Build\Platform.* %OUTPUT_PATH%\Build /y /b
 @copy Build\GSIOSETUPVAR.* %OUTPUT_PATH%\Build /y /b
