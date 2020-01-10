@@ -1,0 +1,12 @@
+stages:
+  - build
+
+job_build:
+  stage: build
+  only:
+    - /^CI-.*$/
+  tags:
+    - BIOS1
+  script:
+    - 'AaeonRemoteBuild.bat 1 1'
+
