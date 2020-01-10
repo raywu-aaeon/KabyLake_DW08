@@ -542,7 +542,7 @@ DetectAndInitializeCodec (
   UINT8                         AzaliaSdiNum;
 
   PostCode (0xB0F);
-  DEBUG ((DEBUG_INFO, "DetectAndInitializeCodec() Start\n"));
+  DEBUG_RAYDEBUG ((-1, "DetectAndInitializeCodec() Start\n"));
 
   ///
   /// PCH BIOS Spec Section 9.1.3 Codec Initialization Programming Sequence
@@ -578,7 +578,7 @@ DetectAndInitializeCodec (
   BitValue = 0;
   Status = StatusPolling (HdaBar + R_PCH_HDABA_GCTL, BitMask, BitValue);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Reset High Definition Audio (CRST = 0) Time Out - 1!\n"));
+    DEBUG_RAYDEBUG ((-1, "Reset High Definition Audio (CRST = 0) Time Out - 1!\n"));
     goto ExitInitCodec;
   }
 
@@ -600,7 +600,7 @@ DetectAndInitializeCodec (
   BitValue = (UINT16) B_PCH_HDABA_GCTL_CRST;
   Status = StatusPolling (HdaBar + R_PCH_HDABA_GCTL, BitMask, BitValue);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "UnReset High Definition Audio (CRST = 1) Time Out - 2!\n"));
+    DEBUG_RAYDEBUG ((-1, "UnReset High Definition Audio (CRST = 1) Time Out - 2!\n"));
     goto ExitInitCodec;
   }
 
@@ -630,7 +630,7 @@ DetectAndInitializeCodec (
     /// No codec detected - turn off the link
     ///
     PostCode (0xB10);
-    DEBUG ((DEBUG_ERROR, "HD-Audio Codec not detected (SDIN not connected to a codec)\n"));
+    DEBUG_RAYDEBUG ((-1, "HD-Audio Codec not detected (SDIN not connected to a codec)\n"));
     MmioAnd32 ((UINTN) (HdaBar + R_PCH_HDABA_GCTL), (UINT32) ~(B_PCH_HDABA_GCTL_CRST));
     Status = EFI_DEVICE_ERROR;
     goto ExitInitCodec;
@@ -649,7 +649,7 @@ DetectAndInitializeCodec (
       ///
       /// SDIx has no HD-Audio device
       ///
-      DEBUG ((DEBUG_ERROR, "SDI%d has no HD-Audio device.\n", AzaliaSdiNum));
+      DEBUG_RAYDEBUG ((-1, "SDI%d has no HD-Audio device.\n", AzaliaSdiNum));
       continue;
     }
 
@@ -673,7 +673,7 @@ DetectAndInitializeCodec (
     VendorDeviceId  = 0x000F0000 | (AzaliaSdiNum << 28);
     Status          = SendCodecCommand (HdaBar, &VendorDeviceId, TRUE);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "Error: Reading the Codec Vendor ID/Device ID fail!\n"));
+      DEBUG_RAYDEBUG ((-1, "Error: Reading the Codec Vendor ID/Device ID fail!\n"));
       goto ExitInitCodec;
     }
     ///
@@ -682,19 +682,19 @@ DetectAndInitializeCodec (
     RevisionId  = 0x000F0002 | (AzaliaSdiNum << 28);
     Status      = SendCodecCommand (HdaBar, &RevisionId, TRUE);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "Error: Reading the Codec Revision ID fail!\n"));
+      DEBUG_RAYDEBUG ((-1, "Error: Reading the Codec Revision ID fail!\n"));
       goto ExitInitCodec;
     }
 
     RevisionId = (RevisionId >> 8) & 0xFF;
 
-    DEBUG ((DEBUG_INFO, "SDI:%d Detected HD-Audio Codec 0x%08X rev 0x%02X\n", AzaliaSdiNum, VendorDeviceId, RevisionId));
+    DEBUG_RAYDEBUG ((-1, "SDI:%d Detected HD-Audio Codec 0x%08X rev 0x%02X\n", AzaliaSdiNum, VendorDeviceId, RevisionId));
 
     ///
     /// Link static frequency switching
     ///
     Status = ConfigureLinkFrequency (HdaConfig, HdaPciBase, HdaBar, AzaliaSdiNum);
-    DEBUG ((DEBUG_INFO, "ConfigureLinkFrequency() Exit, Status = %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "ConfigureLinkFrequency() Exit, Status = %r\n", Status));
 
     ///
     /// Locate Verb Table and initialize detected codec
@@ -702,11 +702,11 @@ DetectAndInitializeCodec (
     VerbTable = LocateVerbTable (HdaConfig, VendorDeviceId, (UINT8) RevisionId, AzaliaSdiNum);
 
     if (VerbTable == NULL) {
-      DEBUG ((DEBUG_ERROR, "Error: No matching HD-Audio codec verb table found for codec (0x%08X).\n", VendorDeviceId));
+      DEBUG_RAYDEBUG ((-1, "Error: No matching HD-Audio codec verb table found for codec (0x%08X).\n", VendorDeviceId));
       continue;
     }
 
-    DEBUG ((DEBUG_INFO,
+    DEBUG_RAYDEBUG ((-1,
             "Found verb table for vendor 0x%04X devId 0x%04X "
             "rev 0x%02X (SDI:%X, size: %d dwords)\n",
             VerbTable->Header.VendorId,
@@ -718,7 +718,7 @@ DetectAndInitializeCodec (
     ///
     /// Send the entire list of verbs in the matching verb table one by one to the codec
     ///
-    DEBUG ((DEBUG_VERBOSE, "HDA: Sending verbs to codec:\n"));
+    DEBUG_RAYDEBUG ((-1, "HDA: Sending verbs to codec:\n"));
     for (Index = 0; Index < VerbTable->Header.DataDwords; ++Index) {
       CodecCmdData  = VerbTable->Data[Index];
       ASSERT ((CodecCmdData >> 28) == 0);
@@ -732,18 +732,18 @@ DetectAndInitializeCodec (
         /// Skip the Azalia verb table loading when find the verb table content is not
         /// properly matched with the HDA hardware, though IDs match.
         ///
-        DEBUG ((DEBUG_ERROR,"Error loading verb table for Azalia Codec of 0x%08X\n", VendorDeviceId));
+        DEBUG_RAYDEBUG ((-1,"Error loading verb table for Azalia Codec of 0x%08X\n", VendorDeviceId));
         break;
       }
 
-      DEBUG ((DEBUG_VERBOSE, "[%03d] 0x%08X\n", Index, CodecCmdData));
+      DEBUG_RAYDEBUG ((-1, "[%03d] 0x%08X\n", Index, CodecCmdData));
     }
   }
 
   Status = EFI_SUCCESS;
 
 ExitInitCodec:
-  DEBUG ((DEBUG_INFO, "DetectAndInitializeCodec() Exit, Status = %r\n", Status));
+  DEBUG_RAYDEBUG ((-1, "DetectAndInitializeCodec() Exit, Status = %r\n", Status));
   return Status;
 }
 
