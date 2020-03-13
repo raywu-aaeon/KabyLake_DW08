@@ -113,6 +113,7 @@ if not exist "%OUTPUT_PATH%\Build" mkdir %OUTPUT_PATH%\Build\
 @copy Build\*.hfr %OUTPUT_PATH%\Build /y /b
 @copy Build\*.vfr %OUTPUT_PATH%\Build /y /b
 @copy Build\*.asl %OUTPUT_PATH%\Build /y /b
+@copy Build\*.mak %OUTPUT_PATH%\Build /y /b
 @copy Build\SignOnMessage.uni %OUTPUT_PATH%\Build /y /b
 
 :DeleteConnection
