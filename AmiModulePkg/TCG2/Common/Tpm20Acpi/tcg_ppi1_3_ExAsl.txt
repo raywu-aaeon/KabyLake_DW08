@@ -197,11 +197,23 @@ Scope(\_SB.TPM)
         //
         If(LEqual(Arg0, ToUUID ("cf8e16a5-c1e8-4e25-b712-4f54a96702c8")))
         {
+//raydebug / added >>
+            ADBG("TPM2 ACPI Start Method(cf8e16a5) Begin")
+            Store ( CRYF (Arg1, Arg2, Arg3) , Local0 )
+            ADBG("CRYF (Arg1, Arg2, Arg3) = ")
+            ADBG(Local0)
+//raydebug / added <<
           Return (CRYF (Arg1, Arg2, Arg3))
         }
 
         If(LEqual(Arg0, ToUUID ("6bbf6cab-5463-4714-b7cd-f0203c0368d4")))
         {
+//raydebug / added >>
+            ADBG("TPM2 ACPI Start Method(6bbf6cab) Begin")
+            Store ( STRT (Arg1, Arg2, Arg3) , Local0 )
+            ADBG("STRT (Arg1, Arg2, Arg3) = ")
+            ADBG(Local0)
+//raydebug / added <<
           Return (STRT (Arg1, Arg2, Arg3))
         }
         return (Buffer() {0})
