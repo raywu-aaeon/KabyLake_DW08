@@ -3552,9 +3552,10 @@ suppressif NOT ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorMobile AND
     oneof varid   = SETUP_DATA.SystemTimeAndAlarmSource,
       prompt      = STRING_TOKEN(STR_SYSTEM_TIME_AND_ALARM),
       help        = STRING_TOKEN(STR_SYSTEM_TIME_AND_ALARM_HELP),
-      option text = STRING_TOKEN(STR_ACPI_TAD), value = 0 , flags = DEFAULT | MANUFACTURING |RESET_REQUIRED;
-      option text = STRING_TOKEN(STR_LEGACY_RTC), value = 1, flags =  RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ACPI_TAD), value = 0 , flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_LEGACY_RTC), value = 1, flags =  DEFAULT | MANUFACTURING | RESET_REQUIRED;
     endoneof;
+//ray_override / [TAG-ChangeSetupDefault] Hide Unknown Device under Windows 7 / SETUP_DATA.SystemTimeAndAlarmSource : STR_ACPI_TAD -> STR_LEGACY_RTC
 //
 // AdvancedFeaturesEnd
 //
