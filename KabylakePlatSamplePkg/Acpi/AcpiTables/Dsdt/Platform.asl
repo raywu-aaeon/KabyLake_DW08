@@ -249,9 +249,47 @@ Method(P8XH,2,Serialized)
    }
 }
 
+//ray_override / raydebug / [TAG-RayDebugMode] ASL Code Dump / Added >>
+Method (SDBG, 1, Serialized)
+{
+  OperationRegion (U3F8, SystemIO, 0x3F8, 0x10)
+  Field (U3F8, ByteAcc, Lock, Preserve)
+  {
+    TXBF,   8, 
+    DLM,    8, 
+    FCR,    8, 
+    LCR,    8
+  }
+
+  Store (0x83, LCR)
+  Store (1, TXBF)
+  Store (0, DLM)
+  Store (0xE1, FCR)
+  Store (0x03, LCR)
+  Store (0, DLM)
+  
+  ToHexString (Arg0, Local3)
+  Store (SizeOf (Local3), Local4)
+  Store (Zero, Local5)
+  While(LLess(Local5, Local4))
+  {
+    Mid (Local3, Local5, One, TXBF) /* \SDBG.TXBF */
+    Stall (100)
+    Increment(Local5)
+  }
+
+  Stall (100)
+  Store (0x0D, TXBF)
+  Stall (100)
+  Store (0x0A, TXBF)
+}
+//ray_override / raydebug / [TAG-RayDebugMode] ASL Code Dump / Added <<
 
 Method(ADBG,1,Serialized)
 {
+//ray_override / raydebug / [TAG-RayDebugMode] ASL Code Dump / Added >>
+  SDBG (Arg0)
+//ray_override / raydebug / [TAG-RayDebugMode] ASL Code Dump / Added <<
 // AMI_OVERRIDE_START - For the structure of AMI asl code scope.
   If(CondRefOf(MDBG))
   {
