@@ -234,6 +234,17 @@ External(CRBI)
       
 
       Method(_STA, 0){
+//raydebug / added >>
+        ADBG("MSFT0101 _STA Begin\n")
+        Store( @Token(TTDPNAME) , Local0 )
+        ADBG("TTDPNAME = ")
+        ADBG(Local0)
+        ADBG("\n")
+        Store( @Token(TPMFNAME) , Local0 )
+        ADBG("TPMFNAME = ")
+        ADBG(Local0)
+        ADBG("\n")
+//raydebug / added <<
         If(LEqual(@Token(TTDPNAME), 0)){
             If(@Token(TPMFNAME)){
                  Return(0x0F)  // TPM Support 
