@@ -596,52 +596,54 @@ Password:
 			 {
 				UpdatePasswordToNonCaseSensitive (NewPswd, NewPwLen);
 			 }
-			if ( (VARIABLE_ID_IDE_SECURITY == popuppassword->ControlData.ControlVariable) || (PopupPasswordCheckInstalled (popuppassword)) )
-			{
-				if ((PasswordInstalled || (CheckForIDEPasswordInstalled(popuppassword) == EFI_SUCCESS))  && NewPwLen == 0) //if only new passwd length is 0, we will ask to clear the old password
-				{
-					//call function
-					SetTitleUsingControlPtr(gClearLabelPasswordMsgBox, &popuppassword->ControlData, &newtoken, &orgtext);
-	
-					//Report Message box for Clearing Old password
-					if(CallbackShowMessageBox( (IsShowPromptStringAsTitle() ? (UINTN)gClearLabelPasswordMsgBox : (UINTN)gClearPasswordMsgBox), MSGBOX_TYPE_YESNO )!= MSGBOX_YES)
-					{
-						if ( IsShowPromptStringAsTitle() )
-						{
-							//Resetting original token
-							((AMI_IFR_MSGBOX*)(gClearLabelPasswordMsgBox))->Text = orgtext;
-							//Delete created token
-							HiiRemoveString(gHiiHandle, newtoken);
-						}
-	
-						goto Password; //again prompt for new password
-						//Status = EFI_UNSUPPORTED; //Do not clear the password
-					} 
-					else 
-					{
-						if ( IsShowPromptStringAsTitle() )
-						{
-							//Resetting original token
-							((AMI_IFR_MSGBOX*)(gClearLabelPasswordMsgBox))->Text = orgtext;
-							//Delete created token
-							HiiRemoveString(gHiiHandle, newtoken);
-						}
-	
-						ConfirmNewPswd = EfiLibAllocateZeroPool( sizeof(CHAR16) );
-						
-						if(ConfirmNewPswd) 
-						{
-							*ConfirmNewPswd = L'\0'; //Set confirmation password to null string
-							goto SavePassword; //now we will save null as password for clearing already installed password
-						} 
-						else 
-						{
-							Status = EFI_OUT_OF_RESOURCES;
-							goto Done; //not able to allocate memory so we will exit.
-						}
-					}
-				}
-			}
+//ray_override / [TAG-NotSupportClearPassword] Spec. Changed : Do not Support Clear Password / Removed >>
+//			if ( (VARIABLE_ID_IDE_SECURITY == popuppassword->ControlData.ControlVariable) || (PopupPasswordCheckInstalled (popuppassword)) )
+//			{
+//				if ((PasswordInstalled || (CheckForIDEPasswordInstalled(popuppassword) == EFI_SUCCESS))  && NewPwLen == 0) //if only new passwd length is 0, we will ask to clear the old password
+//				{
+//					//call function
+//					SetTitleUsingControlPtr(gClearLabelPasswordMsgBox, &popuppassword->ControlData, &newtoken, &orgtext);
+//	
+//					//Report Message box for Clearing Old password
+//					if(CallbackShowMessageBox( (IsShowPromptStringAsTitle() ? (UINTN)gClearLabelPasswordMsgBox : (UINTN)gClearPasswordMsgBox), MSGBOX_TYPE_YESNO )!= MSGBOX_YES)
+//					{
+//						if ( IsShowPromptStringAsTitle() )
+//						{
+//							//Resetting original token
+//							((AMI_IFR_MSGBOX*)(gClearLabelPasswordMsgBox))->Text = orgtext;
+//							//Delete created token
+//							HiiRemoveString(gHiiHandle, newtoken);
+//						}
+//	
+//						goto Password; //again prompt for new password
+//						//Status = EFI_UNSUPPORTED; //Do not clear the password
+//					} 
+//					else 
+//					{
+//						if ( IsShowPromptStringAsTitle() )
+//						{
+//							//Resetting original token
+//							((AMI_IFR_MSGBOX*)(gClearLabelPasswordMsgBox))->Text = orgtext;
+//							//Delete created token
+//							HiiRemoveString(gHiiHandle, newtoken);
+//						}
+//	
+//						ConfirmNewPswd = EfiLibAllocateZeroPool( sizeof(CHAR16) );
+//						
+//						if(ConfirmNewPswd) 
+//						{
+//							*ConfirmNewPswd = L'\0'; //Set confirmation password to null string
+//							goto SavePassword; //now we will save null as password for clearing already installed password
+//						} 
+//						else 
+//						{
+//							Status = EFI_OUT_OF_RESOURCES;
+//							goto Done; //not able to allocate memory so we will exit.
+//						}
+//					}
+//				}
+//			}
+//ray_override / [TAG-NotSupportClearPassword] Spec. Changed : Do not Support Clear Password / Removed <<
 			if(
 				( (NewPwLen < (UINT8)UefiGetMinValue (popuppassword->ControlData.ControlPtr)) ||
 				  (NewPwLen > (UINT8)UefiGetMaxValue (popuppassword->ControlData.ControlPtr)) )
@@ -672,7 +674,9 @@ Password:
 			Status = _DoPopupEdit(  popuppassword, (IsShowPromptStringAsTitle() ? STRING_TOKEN(STR_CONFIRM_NEW_PSWD_LABEL) : STRING_TOKEN(STR_CONFIRM_NEW_PSWD)), &ConfirmNewPswd);			
 		}
 	
-SavePassword:
+//ray_override / [TAG-NotSupportClearPassword] Spec. Changed : Do not Support Clear Password / Removed >>
+//SavePassword:
+//ray_override / [TAG-NotSupportClearPassword] Spec. Changed : Do not Support Clear Password / Removed <<
 		if ( !Status )
 		{
 			if (
