@@ -47,6 +47,11 @@ Scope(\_SB.TPM)
 
     Method( _DSM , 4, Serialized)
     {
+//raydebug / added >>
+            ADBG("TPM _DSM Begin")
+            ADBG("Arg0 = ")
+            ADBG(Arg0)
+//raydebug / added <<
         if( LEqual(Arg0,ToUUID("3DDDFAA6-361B-4EB4-A424-8D10089D1653")))
         {
                 switch(ToInteger(Arg2))
