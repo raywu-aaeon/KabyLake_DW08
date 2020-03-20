@@ -289,6 +289,8 @@ Tpm20PublishAcpiTable (IN EFI_EVENT ev,
     UINTN  Info;   //TODO
 #endif
 
+    DEBUG_RAYDEBUG((-1, "Tpm20PublishAcpiTable() Start\n"));
+
     mTpm2AcpiTemplate.Header.OemRevision     = TPM20TABLEOEMREVISION;
     mTpm2AcpiTemplate.Header.CreatorId  = CREATOR_ID_AMI;
     
@@ -299,6 +301,7 @@ Tpm20PublishAcpiTable (IN EFI_EVENT ev,
             sizeof (mTpm2AcpiTemplate.Header.OemId));
     
     mTpm2AcpiTemplate.Header.OemTableId = PcdGet64 (PcdAcpiDefaultOemTableId);
+    DEBUG_RAYDEBUG((-1, "mTpm2AcpiTemplate.Header.OemTableId = 0x%X\n", mTpm2AcpiTemplate.Header.OemTableId));
 #else
     gBS->CopyMem(&mTpm2AcpiTemplate.Header.OemTableId, OemTblId, 8);
     gBS->CopyMem(&mTpm2AcpiTemplate.Header.OemId, OemId, 6);
