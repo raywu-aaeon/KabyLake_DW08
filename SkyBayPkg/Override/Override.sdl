@@ -2047,4 +2047,12 @@ TOKEN
     TargetMAK = Yes
     TargetH = Yes
 End
+
+TOKEN
+	Name  = "TPM20_CRB_WITH_START_METHOD"
+	Value  = "1"
+	Help  = "Patch for some Intel fTPM, the windows driver is access faster than HW response"
+	TokenType = Integer
+	TargetH = Yes
+End
 ##raydebug <<
