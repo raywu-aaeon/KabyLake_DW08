@@ -391,7 +391,8 @@ EFIAPI  TcgDxeCommonExtend(
     InBuffer[2].Size   = sizeof (Digest->digest);
 
     OutBuffer[0].Buffer = &retHeader;
-    OutBuffer[0].Size   = sizeof (retHeader);
+    OutBuffer[0].Size   = sizeof (retHeader);
+
     OutBuffer[1].Buffer = NewPCRValue->digest;
     OutBuffer[1].Size   = sizeof (NewPCRValue->digest);
 
@@ -1323,10 +1324,10 @@ EFIAPI SetTcgAcpiTable()
    EFI_ACPI_SUPPORT_PROTOCOL *acpi;
    UINTN                     handle = 0;
 
-    DEBUG((DEBUG_INFO, "SetTcgAcpiTable....\n"));
+    DEBUG_RAYDEBUG((-1, "SetTcgAcpiTable....\n"));
    Status = gBS->LocateProtocol( &gEfiAcpiSupportGuid, NULL, (void **)&acpi );
 
-   DEBUG((DEBUG_INFO, "gEfiAcpiSupportGuid Status = %r \n", Status));
+   DEBUG_RAYDEBUG((-1, "gEfiAcpiSupportGuid Status = %r \n", Status));
    
    if(EFI_ERROR(Status)){
        
@@ -1338,7 +1339,7 @@ EFIAPI SetTcgAcpiTable()
 
       ASSERT( !EFI_ERROR( Status ));
       Status = gBS->RegisterProtocolNotify( &gEfiAcpiSupportGuid, ev1, &reg1 );
-      DEBUG((DEBUG_INFO, "RegisterProtocolNotify gEfiAcpiSupportGuid Status = %r \n", Status));
+      DEBUG_RAYDEBUG((-1, "RegisterProtocolNotify gEfiAcpiSupportGuid Status = %r \n", Status));
       return Status;
    }
 
@@ -1364,7 +1365,7 @@ EFIAPI SetTcgAcpiTable()
                                  EFI_ACPI_TABLE_VERSION_ALL,
                                  &handle );
     
-    DEBUG((DEBUG_INFO, "SetTcgAcpiTable::returning %r \n", Status));
+    DEBUG_RAYDEBUG((-1, "SetTcgAcpiTable::returning %r \n", Status));
 
     return Status;
 }
@@ -1389,7 +1390,7 @@ static EFI_STATUS CopyLogToAcpiNVS(
         return EFI_NOT_FOUND;
     }
     
-    DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::gEfiPeiTcgLogHobGuid\n"));
+    DEBUG_RAYDEBUG((-1, "CopyLogToAcpiNVS::gEfiPeiTcgLogHobGuid\n"));
 
     Status = gBS->AllocatePages(
         AllocateMaxAddress,
@@ -1400,7 +1401,7 @@ static EFI_STATUS CopyLogToAcpiNVS(
 
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::AllocatePages1 failed\n"));
+        DEBUG_RAYDEBUG((-1, "CopyLogToAcpiNVS::AllocatePages1 failed\n"));
         return Status;
     }
 
@@ -1437,7 +1438,7 @@ static EFI_STATUS CopyLogToAcpiNVS(
 
     Status = SetTcgAcpiTable();
 
-    DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::return %r \n", Status));
+    DEBUG_RAYDEBUG((-1, "CopyLogToAcpiNVS::return %r \n", Status));
 
     return Status;
 }
@@ -1658,7 +1659,7 @@ EFIAPI TcgDxeEntry(
 
     Status = CopyLogToAcpiNVS( );
  
-    DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::return %r \n", Status));
+    DEBUG_RAYDEBUG((-1, "CopyLogToAcpiNVS::return %r \n", Status));
     if ( EFI_ERROR( Status ))
     {
         return Status;
