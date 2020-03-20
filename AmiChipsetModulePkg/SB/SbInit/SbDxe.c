@@ -948,6 +948,7 @@ EFI_STATUS EFIAPI SbDxeInit(
     InitAmiLib(ImageHandle, SystemTable);
 
     PROGRESS_CODE (DXE_SB_INIT);
+    DEBUG_RAYDEBUG((-1, "DXE_SB_INIT\n"));
 
 #if defined RESERVE_SBWARMRESETVAR && RESERVE_SBWARMRESETVAR == 1  
     InitVariable();
