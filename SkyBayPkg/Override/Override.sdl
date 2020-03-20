@@ -2037,4 +2037,14 @@ TOKEN
 #	Token = "STRING_STATUS_SUPPORT" "=" "1"
 	Token = "RAY_DEBUG_MODE" "=" "1"
 End
+
+TOKEN
+    Name  = "CID_SUPPORT"
+    Value  = "1"
+    Help  = "Enable optional ACPI compatiblity support in TPM ASL"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
 ##raydebug <<
