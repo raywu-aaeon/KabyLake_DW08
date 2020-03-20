@@ -2466,17 +2466,17 @@ TOKEN
     TokenType = Boolean
     TargetH = Yes
 End
-
-TOKEN
-    Name  = "PTTHciSmm_SUPPORT"
-    Value  = "0"
-    Help  = " 1 - Send TPM startup and Selftest before Mem. 0 Send  selftest and Startup After Mem Init"
-    TokenType = Boolean
-    TargetEQU = Yes
-    TargetMAK = Yes
-    TargetH = Yes
-End
-
+##raydebug / removed >>
+##TOKEN
+##    Name  = "PTTHciSmm_SUPPORT"
+##    Value  = "0"
+##    Help  = " 1 - Send TPM startup and Selftest before Mem. 0 Send  selftest and Startup After Mem Init"
+##    TokenType = Boolean
+##    TargetEQU = Yes
+##    TargetMAK = Yes
+##    TargetH = Yes
+##End
+##raydebug / removed <<
 TOKEN
     Name  = " "
     TokenType = Integer
