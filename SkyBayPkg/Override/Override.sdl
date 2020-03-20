@@ -1930,6 +1930,17 @@ TOKEN
 End
 ##ray_override / [XI-Tuning] Full Screen Logo / Added <<
 
+PcdMapping
+    Name  = "PcdAcpiDefaultOemId"
+    GuidSpace  = "gEfiMdeModulePkgTokenSpaceGuid"
+    PcdType  = "PcdsDynamicDefault"
+    Value  = '"GRGB  "'
+    Arch  = "common"
+    Offset  = 00h
+    Length  = 00h
+    TargetDSC = Yes
+End
+
 ##raydebug >>
 TOKEN
 	Name  = "DEBUG_MODE"
