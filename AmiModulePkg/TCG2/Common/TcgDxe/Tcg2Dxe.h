@@ -77,15 +77,15 @@ typedef struct
     BYTE  sm3256[SM3_256_DIGEST_SIZE];
 } TPM2_HALG;
 
-
-typedef struct
-{
-    TCG_PCRINDEX         PCRIndex;
-    TCG_EVENTTYPE        EventType;
-    TPML_DIGEST_VALUES   Digests;
-    UINT32               EventSize; // UINT32 aligned
-} TCG_PCR_EVENT2_HDR;
-
+//raydebug >>
+//typedef struct
+//{
+//    TCG_PCRINDEX         PCRIndex;
+//    TCG_EVENTTYPE        EventType;
+//    TPML_DIGEST_VALUES   Digests;
+//    UINT32               EventSize; // UINT32 aligned
+//} TCG_PCR_EVENT2_HDR;
+//raydebug <<
 #if MDE_PKG_VERSION < 10
 typedef struct
 {
