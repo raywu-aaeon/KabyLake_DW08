@@ -23,7 +23,4 @@
 "AmiTcgPlatformDxeLib.h"	
 "TcgSetupBoard.h"	
 "AmiTpmStatusCodes.h"	
-"AmiTcg2InfoProtocol.h"
-"Tcm.h"
-"Tcmdxe.h"
 <endComponent>

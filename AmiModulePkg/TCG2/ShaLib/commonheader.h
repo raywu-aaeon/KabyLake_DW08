@@ -7,7 +7,7 @@
  */
 
 #include <Uefi.h>
-#include <Library/BaseMemoryLib.h>
+#include <Library\BaseMemoryLib.h>
 
 #define INTERNAL_SHA256
 #define INTERNAL_SHA1
@@ -32,7 +32,7 @@ typedef unsigned long long int  u64;
 #define os_memmove(d, s, n) CopyMem((d), (s), (n))
 #endif
 #ifndef os_memset
-#define os_memset(s, c, n) SetMem(s, n, c)
+#define os_memset(s, c, n) SetMem(s, c, n)
 #endif
 #ifndef os_memcmp
 #define os_memcmp(s1, s2, n) CompareMem((s1), (s2), (n))

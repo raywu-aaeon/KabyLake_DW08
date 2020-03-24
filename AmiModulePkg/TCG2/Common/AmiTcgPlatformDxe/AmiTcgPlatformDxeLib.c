@@ -76,19 +76,26 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <AmiTcg/AmiTcgPlatformDxeLib.h>
+#include <AmiTcg\AmiTcgPlatformDxeLib.h>
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Protocol/TcgTcmService.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <AmiTcg/tcg.h>
-
+#include <protocol\TcgTcmService.h>
 #if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
 #include <Protocol/VariableLock.h>
 #endif
 
 
-extern EFI_GUID gEfiHobListGuid;
+
+EFI_GUID AmitcgefiOsVariableGuid       = AMI_TCG_EFI_OS_VARIABLE_GUID;
+
+
+EFI_GUID  gSetupGuid = SETUP_GUID;
+EFI_GUID  gEfiAmiboardTcgWakeEventDataHobGuid = EFI_TCG_WAKE_EVENT_DATA_HOB_GUID;
+EFI_GUID  gEfiAmiboardHobListGuid = TCG_EFI_HOB_LIST_GUID;
+
+
+
+EFI_GUID                         gDsdtGuid = DSDT_GUID;
 
 EFI_STATUS getSetupData (
     SETUP_DATA** ppsd,
@@ -123,7 +130,7 @@ typedef struct _TCM_DXE_PRIVATE_DATA
 
 
 EFI_STATUS
-EFIAPI TcgCommonPassThrough(
+__stdcall TcgCommonPassThrough(
     IN VOID                    *Context,
     IN UINT32                  NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -150,14 +157,9 @@ EFI_STATUS TcgSetVariableWithNewAttributes(
 )
 {
     EFI_STATUS Status;
+
     Status = gRT->SetVariable(Name, Guid, Attributes, DataSize, Data);
-    if (!EFI_ERROR(Status) || Status != EFI_INVALID_PARAMETER){
-        if(Status == EFI_NOT_FOUND)//if not found; just set the variable
-        {
-            gRT->SetVariable(Name, Guid, Attributes, DataSize, Data);
-        }
-        return Status;
-    }
+    if (!EFI_ERROR(Status) || Status != EFI_INVALID_PARAMETER) return Status;
 
     Status = gRT->SetVariable(Name, Guid, 0, 0, NULL);
     if (EFI_ERROR(Status)) return Status;
@@ -191,7 +193,7 @@ EFI_STATUS TcgSetVariableWithNewAttributes(
 //<AMI_PHDR_END>
 //**********************************************************************
 EFI_STATUS
-EFIAPI TcmCommonPassThrough(
+__stdcall TcmCommonPassThrough(
     IN VOID                    *Context,
     IN UINT32                  NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -261,15 +263,15 @@ EFI_STATUS GetTcgWakeEventType(
 
         if ( !CompareMem(
                     &ConfigTable[NoTableEntries].VendorGuid,
-                    &gEfiHobListGuid, sizeof(EFI_GUID)
+                    &gEfiAmiboardHobListGuid, sizeof(EFI_GUID)
                 ))
         {
             HobStart = ConfigTable[NoTableEntries].VendorTable;
 
             if ( !EFI_ERROR(
                         TcgGetNextGuidHob( &HobStart,
-                                           &gEfiTcgWakeEventDataHobGuid,
-                                           (void **)&BootMode, NULL )
+                                           &gEfiAmiboardTcgWakeEventDataHobGuid,
+                                           &BootMode, NULL )
                     ))
             {
                 break;
@@ -287,6 +289,10 @@ EFI_STATUS GetTcgWakeEventType(
     }
     return EFI_SUCCESS;
 }
+
+
+
+
 
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -307,7 +313,7 @@ EFI_STATUS GetTcgWakeEventType(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-UINT8 ReadPpiRequest()
+UINT8 ReadPpiRequest( )
 {
     UINTN          Size = sizeof(AMI_PPI_NV_VAR);
     AMI_PPI_NV_VAR Temp;
@@ -328,11 +334,11 @@ UINT8 ReadPpiRequest()
         Temp.AmiMisc = 0;
 
 #if NVRAM_VERSION > 6
-        Status = TcgSetVariableWithNewAttributes(L"AMITCGPPIVAR", &AmitcgefiOsVariableGuid, \
+        Status =  TcgSetVariableWithNewAttributes(L"AMITCGPPIVAR", &AmitcgefiOsVariableGuid, \
                   EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,\
                   Size, &Temp);
 #else
-        Status = TcgSetVariableWithNewAttributes(L"AMITCGPPIVAR", &AmitcgefiOsVariableGuid, \
+        TcgSetVariableWithNewAttributes(L"AMITCGPPIVAR", &AmitcgefiOsVariableGuid, \
                                         EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                                         Size, &Temp );
 #endif
@@ -342,104 +348,8 @@ UINT8 ReadPpiRequest()
     return Temp.RQST;
 }
 
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:  ReadPpiRequestEx
-//
-// Description: Reads and returns TCG PPI requests Value
-//
-//
-// Input:
-//
-// Output:      UINT8
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-UINT8 ReadPpiRequestEx(UINT32 *Optionaldata )
-{
-    UINTN          Size = sizeof(AMI_PPI_NV_VAR);
-    UINTN          Size2 = sizeof(AMI_PPI_NV_VAR);
-    AMI_PPI_NV_VAR Temp;
-    AMI_PPI_NV_VAR Temp2;
-    EFI_STATUS     Status;
-    UINT32         Attributes = 0;
-    UINT32         Attributes2 = 0;
 
-    Status = gRT->GetVariable( L"AMITCGPPIVAR", \
-                               &AmitcgefiOsVariableGuid, \
-                               &Attributes, \
-                               &Size, \
-                               &Temp );
 
-    if(Status == EFI_NOT_FOUND)
-    {
-        Temp.RQST    = 0;
-        Temp.RCNT    = 0;
-        Temp.ERROR   = 0;
-        Temp.Flag    = 0;
-        Temp.AmiMisc = 0;
-        Temp.OptionalData = 0;
-
-#if defined (NVRAM_VERSION) && (NVRAM_VERSION > 6)
-
-        Status = TcgSetVariableWithNewAttributes( L"AMITCGPPIVAR", \
-                                   &AmitcgefiOsVariableGuid, \
-                                   EFI_VARIABLE_NON_VOLATILE | \
-                                   EFI_VARIABLE_BOOTSERVICE_ACCESS | \
-                                   EFI_VARIABLE_RUNTIME_ACCESS, \
-                                   Size, \
-                                   &Temp );
-#else
-        Status = TcgSetVariableWithNewAttributes( L"AMITCGPPIVAR", \
-                                   &AmitcgefiOsVariableGuid, \
-                                   EFI_VARIABLE_NON_VOLATILE | \
-                                   EFI_VARIABLE_BOOTSERVICE_ACCESS, \
-                                   Size, \
-                                   &Temp );
-#endif
-
-        return Temp.RQST;
-    }
-
-    if(Temp.RQST == 0)
-    {
-        //check for protocol interface request
-        Status = gRT->GetVariable( L"AMITCGPPIVAR2", \
-                                   &AmitcgefiOsVariableGuid, \
-                                   &Attributes2, \
-                                   &Size2, \
-                                   &Temp2);
-
-        if(!EFI_ERROR(Status) && Temp2.RQST == TCPA_PPIOP_SET_PCR_BANKS)
-        {
-            Temp.RQST = Temp2.RQST;
-            Temp.RCNT = Temp2.RCNT;
-            Temp.OptionalData = Temp2.OptionalData;
-			//SetVariable "AMITCGPPIVAR" will fail since Attributes is different from GetVariable's
-            Status = TcgSetVariableWithNewAttributes( L"AMITCGPPIVAR", \
-                                       &AmitcgefiOsVariableGuid, \
-                                       Attributes, \
-                                       Size, \
-                                       &Temp );
-            
-            Temp2.RQST = 0; //TPM20_PP_NO_ACTION
-            Status = TcgSetVariableWithNewAttributes( L"AMITCGPPIVAR2", \
-                                       &AmitcgefiOsVariableGuid, \
-                                       Attributes2, \
-                                       Size2, \
-                                       &Temp2 );
-        }
-    }
-
-    *Optionaldata = Temp.OptionalData;
-    return Temp.RQST;
-}
 
 //****************************************************************************************
 //<AMI_PHDR_START>
@@ -549,6 +459,8 @@ void WritePpiResult(
 #endif
 }
 
+
+
 //****************************************************************************************
 //<AMI_PHDR_START>
 //
@@ -579,7 +491,7 @@ EFI_STATUS getSetupData(
     UINTN      sz = 0;
 
     *ppsd  = NULL;
-    Status = gRT->GetVariable( L"Setup", &gSetupVariableGuid, pattr, &sz, *ppsd );
+    Status = gRT->GetVariable( L"Setup", &gSetupGuid, pattr, &sz, *ppsd );
 
     if ( !EFI_ERROR( Status ))
     {
@@ -588,13 +500,13 @@ EFI_STATUS getSetupData(
 
     if ( Status == EFI_BUFFER_TOO_SMALL )
     {
-        Status = gBS->AllocatePool( EfiBootServicesData, sz, (void **)ppsd );
+        Status = gBS->AllocatePool( EfiBootServicesData, sz, ppsd );
 
-        if ( !(*ppsd) || EFI_ERROR(Status))
+        if ( !(*ppsd))
         {
             return EFI_OUT_OF_RESOURCES;
         }
-        Status = gRT->GetVariable( L"Setup", &gSetupVariableGuid, pattr, &sz, *ppsd );
+        Status = gRT->GetVariable( L"Setup", &gSetupGuid, pattr, &sz, *ppsd );
     }
 
     if ( psz != NULL )

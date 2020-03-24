@@ -39,7 +39,7 @@
 
 #include "TcgTpm12.h"
 #include "TcgEfiTpm.h"
-#include "Token.h"
+#include "token.h"
 
 
 typedef TPM_ALGORITHM_ID TCG_ALGORITHM_ID;

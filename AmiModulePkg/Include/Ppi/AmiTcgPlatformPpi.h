@@ -21,7 +21,7 @@
 //**********************************************************************//
 #ifndef _AMI_TCG_PLATFORM_PPI_H_
 #define _AMI_TCG_PLATFORM_PPI_H_
-#include <Uefi.h>
+#include <UEFI.h>
 
 
 #ifdef __cplusplus

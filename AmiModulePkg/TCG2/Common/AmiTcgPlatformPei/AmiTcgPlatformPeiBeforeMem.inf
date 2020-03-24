@@ -54,23 +54,13 @@ BaseAmiTcmlib
 TpmReportStatusCodeWrapperLibPei
 
 [Ppis]
-  gAmiTcgPlatformPpiBeforeMem
-  gEfiPeiReadOnlyVariable2PpiGuid
-  gAmiTcgPlatformPpiBeforeMem
+gAmiTcgPlatformPpiBeforeMem
+gEfiPeiReadOnlyVariable2PpiGuid
 
-[Guids]
-  gSkipTpmStartupGuid
-  AmiMemoryAbsentOverrideGuid
-  gPeiTpmInitializedPpiGuid
-  gEfiTcgMADriverGuid
-  gEfiTcgMADriverHobGuid
-
-  
 [Packages]
   MdePkg/MdePkg.dec
   AmiModulePkg/AmiModulePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [Depex]
   gPeiTcgPpiGuid

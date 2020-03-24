@@ -13,18 +13,18 @@
 //**********************************************************************
 
 
-#include <IndustryStandard/Acpi30.h>
+#include <industrystandard\Acpi30.h>
 #include <Acpi.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/DebugLib.h>
-#include <Library/BaseLib.h>
+#include<Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Protocol/AcpiSystemDescriptionTable.h>
 #include <Protocol/AcpiSupport.h>
-#include <Acpi20.h>
+#include <ACPI20.h>
 
 
 #define FACP_SIG 0x50434146  //"FACP" Fixed ACPI Description Table (FADT)
@@ -32,6 +32,8 @@
 
 #define EFI_ACPI_TABLE_VERSION_X        (EFI_ACPI_TABLE_VERSION_2_0 | EFI_ACPI_TABLE_VERSION_3_0 | EFI_ACPI_TABLE_VERSION_4_0)
 #define EFI_ACPI_TABLE_VERSION_ALL      (EFI_ACPI_TABLE_VERSION_1_0B|EFI_ACPI_TABLE_VERSION_X)
+
+EFI_GUID gInternalAcpiSupportGuid = EFI_ACPI_SUPPORT_GUID;
 
 //Type of object
 typedef enum

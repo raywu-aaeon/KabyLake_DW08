@@ -15,19 +15,19 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <AmiTcg/TcgCommon20.h>
-#include <AmiTcg/sha.h>
-#include <AmiTcg/TCGMisc.h>
-#include <AmiTcg/Tpm20.h>
-#include <AmiTcg/TrEEProtocol.h>
+#include <AmiTcg\TcgCommon20.h>
+#include <AmiTcg\sha.h>
+#include <AmiTcg\TcgMisc.h>
+#include <AmiTcg\Tpm20.h>
+#include <AmiTcg\TrEEProtocol.h>
 #include <Token.h>
-#include <Protocol/TcgTcmService.h>
-#include <Protocol/TcgPlatformSetupPolicy.h>
-#include <Protocol/AcpiSupport.h>
-#include "AmiTcg/TcgPc.h"
-#include "Protocol/TcgService.h"
-#include "Protocol/TpmDevice.h"
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include <protocol\TcgTcmService.h>
+#include <protocol\TcgPlatformSetupPolicy.h>
+#include <protocol\AcpiSupport.h>
+#include "AmiTcg\TcgPc.h"
+#include "protocol\TcgService.h"
+#include "protocol\TpmDevice.h"
+#include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -36,25 +36,24 @@
 #endif
 #include <Library/TimerLib.h>
 #include <Library/LocalApicLib.h>
-#include <IndustryStandard/Acpi30.h>
-#include <Protocol/Runtime.h>
-#include <Library/UefiLib.h>
-#include <Library/HobLib.h>
-#include <Guid/MemoryOverwriteControl.h>
-#include <Protocol/FirmwareVolumeBlock.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include <industrystandard/Acpi30.h>
+#include <Protocol\Runtime.h>
+#include <Library\UefiLib.h>
+#include <Library\HobLib.h>
+#include <Guid\MemoryOverwriteControl.h>
+#include <Protocol\FirmwareVolumeBlock.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 
 #include <AmiProtocol.h>
 
 #if PI_SPECIFICATION_VERSION<0x00010000
-#include <Protocol/FirmwareVolume.h>
+#include <Protocol\FirmwareVolume.h>
 #else
-#include <Protocol/FirmwareVolume2.h>
+#include <Protocol\FirmwareVolume2.h>
 #endif
 
-extern EFI_GUID AmiProtocolInternalHlxeGuid;
 
+EFI_GUID gEfiAmiHLXEGuid =  AMI_PROTOCOL_INTERNAL_HLXE_GUID;
 
 #define SHA1_DIGEST_SIZE        20
 #define SHA256_DIGEST_SIZE      32
@@ -116,6 +115,15 @@ typedef struct
     BYTE  sha512[SHA512_DIGEST_SIZE];
 } TPM2_HALG;
 
+//ray_override / [TAG-FixedTCG2Windows7] Downgrade TCG2 to Ver.11 / Fixed Build Error >>
+//typedef struct
+//{
+//    TCG_PCRINDEX         PCRIndex;
+//    TCG_EVENTTYPE        EventType;
+//    TPML_DIGEST_VALUES   Digests;
+//    UINT32               EventSize; // UINT32 aligned
+//} TCG_PCR_EVENT2_HDR;
+//ray_override / [TAG-FixedTCG2Windows7] Downgrade TCG2 to Ver.11 / Fixed Build Error <<
 typedef struct _AMI_INTERNAL_HLXE_PROTOCOL  AMI_INTERNAL_HLXE_PROTOCOL;
 
 typedef
@@ -149,8 +157,8 @@ void printbuffer(UINT8 *Buffer, UINTN BufferSize)
     UINTN i=0;
     UINTN j=0;
 
-    DEBUG ((DEBUG_INFO, "Buffer  = %x  \n", Buffer));
-    DEBUG ((DEBUG_INFO, "BufferSize  = %x  \n", BufferSize));
+    DEBUG ((-1, "Buffer  = %x  \n", Buffer));
+    DEBUG ((-1, "BufferSize  = %x  \n", BufferSize));
 
     for(i=0; i<BufferSize; i++)
     {
@@ -159,16 +167,16 @@ void printbuffer(UINT8 *Buffer, UINTN BufferSize)
 
         if(i%16 == 0)
         {
-            DEBUG((DEBUG_INFO,"\n"));
-            DEBUG((DEBUG_INFO,"%04x :", j));
+            DEBUG((-1,"\n"));
+            DEBUG((-1,"%04x :", j));
 
             j+=1;
 
         }
-        DEBUG((DEBUG_INFO,"%02x ", Buffer[i]));
+        DEBUG((-1,"%02x ", Buffer[i]));
 
     }
-    DEBUG((DEBUG_INFO,"\n"));
+    DEBUG((-1,"\n"));
 
 }
 
@@ -183,11 +191,11 @@ VOID CallbackOnTcgprotocolInstall(IN EFI_EVENT event,
     EFI_GUID                          ExtendedDataGuid = TCG_FWEXTENDED_DATA_GUID;
 
 
-    DEBUG ((DEBUG_INFO, "CallbackOnTcgprotocolInstall Entry\n"));
+    DEBUG ((-1, "CallbackOnTcgprotocolInstall Entry\n"));
 
     Status = gBS->LocateProtocol(&gEfiTcgProtocolGuid,
                                  NULL,
-                                 (void **)&TcgProtocol);
+                                 &TcgProtocol);
 
     if(EFI_ERROR(Status))return;
 
@@ -215,18 +223,20 @@ VOID CallbackOnTreeInstall(IN EFI_EVENT ev,
 {
     EFI_STATUS                        Status;
     EFI_TREE_PROTOCOL                 *pTreeProtocol  =  NULL;
+    EFI_GUID  gEfiTrEEProtocolGuid  = EFI_TREE_PROTOCOL_GUID;
     AMI_INTERNAL_HLXE_PROTOCOL        *InternalHLXE = NULL;
     TCG_PCR_EVENT2_HDR                Tcg20Event;
     EFI_TCG_EV_POST_CODE              EventData;
     UINTN                             Count = 0;
+    EFI_GUID                          ExtendedDataGuid = TCG_FWEXTENDED_DATA_GUID;
 
-    DEBUG ((DEBUG_INFO, "CallbackOnTreeInstall Entry\n"));
+    DEBUG ((-1, "CallbackOnTreeInstall Entry\n"));
 
     Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid,
                                  NULL,
-                                 (void **)&pTreeProtocol);
+                                 &pTreeProtocol);
 
-    Status = gBS->LocateProtocol(&AmiProtocolInternalHlxeGuid, NULL, (void **)&InternalHLXE);
+    Status = gBS->LocateProtocol(&gEfiAmiHLXEGuid, NULL, &InternalHLXE);
     if(EFI_ERROR(Status))return;
 
     EventData.PostCodeAddress = PhysicalAddressBases.PostCodeAddress;
@@ -281,7 +291,7 @@ VOID CallbackOnTreeInstall(IN EFI_EVENT ev,
         Tcg20Event.Digests.count = (UINT32)Count;
     }
 
-    DEBUG ((DEBUG_INFO, "AmiHashLogExtend2 FwVol\n"));
+    DEBUG ((-1, "AmiHashLogExtend2 FwVol\n"));
     //printbuffer((UINT8 *)&Tcg20Event,sizeof(TCG_PCR_EVENT2_HDR));
     InternalHLXE->AmiHashLogExtend2(pTreeProtocol, NULL, 0,0, &Tcg20Event, (UINT8 *)&EventData);
     
@@ -325,23 +335,29 @@ void TcgHookCoreinit(IN EFI_HANDLE        ImageHandle,
     UINTN        FwVolHobCount;
     EFI_PEI_HOB_POINTERS          FvHob;
     UINTN        MeasuredCount=0;
+    EFI_GUID     amiFVhoblistguid = AMI_FV_HOB_LIST_GUID;
 
-    DEBUG ((DEBUG_INFO, "TcgHookCoreinit Entry\n"));
+    DEBUG ((-1, "TcgHookCoreinit Entry\n"));
 
-    TpmFwVolHob = Tpm20LocateATcgHob( gST->NumberOfTableEntries,
+    TpmFwVolHob = LocateATcgHob( gST->NumberOfTableEntries,
                                  gST->ConfigurationTable,
                                  &amiFVhoblistguid);
 
     if(TpmFwVolHob == NULL)return;
 
+#if defined(SAVE_ENTIRE_FV_IN_MEM) && SAVE_ENTIRE_FV_IN_MEM == 0
+    if( TpmFwVolHob->Tcg2SpecVersion != 0 ){
+         return;
+    }
+#endif
       
-    DEBUG ((DEBUG_INFO, "SHA1Init done\n"));
+    DEBUG ((-1, "SHA1Init done\n"));
     FwVolHobCount = TpmFwVolHob->Count;
 
 
     if(FwVolHobCount == 0) return;
 
-    DEBUG ((DEBUG_INFO, "FwVolHobCount = %x \n", FwVolHobCount));
+    DEBUG ((-1, "FwVolHobCount = %x \n", FwVolHobCount));
 
     DigestAlgo = TpmFwVolHob->Tcg2SpecVersion;
     PcrBanks = TpmFwVolHob->PcrBanks;
@@ -383,16 +399,16 @@ void TcgHookCoreinit(IN EFI_HANDLE        ImageHandle,
     
     for(i=0; i< FwVolHobCount; i++)
     {
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob[i].Size = %x \n", TpmFwVolHob[i].Size));
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob[i].baseAddress = %x \n", TpmFwVolHob[i].baseAddress));
+        DEBUG ((-1, "TpmFwVolHob[i].Size = %x \n", TpmFwVolHob[i].Size));
+        DEBUG ((-1, "TpmFwVolHob[i].baseAddress = %x \n", TpmFwVolHob[i].baseAddress));
 
 
         FvHob.Raw = GetHobList ();
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob->Tcg2SpecVersion = %x \n", TpmFwVolHob->Tcg2SpecVersion));
+        DEBUG ((-1, "TpmFwVolHob->Tcg2SpecVersion = %x \n", TpmFwVolHob->Tcg2SpecVersion));
         
         do{
             
-            DEBUG ((DEBUG_INFO, "FvHob.FirmwareVolume->BaseAddress = %x  \n", FvHob.FirmwareVolume->BaseAddress));
+            DEBUG ((-1, "FvHob.FirmwareVolume->BaseAddress = %x  \n", FvHob.FirmwareVolume->BaseAddress));
             
             if(TpmFwVolHob[i].baseAddress == FvHob.FirmwareVolume->BaseAddress ||
                TpmFwVolHob[i].Size == ((UINT32)FvHob.FirmwareVolume->Length) ||
@@ -401,18 +417,18 @@ void TcgHookCoreinit(IN EFI_HANDLE        ImageHandle,
                 // The Tcg2SpecVersion == 0 , => It is a TPM 1.2 device, otherwise, 1: TPM20 TCG2 Old Protocol compatible, 2: TPM 20 TCG2 New Protocol
                 if(TpmFwVolHob->Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2 || 0 == TpmFwVolHob->Tcg2SpecVersion)
                 {
-                    DEBUG ((DEBUG_INFO, "SHA1Update FwVol hob \n"));
-                    DEBUG ((DEBUG_INFO, "(u32)FvHob.FirmwareVolume->Length  = %x  \n", (u32)FvHob.FirmwareVolume->Length ));
-                    DEBUG ((DEBUG_INFO, "(u32)FvHob.FirmwareVolume->BaseAddres  = %x  \n", (u32)FvHob.FirmwareVolume->BaseAddress));
+                    DEBUG ((-1, "SHA1Update FwVol hob \n"));
+                    DEBUG ((-1, "(u32)FvHob.FirmwareVolume->Length  = %x  \n", (u32)FvHob.FirmwareVolume->Length ));
+                    DEBUG ((-1, "(u32)FvHob.FirmwareVolume->BaseAddres  = %x  \n", (u32)FvHob.FirmwareVolume->BaseAddress));
                     //printbuffer((UINT8 *)FvHob.FirmwareVolume->BaseAddress,FvHob.FirmwareVolume->Length );
                     SHA1Update( &Sha1Ctx, (unsigned char *)FvHob.FirmwareVolume->BaseAddress, (u32)FvHob.FirmwareVolume->Length );
                     MeasuredCount+=1;
                 }
                 else if(TpmFwVolHob->Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
                 {
-                    DEBUG ((DEBUG_INFO, "sha256_process FwVol hob \n"));
-                    DEBUG ((DEBUG_INFO, "(u32)FvHob.FirmwareVolume->Length  = %x  \n", (u32)FvHob.FirmwareVolume->Length ));
-                    DEBUG ((DEBUG_INFO, "(u32)FvHob.FirmwareVolume->BaseAddres  = %x  \n", (u32)FvHob.FirmwareVolume->BaseAddress));
+                    DEBUG ((-1, "sha256_process FwVol hob \n"));
+                    DEBUG ((-1, "(u32)FvHob.FirmwareVolume->Length  = %x  \n", (u32)FvHob.FirmwareVolume->Length ));
+                    DEBUG ((-1, "(u32)FvHob.FirmwareVolume->BaseAddres  = %x  \n", (u32)FvHob.FirmwareVolume->BaseAddress));
                     //printbuffer((UINT8 *)FvHob.FirmwareVolume->BaseAddress,FvHob.FirmwareVolume->Length );
                     if( TpmFwVolHob->PcrBanks & TREE_BOOT_HASH_ALG_SHA256)
                     {
@@ -444,8 +460,8 @@ void TcgHookCoreinit(IN EFI_HANDLE        ImageHandle,
         }while ((FvHob.Raw != NULL )&&(!END_OF_HOB_LIST (FvHob)));
     }
 
-    DEBUG ((DEBUG_INFO, "MeasuredCount = %x \n", MeasuredCount));
-    DEBUG ((DEBUG_INFO, "TpmFwVolHob->PcrBanks = %x \n", TpmFwVolHob->PcrBanks));
+    DEBUG ((-1, "MeasuredCount = %x \n", MeasuredCount));
+    DEBUG ((-1, "TpmFwVolHob->PcrBanks = %x \n", TpmFwVolHob->PcrBanks));
 
     if(MeasuredCount != 0)
     {
@@ -489,24 +505,24 @@ void TcgHookCoreinit(IN EFI_HANDLE        ImageHandle,
 
         if(EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "Unable to create Event..Exit(1)\n"));
+            DEBUG((-1, "Unable to create Event..Exit(1)\n"));
             return;
         }
 
-        Status = gBS->RegisterProtocolNotify( &AmiProtocolInternalHlxeGuid, Event, &reg );
-        DEBUG ((DEBUG_INFO, "TcgHookCoreinit::RegisterProtocolNotify Status = %r\n", Status));
+        Status = gBS->RegisterProtocolNotify( &gEfiAmiHLXEGuid, Event, &reg );
+        DEBUG ((-1, "TcgHookCoreinit::RegisterProtocolNotify Status = %r\n", Status));
 
         Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
                                    EFI_TPL_CALLBACK, CallbackOnTcgprotocolInstall, &reg2, &Event2);
 
         if(EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "Unable to create Event..Exit(1)\n"));
+            DEBUG((-1, "Unable to create Event..Exit(1)\n"));
             return;
         }
 
         Status = gBS->RegisterProtocolNotify( &gEfiTcgProtocolGuid, Event2, &reg2);
-        DEBUG ((DEBUG_INFO, "TcgHookCoreinit::RegisterProtocolNotify Status = %r\n", Status));
+        DEBUG ((-1, "TcgHookCoreinit::RegisterProtocolNotify Status = %r\n", Status));
     }
 
     return;

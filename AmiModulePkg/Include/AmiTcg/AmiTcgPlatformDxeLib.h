@@ -27,18 +27,18 @@
 //*************************************************************************
 //#include <Protocol\SmmBase.h>
 //#include <Protocol\SmmSwDispatch.h>
-#include <Token.h>
-#include <Include/Acpi.h>
-#include <Include/Acpi11.h>
+#include <token.h>
+#include <Include\Acpi.h>
+#include <Include\Acpi11.h>
 #include <Include/Setup.h>
 //#include <AmiDxeLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Protocol/TcgService.h>
-#include <Protocol/TpmDevice.h>
-#include <Protocol/CpuIo.h>
-#include <Protocol/AcpiSupport.h>
-#include <AmiTcg/TcgPc.h>
+#include <AmiTcg\TcgMisc.h>
+#include <Protocol\TcgService.h>
+#include <Protocol\TpmDevice.h>
+#include "Protocol/CpuIo.h"
+#include "Protocol/AcpiSupport.h"
+#include "AmiTcg\TcgPc.h"
 
 #define TCPA_PPIOP_ENABLE                       1
 #define TCPA_PPIOP_DISABLE                      2

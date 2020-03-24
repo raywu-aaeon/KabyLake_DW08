@@ -20,7 +20,4 @@
 "AmiTpmSupportTypeProtocol"
 "DxeTpmMeasureBootLib"
 "TcgCoreHook"
-"TpmSmbios"
-"TpmNvmeSupport"
-"Nationz"
 <endComponent>

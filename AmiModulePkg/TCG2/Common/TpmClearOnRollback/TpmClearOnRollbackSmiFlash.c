@@ -46,8 +46,8 @@
 //<AMI_FHDR_END>
 #include <AmiDxeLib.h>
 #include "TpmClearOnRollback.h"
-#include <Protocol/AMIPostMgr.h>
-#include <Protocol/SmmVariable.h>
+#include <Protocol/AmiPostMgr.h>
+#include <Protocol\SmmVariable.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/SmmServicesTableLib.h>
@@ -56,8 +56,6 @@
 CLEAR_TPM_ROLLBACK_PROTOCOL *PrivateProtocol;
 EFI_SMM_SYSTEM_TABLE2               *mSmst;
 static FW_VERSION                          Fid;
-
-extern EFI_GUID gAmiTpmRollbackSmmProtocolGuid;
 
 #pragma optimize("",off)
 
@@ -87,21 +85,21 @@ UINT8 SmiFlashClearTpmBeforeFlash ()
 //
 //<AMI_PHDR_END>
 //**********************************************************************
-EFI_STATUS
-EFIAPI
-TpmClearRollBackSmmInit(
+EFI_STATUS TpmClearRollBackSmmInit(
     IN EFI_HANDLE       ImageHandle,
     IN EFI_SYSTEM_TABLE *SystemTable )
 {
     EFI_HANDLE                    Handle=NULL;
     EFI_STATUS                    Status;
-       
+    EFI_GUID                      TpmRollbackSmmGuid = \
+            AMI_TPM_ROLLBACK_SMM_PROTOCOL_GUID;
+    
     InitAmiLib(ImageHandle, SystemTable);
 
     Status = gSmst->SmmAllocatePool (
                  EfiRuntimeServicesData,
                  sizeof (CLEAR_TPM_ON_ROLLBACK),
-                 (void **)&PrivateProtocol
+                 &PrivateProtocol
              );
    
     if((EFI_ERROR(Status)) || (PrivateProtocol == NULL))
@@ -114,7 +112,7 @@ TpmClearRollBackSmmInit(
     PrivateProtocol->ClearTpmOnRollBack = (VOID *)&SmiFlashClearTpmBeforeFlash;
 
     Status = gSmst->SmmInstallProtocolInterface( &Handle, \
-             &gAmiTpmRollbackSmmProtocolGuid, \
+             &TpmRollbackSmmGuid, \
              EFI_NATIVE_INTERFACE, \
              PrivateProtocol );
 

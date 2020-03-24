@@ -463,11 +463,7 @@ static int sha256_compress(struct sha256_state *md, unsigned char *buf)
     {
         if (md->curlen == 0 && inlen >= block_size)
         {
-// --> mod faster hash for non-cached data blocks
-            os_memcpy(md->buf, in, block_size);
-            if (sha256_compress(md, md->buf) < 0)
-//          if (sha256_compress(md, (unsigned char *) in) < 0)
-// <-- end mod 
+            if (sha256_compress(md, (unsigned char *) in) < 0)
                 return -1;
             md->length += block_size * 8;
             in += block_size;

@@ -31,7 +31,7 @@
 #define _TCG_PLATFORM_SETUP_POLICY_H_
 
 #include <Efi.h>
-#include <Token.h>
+#include <token.h>
 #include <Setup.h>
 
 #define TCG_PLATFORM_SETUP_POLICY_GUID \

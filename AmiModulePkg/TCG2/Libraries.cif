@@ -3,8 +3,6 @@
 	category = ModulePart
 	LocalRoot = "AmiModulePkg\TCG2\"
 	RefName = "Libraries"
-[files]
-"TisLib.sdl"
 [parts]
 "TisLib12"
 "TisLib20"

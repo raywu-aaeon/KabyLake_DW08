@@ -35,12 +35,12 @@
 
 
 [Defines]
- INF_VERSION    = 0x00010005
+ INF_VERSION = 0x00010005
  VERSION_STRING = 1.0
- BASE_NAME      = TrEEPei
- MODULE_TYPE    = PEIM
- FILE_GUID      = 961C19BE-D1AC-4ba7-87AF-4AE0F09DF2A6
- ENTRY_POINT    = TrEEPeiEntry
+ BASE_NAME = TrEEPei
+ MODULE_TYPE = PEIM
+ FILE_GUID = 961C19BE-D1AC-4ba7-87AF-4AE0F09DF2A6
+ ENTRY_POINT = TrEEPeiEntry
 
 [Sources]
  TrEEPei.c
@@ -56,23 +56,16 @@
  IoLib
  PeiServicesLib
  AmiTcgLibPei
+ PeiServicesTablePointerLib
  TpmReportStatusCodeWrapperLibPei
 
 [Ppis]
- gAmiTreePpiGuid
- AmiPeiHashInterfaceProtocolGuid
- gAmiHashLogExtendExGuid
- gTcgPeiPolicyGuid
-
-[Guids]
- gEfiTcgTreeLogHobGuid
- gTpm20HobGuid
+gAmiTreePpiGuid
 
 [Packages]
  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
  AmiModulePkg/AmiModulePkg.dec
  MdePkg/MdePkg.dec
- AmiTcgPkg/AmiTcgPkg.dec
 
 [Depex]
  gEfiPeiReadOnlyVariable2PpiGuid

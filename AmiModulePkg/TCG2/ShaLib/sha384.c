@@ -13,7 +13,7 @@
    LTC_SHA384 hash included in sha512.c, Tom St Denis
 */
 
-#include <sha384.h>
+#include "sha384.h"
 
 #define LTC_SHA512
 
@@ -33,12 +33,12 @@ typedef unsigned long long u64;
 
 #define LTC_ARGCHK(x)   if (!(x)) return CRYPT_INVALID_ARG;
 
-typedef struct
+typedef struct hash_state
 {
     u64  length, state[8];
     unsigned long curlen;
     unsigned char buf[128];
-}hash_state;
+};
 
 /*
 const struct ltc_hash_descriptor sha384_desc =
@@ -65,7 +65,7 @@ const struct ltc_hash_descriptor sha384_desc =
    @param md   The hash state you wish to initialize
    @return CRYPT_OK if successful
 */
-int sha384_init( hash_state * md)
+int sha384_init(struct hash_state * md)
 {
     LTC_ARGCHK(md != NULL);
 
@@ -88,9 +88,9 @@ int sha384_init( hash_state * md)
    @param out [out] The destination of the hash (48 bytes)
    @return CRYPT_OK if successful
 */
-int sha512_done( hash_state * md, unsigned char *out);
+int sha512_done(struct hash_state * md, unsigned char *out);
 
-int sha384_done(hash_state * md, unsigned char *out)
+int sha384_done(struct hash_state * md, unsigned char *out)
 {
     unsigned char buf[64];
 
@@ -110,13 +110,13 @@ int sha384_done(hash_state * md, unsigned char *out)
     return CRYPT_OK;
 }
 
-int sha512_process(hash_state *md, const unsigned char *in,
+int sha512_process(struct hash_state *md, const unsigned char *in,
                    unsigned long inlen);
 void sha384_vector(size_t num_elem, const u8 *addr[], const size_t *len,
                    u8 *mac)
 {
     size_t i;
-    hash_state md;
+    struct hash_state md;
 
     sha384_init(&md);
     for (i = 0; i < num_elem; i++)

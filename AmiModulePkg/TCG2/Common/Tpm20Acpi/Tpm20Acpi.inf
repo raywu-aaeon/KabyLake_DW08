@@ -59,8 +59,6 @@ Tpm20Acpi.h
   MdePkg/MdePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-  MdeModulePkg/MdeModulePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint
@@ -68,8 +66,6 @@ Tpm20Acpi.h
   TcgAslLib
   UefiLib
   HobLib
-  PcdLib
-  AmiTcgLibDxe
   
 [Protocols]
  gEfiFirmwareVolume2ProtocolGuid
@@ -77,21 +73,15 @@ Tpm20Acpi.h
  gEfiAcpiTableProtocolGuid
  gEfiFirmwareVolume2ProtocolGuid
  gEfiAcpiSupportGuid
- gEfiTrEEProtocolGuid
- gBdsAllDriversConnectedProtocolGuid
- 
+
  [Guids]
  gEfiImageSecurityDatabaseGuid
  gEfiHobListGuid
- FlagsStatusguid
- gPttSsdtAcpiTableGuid
- 
- [Pcd]
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId             ## CONSUMES
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId        ## CONSUMES
- 
+
 [Depex]
-  gEfiTrEEProtocolGuid
+ gEfiTrEEProtocolGuid AND
+ gEfiAcpiTableProtocolGuid
+   
 #*************************************************************************
 #*************************************************************************
 #**                                                                     **

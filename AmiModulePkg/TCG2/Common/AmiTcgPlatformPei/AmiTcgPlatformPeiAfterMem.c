@@ -31,15 +31,15 @@
 //*************************************************************************
 #include <Efi.h>
 #include <Pei.h>
-#include <AmiTcg/TcgCommon12.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Ppi/TcgTcmService.h>
+#include <AmiTcg\TcgCommon12.h>
+#include <AmiTcg\TcgMisc.h>
+#include <PPI/TcgTcmService.h>
 #include <Ppi/TcgService.h>
 #include <Ppi/TpmDevice.h>
-#include "Ppi/CpuIo.h"
-#include "Ppi/LoadFile.h"
-#include <Ppi/ReadOnlyVariable.h>
-#include <AmiTcg/AmiTcgPlatformPei.h>
+#include "PPI\CpuIo.h"
+#include "PPI\LoadFile.h"
+#include <Ppi\ReadOnlyVariable.h>
+#include <AmiTcg\AmiTcgPlatformPei.h>
 #include <Ppi/AmiTcgPlatformPpi.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -55,21 +55,13 @@
 #include <Guid/HobList.h>
 #include <AmiHobs.h>
 #include <Token.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 // NIST 800-155
 
-//**********************************************************************
-//                  Links
-//**********************************************************************
-extern MEASURE_CRTM_VERSION_PEI_FUNC_PTR  MEASURE_CRTM_VERSION_PEI_FUNCTION;
-MEASURE_CRTM_VERSION_PEI_FUNC_PTR *MeasureCRTMVersionFuncPtr = MEASURE_CRTM_VERSION_PEI_FUNCTION;
+extern  EFI_GUID gAmiTcgPlatformPpiAfterMem;
 
-extern EFI_GUID gTcgPeiPolicyGuid;
-extern EFI_GUID gAmiTcgPlatformPpiAfterMem;
-extern EFI_GUID PeiMpFileGuid;
-extern EFI_GUID gMpTcmFileGuid;
-extern TCM_PC_REGISTERS_PTR      TcmReg;
+EFI_GUID gAmiTcmSignalguid              =  AMI_TCM_CALLBACK_GUID;
+EFI_GUID gAmiLegacyTpmguid              =  AMI_TPM_LEGACY_GUID;
 
 static EFI_PEI_PPI_DESCRIPTOR TcmInitPpi[] = {
   (EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST),
@@ -98,13 +90,13 @@ void printbuffer(UINT8 *Buffer, UINTN BufferSize)
     for(i=0; i<BufferSize; i++){
 
         if(i%16 == 0){
-            DEBUG((DEBUG_INFO,"\n"));
-            DEBUG((DEBUG_INFO,"%04x :", j));
+            DEBUG((-1,"\n"));
+            DEBUG((-1,"%04x :", j));
             j+=1;
         }
-        DEBUG((DEBUG_INFO,"%02x ", Buffer[i]));
+        DEBUG((-1,"%02x ", Buffer[i]));
     }
-    DEBUG((DEBUG_INFO,"\n"));
+    DEBUG((-1,"\n"));
     
 }
 
@@ -134,10 +126,10 @@ TcgPeiSimpleExtend(
     UINT8   *ret;
 
     BufferSize = sizeof (TPM_1_2_CMD_HEADER) + sizeof (PCRIndex) + TPM_SHA1_160_HASH_LEN;
-    Status = (*ps)->AllocatePool((CONST EFI_PEI_SERVICES **)ps, BufferSize, (void **)&cmd);
+    Status = (*ps)->AllocatePool(ps, BufferSize, &cmd);
     if(EFI_ERROR(Status))return Status;
     
-    Status = (*ps)->AllocatePool((CONST EFI_PEI_SERVICES **)ps, BufferSize, (void **)&ret);
+    Status = (*ps)->AllocatePool(ps, BufferSize, &ret);
     if(EFI_ERROR(Status))return Status;
     
     (*ps)->SetMem(cmd, BufferSize, 0);
@@ -166,112 +158,12 @@ TcgPeiSimpleExtend(
                                 BufferSize,
                                 ret);
     
-    DEBUG ((DEBUG_INFO, "Status = %r\n", Status));
+    DEBUG ((-1, "Status = %r\n", Status));
     //printbuffer(ret, BufferSize);
     
     return Status;
 }
     
-
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:   MeasureLogDxeFwVol
-//
-// Description: Hashes FVMain Volume
-//
-//
-// Input:       IN      EFI_PEI_SERVICES          **PeiServices,
-//
-// Output:      EFI_STATUS
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-EFI_STATUS
-MeasureLogDxeFwVol(
-    IN  CONST EFI_PEI_SERVICES  **PeiServices,
-    IN  FwVolHob                *TpmFwVolHob,
-    IN  PEI_TPM_PPI             *TpmPpi,
-    IN  PEI_TCG_PPI             *TcgPpi
-)
-{
-    EFI_STATUS                        Status = EFI_SUCCESS;
-    SHA1_CTX                          Sha1Ctx;
-    PEI_EFI_POST_CODE                 *TcgEvent = NULL;
-    UINT32                            EventNumber;
-    UINT32                            i = 0;
-    UINT32                            FwVolHobCount;
-    TCG_DIGEST                        Sha1Digest;
-
-    DEBUG(( DEBUG_INFO, "[%d] Enter MeasureLogDxeFwVol\n", __LINE__));
-
-    Status = (*PeiServices)->AllocatePool( PeiServices,
-                                           sizeof(PEI_EFI_POST_CODE),
-                                           (void **)&TcgEvent);
-    if (EFI_ERROR (Status))
-    {
-        return Status;
-    }
-
-    FwVolHobCount = TpmFwVolHob->Count;
-
-    TcgEvent->Header.PCRIndex      = PCRi_CRTM_AND_POST_BIOS;
-    TcgEvent->Header.EventType     = EV_POST_CODE;
-    TcgEvent->Header.EventDataSize = sizeof (EFI_TCG_EV_POST_CODE);
-    TcgEvent->Event.PostCodeAddress = TpmFwVolHob[0].baseAddress;
-    TcgEvent->Event.PostCodeLength = (UINT64)TpmFwVolHob[0].Size;
-
-    SHA1Init( &Sha1Ctx );
-
-    DEBUG ((DEBUG_INFO, "FwVolHobCount = %x \n", FwVolHobCount));
-    for(i=0; i< FwVolHobCount; i++)
-    {
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob[i].Size = %x \n", TpmFwVolHob[i].Size));
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob[i].baseAddress = %lx \n", TpmFwVolHob[i].baseAddress));
-        SHA1Update( &Sha1Ctx,  (unsigned char *)(UINTN)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
-    }
-
-    SHA1Final(Sha1Digest.digest, &Sha1Ctx);
-
-    //printbuffer(Sha1Digest.digest, 20);
-
-    (*PeiServices)->CopyMem(TcgEvent->Header.Digest.digest, Sha1Digest.digest, TPM_SHA1_160_HASH_LEN);
-
-    TpmPpi->Init(TpmPpi, (EFI_PEI_SERVICES **)PeiServices);
-
-    Status = TcgPeiSimpleExtend(
-                  TcgPpi,
-                  (EFI_PEI_SERVICES **)PeiServices,
-                  TcgEvent->Header.PCRIndex,
-                  &TcgEvent->Header.Digest,
-                  &Sha1Digest );
-
-    TpmPpi->Close(TpmPpi, (EFI_PEI_SERVICES **)PeiServices);
-
-    if (EFI_ERROR (Status))
-    {
-        return Status;
-    }
-
-    Status = TcgPpi->TCGLogEvent( TcgPpi,
-                                  (EFI_PEI_SERVICES **)PeiServices,
-                                  (TCG_PCR_EVENT *)TcgEvent,
-                                  &EventNumber);
-
-    DEBUG(( DEBUG_INFO, "MeasureLogDxeFwVol - %r\n", Status));
-
-    TpmPeiReportStatusCodeEx(EFI_PROGRESS_CODE, AMI_SPECIFIC_BIOS_FWVOL_MEASURED | EFI_SOFTWARE_PEI_MODULE,
-                             0, NULL, &ExtendedDataGuid, &TcgEvent->Event, sizeof (EFI_TCG_EV_POST_CODE));
-    TpmPeiReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_BIOS_FWVOL_MEASURED | EFI_SOFTWARE_PEI_MODULE);
-
-    return Status;
-}
 
 
 //**********************************************************************
@@ -312,7 +204,7 @@ MeasureTeImage (
     // 2. Initialize a SHA hash context.
     SHA1Init(&Sha1Ctx);
                              
-    DEBUG ((DEBUG_INFO, "Printing TE Image Buffer in Memory Image Location = %x, Image size = %x\n",
+    DEBUG ((-1, "Printing TE Image Buffer in Memory Image Location = %x, Image size = %x\n",
     (UINTN)ImageLoad->ImageLocationInMemory, ImageLoad->ImageLengthInMemory));
            
     //printbuffer((UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory, 1024);
@@ -323,8 +215,8 @@ MeasureTeImage (
     HashBase = (UINT8 *)(UINTN)ptrToTEHdr;
     HashSize = sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);
            
-    DEBUG ((DEBUG_INFO, "Printing Hashed TE Hdr and Section Header\n"));
-    DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+    DEBUG ((-1, "Printing Hashed TE Hdr and Section Header\n"));
+    DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
     
     //printbuffer(HashBase, HashSize);
     SHA1Update(&Sha1Ctx,
@@ -346,8 +238,8 @@ MeasureTeImage (
     
         HashBase += sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);               
 
-        DEBUG ((DEBUG_INFO, "Printing Hashed TE Alignment Buffer\n"));
-        DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Printing Hashed TE Alignment Buffer\n"));
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
             
         SHA1Update(&Sha1Ctx,
                         HashBase,
@@ -375,7 +267,7 @@ MeasureTeImage (
                
         HashSize = (UINTN) Section->SizeOfRawData;
                       
-        DEBUG ((DEBUG_INFO, "Section Base = %x Section Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Section Base = %x Section Len = %x \n", HashBase, HashSize));
         //printbuffer(HashBase, 1024);
 
         SHA1Update(&Sha1Ctx,
@@ -386,16 +278,16 @@ MeasureTeImage (
         SectionHeaderOffset += EFI_IMAGE_SIZEOF_SECTION_HEADER;
     }  
     
-    DEBUG ((DEBUG_INFO, "SumOfBytesHashed = %x \n", SumOfBytesHashed));
+    DEBUG ((-1, "SumOfBytesHashed = %x \n", SumOfBytesHashed));
                  
     //verify size
     if ( (UINT32)ImageLoad->ImageLengthInMemory > SumOfBytesHashed) {
-        DEBUG ((DEBUG_INFO, "Hash rest of Data if true \n"));
+        DEBUG ((-1, "Hash rest of Data if true \n"));
         
         HashBase = (UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory + SumOfBytesHashed;
         HashSize = (UINTN)(ImageLoad->ImageLengthInMemory - SumOfBytesHashed);
         
-        DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
         //printbuffer(HashBase, 106);
 
         SHA1Update(&Sha1Ctx,
@@ -470,10 +362,10 @@ MeasureDxeCorePEImage (
    SectionHeader = NULL;
     FullPathSize  = 0;
 
-   DEBUG ((DEBUG_INFO, "PeiMeasurePeImage Entry\n"));
+   DEBUG ((-1, "PeiMeasurePeImage Entry\n"));
 
     Status = (*PeiServices)->AllocatePool(PeiServices, ((sizeof (*ImageLoad)
-                                - sizeof (ImageLoad->DevicePath)) + FullPathSize), (void **)&EventData);
+                                - sizeof (ImageLoad->DevicePath)) + FullPathSize), &EventData);
     if(EFI_ERROR(Status))return Status;
    //
    // Determine destination PCR by BootPolicy
@@ -481,13 +373,13 @@ MeasureDxeCorePEImage (
    EventSize  = sizeof (*ImageLoad) - sizeof (ImageLoad->DevicePath);
    EventSize += FullPathSize;
 
-    Status = (*PeiServices)->AllocatePool(PeiServices,EventSize, (void **)&ImageLoad);
+    Status = (*PeiServices)->AllocatePool(PeiServices,EventSize, &ImageLoad);
    
-   if (ImageLoad == NULL || EFI_ERROR(Status)) {
+   if (ImageLoad == NULL) {
         return EFI_OUT_OF_RESOURCES;
    }
    
-   Status = (*PeiServices)->AllocatePool(PeiServices, sizeof(TCG_PCR_EVENT_HDR)+EventSize, (void **)&TcgEvent);
+   Status = (*PeiServices)->AllocatePool(PeiServices, sizeof(TCG_PCR_EVENT_HDR)+EventSize, &TcgEvent);
       if(EFI_ERROR(Status))return Status;
 
    TcgEvent->EventSize = EventSize;
@@ -497,7 +389,7 @@ MeasureDxeCorePEImage (
    ImageLoad->ImageLinkTimeAddress  = 0;
    ImageLoad->LengthOfDevicePath    = 0;
    
-   DEBUG ((DEBUG_INFO, "ImageLoad->ImageLocationInMemory = %lx,  ImageLoad->ImageLengthInMemory = %lx \n", 
+   DEBUG ((-1, "ImageLoad->ImageLocationInMemory = %lx,  ImageLoad->ImageLengthInMemory = %lx \n", 
            ImageLoad->ImageLocationInMemory, (UINT32)ImageLoad->ImageLengthInMemory));
      
    //
@@ -518,7 +410,7 @@ MeasureDxeCorePEImage (
         goto TEImageDone;
    }
    
-   DEBUG ((DEBUG_INFO, "Image is a PE image\n"));
+   DEBUG ((-1, "Image is a PE image\n"));
 
    //
    // PE/COFF Image Measurement
@@ -594,9 +486,9 @@ MeasureDxeCorePEImage (
     //     header indicates how big the table should be. Do not include any 
     //     IMAGE_SECTION_HEADERs in the table whose 'SizeOfRawData' field is zero.   
     //
-    Status = (*PeiServices)->AllocatePool(PeiServices,sizeof (EFI_IMAGE_SECTION_HEADER) * Hdr->FileHeader.NumberOfSections, (void **)&SectionHeader);
+    (*PeiServices)->AllocatePool(PeiServices,sizeof (EFI_IMAGE_SECTION_HEADER) * Hdr->FileHeader.NumberOfSections, &SectionHeader);
 
-    if(SectionHeader==NULL || EFI_ERROR(Status))return EFI_OUT_OF_RESOURCES;
+    if(SectionHeader==NULL)return EFI_OUT_OF_RESOURCES;
     (*PeiServices)->SetMem(SectionHeader, (sizeof (EFI_IMAGE_SECTION_HEADER) * Hdr->FileHeader.NumberOfSections), 0);
     
     //
@@ -624,6 +516,7 @@ MeasureDxeCorePEImage (
            Section += 1;    
     }
     
+    DEBUG ((-1, "CheckPoint 4\n"));
     
     //
     // 13.    Walk through the sorted table, bring the corresponding section 
@@ -667,19 +560,22 @@ MeasureDxeCorePEImage (
                      (u32)HashSize);
     }
 
+
+    DEBUG ((-1, "CheckPoint 6\n"));
+
     //
     // 17.    Finalize the SHA hash.
     //
     SHA1Final(Sha1Digest.digest, &Sha1Ctx);
 
 TEImageDone:        
-
+    DEBUG ((-1, "CheckPoint 7\n"));
     //printbuffer(Sha1Digest.digest,  sizeof (TcgEvent->Digest.digest));
     (*PeiServices)->CopyMem (&TcgEvent->Digest.digest, Sha1Digest.digest, sizeof (TcgEvent->Digest.digest));
         
       
      TpmPpi->Init(TpmPpi, (EFI_PEI_SERVICES **)PeiServices);
-
+     DEBUG ((-1, "CheckPoint 8\n"));
      
      Status = TcgPeiSimpleExtend (
                   TcgPpi,
@@ -689,25 +585,30 @@ TEImageDone:
                   &Sha1Digest
                  );
     
-
+     DEBUG ((-1, "CheckPoint 9\n"));
      TpmPpi->Close(TpmPpi, (EFI_PEI_SERVICES **)PeiServices);
      
+     DEBUG ((-1, "CheckPoint 10\n"));
+    
      if (!EFI_ERROR (Status)) {  
     
-          Status = (*PeiServices)->AllocatePool(PeiServices,EventSize + sizeof (TCG_PCR_EVENT), (void **)&TcgEventlog);
-          if(EFI_ERROR(Status) || TcgEventlog == NULL )return Status;
-                 
+          Status = (*PeiServices)->AllocatePool(PeiServices,EventSize + sizeof (TCG_PCR_EVENT), &TcgEventlog);
+          
+          DEBUG ((-1, "CheckPoint 11\n"));
+        
           //Now log the event
           TcgEventlog->PCRIndex  = PCRi_CRTM_AND_POST_BIOS;
           TcgEventlog->EventType = EV_POST_CODE;
           TcgEventlog->EventSize = TcgEvent->EventSize;
-          DEBUG ((DEBUG_INFO, "TcgEvent->EventSize = %x \n", TcgEvent->EventSize));
+          DEBUG ((-1, "TcgEvent->EventSize = %x \n", TcgEvent->EventSize));
 
           (*PeiServices)->CopyMem (&TcgEventlog->Digest, &TcgEvent->Digest, sizeof(TCG_DIGEST));
           (*PeiServices)->CopyMem (&TcgEventlog->Event, ImageLoad, TcgEvent->EventSize);
+          DEBUG ((-1, "before CheckPoint 12\n"));
           //printbuffer((UINT8 *)TcgEventlog, 50);
           Status = TcgPpi->TCGLogEvent(TcgPpi,(EFI_PEI_SERVICES **)PeiServices, TcgEventlog, &EventNumber);
           TpmPeiReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_CRTM_VERSION_MEASURED | EFI_SOFTWARE_PEI_MODULE);
+          DEBUG ((-1, "CheckPoint 12\n"));
      }
      
 //Finish:   
@@ -788,7 +689,7 @@ EFI_STATUS InternalPeiBuildHobGuid(
     EFI_STATUS Status;
 
     Status = (*PeiServices)->CreateHob(
-        (CONST EFI_PEI_SERVICES **)PeiServices,
+        PeiServices,
         EFI_HOB_TYPE_GUID_EXTENSION,
         (UINT16) ( sizeof (EFI_HOB_GUID_TYPE) + DataLength ),
         Hob
@@ -796,11 +697,10 @@ EFI_STATUS InternalPeiBuildHobGuid(
 
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_INFO, "Failed to create TCG/TPM Hob Status = %r \n", Status));
         return Status;
     }
     
-    DEBUG((DEBUG_INFO, "Hob created \n")); 
+    DEBUG((-1, "Hob created \n")); 
     ((EFI_HOB_GUID_TYPE*)(*Hob))->Name = *Guid;
 
     return EFI_SUCCESS;
@@ -838,14 +738,16 @@ ImageRead (
 // Notes:
 //<AMI_PHDR_END>
 //******************************************************************************
-EFI_STATUS FindAndMeasureDxeCore(EFI_PEI_SERVICES **PeiServices)
+EFI_STATUS FindAndMeasureDxeCore(IN CONST EFI_PEI_SERVICES **PeiServices)
 {
 
    EFI_STATUS              Status;
    PEI_TPM_PPI             *TpmPpi         = NULL;         
    PEI_TCG_PPI             *TcgPpi         = NULL;
-   TCG_PLATFORM_SETUP_INTERFACE    *TcgPeiPolicy=NULL;
+   TCG_PLATFORM_SETUP_INTERFACE    *TcgPeiPolicy;
    TCG_CONFIGURATION               ConfigFlags;
+   EFI_GUID                        gTcgPeiPolicyGuid =\
+                                           TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
 
 #if defined(MeasureDxeCorePe) && (MeasureDxeCorePe == 1)
    EFI_HOB_MEMORY_ALLOCATION_MODULE    *DxeCoreHob;
@@ -856,16 +758,17 @@ EFI_STATUS FindAndMeasureDxeCore(EFI_PEI_SERVICES **PeiServices)
    AMI_ROM_AREA                    *RomArea = NULL;
    UINTN                           RomArea_size;
 #endif
-   FwVolHob                        *TpmFwVolHob = NULL;
+   FwVolHob                        *TpmFwVolHob;
    FwVolHob                        FwVolHobArray[10];
    UINTN                           i=0;
    UINTN                            Count=0;
-   EFI_HOB_GUID_TYPE               *VolHob = NULL;
+   EFI_HOB_GUID_TYPE               *VolHob;
+   EFI_GUID                        amiFVhoblistguid = AMI_FV_HOB_LIST_GUID;
    
    //locate the PeiTree Protocol
     Status = LocateTcgPpi((EFI_PEI_SERVICES **)PeiServices, &TpmPpi, &TcgPpi);
     if(EFI_ERROR(Status)){
-      DEBUG((DEBUG_ERROR, "\n LocateTcgPpi is failed \n"));
+      DEBUG((-1, "\n LocateTcgPpi is failed \n"));
       return EFI_NOT_FOUND;
     }
     
@@ -874,8 +777,9 @@ EFI_STATUS FindAndMeasureDxeCore(EFI_PEI_SERVICES **PeiServices)
     Status = GetRomArea(&RomArea,&RomArea_size, NULL);
     if( (!EFI_ERROR(Status))&&(RomArea != NULL) )
     {
-        for(i=0; RomArea!=NULL; i++)
+        for(i=0; i<10; i++)
         {
+            if(RomArea == NULL)break;
             
             if((RomArea->Attributes & ROM_AREA_FV_SIGNED) && (RomArea->Attributes & ROM_AREA_TCG_MEASURED) ||
                 ((RomArea->Attributes & (ROM_AREA_FV_PEI+ROM_AREA_FV_DXE)) &&
@@ -884,8 +788,8 @@ EFI_STATUS FindAndMeasureDxeCore(EFI_PEI_SERVICES **PeiServices)
                 
                 FwVolHobArray[Count].baseAddress = RomArea->Address;  
                 FwVolHobArray[Count].Size        = RomArea->Size;  
-               DEBUG ((DEBUG_INFO, "RomArea->Address = %x \n", RomArea->Address));
-               DEBUG ((DEBUG_INFO, "RomArea->Size = %x \n",RomArea->Size));
+               DEBUG ((-1, "RomArea->Address = %x \n", RomArea->Address));
+               DEBUG ((-1, "RomArea->Size = %x \n",RomArea->Size));
                 Count +=1;
             }
             
@@ -904,24 +808,20 @@ EFI_STATUS FindAndMeasureDxeCore(EFI_PEI_SERVICES **PeiServices)
     Count+=1;
 #endif
     
-    Status = InternalPeiBuildHobGuid(PeiServices, &amiFVhoblistguid,
-                              (sizeof(FwVolHob)*Count),  (void **)&VolHob);
-    if (EFI_ERROR (Status))
-    {
-        return Status;
-    }
+    Status = InternalPeiBuildHobGuid((EFI_PEI_SERVICES **)PeiServices, &amiFVhoblistguid,
+                              (sizeof(FwVolHob)*Count),  &VolHob);
     
     Status = (*PeiServices)->LocatePpi(
-                    (CONST EFI_PEI_SERVICES **)PeiServices,
+                     PeiServices,
                      &gTcgPeiPolicyGuid,
                      0, NULL,
-                     (void **)&TcgPeiPolicy);
+                     &TcgPeiPolicy);
     
-    if(EFI_ERROR(Status)){
+    if(TcgPeiPolicy == NULL){
         return EFI_NOT_FOUND;  
     }
            
-    Status = TcgPeiPolicy->getTcgPeiPolicy(PeiServices, &ConfigFlags);
+    Status = TcgPeiPolicy->getTcgPeiPolicy((EFI_PEI_SERVICES **)PeiServices, &ConfigFlags);
     if(EFI_ERROR(Status))return Status;
     
     TpmFwVolHob = (FwVolHob*)(VolHob + 1);
@@ -940,30 +840,22 @@ EFI_STATUS FindAndMeasureDxeCore(EFI_PEI_SERVICES **PeiServices)
            TpmFwVolHob->Tcg2SpecVersion = 0;
        }
        
-       DEBUG ((DEBUG_INFO, "TpmFwVolHob->Size = %x \n", TpmFwVolHob->Size));
-       DEBUG ((DEBUG_INFO, "TpmFwVolHob->baseAddress = %x \n",TpmFwVolHob->baseAddress));
-       DEBUG ((DEBUG_INFO, "TpmFwVolHob->Tcg2SpecVersion = %x \n",TpmFwVolHob->Tcg2SpecVersion));
-       DEBUG ((DEBUG_INFO, "TpmFwVolHob address = %x \n", TpmFwVolHob));
+       DEBUG ((-1, "TpmFwVolHob->Size = %x \n", TpmFwVolHob->Size));
+       DEBUG ((-1, "TpmFwVolHob->baseAddress = %x \n",TpmFwVolHob->baseAddress));
+       DEBUG ((-1, "TpmFwVolHob->Tcg2SpecVersion = %x \n",TpmFwVolHob->Tcg2SpecVersion));
+       DEBUG ((-1, "TpmFwVolHob address = %x \n", TpmFwVolHob));
        TpmFwVolHob+=1;
     }
                          
       
-#if defined(SAVE_ENTIRE_FV_IN_MEM) && (SAVE_ENTIRE_FV_IN_MEM == 0)
-    MeasureLogDxeFwVol(
-            (CONST EFI_PEI_SERVICES **)PeiServices,
-            ((FwVolHob*)(VolHob + 1)),
-            TpmPpi,
-            TcgPpi
-            );
-#endif
     //locate DxeCore Hob
     //treat it like a PE image
     // Hash and extend it
 #if defined(MeasureDxeCorePe) && (MeasureDxeCorePe == 1)
     PeiServicesGetHobList(&Hob.Raw);
     while (!TCGEND_OF_HOB_LIST (Hob)) {
-    //          DEBUG ((DEBUG_INFO, "Hob.Raw = %x \n", Hob.Raw));
-    //          DEBUG ((DEBUG_INFO, "Hob.Header->HobType = %x \n",Hob.Header->HobType));
+    //          DEBUG ((-1, "Hob.Raw = %x \n", Hob.Raw));
+    //          DEBUG ((-1, "Hob.Header->HobType = %x \n",Hob.Header->HobType));
          if(Hob.Header->HobType == EFI_HOB_TYPE_MEMORY_ALLOCATION){
              DxeCoreHob = (EFI_HOB_MEMORY_ALLOCATION_MODULE *) (Hob.Raw);
          }
@@ -975,11 +867,11 @@ EFI_STATUS FindAndMeasureDxeCore(EFI_PEI_SERVICES **PeiServices)
          Hob.Raw = TCGGET_NEXT_HOB (Hob);
     }
     
-    DEBUG ((DEBUG_INFO, "Found = %x \n", Found));
+    DEBUG ((-1, "Found = %x \n", Found));
     
     if(!Found)return EFI_NOT_FOUND;
     
-    DEBUG ((DEBUG_INFO, "DxeCoreHob->MemoryAllocationHeader.MemoryBaseAddress = %lx,  DxeCoreHob->MemoryAllocationHeader.MemoryLength = %lx \n", 
+    DEBUG ((-1, "DxeCoreHob->MemoryAllocationHeader.MemoryBaseAddress = %lx,  DxeCoreHob->MemoryAllocationHeader.MemoryLength = %lx \n", 
            DxeCoreHob->MemoryAllocationHeader.MemoryBaseAddress, DxeCoreHob->MemoryAllocationHeader.MemoryLength));
     
     //printbuffer((UINT8 *)DxeCoreHob->MemoryAllocationHeader.MemoryBaseAddress, (UINTN)DxeCoreHob->MemoryAllocationHeader.MemoryLength);
@@ -1029,14 +921,15 @@ EFI_STATUS VerifyTcgVariables(
     EFI_PEI_SERVICES **PeiServices )
 {
     AMI_TCG_PEI_FUNCTION_OVERRIDE_PPI       *VerifyVarOverride;
+    EFI_GUID                       VarOverrideguid = AMI_VERIFY_TCG_VARIABLES_GUID;
     EFI_STATUS						Status;
 
     
     Status = (*PeiServices)->LocatePpi(
-                   (CONST EFI_PEI_SERVICES    **)PeiServices,
-                    &AmiVerifyTcgVariablesGuid,
+                    PeiServices,
+                    &VarOverrideguid,
                     0, NULL,
-                    (void **)&VerifyVarOverride);
+                    &VerifyVarOverride);
 
     if(!EFI_ERROR(Status)){
         return (VerifyVarOverride->Function(PeiServices));
@@ -1075,6 +968,7 @@ EFI_STATUS Set_TPMPhysicalPresence(
     TPM_Capabilities_PermanentFlag  Cap;
 
     AMI_TCG_PEI_FUNCTION_OVERRIDE_PPI   *SetPhysicalOverride;
+    EFI_GUID                            Overrideguid = AMI_SET_PHYSICAL_PRESENCE_GUID;
     struct
     {
         TPM_RQU_COMMAND_HDR CmdHdr;
@@ -1090,17 +984,13 @@ EFI_STATUS Set_TPMPhysicalPresence(
 
 
     Status = (*PeiServices)->LocatePpi(
-                    (CONST EFI_PEI_SERVICES    **)PeiServices,
-                    &AmiSetPhysicalPresenceGuid,
+                    PeiServices,
+                    &Overrideguid,
                     0, NULL,
-                    (void **)&SetPhysicalOverride);
+                    &SetPhysicalOverride);
 
     if(!EFI_ERROR(Status)){
         return (SetPhysicalOverride->Function(PeiServices));
-    }
-    
-    if(IsTcmSupportType()){
-    	return EFI_SUCCESS;
     }
 
 
@@ -1118,17 +1008,10 @@ EFI_STATUS Set_TPMPhysicalPresence(
         if( !IsTcmSupportType() )
         {
             Status = ContinueTPMSelfTest( PeiServices );
-            if(EFI_ERROR(Status)){
-                DEBUG((DEBUG_INFO, "\n ContinueTpmSelftest Status = %r \n", Status));
-            }
         }
     }
 
     Status = LocateTcgPpi(PeiServices, &TpmPpi, &TcgPpi);
-    if(EFI_ERROR(Status)){
-        DEBUG((DEBUG_INFO, "\n ContinueTpmSelftest Status = %r \n", Status));
-    }
-    
     if(EFI_ERROR(Status))return EFI_NOT_FOUND;
     Cap = INTTCGPEI_GETCAP(PeiServices);
     if( 1 == Cap.physicalPresenceLifetimeLock )
@@ -1189,6 +1072,11 @@ EFI_STATUS Set_TPMPhysicalPresence(
         return Status;
     }
 
+    if ( EFI_ERROR( Status ))
+    {
+        return Status;
+    }
+
     if ( RspHdr.returnCode != 0 )
     {
         TpmPeiReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_1_2_PP_LOCK_CMD_SENT | EFI_SOFTWARE_PEI_MODULE);   
@@ -1230,16 +1118,17 @@ EFI_STATUS Set_TCMPhysicalPresence(
 {
     EFI_STATUS               Status;
     TPM_RSP_COMMAND_HDR      RspHdr;
-    UINT16  physical_CMD_on = TPM_H2NS(TPM_PHYSICAL_PRESENCE_CMD_ENABLE );
-    UINT16  physical_on     = TPM_H2NS(TPM_PHYSICAL_PRESENCE_PRESENT );
-    PEI_TCM_PPI     *TcmPpi = NULL;
+
     struct
     {
         TPM_RQU_COMMAND_HDR CmdHdr;
         UINT8               Data[0x4];
     } cmd;
 
-
+    UINT16  physical_CMD_on = TPM_H2NS(TPM_PHYSICAL_PRESENCE_CMD_ENABLE );
+    UINT16  physical_on     = TPM_H2NS(TPM_PHYSICAL_PRESENCE_PRESENT );
+    PEI_TPM_PPI     *TpmPpi = NULL;         
+    PEI_TCM_PPI     *TcgPpi = NULL;
 
     cmd.CmdHdr.tag =     TPM_H2NS( TPM_TAG_RQU_COMMAND );
     cmd.CmdHdr.paramSize = TPM_H2NL((UINT32)( sizeof (cmd.CmdHdr)
@@ -1253,26 +1142,28 @@ EFI_STATUS Set_TCMPhysicalPresence(
         physical_on = TPM_H2NS( TPM_PHYSICAL_PRESENCE_LOCK );
     }
 
-    Status = LocateTcmPpi(PeiServices, &TcmPpi);
+    Status = LocateTcmPpi(PeiServices, &TpmPpi, &TcgPpi);
     ASSERT_EFI_ERROR(  Status );
 
     CopyMem( cmd.Data, &physical_CMD_on, sizeof(TPM_PHYSICAL_PRESENCE));
 
-    Status = TcmPpi->TcmLibPassThrough(
-                        TcmReg,
-                        (UINT8*)&cmd,
-                        (sizeof (cmd.CmdHdr) + sizeof(TPM_PHYSICAL_PRESENCE)),
-                        (UINT8*)&RspHdr,
-                        sizeof (RspHdr));
+    Status = TcgPpi->TCMPassThroughToTcm(
+        TcgPpi,
+        PeiServices,
+        (sizeof (cmd.CmdHdr) + sizeof(TPM_PHYSICAL_PRESENCE)),
+        (UINT8*)&cmd,
+        sizeof (RspHdr),
+        (UINT8*)&RspHdr );
 
     CopyMem( cmd.Data, &physical_on, sizeof(TPM_PHYSICAL_PRESENCE));
 
-    Status = TcmPpi->TcmLibPassThrough(
-            TcmReg,
-            (UINT8*)&cmd,
-            (sizeof (cmd.CmdHdr) + sizeof(TPM_PHYSICAL_PRESENCE)),
-            (UINT8*)&RspHdr,
-            sizeof (RspHdr));
+    Status = TcgPpi->TCMPassThroughToTcm(
+        TcgPpi,
+        PeiServices,
+        (sizeof (cmd.CmdHdr) + sizeof(TPM_PHYSICAL_PRESENCE)),
+        (UINT8*)&cmd,
+        sizeof (RspHdr),
+        (UINT8*)&RspHdr );
 
     if ( RspHdr.returnCode != 0 )
     {
@@ -1326,7 +1217,7 @@ EFIAPI TcgPeiGetRawImage(
 
     while ( TRUE )
     {
-        Status = (*PeiServices)->FfsFindNextVolume( (CONST EFI_PEI_SERVICES **)PeiServices, FvNum, (void **)&pFV );
+        Status = (*PeiServices)->FfsFindNextVolume( PeiServices, FvNum, &pFV );
 
         if ( EFI_ERROR( Status ))
         {
@@ -1337,10 +1228,10 @@ EFIAPI TcgPeiGetRawImage(
 
         while ( TRUE )
         {
-            Status = (*PeiServices)->FfsFindNextFile( (CONST EFI_PEI_SERVICES **)PeiServices,
+            Status = (*PeiServices)->FfsFindNextFile( PeiServices,
             										  EFI_FV_FILETYPE_ALL,
                                                       pFV,
-                                                     (void **) &ppFile );
+                                                      &ppFile );
 
             if ( Status == EFI_NOT_FOUND )
             {
@@ -1363,7 +1254,7 @@ EFIAPI TcgPeiGetRawImage(
         }
     }
 
-    (*PeiServices)->FfsFindSectionData( (CONST EFI_PEI_SERVICES **)PeiServices,
+    (*PeiServices)->FfsFindSectionData( PeiServices,
                                         EFI_SECTION_RAW,
                                         ppFile,
                                         Buffer );
@@ -1376,17 +1267,31 @@ EFIAPI TcgPeiGetRawImage(
     Temp  = ((MPDRIVER_LEGHEADER*)(((UINT8* )ppFile )+sizeof(EFI_FFS_FILE_HEADER)));
     *size = Temp->Size;
     
-    Status = (*PeiServices)->AllocatePool((CONST EFI_PEI_SERVICES **)PeiServices, *size,  (void **)Buffer );
-    if(EFI_ERROR(Status)) return Status;
-    
+    (*PeiServices)->AllocatePool(PeiServices, *size,  Buffer );
     (*PeiServices)->CopyMem(*Buffer,( ((UINT8* )ppFile )+sizeof(EFI_FFS_FILE_HEADER) ), *size) ;
 
     return Status;
 }
 
+
+
+TCG_PEI_MEMORY_CALLBACK    *FvMemCallback;
+
 EFI_STATUS MeasureTCGPcClientSpecID(
     IN EFI_PEI_SERVICES **ps, 
     IN PEI_TCG_PPI      *tcg );
+
+EFI_STATUS
+    EFIAPI MeasureFVOnMemAvail(
+      IN EFI_PEI_SERVICES          **PeiServices,
+      IN EFI_PEI_NOTIFY_DESCRIPTOR *NotifyDesc,
+      IN VOID                      *Ppi )
+   {
+       EFI_STATUS Status=EFI_SUCCESS;
+       Status = FindAndMeasureDxeCore(PeiServices);
+       return Status;
+   }
+
 
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -1418,46 +1323,130 @@ EFIAPI MemoryPresentEntry(
     PEI_TCG_PPI                    *TcgPpi = NULL;
     EFI_HOB_GUID_TYPE              *ptrBootMode;
     EFI_BOOT_MODE                  BootMode;
+    EFI_HOB_GUID_TYPE              *MpHobType;
+    EFI_PHYSICAL_ADDRESS           MPRuntime;
     void                           *TcgMPBuffer = NULL;
+    FAR32LOCALS                    InitCall;
+    void                           *MPRuntimePtr = NULL;
     UINT16                         Pages      = 0;
     UINT32                         Offset     = 0;
     UINT8                          FuncID     = 1;
     void                           *ParamIN   = NULL;
     void                           *ParamOut  = NULL;
     UINT32                         RetVal     = 0;
-    EFI_PEI_FILE_HANDLE            *FfsHeader = NULL;
+    EFI_FFS_FILE_HEADER            *FfsHeader = NULL;
     EFI_PEI_CPU_IO_PPI             *CpuIo      = (*PeiServices)->CpuIo;
     UINT8                          MPFILEERROR = 0xFA;
     BOOLEAN                        ResetMor = FALSE;
-    BOOLEAN			   			   TpmLegBin = FALSE;
+#if TCG_LEGACY == 1
+    BOOLEAN			   TpmLegBin = TRUE;
+    EFI_GUID                       MpFileGuid  = EFI_TCG_MPDriver_GUID;
+#else
+    BOOLEAN			   TpmLegBin = FALSE;
+    EFI_GUID                       MpFileGuid  = EFI_TCM_MPDriver_GUID;
+#endif
 
     AMI_TCG_PEI_FUNCTION_OVERRIDE_PPI       *MpOverride;
+    EFI_GUID                Overrideguid =  AMI_MEMORY_PRESENT_FUNCTION_OVERRIDE_GUID;
+
+    EFI_GUID gPeiEfiAmiTcgWakeEventDataHobGuid =  \
+                                EFI_TCG_WAKE_EVENT_DATA_HOB_GUID;
+    EFI_GUID gEfiPeiAmiTcgLogHobGuid           = EFI_TCG_LOG_HOB_GUID;
+    EFI_GUID gEfiTcgMpDriverHobGuid = EFI_TCG_MPDriver_HOB_GUID;
+
 
     Status = (*PeiServices)->LocatePpi(
-                                (CONST EFI_PEI_SERVICES    **)PeiServices,
-                                &AmiMemoryPresentFunctionOverrideGuid,
+                                PeiServices,
+                                &Overrideguid,
                                 0, NULL,
-                                (void **)&MpOverride);
+                                &MpOverride);
 
     if(!EFI_ERROR(Status)){
         return (MpOverride->Function(PeiServices));
     }
 
 #if TCG_LEGACY == 1
-    TpmLegBin = TRUE;
-    MpFileGuid  = gEfiTcgMPDriverGuid;
     Status = Configure_Tpm_Chip( );
     if ( EFI_ERROR( Status ))
     {
-         DEBUG((DEBUG_INFO, 
+         DEBUG((-1, 
            "Device not configured for legacy IO aborting TPM initialization\n"));
         return Status;
     }
 #endif
 
-    Status = (*PeiServices)->GetBootMode( (CONST EFI_PEI_SERVICES **)PeiServices, &BootMode );
+    Status = (*PeiServices)->GetBootMode( PeiServices, &BootMode );
     ASSERT_EFI_ERROR(  Status );
-    
+
+    if((IsTcmSupportType()) || (TpmLegBin == TRUE)){
+
+        DEBUG((-1,"Setting up Binary Images\n"));
+
+        Status = TcgPeiGetRawImage( PeiServices, &TcgMPBuffer, &Pages, MpFileGuid );
+
+        if ( TcgMPBuffer == NULL )
+        {
+            DEBUG((-1, 
+            "Unable to Find TCM OEM MPDriver!!! Please make sure TCM porting is done correctly\n"));
+            DEBUG((-1, "Unrecoverable Error. HALTING SYSTEM\n"));
+            CpuIo->Io.Write( PeiServices, CpuIo, 0, 0x80, 1, &MPFILEERROR );
+             while ( 1 )
+            {
+                ;
+            }
+        }   
+
+        (*PeiServices)->AllocatePages( PeiServices,
+                                   EfiRuntimeServicesCode,
+                                   (UINTN)((Pages / 4096)+1),
+                                   &MPRuntime );
+
+        MPRuntimePtr = (void*)MPRuntime;
+        CopyMem( MPRuntimePtr, TcgMPBuffer, Pages );
+
+        Offset     = ((MPDRIVER_LEGHEADER*)MPRuntimePtr)->CodeP;
+        MPRuntime += Offset;
+
+        //Assuming we are in Protected mode with flat address selector 10 as
+        //set by startup32.asm
+        InitCall.Offset   = (UINT32)MPRuntime;
+        InitCall.Selector = SEL_flatCS;
+        InitCall.Codep    = ((MPDRIVER_LEGHEADER*)MPRuntimePtr)->CodeP;
+        InitCall.Size     = Pages;
+
+        //create Hob to pass PEI Capabilities information
+        Status = TcgPeiBuildHobGuid(
+          PeiServices,
+          &gEfiTcgMpDriverHobGuid,
+          sizeof (FAR32LOCALS),
+          &MpHobType );
+
+        ASSERT_EFI_ERROR(  Status );
+        MpHobType++;
+        (*PeiServices)->CopyMem( MpHobType, &InitCall, sizeof (FAR32LOCALS));
+        if ( EFI_ERROR( Status )) {
+            return Status;
+        }
+        
+        if(IsTcmSupportType())
+        {
+            Status = (*PeiServices)->InstallPpi( PeiServices, TcmInitPpi );
+            if ( EFI_ERROR( Status )) {
+                return Status;
+            }
+        }else{//legacy IO support for TPM
+            Status = (*PeiServices)->InstallPpi( PeiServices, LegacyTpmInitPpi );
+            if ( EFI_ERROR( Status )) {
+                return Status;
+            }
+        }
+
+ #if (StartupCmd_SelfTest_State == 1)
+    Status = SendStartupandSelftest(PeiServices,BootMode);
+    if(EFI_ERROR(Status))return Status;  //if startup or selftest fails, treat it as a fatal error; return
+ #endif
+     }
+       
  #if (StartupCmd_SelfTest_State == 0)
     Status = SendStartupandSelftest(PeiServices,BootMode);
     if(EFI_ERROR(Status))return Status;  //if startup or selftest fails, treat it as a fatal error; return
@@ -1468,29 +1457,24 @@ EFIAPI MemoryPresentEntry(
     }
 
     Status = TcgPeiBuildHobGuid(
-        (CONST EFI_PEI_SERVICES    **) PeiServices,
-        &gEfiTcgWakeEventDataHobGuid,
+        PeiServices,
+        &gPeiEfiAmiTcgWakeEventDataHobGuid,
         sizeof (BootMode),
-        (void **)&ptrBootMode );
+        &ptrBootMode );
 
-    if(EFI_ERROR(Status)){
-        return Status;
-    }
-
+    ASSERT_EFI_ERROR(  Status );
     ptrBootMode++;
     (*PeiServices)->CopyMem( ptrBootMode, &BootMode, sizeof (BootMode));
 
     //even if TPM is deactivated still build hob but
     //don't populate it.
     Status = TcgPeiBuildHobGuid(
-         (CONST EFI_PEI_SERVICES **)PeiServices,
-        &gEfiPeiTcgLogHobGuid,
+        PeiServices,
+        &gEfiPeiAmiTcgLogHobGuid,
         sizeof (*TcgLog) + TCG_LOG_MAX_TABLE_SIZE,
-        (void **)&Hob );
+        &Hob );
 
-    if(EFI_ERROR(Status)){
-        return Status;
-    }
+    ASSERT_EFI_ERROR(  Status );
 
     TcgLog = (TCG_LOG_HOB*)(Hob + 1);
     (*PeiServices)->SetMem( TcgLog, sizeof (*TcgLog), 0 );
@@ -1509,13 +1493,33 @@ EFIAPI MemoryPresentEntry(
 #endif
         Status = MeasureCRTMVersionFuncPtr( PeiServices );
         ASSERT_EFI_ERROR(  Status );
-        if ( EFI_ERROR( Status ))
-        {
-            DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-        }
+    }else{
+        Status = MeasureTcmCRTMVersion( PeiServices );
+        ASSERT_EFI_ERROR(  Status );
     }
 
-    Status = FindAndMeasureDxeCore(PeiServices);
+    //Status = LocateTcgPpi(PeiServices, &TpmPpi, &TcgPpi);
+    //if(EFI_ERROR(Status))return EFI_NOT_FOUND;
+    //FindAndMeasureDxeFWVol(PeiServices);
+    
+    Status = (**PeiServices).AllocatePool(
+         PeiServices,
+         sizeof (TCG_PEI_MEMORY_CALLBACK),
+         &FvMemCallback);
+    
+    if ( !EFI_ERROR( Status ))
+    {
+         FvMemCallback->NotifyDesc.Flags
+               = (EFI_PEI_PPI_DESCRIPTOR_NOTIFY_CALLBACK
+               | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST);
+         FvMemCallback->NotifyDesc.Guid   = &gEfiEndOfPeiSignalPpiGuid;
+         FvMemCallback->NotifyDesc.Notify = MeasureFVOnMemAvail;
+         FvMemCallback->FfsHeader         = FfsHeader;
+
+         Status = (*PeiServices)->NotifyPpi( PeiServices,
+                                   &FvMemCallback->NotifyDesc );
+    }
+
 
     return Status;
 }
@@ -1564,7 +1568,7 @@ static EFI_PEI_PPI_DESCRIPTOR mAmiTcgPlatformPPIListAfterMem[] = {
 //**********************************************************************
 EFI_STATUS
 EFIAPI AmiTcgPlatformPEI_EntryAfterMem(
-    IN EFI_PEI_FILE_HANDLE  FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices 
 ){
     EFI_STATUS Status;

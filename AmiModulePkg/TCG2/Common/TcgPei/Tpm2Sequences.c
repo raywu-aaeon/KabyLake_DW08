@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseMemoryLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
-#include "Ppi/AmiTreePpi.h"
+#include "PPI\AmiTreePpi.h"
 
 #pragma pack(1)
 

@@ -25,27 +25,27 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Token.h>
-#include <AmiTcg/TcgPc.h>
+#include <AmiTcg\TcgPc.h>
 //#include <AmiDxeLib.h>
-#include <AmiTcg/TcgCommon12.h>
-#include <AmiTcg/tcg.h>
+#include <AmiTcg\TcgCommon12.h>
+#include <token.h>
+#include <AmiTcg\tcg.h>
 #if SMBIOS_SUPPORT == 1
 //  #include <Protocol\SmBios.h>
 //  #include <Protocol\AmiSmBios.h>
 #endif
-#include <AmiTcg/TCGMisc.h>
-#include <Protocol/TcgTcmService.h>
-#include <Protocol/TcgService.h>
-#include <Protocol/TpmDevice.h>
+#include <AmiTcg\TcgMisc.h>
+#include <Protocol\TcgTcmService.h>
+#include <Protocol\TcgService.h>
+#include <Protocol\TpmDevice.h>
 #include <Include/Setup.h>
 #include "Protocol/CpuIo.h"
 #include "Protocol/FirmwareVolume.h"
 #include "Protocol/DevicePath.h"
-#include <Library/IoLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library\IoLib.h>
+#include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Protocol/AmiTpmSupportTypeProtocol.h>
+#include<Protocol/AmiTpmSupportTypeProtocol.h>
 #if ( defined(CSM_SUPPORT) && (CSM_SUPPORT != 0) )
 #include "Protocol/LegacyBios.h"
 #endif
@@ -66,9 +66,9 @@
   #include "Protocol/HII.h"
 #endif
 */
-#include <Protocol/SmmBase.h>
-#include <Protocol/SmmSwDispatch.h>
-#include <Protocol/Runtime.h>
+#include <Protocol\SmmBase.h>
+#include <Protocol\SmmSwDispatch.h>
+#include <Protocol\Runtime.h>
 //#include <Include\Acpi.h>
 //#include <Include\Acpi11.h>
 //#include "AmiTcgPlatformDxeLib.h"
@@ -80,6 +80,73 @@
 //--------------------------------------------------------------------------
 //GUID Definitions
 //--------------------------------------------------------------------------
+#define EFI_SMBIOS_TABLE_GUID \
+    {0xeb9d2d31, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d}
+
+#define AMI_TCG_PLATFORM_PROTOCOL_GUID\
+    {0x8c939604, 0x700, 0x4415, 0x9d, 0x62, 0x11, 0x61, 0xdb, 0x81, 0x64, 0xa6}
+
+#define  AMI_PROCESS_TCG_PPI_REQUEST_GUID\
+    { 0x30ad2b83, 0xadd0, 0x414b, 0xb1, 0x1c, 0xf9, 0x3c, 0xc1, 0xd0, 0xb7,\
+      0x9b}
+
+#define  AMI_PROCESS_TCG_SETUP_GUID\
+    { 0xc77dd102, 0x1db4, 0x4997, 0xae, 0x37, 0x4e, 0x8c, 0x52, 0x1e, 0xf5,\
+      0x67}
+
+#define  AMI_MEASURE_CPU_MICROCODE_GUID\
+    { 0x5cf308b5, 0xfa23, 0x4100, 0x8a, 0x76, 0xf3, 0x26, 0xc2, 0x81, 0x48,\
+      0x80}
+
+#define  AMI_MEASURE_PCIOPROM_GUID\
+    { 0x76f3992d, 0x529e, 0x4efe, 0x8b, 0xbe, 0x8e, 0x1e, 0xd4, 0x32, 0xc2,\
+      0x23}
+
+#define  AMI_SET_TCG_READYTOBOOT_GUID\
+    { 0xa4524a9c, 0xb5e, 0x492d, 0xae, 0xc9, 0x30, 0x86, 0x31, 0xb1, 0x89,\
+      0xb4}
+
+#define  AMI_TPM12_LOCK_PHYSICAL_PRESENCE_GUID\
+    { 0x9c53ce0e, 0xe9f, 0x4f20, 0xb1, 0xa1, 0x15, 0xe, 0x43, 0x49, 0xd7,\
+      0x77}
+
+
+#define TCG_SMBIOS_EFI_TABLE_GROUP \
+    { 0xb3dae700, 0x2a77, 0x4ea4, 0xaf, 0x79, 0x32, 0x97, 0xb4, 0x84, 0xbe, 0x61 }
+
+
+EFI_GUID gEfiSmbiosTableGuid = EFI_SMBIOS_TABLE_GUID;
+
+#define    MINI_SETUP_GUID { 0xB1DA0ADF, 0x4F77, 0x4070,\
+      { 0xA8, 0x8E, 0xBF, 0xFE, 0x1C, 0x60, 0x52, 0x9A } }
+
+#define   GUID_VARIABLE_DECLARATION( Variable, Guid ) extern EFI_GUID Variable
+
+EFI_GUID  gMicrocodeGuid =
+{
+    0x17088572, 0x377F, 0x44ef, 0x8F, 0x4E, 0xB0, 0x9F, 0xFF, 0x46, 0xA0, 0x70
+};
+
+#if TPM_PASSWORD_AUTHENTICATION
+
+EFI_GUID  gAmitseAdminPasswordValidGuid = AMITSE_ADMIN_PASSWORD_VALID_GUID;
+
+
+#define AMITSE_PASSWORD_PROMPT_EXIT_GUID { 0xb9b038b0, 0xe2b6, 0x4aab, \
+    0x94, 0x35, 0x41, 0x65, 0xec, 0xfe, 0xd0, 0x32 }
+
+
+EFI_GUID  gAmitsePasswordPromptExitGuid = AMITSE_PASSWORD_PROMPT_EXIT_GUID;
+
+#define AMITSE_PASSWORD_PROMPT_ENTER_GUID \
+{ 0x73e7e01, 0x2611, 0x4e85, 0xb8, 0x96, 0xa3, 0xb6, 0x76, 0x7c, 0xba, 0x0 }
+
+EFI_GUID  gAmitsePasswordPromptEnterGuid = AMITSE_PASSWORD_PROMPT_ENTER_GUID;
+#endif
+
+EFI_GUID  gDsdtGuidDxe        = DSDT_GUID;
+EFI_GUID  TcgEfiGlobalVariableGuid = TCG_EFI_GLOBAL_VARIABLE_GUID;
+
 #define TCG_DEACTIVED_ERROR  0x06
 
 //---------------------------------------------------------------------------

@@ -14,66 +14,54 @@
 
 #include <TcgAslLib.h>
 #include <Library/IoLib.h>
-#include <Protocol/AcpiSystemDescriptionTable.h>
 
-extern EFI_GUID gEfiAcpiSdtProtocolGuid;
-extern EFI_GUID gEfiAcpiTableGuid;
-
-VOID * TcgAslGetConfigurationTable(
-    IN EFI_SYSTEM_TABLE *SystemTable,
-    IN EFI_GUID         *Guid
-)
-{
-    EFI_CONFIGURATION_TABLE *Table = SystemTable->ConfigurationTable;
-    UINTN i = SystemTable->NumberOfTableEntries;
-
-    for (; i; --i,++Table)
-    {
-        if (CompareMem(&Table->VendorGuid,Guid, sizeof(EFI_GUID))==0) return Table->VendorTable;
-    }
-    return 0;
-}
 
 EFI_STATUS TcgLibGetDsdt(EFI_PHYSICAL_ADDRESS *DsdtAddr, EFI_ACPI_TABLE_VERSION Version)
 {
-    EFI_PHYSICAL_ADDRESS Dsdt1 = 0;
-    EFI_PHYSICAL_ADDRESS Dsdt2 = 0;
-
+    static EFI_PHYSICAL_ADDRESS Dsdt1 = 0;
+    static EFI_PHYSICAL_ADDRESS Dsdt2 = 0;
+    static EFI_GUID gInternalEfiAcpiSdtProtocolGuid = EFI_ACPI_SDT_PROTOCOL_GUID;
 #if PI_SPECIFICATION_VERSION < 0x10014
     ACPI_HDR                    *tbl = NULL;
-    EFI_ACPI_SDT_PROTOCOL       *as;
+    EFI_ACPI_SUPPORT_PROTOCOL   *as;
 #else
     EFI_ACPI_SDT_HEADER         *tbl = NULL;
     EFI_ACPI_SDT_PROTOCOL       *as;
 #endif
-    UINT8                       *Rsdtptr=NULL;
+
     EFI_STATUS                  Status = EFI_NOT_FOUND;
     UINTN                       i;
     EFI_ACPI_TABLE_VERSION      ver;
     UINTN                       AcpiHandle;
-    EFI_GUID                    gEfiAcpiSdtProtocolGuid = EFI_ACPI_SDT_PROTOCOL_GUID;
+
 
 //---------------------------
     if (!(Dsdt1 && Dsdt2))
     {
-        Status=gBS->LocateProtocol(&gEfiAcpiSdtProtocolGuid, NULL, (void **)&as);
+#if PI_SPECIFICATION_VERSION < 0x10014
+        Status=gBS->LocateProtocol(&gInternalAcpiSupportGuid, NULL, &as);
+#else
+        Status=gBS->LocateProtocol(&gInternalEfiAcpiSdtProtocolGuid, NULL, &as);
+#endif
 
         if (EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR,"AcpiResLib: LibGetDsdt(): LocateProtocol(ACPISupport) returned %r \n", Status));
+            DEBUG((-1,"AcpiResLib: LibGetDsdt(): LocateProtocol(ACPISupport) returned %r \n", Status));
             return EFI_NOT_AVAILABLE_YET;
         }
         else
         {
-            Rsdtptr = TcgAslGetConfigurationTable(gST, &gEfiAcpiTableGuid);
-            if(Rsdtptr == NULL) return EFI_NOT_AVAILABLE_YET;
-            
             for (i=0; ; i++)
             {
+#if PI_SPECIFICATION_VERSION < 0x10014
+                Status = as->GetAcpiTable(as, i, &tbl, &ver, &AcpiHandle);
+#else
                 Status = as->GetAcpiTable(i, &tbl, &ver, &AcpiHandle);
+#endif
+
                 if (EFI_ERROR(Status))
                 {
-                    DEBUG((DEBUG_ERROR,"Can't find Dsdt table -> %r search %d Tables\n", Status, i));
+                    DEBUG((-1,"Can't find FADT table -> %r search %d Tables\n", Status, i));
                     break;
                 }
 
@@ -82,20 +70,20 @@ EFI_STATUS TcgLibGetDsdt(EFI_PHYSICAL_ADDRESS *DsdtAddr, EFI_ACPI_TABLE_VERSION 
                     if (ver == EFI_ACPI_TABLE_VERSION_1_0B)
                     {
                         Dsdt1 = (EFI_PHYSICAL_ADDRESS)(((FACP_20 *)tbl)->DSDT);
-                        DEBUG((DEBUG_INFO,"AcpiResLib: LibGetDsdt(): Found v1.0b   RSDT->DSDT @ 0x%lX; -> %r \n", Dsdt1, Status));
+                        DEBUG((-1,"AcpiResLib: LibGetDsdt(): Found v1.0b   RSDT->DSDT @ 0x%lX; -> %r \n", Dsdt1, Status));
                     }
 
                     if ((ver & EFI_ACPI_TABLE_VERSION_X)!= 0)
                     {
                         Dsdt2 = (EFI_PHYSICAL_ADDRESS)(((FACP_20 *)tbl)->X_DSDT);
-                        DEBUG((DEBUG_INFO,"AcpiResLib: LibGetDsdt(): Found v2.0&UP XSDT->DSDT @ 0x%lX; -> %r \n", Dsdt2, Status));
+                        DEBUG((-1,"AcpiResLib: LibGetDsdt(): Found v2.0&UP XSDT->DSDT @ 0x%lX; -> %r \n", Dsdt2, Status));
                     }
                 }
                 else
                 {
-#if ACPI_MODULE_VER < 170            
+                    if(tbl!=NULL){
                         gBS->FreePool((VOID *)tbl);
-#endif                        
+                    }
                 }
 
                 if (Dsdt1 && Dsdt2)
@@ -116,10 +104,6 @@ EFI_STATUS TcgLibGetDsdt(EFI_PHYSICAL_ADDRESS *DsdtAddr, EFI_ACPI_TABLE_VERSION 
             *DsdtAddr = Dsdt1;
             Status = EFI_SUCCESS;
         }
-    }
-    
-    if(Status != EFI_SUCCESS){
-        Status = EFI_NOT_AVAILABLE_YET;
     }
     return Status;
 }

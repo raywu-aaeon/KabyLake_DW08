@@ -27,15 +27,9 @@
   UefiDriverEntryPoint
   MemoryAllocationLib
   UefiLib
-
-[Guids]
-  gEfiAcpiTableGuid
-
-[Protocols]
- gEfiAcpiSdtProtocolGuid     
   
 [Packages]
- AmiCompatibilityPkg/AmiCompatibilityPkg.dec
- MdePkg/MdePkg.dec
- AmiModulePkg/AmiModulePkg.dec
+ AmiCompatibilityPkg\AmiCompatibilityPkg.dec
+ MdePkg\MdePkg.dec
+ AmiModulePkg\AmiModulePkg.dec
 

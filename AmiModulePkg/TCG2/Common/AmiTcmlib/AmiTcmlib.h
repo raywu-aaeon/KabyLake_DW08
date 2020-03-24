@@ -26,7 +26,7 @@
 //<AMI_FHDR_END>
 //**********************************************************************
 //Array of supported TCM devices
-#include <Uefi.h>
+#include <efi.h>
 
 typedef struct
 {

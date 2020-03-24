@@ -10,34 +10,13 @@ End
 
 TOKEN
     Name  = "TCG2_VERSION"
-    Value  = "21"
+    Value  = "11"
     Help  = "TCG2 module version.\Do not change."
     TokenType = Integer
     TargetMAK = Yes
     TargetH = Yes
     Lock = Yes
 End
-
-
-TOKEN
-    Name = "MeasureGptFilterIntelIDER"
-    Value = "0"
-    Help  = "Enable this token to measure the GPT partition on IDER device if enabed"
-    TokenType = BOOLEAN
-    TargetMAK = Yes
-    TargetH   = Yes
-End
-
-
-TOKEN
-    Name = "DisableDisAllowTPMSupport"
-    Value = "1"
-    Help  = "Disable disallow TPM Support"
-    TokenType = BOOLEAN
-    TargetMAK = Yes
-    TargetH   = Yes
-End
-
 
 TOKEN
     Name  = "AMI_TPM_PROGRESS_CODE_BASE"
@@ -49,38 +28,9 @@ TOKEN
 End
 
 TOKEN
-    Name  = "MAX_LOG_AREA_SIZE"
-    Value  = "10000h"
-    Help  = "Max log Area for TCG2 O.S. interface"
-    TokenType = Integer
-    TargetEQU = Yes
-    TargetH = Yes
-End
-
-TOKEN
-    Name  = "PEI_MAX_LOG_AREA_SIZE"
-    Value  = "1000h"
-    Help  = "Max log Area for TCG2 Pei Log"
-    TokenType = Integer
-    TargetEQU = Yes
-    TargetH = Yes
-End
-
-
-TOKEN
     Name = "FTpmPlatformProfile"
     Value = "0"
     Help  = "Set to 0 for Intel PTT and 1 for AMD PSP device"
-    TokenType = BOOLEAN
-    TargetMAK = Yes
-    TargetH   = Yes
-End
-
-
-TOKEN
-    Name = "MEASURE_EMBEDDED_BOOT_IMAGES"
-    Value = "1"
-    Help  = "Set to 1 for TCG2 to measure embedded boot images"
     TokenType = BOOLEAN
     TargetMAK = Yes
     TargetH   = Yes
@@ -104,6 +54,16 @@ TOKEN
     TargetH   = Yes
 End
 
+
+TOKEN
+    Name  = "TCG_LEGACY"
+    Value  = "0"
+    Help  = "Main switch to enable Tcg Legacy support in Project."
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
 
 TOKEN
     Name  = "RomLayout_SUPPORT"
@@ -135,6 +95,15 @@ TOKEN
     Range  = "4 characters max"
 End
 
+TOKEN
+    Name  = "USE_BIOS_IMAGE_AS_CRTM"
+    Value  = "0"
+    Help  = "Requires controlled access to BIOS region on the Flash PART. Easily achieved with secureboot."
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
 
 TOKEN
     Name  = "ALLOCATE_PCR_AFTER_SMM_INIT"
@@ -148,7 +117,7 @@ End
 
 TOKEN
     Name  = "WORD_ACCESS_SMI_PORT"
-    Value  = "1"
+    Value  = "0"
     Help  = "This will cause 16 bit read and write to the TPM SMI port required for some AMD platforms"
     TokenType = Boolean
     TargetEQU = Yes
@@ -175,6 +144,17 @@ TOKEN
     Token = "TCG_LEGACY" "=" "0"
 End
 
+TOKEN
+    Name  = "StartupCmd_SelfTest_State"
+    Value  = "1"
+    Help  = "Always send selftest and Startup Command after Mem if TCG_LEGACY is enabled"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+    Lock = Yes
+    Token = "TCG_LEGACY" "=" "1"
+End
 
 TOKEN
     Name  = "PCR_FOR_BOOT_VARIABLES"
@@ -234,25 +214,6 @@ TOKEN
     TargetH = Yes
 End
 
-
-TOKEN
-    Name  = "TPM_IRQ_NUM"
-    Value  = "0"    
-    Help  = "..PORTING... discrete TPM interrupt number in TPM ASL"
-    TokenType = Expression
-    TargetMAK = Yes
-    TargetH = Yes
-End
-
-
-TOKEN
-    Name  = "TMRQ"
-    Value  = "$(TPM_IRQ_NUM)"
-    TokenType = Integer
-    TargetASL = Yes
-    Help  = "TPM IRQ value for TPM ASL code"
-End
-
 TOKEN
     Name  = "PMBASE_RTC_WKAround"
     Value  = "1"
@@ -298,6 +259,7 @@ TOKEN
     Help  = "Device ID of the TPM device. This ID will show up in ACPI structure"
     TokenType = Expression
     TargetMAK = Yes
+    Token = "TCG_LEGACY" "=" "0"
 End
 
 TOKEN
@@ -306,6 +268,7 @@ TOKEN
     Help  = "Compatible Device ID of the TPM device. This ID will show up in _CID object"
     TokenType = Expression
     TargetMAK = Yes
+    Token = "TCG_LEGACY" "=" "0"
 End
 
 TOKEN
@@ -333,6 +296,13 @@ TOKEN
     Help  = "Start of Mem I/O region dedicated for TPM access"
     TokenType = Integer
     TargetEQU = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "TCG_PCCLIENT_SPEC"
+    Value  = "0"
+    TokenType = Boolean
     TargetH = Yes
 End
 
@@ -445,6 +415,26 @@ TOKEN
     TargetASL = Yes
 End
 
+TOKEN
+    Name  = "PARTIALLY_MEASURE_FVMAIN"
+    Value  = "0"
+    Help  = "Enable this token to make the TPM measure part of FVMAIN. This is useful to reduce the amount of time used for hashing FVMAIN."
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "TCG_FV_MAIN_SIZE"
+    Value  = "0x180000"
+    Help  = "Size of FV_MAIN to Measure."
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+    Token = "PARTIALLY_MEASURE_FVMAIN" "=" "1"
+End
 
 TOKEN
     Name  = "TCG_CONVENTIONAL_BIOS_6_1"
@@ -481,16 +471,6 @@ TOKEN
     TargetMAK = Yes
     TargetH = Yes
 End
-
-
-TOKEN
-    Name  = "TPM2_S3_STARTUP_FAILURE_REBOOT_FLOW"
-    Value  = "0"
-    Help  = "Causes system reboot if TPM2 Startup State fails during S3 resume"
-    TokenType = Boolean
-    TargetH = Yes
-End
-
 
 TOKEN
     Name  = "CONFIRM_SETUP_CHANGE"
@@ -541,16 +521,14 @@ TOKEN
     Range  = "GUID"
 End
 
-
-TOKEN
-    Name  = "gTcgMeDataHobGuid"
-    Value  = "{0x1e94f097,0x5acd,0x4089,0xb2,0xe3,0xb9,0xa5,0xc8,0x79,0xa7,0x0c}"
-    Help  = "GUID for MEHOBDATA..PORTING...Chipset Specific"
-    TokenType = Expression
-    TargetH = Yes
-    Range  = "GUID"
-End
-
+#TOKEN
+#   Name  = "MEMORY_ONLY_RESET_CONTROL_GUID"
+#   Value  = "{0xe20939be, 0x32d4, 0x41be, 0xa1, 0x50, 0x89, 0x7f, 0x85, 0xd4, 0x98, 0x29}"
+#   Help  = "Industry standard guid for MOR"
+#   TokenType = Expression
+#   TargetH = Yes
+#   Range  = "GUID"
+#End
 
 TOKEN
     Name  = "CRTM_GUID"
@@ -626,7 +604,32 @@ TOKEN
     TargetH = Yes
 End
 
+TOKEN
+    Name  = "TCG_SPEC_VERSION_MAJOR"
+    Value  = "1"
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
 
+TOKEN
+    Name  = "TCG_SPEC_VERSION_MINOR"
+    Value  = "2"
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "TCG_SPEC_ERRATA"
+    Value  = "1"
+    TokenType = Integer
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
 
 TOKEN
     Name = "AUTO_ACCEPT_PPI"
@@ -654,31 +657,13 @@ TOKEN
     TargetH = Yes
 END
 
-
-TOKEN
-    Name  = "TCMFNAME"
-    Value  = "TCMF"
-    TokenType = Expression
-    TargetMAK = Yes
-    TargetH = Yes
-    Range  = "4 characters max"
-End
-
 TOKEN
     Name  = "TCMF"
     Value  = "0"
     Help  = "TPM ASL update Variable"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TMF1NAME"
-    Value  = "TMF1"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -687,15 +672,7 @@ TOKEN
     Help  = "TPM ASL update Variable"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TMF2NAME"
-    Value  = "TMF2"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -704,15 +681,7 @@ TOKEN
     Help  = "TPM ASL update Variable"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TMF3NAME"
-    Value  = "TMF3"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -721,33 +690,15 @@ TOKEN
     Help  = "TPM ASL update Variable"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TTPFNAME"
-    Value  = "TTPF"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
-
 
 TOKEN
     Name  = "TTPF"
     Value  = "1"
     TokenType = Integer
     TargetASL = Yes
-End
-
-
-TOKEN
-    Name  = "DTPTNAME"
-    Value  = "DTPT"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -755,15 +706,7 @@ TOKEN
     Value  = "0"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TTDPNAME"
-    Value  = "TTDP"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -771,15 +714,7 @@ TOKEN
     Value  = "0"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TPMBNAME"
-    Value  = "TPMB"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -787,31 +722,7 @@ TOKEN
     Value  = "0xFFFFFFFF"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TPMBSIZE"
-    Value  = "TPBS"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
-End
-
-TOKEN
-    Name  = "TPBS"
-    Value  = "0x1000"
-    TokenType = Integer
-    TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TPMCNAME"
-    Value  = "TPMC"
-    TokenType = Expression
-    TargetMAK = Yes
-    TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -819,42 +730,8 @@ TOKEN
     Value  = "0xFFFFFFFF"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TPMCSIZE"
-    Value  = "TPCS"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
-
-TOKEN
-    Name  = "TPCS"
-    Value  = "0x1000"
-    TokenType = Integer
-    TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TPMMNAME"
-    Value  = "TPMM"
-    TokenType = Expression
-    TargetMAK = Yes
-    TargetH = Yes
-    Range  = "4 characters max"
-End
-
-TOKEN
-    Name  = "TPMIRQNAME"
-    Value  = "TMRQ"
-    TokenType = Expression
-    TargetMAK = Yes
-    TargetH = Yes
-    Range  = "4 characters max"
-End
-
 
 
 TOKEN
@@ -862,33 +739,15 @@ TOKEN
     Value  = "0xFED40000"
     TokenType = Integer
     TargetASL = Yes
-End
-
-
-TOKEN
-    Name  = "FTPMNAME"
-    Value  = "FTPM"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
-
 
 TOKEN
     Name  = "FTPM"
     Value  = "0xFFFFFFFF"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "PPIMNAME"
-    Value  = "PPIM"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -896,33 +755,16 @@ TOKEN
     Value  = "0xFFFF0000"
     TokenType = Integer
     TargetASL = Yes
-End
-
-
-TOKEN
-    Name  = "PPILNAME"
-    Value  = "PPIL"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
+
 
 TOKEN
     Name  = "PPIL"
     Value  = "0x000000F0"
     TokenType = Integer
     TargetASL = Yes
-End
-
-
-TOKEN
-    Name  = "AMDTNAME"
-    Value  = "AMDT"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 TOKEN
@@ -930,15 +772,7 @@ TOKEN
     Value  = "0"
     TokenType = Integer
     TargetASL = Yes
-End
-
-TOKEN
-    Name  = "TPMFNAME"
-    Value  = "TPMF"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
 
@@ -947,42 +781,20 @@ TOKEN
     Value  = "0"
     TokenType = Integer
     TargetASL = Yes
-End
-
-
-TOKEN
-    Name  = "PPIVNAME"
-    Value  = "PPIV"
-    TokenType = Expression
-    TargetMAK = Yes
     TargetH = Yes
-    Range  = "4 characters max"
 End
 
+
 TOKEN
-    Name  = "PPIV"
+    Name  = "PTTHciSmm_SUPPORT"
     Value  = "0"
-    Help  = "PPI version flag"
-    TokenType = Integer
-    TargetASL = Yes
-End
-
-
-TOKEN
-    Name  = "TCMESIADVALUE"
-    Value  = "ZIT0101"
-    TokenType = Expression
+    Help  = " 1 - Send TPM startup and Selftest before Mem. 0 Send  selftest and Startup After Mem Init"
+    TokenType = Boolean
+    TargetEQU = Yes
     TargetMAK = Yes
     TargetH = Yes
 End
 
-TOKEN
-    Name  = "TPMPNPESAIDVALUE"
-    Value  = "PNP0C31"
-    TokenType = Expression
-    TargetMAK = Yes
-    TargetH = Yes
-End
 
 TOKEN
     Name = "TCG2_SYSTEM_RESET_GUID_CORE"
@@ -998,6 +810,13 @@ PATH
     Name  = "TCG_DIR"
     Help  = "Tcg Directory"
 End
+
+#ELINK
+#   Name  = "TCGProcessConInAvailability,"
+#    Parent  = "ProcessConInAvailability,"
+#   Token = "TPM_PASSWORD_AUTHENTICATION" "=" "1"
+#   InvokeOrder = ReplaceParent
+#End
 
 ELINK
     Name = "PasswordAuthentication,"
@@ -1022,3 +841,11 @@ ELINK
     Parent  = "ADDITIONAL_AMITSE_LibraryClasses"
     InvokeOrder = AfterParent
 End
+ELINK
+    Name  = "-D PTT_FLAG=1"
+    Parent  = "*_*_*_CC_FLAGS"
+    Type  = "BuildOptions"
+    Token = "ULT_SUPPORT" "=" "1"
+    InvokeOrder = AfterParent
+End
+

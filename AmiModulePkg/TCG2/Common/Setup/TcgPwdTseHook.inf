@@ -17,15 +17,12 @@
   IntelFrameworkModulePkg/IntelFrameworkModulePkg.dec
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   AmiTsePkg/AmiTsePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
   
 [LibraryClasses]
 
 [Protocols]
   
 
-[Guids]
-  gTcgEfiGlobalVariableGuid
-  TcgPasswordAuthenticationGuid
+#[Guids]
 
 

@@ -95,11 +95,11 @@ Abstract:
 //<AMI_FHDR_END>
 //*************************************************************************
 #include <Efi.h>
-#include "AmiTcg/TpmLib.h"
+#include "AmiTcg\TpmLib.h"
 #include <Library/BaseLib.h>
 #include<Library/IoLib.h>
 #include<Library/TimerLib.h>
-#include <Token.h>
+#include <token.h>
 
 extern EFI_STATUS CountTime ( IN UINTN	DelayTime,  IN	UINT16	BaseAddr); // only needs to be 16 bit for I/O address)
 #define Wait  TPM_DRIVER_WAIT 
@@ -147,7 +147,7 @@ EFI_STATUS TcgCountTime (
 //**********************************************************************
 
 void
-EFIAPI
+__stdcall
 FixedDelay(UINT32 dCount)
 {
   UINTN  MicroSDelay = DELAY_AMOUNT;
@@ -160,7 +160,7 @@ FixedDelay(UINT32 dCount)
 // function parameter name changed
 static
 UINT8
-EFIAPI
+__stdcall
 CheckAccessBit (
   IN      volatile UINT8    *Access,
   IN      UINT8             Bit,
@@ -191,7 +191,7 @@ Returns:
 
 static
 UINT8
-EFIAPI
+__stdcall
 CheckStsBit (
   IN      volatile UINT8            *Sts,
   IN      UINT8                     Bit
@@ -222,7 +222,7 @@ Returns:
 
 static
 UINT16
-EFIAPI
+__stdcall
 ReadBurstCount (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
 )
@@ -259,7 +259,7 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
+__stdcall
 TisRequestLocality (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
@@ -287,7 +287,7 @@ Returns:
 
 #pragma optimize("",off)
 EFI_STATUS
-EFIAPI
+__stdcall
 TisReleaseLocality (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
@@ -323,7 +323,7 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
+__stdcall
 TisPrepareSendCommand (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
@@ -370,7 +370,7 @@ Returns:
 }
 
 EFI_STATUS
-EFIAPI
+__stdcall
 TisSendCommand (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg,
   IN      const VOID                *CmdStream,
@@ -441,7 +441,7 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
+__stdcall
 TisWaitForResponse (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
@@ -463,7 +463,7 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
+__stdcall
 TisReceiveResponse (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg,
   OUT     VOID                      *Buffer,
@@ -507,7 +507,7 @@ Returns:
 
 
 VOID
-EFIAPI
+__stdcall
 TisResendResponse (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
@@ -524,12 +524,12 @@ Returns:
 }
 
 EFI_STATUS
-EFIAPI
+__stdcall
 IsTpmPresent (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
 {
-  if ((TpmReg->Access == 0xff) || (TpmReg->Access == 0x00)) {
+  if (TpmReg->Access == 0xff) {
     return EFI_NOT_FOUND;
   }
 
@@ -540,7 +540,7 @@ IsTpmPresent (
 
 
 EFI_STATUS
-EFIAPI
+__stdcall
 TpmLibPassThrough (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg,
   IN      UINTN                     NoInputBuffers,
@@ -614,7 +614,8 @@ Returns:
       &OutputBuffers[i].Size
       );
   }
-  TpmReg->Sts = TPM_STS_READY;
+
 Exit:
+  TpmReg->Sts = TPM_STS_READY;
   return Status;
 }

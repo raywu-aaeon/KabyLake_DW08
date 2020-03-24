@@ -57,25 +57,14 @@
     gAmiTreePpiGuid
     gEfiPeiReadOnlyVariable2PpiGuid
     gEfiEndOfPeiSignalPpiGuid
-    gAmiHashLogExtendExGuid
-    gTcgPeiPolicyGuid
-    AmiPeiHashInterfaceProtocolGuid
-    gEfiPeiReset2PpiGuid
 
 [Guids]
-    gEfiHobMemoryAllocModuleGuid  
-    gEfiGlobalVariableGuid
-    gAmiGlobalVariableGuid  
-    gSkipTpmStartupGuid
-    gTpm20HobGuid
-    gHandleTpmS3ResumeFailure
-    amiFVhoblistguid
-      
+    gEfiHobMemoryAllocModuleGuid    
+
 [Packages]
     MdePkg/MdePkg.dec
     AmiModulePkg/AmiModulePkg.dec
     AmiCompatibilityPkg/AmiCompatibilityPkg.dec
-    AmiTcgPkg/AmiTcgPkg.dec
 
 [Depex]
     gAmiTreePpiGuid

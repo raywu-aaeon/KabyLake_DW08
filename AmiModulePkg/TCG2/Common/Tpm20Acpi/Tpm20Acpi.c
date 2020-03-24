@@ -1,7 +1,7 @@
 //*************************************************************************
 //*************************************************************************
 //**                                                                     **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.            **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.            **
 //**                                                                     **
 //**                       All Rights Reserved.                          **
 //**                                                                     **
@@ -22,26 +22,26 @@
 //<AMI_FHDR_END>
 //*************************************************************************
 
-#include <Token.h>
 #include "Tpm20Acpi.h"
-#include <AmiTcg/TCGMisc.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Token.h>
+#include <AmiTcg\TcgMisc.h>
+#include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
-#include <Library/BaseLib.h>
+#include<Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <AmiTcg/TrEEProtocol.h>
+#include <AmiTcg\TrEEProtocol.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/HobLib.h>
-#include <Guid/HobList.h>
+#include <Guid\HobList.h>
 #include <Protocol/FirmwareVolume2.h>
-#include <Acpi.h>
+#include <ACPI.h>
 #include <Protocol/AcpiSystemDescriptionTable.h>
 #include <Protocol/AcpiSupport.h>
-#include <Include/AmiProtocol.h>
 #include <Library/IoLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <Library/PcdLib.h>
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
+#include <Protocol/VariableLock.h>
+#endif
 
 
 
@@ -49,8 +49,10 @@
 #define EFI_ACPI_TABLE_VERSION_X        (EFI_ACPI_TABLE_VERSION_2_0 | EFI_ACPI_TABLE_VERSION_3_0 | EFI_ACPI_TABLE_VERSION_4_0)
 #define EFI_ACPI_TABLE_VERSION_ALL      (EFI_ACPI_TABLE_VERSION_1_0B|EFI_ACPI_TABLE_VERSION_X)
 
+#define BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID \
+        {0xdbc9fd21, 0xfad8, 0x45b0, 0x9e, 0x78, 0x27, 0x15, 0x88, 0x67, 0xcc, 0x93}
 
-extern EFI_GUID gBdsAllDriversConnectedProtocolGuid;
+EFI_GUID    gBdsAllDriversConnectedProtocolGuid = BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID;
 
 AMI_ASL_PPI_NV_VAR              *MemoryAddress = NULL;
 
@@ -84,15 +86,12 @@ EFI_STATUS TcgUpdateAslNameObject(ACPI_HDR *PDsdt, UINT8 *ObjName, UINT64 Value)
 EFI_STATUS TcgLibGetDsdt(EFI_PHYSICAL_ADDRESS *DsdtAddr, EFI_ACPI_TABLE_VERSION Version);
 EFI_STATUS GetPspBar1Addr (IN OUT   EFI_PHYSICAL_ADDRESS *PspMmio );
 
-EFI_STATUS TcgSetVariableWithNewAttributes(
-    IN CHAR16 *Name, IN EFI_GUID *Guid, IN UINT32 Attributes,
-    IN UINTN DataSize, IN VOID *Data
-);
+EFI_GUID gEdkiiVariableLockProtocolGuid = EDKII_VARIABLE_LOCK_PROTOCOL_GUID;
 
 //**********************************************************************
 //<AMI_PHDR_START>
 //
-// Procedure:   TpmAcpiGetHob
+// Procedure:   GetHob
 //
 // Description: Find instance of a HOB type in a HOB list
 //
@@ -110,7 +109,7 @@ EFI_STATUS TcgSetVariableWithNewAttributes(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID* TpmAcpiGetHob(
+VOID* GetHob(
     IN UINT16 Type,
     IN VOID   *HobStart  )
 {
@@ -170,7 +169,7 @@ VOID* TpmAcpiGetHob(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-EFI_STATUS  Tpm20AcpiTcgGetNextGuidHob(
+EFI_STATUS TcgGetNextGuidHob(
     IN OUT VOID          **HobStart,
     IN EFI_GUID          * Guid,
     OUT VOID             **Buffer,
@@ -193,7 +192,7 @@ EFI_STATUS  Tpm20AcpiTcgGetNextGuidHob(
             return EFI_NOT_FOUND;
         }
 
-        GuidHob.Raw = TpmAcpiGetHob( EFI_HOB_TYPE_GUID_EXTENSION, *HobStart );
+        GuidHob.Raw = GetHob( EFI_HOB_TYPE_GUID_EXTENSION, *HobStart );
 
         if ( GuidHob.Header->HobType == EFI_HOB_TYPE_GUID_EXTENSION )
         {
@@ -239,10 +238,10 @@ VOID* FindHob(
             HobStart = ConfigTable[NoTableEntries].VendorTable;
 
             if ( !EFI_ERROR(
-                    Tpm20AcpiTcgGetNextGuidHob( &HobStart, HOB_guid, &PtrHob, NULL )
+                        TcgGetNextGuidHob( &HobStart, HOB_guid, &PtrHob, NULL )
                     ))
             {
-                DEBUG ((DEBUG_INFO, "Hob found = %x \n", PtrHob));
+                DEBUG ((-1, "Hob found = %x \n", PtrHob));
                 return PtrHob;
             }
         }
@@ -250,99 +249,96 @@ VOID* FindHob(
     return NULL;
 }
 
-VOID EFIAPI
+
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
+AcpiOnVariableLockProtocolGuid (
+    IN      EFI_EVENT                 Event,
+    IN      VOID                      *Context
+)
+{
+    EDKII_VARIABLE_LOCK_PROTOCOL    *LockProtocol;
+    EFI_STATUS                      Status;
+    EFI_GUID  FlagsStatusguid       = AMI_TCG_CONFIRMATION_FLAGS_GUID;
+
+    DEBUG((-1, "Tpm20OnVariableLockProtocolGuid callback entry\n"));
+
+    Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, &LockProtocol);
+    if(!EFI_ERROR(Status))
+    {
+        Status = LockProtocol->RequestToLock(LockProtocol, L"TpmServFlags", &FlagsStatusguid);
+        ASSERT_EFI_ERROR(Status);
+    }
+
+    gBS->CloseEvent(Event);
+}
+#endif
+
+EFI_STATUS
 Tpm20PublishAcpiTable (IN EFI_EVENT ev,
                        IN VOID *ctx)
 {
-    EFI_STATUS                      Status;
-    UINTN                           TableKey = 0;
-    EFI_ACPI_TABLE_PROTOCOL         *AcpiTable;
-    EFI_TPM2_ACPI_CONTROL_AREA      *CtrlAreaMap = NULL;
-
-    INTEL_PTT_HOB_DATA              *StolenAddress = NULL;
-    UINTN                           FtpmBase=0;
+    EFI_STATUS    Status;
+    UINTN         TableKey = 0;
+    EFI_ACPI_TABLE_PROTOCOL     *AcpiTable;
+    EFI_TPM2_ACPI_CONTROL_AREA  *CtrlAreaMap = NULL;
+    EFI_GUID      Meguid = ME_DATA_HOB_GUID;
+    INTEL_PTT_HOB_DATA  *StolenAddress = NULL;
+    UINTN                     FtpmBase=0;
     EFI_PHYSICAL_ADDRESS            dsdtAddress=0;
     ACPI_HDR                        *dsdt;
-    EFI_ACPI_SUPPORT_PROTOCOL       *mTcgAcpiSupport;
-#if defined ACPI_MODULE_VER && ACPI_MODULE_VER < 120     
-    UINT8                     OemTblId[8] = CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID);
-    UINT8                     OemId[6]    = CONVERT_TO_STRING(T_ACPI_OEM_ID);
-#endif
+    EFI_ACPI_SUPPORT_PROTOCOL * mTcgAcpiSupport;
+    EFI_GUID gAcpiSupportGuid = EFI_ACPI_SUPPORT_GUID;
+    EFI_GUID TreeProtocolguid = EFI_TREE_PROTOCOL_GUID;
     EFI_TREE_PROTOCOL                *TreeProtocolPtr;
     TREE_BOOT_SERVICE_CAPABILITY     ProtocolCapability;
-    EFI_GUID                         gMeDataHobguid  = gTcgMeDataHobGuid;
-    UINT8                      TpmfName[5] = CONVERT_TO_STRING(TPMFNAME);
-    UINT8                      TpmmName[5] = CONVERT_TO_STRING(TPMMNAME);
-    UINT8                      AmdtName[5] = CONVERT_TO_STRING(AMDTNAME);
-    UINT8                      DtptName[5] = CONVERT_TO_STRING(DTPTNAME);
-    UINT8                      FtpmName[5] = CONVERT_TO_STRING(FTPMNAME);
-    UINT8                      TpmbName[5] = CONVERT_TO_STRING(TPMBNAME);
-    UINT8                      TpmcName[5] = CONVERT_TO_STRING(TPMCNAME);
-    UINT8                      TpmbSizeName[5] = CONVERT_TO_STRING(TPMBSIZE);
-    UINT8                      TpmcSizeName[5] = CONVERT_TO_STRING(TPMCSIZE);
-    UINT8                      PpimName[5] = CONVERT_TO_STRING(PPIMNAME);
-    UINT8                      PpilName[5] = CONVERT_TO_STRING(PPILNAME);
-    UINT8                      TpmIrqName[5] = CONVERT_TO_STRING(TPMIRQNAME);
-    EFI_TPM2_ACPI_TABLE        *pTpm2AcpiTableBuffer=NULL;
-    
 #if FTpmPlatformProfile == 1
     UINTN  Info;   //TODO
 #endif
 
+
     mTpm2AcpiTemplate.Header.OemRevision     = TPM20TABLEOEMREVISION;
     mTpm2AcpiTemplate.Header.CreatorId  = CREATOR_ID_AMI;
-    
-#if defined ACPI_MODULE_VER && ACPI_MODULE_VER > 110   
-    
-    CopyMem (&mTpm2AcpiTemplate.Header.OemId,
-            PcdGetPtr (PcdAcpiDefaultOemId),
-            sizeof (mTpm2AcpiTemplate.Header.OemId));
-    
-    mTpm2AcpiTemplate.Header.OemTableId = PcdGet64 (PcdAcpiDefaultOemTableId);
-#else
-    gBS->CopyMem(&mTpm2AcpiTemplate.Header.OemTableId, OemTblId, 8);
-    gBS->CopyMem(&mTpm2AcpiTemplate.Header.OemId, OemId, 6);
-#endif
+    mTpm2AcpiTemplate.Header.OemTableId = EFI_SIGNATURE_64 ('T', 'p', 'm', '2', 'T', 'a', 'b', 'l');
     mTpm2AcpiTemplate.Flags = TCG_PLATFORM_CLASS;
 
     //
     // Publish the TPM ACPI table
     //
-    Status = gBS->LocateProtocol (&gEfiAcpiTableProtocolGuid, NULL, (void **) &AcpiTable);
-    if(EFI_ERROR(Status))return;
+    Status = gBS->LocateProtocol (&gEfiAcpiTableProtocolGuid, NULL, (VOID **) &AcpiTable);
+    if(EFI_ERROR(Status))return Status;
 
-    Status = gBS->LocateProtocol( &gEfiAcpiSupportGuid, NULL, (void **)&mTcgAcpiSupport );
+    Status = gBS->LocateProtocol( &gAcpiSupportGuid, NULL, &mTcgAcpiSupport );
     if ( EFI_ERROR( Status ))
     {
-        return;
+        return Status;
     }
 
     Status = TcgLibGetDsdt(&dsdtAddress, EFI_ACPI_TABLE_VERSION_ALL);
     if(EFI_ERROR(Status))
     {
-        return;
+        return Status;
     }
 
     dsdt = (ACPI_HDR*)dsdtAddress;
 
 
-    Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid, NULL, (void **)&TreeProtocolPtr);
+    Status = gBS->LocateProtocol(&TreeProtocolguid, NULL, &TreeProtocolPtr);
     if(!EFI_ERROR(Status))
     {
         ProtocolCapability.Size = sizeof(TREE_BOOT_SERVICE_CAPABILITY);
         Status = TreeProtocolPtr->GetCapability(TreeProtocolPtr, &ProtocolCapability);
         if ( EFI_ERROR( Status ))
         {
-            return;
+            return Status;
         }
-        Status=TcgUpdateAslNameObject(dsdt, TpmfName, 1);
+        Status=TcgUpdateAslNameObject(dsdt, "TPMF", 1);
     }
     else
     {
-        Status=TcgUpdateAslNameObject(dsdt, TpmfName, 0);
-        Status=TcgUpdateAslNameObject(dsdt, TpmmName, (UINT32)0xFED40000);
-        Status=TcgUpdateAslNameObject(dsdt, AmdtName, 0x0);
-        return;
+        Status=TcgUpdateAslNameObject(dsdt, "TPMF", 0);
+        Status=TcgUpdateAslNameObject(dsdt, "TPMM", (UINT32)0xFED40000);
+        Status=TcgUpdateAslNameObject(dsdt, "AMDT", 0x0);
+        return Status;
     }
 
     if(!isTpm20CrbPresent())
@@ -350,22 +346,22 @@ Tpm20PublishAcpiTable (IN EFI_EVENT ev,
         mTpm2AcpiTemplate.AddressOfControlArea = 0;
         mTpm2AcpiTemplate.StartMethod = EFI_TPM2_ACPI_TABLE_START_METHOD_TIS_CANCEL;
 
-        Status=TcgUpdateAslNameObject(dsdt, AmdtName, 0x0);
+        Status=TcgUpdateAslNameObject(dsdt, "AMDT", 0x0);
         if(EFI_ERROR(Status))
         {
-            return;
+            return Status;
         }
 
-        Status=TcgUpdateAslNameObject(dsdt, DtptName, 0x0);
+        Status=TcgUpdateAslNameObject(dsdt, "DTPT", 0x0);
         if(EFI_ERROR(Status))
         {
-            return;
+            return Status;
         }
 
-        Status=TcgUpdateAslNameObject(dsdt, TpmmName, (UINT64)PORT_TPM_IOMEMBASE);
+        Status=TcgUpdateAslNameObject(dsdt, "TPMM", (UINT64)PORT_TPM_IOMEMBASE);
         if(EFI_ERROR(Status))
         {
-            return;
+            return Status;
         }
 
     }
@@ -375,12 +371,11 @@ Tpm20PublishAcpiTable (IN EFI_EVENT ev,
         if(EFI_ERROR(iTpmGetInfo(&Info)))
         {
 #endif
-            Status=TcgUpdateAslNameObject(dsdt, TpmIrqName, (UINT32)0);
             if((*(UINT32 *)(PORT_TPM_IOMEMBASE + 0x0C))==0xFFFFFFFF)
             {
-                StolenAddress = GetFirstGuidHob (&gMeDataHobguid);
-                DEBUG ((DEBUG_INFO, "Tpm20Acpi StolenAddress = %x \n", StolenAddress->BufferAddress));
-                DEBUG ((DEBUG_INFO, "Tpm20Acpi StolenAddress Loc = %x \n", StolenAddress));
+                StolenAddress = GetFirstGuidHob (&Meguid);
+                DEBUG ((-1, "Tpm20Acpi StolenAddress = %x \n", StolenAddress->BufferAddress));
+                DEBUG ((-1, "Tpm20Acpi StolenAddress Loc = %x \n", StolenAddress));
 
                 if(StolenAddress != NULL)
                 {
@@ -411,28 +406,28 @@ Tpm20PublishAcpiTable (IN EFI_EVENT ev,
                 CtrlAreaMap->Command      = (UINTN)mTpm2AcpiTemplate.AddressOfControlArea + 0x80;
                 CtrlAreaMap->Response     = (UINTN)mTpm2AcpiTemplate.AddressOfControlArea + 0x80;
 
-                Status=TcgUpdateAslNameObject(dsdt, TpmmName, (UINT32)INTELFTPMBASE);
+                Status=TcgUpdateAslNameObject(dsdt, "TPMM", (UINT32)INTELFTPMBASE);
                 if(EFI_ERROR(Status))
                 {
-                    return;
+                    return Status;
                 }
 
-                Status=TcgUpdateAslNameObject(dsdt, FtpmName, (UINT32)mTpm2AcpiTemplate.AddressOfControlArea);
+                Status=TcgUpdateAslNameObject(dsdt, "FTPM", (UINT32)mTpm2AcpiTemplate.AddressOfControlArea);
                 if(EFI_ERROR(Status))
                 {
-                    return;
-                }
-                
-                Status=TcgUpdateAslNameObject(dsdt, AmdtName, 0x0);
-                if(EFI_ERROR(Status))
-                {
-                    return;
+                    return Status;
                 }
 
-                Status=TcgUpdateAslNameObject(dsdt, DtptName, 0x0);
+                Status=TcgUpdateAslNameObject(dsdt, "AMDT", 0x0);
                 if(EFI_ERROR(Status))
                 {
-                    return;
+                    return Status;
+                }
+
+                Status=TcgUpdateAslNameObject(dsdt, "DTPT", 0x0);
+                if(EFI_ERROR(Status))
+                {
+                    return Status;
                 }
             }
             else
@@ -445,37 +440,37 @@ Tpm20PublishAcpiTable (IN EFI_EVENT ev,
                 mTpm2AcpiTemplate.AddressOfControlArea = (UINTN) (PORT_TPM_IOMEMBASE + 0x40);
                 CtrlAreaMap = (EFI_TPM2_ACPI_CONTROL_AREA *)(UINTN) mTpm2AcpiTemplate.AddressOfControlArea;
 
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->Error = %x \n", CtrlAreaMap->Error));
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->Cancel = %x \n", CtrlAreaMap->Cancel));
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->Start = %x \n", CtrlAreaMap->Start));
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->Reserved = %x \n", CtrlAreaMap->Reserved));
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->CommandSize = %x \n", CtrlAreaMap->CommandSize));
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->Command = %x \n", CtrlAreaMap->Command));
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->ResponseSize = %x \n", CtrlAreaMap->ResponseSize));
-                DEBUG ((DEBUG_INFO, "CtrlAreaMap->Response = %x \n", CtrlAreaMap->Response));
+                DEBUG ((-1, "CtrlAreaMap->Error = %x \n", CtrlAreaMap->Error));
+                DEBUG ((-1, "CtrlAreaMap->Cancel = %x \n", CtrlAreaMap->Cancel));
+                DEBUG ((-1, "CtrlAreaMap->Start = %x \n", CtrlAreaMap->Start));
+                DEBUG ((-1, "CtrlAreaMap->Reserved = %x \n", CtrlAreaMap->Reserved));
+                DEBUG ((-1, "CtrlAreaMap->CommandSize = %x \n", CtrlAreaMap->CommandSize));
+                DEBUG ((-1, "CtrlAreaMap->Command = %x \n", CtrlAreaMap->Command));
+                DEBUG ((-1, "CtrlAreaMap->ResponseSize = %x \n", CtrlAreaMap->ResponseSize));
+                DEBUG ((-1, "CtrlAreaMap->Response = %x \n", CtrlAreaMap->Response));
 
-                Status=TcgUpdateAslNameObject(dsdt, TpmmName, ((UINT32)mTpm2AcpiTemplate.AddressOfControlArea-0x40));
+                Status=TcgUpdateAslNameObject(dsdt, "TPMM", ((UINT32)mTpm2AcpiTemplate.AddressOfControlArea-0x40));
                 if(EFI_ERROR(Status))
                 {
-                    return;
+                    return Status;
                 }
 
-                Status=TcgUpdateAslNameObject(dsdt, FtpmName, (UINT32)mTpm2AcpiTemplate.AddressOfControlArea);
+                Status=TcgUpdateAslNameObject(dsdt, "FTPM", (UINT32)mTpm2AcpiTemplate.AddressOfControlArea);
                 if(EFI_ERROR(Status))
                 {
-                    return;
+                    return Status;
                 }
 
-                Status=TcgUpdateAslNameObject(dsdt, AmdtName, 0x0);
+                Status=TcgUpdateAslNameObject(dsdt, "AMDT", 0x0);
                 if(EFI_ERROR(Status))
                 {
-                    return;
+                    return Status;
                 }
 
-                Status=TcgUpdateAslNameObject(dsdt, DtptName, 0x1);
+                Status=TcgUpdateAslNameObject(dsdt, "DTPT", 0x1);
                 if(EFI_ERROR(Status))
                 {
-                    return;
+                    return Status;
                 }
             }
 #if FTpmPlatformProfile == 1
@@ -488,79 +483,278 @@ Tpm20PublishAcpiTable (IN EFI_EVENT ev,
         if( 0 )
         {
 #endif
-            if(EFI_ERROR( GetPspBar1Addr ((EFI_PHYSICAL_ADDRESS *)&FtpmBase))) return;
+            if(EFI_ERROR( GetPspBar1Addr ((EFI_PHYSICAL_ADDRESS *)&FtpmBase))) return EFI_UNSUPPORTED;
             FtpmBase = FtpmBase + 0x10;
             mTpm2AcpiTemplate.AddressOfControlArea = FtpmBase;
 
-            CtrlAreaMap = (EFI_TPM2_ACPI_CONTROL_AREA *)(UINTN) mTpm2AcpiTemplate.AddressOfControlArea;
-            Status=TcgUpdateAslNameObject(dsdt, TpmbName, (UINT32)CtrlAreaMap->Command);
+            Status=TcgUpdateAslNameObject(dsdt, "TPMB", *(UINT32 *)(FtpmBase + 0x1C));
             if(EFI_ERROR(Status))
             {
-                DEBUG ((DEBUG_INFO, "TPM AMD, Update Control Area Base Fail - %r \n", Status));
-                return;
+                return Status;
             }
-            Status=TcgUpdateAslNameObject(dsdt, TpmbSizeName, (UINT32)CtrlAreaMap->CommandSize);
 
-            Status=TcgUpdateAslNameObject(dsdt, TpmcName, (UINT32)CtrlAreaMap->Response);
+            Status=TcgUpdateAslNameObject(dsdt, "TPMC", *(UINT32 *)(FtpmBase + 0x28));
             if(EFI_ERROR(Status))
             {
-                DEBUG ((DEBUG_INFO, "TPM AMD, Update TPM CRB Command Buffer Base - %r \n", Status));
-                return;
+                return Status;
             }
-            Status=TcgUpdateAslNameObject(dsdt, TpmcSizeName, (UINT32)CtrlAreaMap->ResponseSize);
 
-            Status=TcgUpdateAslNameObject(dsdt, TpmmName, FtpmBase);
+            Status=TcgUpdateAslNameObject(dsdt, "TPMM", FtpmBase);
             if(EFI_ERROR(Status))
             {
-                return;
+                return Status;
             }
 
-            Status=TcgUpdateAslNameObject(dsdt, FtpmName, FtpmBase);
+            Status=TcgUpdateAslNameObject(dsdt, "FTPM", FtpmBase);
             if(EFI_ERROR(Status))
             {
-                return;
+                return Status;
             }
 
-            Status=TcgUpdateAslNameObject(dsdt, AmdtName, 0x1);
+            Status=TcgUpdateAslNameObject(dsdt, "AMDT", 0x1);
             if(EFI_ERROR(Status))
             {
-                return;
+                return Status;
             }
 
+            CtrlAreaMap = (EFI_TPM2_ACPI_CONTROL_AREA *)(UINTN) &mTpm2AcpiTemplate.AddressOfControlArea;
             mTpm2AcpiTemplate.StartMethod = 2;
-
 #if FTpmPlatformProfile == 1
         }
 #endif
     }
-    
-    if( mTpm2AcpiTemplate.StartMethod == EFI_TPM2_ACPI_TABLE_START_METHOD_ACPI){
-        Status = gBS->AllocatePool(EfiBootServicesData, (sizeof(mTpm2AcpiTemplate)+4), (void **)&pTpm2AcpiTableBuffer);
-        if(EFI_ERROR(Status))return;
-    
-        gBS->SetMem(pTpm2AcpiTableBuffer, (sizeof(mTpm2AcpiTemplate)+4), 0);
-        gBS->CopyMem(pTpm2AcpiTableBuffer, &mTpm2AcpiTemplate, sizeof(mTpm2AcpiTemplate));
-        
-        pTpm2AcpiTableBuffer->Header.Length = mTpm2AcpiTemplate.Header.Length + 4;
-        
-        Status = AcpiTable->InstallAcpiTable (AcpiTable,
-                                                  pTpm2AcpiTableBuffer,
-                                                  sizeof(EFI_TPM2_ACPI_TABLE)+ 4,
-                                                  &TableKey);
-        gBS->FreePool(pTpm2AcpiTableBuffer);
-    }else{
-        Status = AcpiTable->InstallAcpiTable (AcpiTable,
+
+    //if MemoryAddress is NULL, TCGsmm checks for this
+    Status=TcgUpdateAslNameObject(dsdt, "PPIM", (UINT32)MemoryAddress);
+    ASSERT_EFI_ERROR (Status);
+    Status=TcgUpdateAslNameObject(dsdt, "PPIL", (UINT32)(sizeof(AMI_ASL_PPI_NV_VAR)));
+    ASSERT_EFI_ERROR (Status);
+
+    Status = AcpiTable->InstallAcpiTable (AcpiTable,
                                           &mTpm2AcpiTemplate,
                                           sizeof(EFI_TPM2_ACPI_TABLE),
                                           &TableKey);
-    }
 
-    if(EFI_ERROR(Status))return;
+    if(EFI_ERROR(Status))return Status;
 
     gBS->CloseEvent(ev);
 
-    return;
+    return Status;
 }
+
+/**
+@brief
+  Initialize Intel PTT SSDT ACPI tables
+
+  @retval EFI_SUCCESS    ACPI tables are initialized successfully
+  @retval EFI_NOT_FOUND  ACPI tables not found
+**/
+EFI_STATUS
+InitializePttSsdtAcpiTables (
+    void
+)
+{
+    EFI_STATUS                    Status;
+    EFI_HANDLE                    *HandleBuffer=NULL;
+    UINTN                         NumberOfHandles;
+    EFI_FV_FILETYPE               FileType;
+    UINT32                        FvStatus;
+    EFI_FV_FILE_ATTRIBUTES        Attributes;
+    UINTN                         Size;
+    UINTN                         i;
+    EFI_FIRMWARE_VOLUME2_PROTOCOL *FwVol=NULL;
+    UINTN                         Instance;
+    EFI_ACPI_COMMON_HEADER        *CurrentTable=NULL;
+    UINTN                         AcpiTableKey;
+    UINT8                         *CurrPtr=NULL;
+    UINT8                         *EndPtr=NULL;
+    UINT32                        *Signature=NULL;
+    EFI_ACPI_DESCRIPTION_HEADER   *PttAcpiTable=NULL;
+    EFI_ACPI_TABLE_PROTOCOL       *AcpiTable=NULL;
+    PTT_ACPI_NVS_AREA             *mPttNvsArea=NULL;
+    EFI_GUID                      gPttSsdtAcpiTableGuid = PPT_SSDT_ACPI_TABLE_GUID;
+
+    Status = gBS->AllocatePool (EfiReservedMemoryType, sizeof (PTT_ACPI_NVS_AREA), (VOID **) &mPttNvsArea);
+
+    ASSERT_EFI_ERROR (Status);
+    ZeroMem ((VOID *) mPttNvsArea, sizeof (PTT_ACPI_NVS_AREA));
+
+    mPttNvsArea->PttCRBAddress = mTpm2AcpiTemplate.AddressOfControlArea;
+    DEBUG ((DEBUG_INFO, "mPttNvsArea->PttCRBAddress = %x\n", mPttNvsArea->PttCRBAddress));
+
+    FwVol       = NULL;
+    PttAcpiTable = NULL;
+
+    ///
+    /// Locate ACPI Table protocol
+    ///
+    DEBUG ((DEBUG_INFO, "Init Ptt SSDT table\n"));
+    Status = gBS->LocateProtocol (&gEfiAcpiTableProtocolGuid, NULL, (void **)&AcpiTable);
+    if (Status != EFI_SUCCESS)
+    {
+        DEBUG ((DEBUG_ERROR, "Fail to locate EfiAcpiTableProtocol.\n"));
+        FreePool(mPttNvsArea);
+        return EFI_NOT_FOUND;
+    }
+
+    ///
+    /// Locate protocol.
+    /// There is little chance we can't find an FV protocol
+    ///
+    Status = gBS->LocateHandleBuffer (
+                 ByProtocol,
+                 &gEfiFirmwareVolume2ProtocolGuid,
+                 NULL,
+                 &NumberOfHandles,
+                 &HandleBuffer
+             );
+    ASSERT_EFI_ERROR (Status);
+    ///
+    /// Looking for FV with ACPI storage file
+    ///
+    for (i = 0; i < NumberOfHandles; i++)
+    {
+        ///
+        /// Get the protocol on this handle
+        /// This should not fail because of LocateHandleBuffer
+        ///
+        Status = gBS->HandleProtocol (
+                     HandleBuffer[i],
+                     &gEfiFirmwareVolume2ProtocolGuid,
+                     (void **)&FwVol
+                 );
+        ASSERT_EFI_ERROR (Status);
+
+        ///
+        /// See if it has the ACPI storage file
+        ///
+        Size      = 0;
+        FvStatus  = 0;
+        Status = FwVol->ReadFile (
+                     FwVol,
+                     &gPttSsdtAcpiTableGuid,
+                     NULL,
+                     &Size,
+                     &FileType,
+                     &Attributes,
+                     &FvStatus
+                 );
+
+        ///
+        /// If we found it, then we are done
+        ///
+        if (Status == EFI_SUCCESS)
+        {
+            break;
+        }
+    }
+    ///
+    /// Free any allocated buffers
+    ///
+    FreePool (HandleBuffer);
+
+    ///
+    /// Sanity check that we found our data file
+    ///
+    ASSERT (FwVol != NULL);
+    if (FwVol == NULL)
+    {
+        DEBUG ((DEBUG_INFO, "PTT ACPI NVS table not found\n"));
+        FreePool(mPttNvsArea);
+        return EFI_NOT_FOUND;
+    }
+    ///
+    /// Our exit status is determined by the success of the previous operations
+    /// If the protocol was found, Instance already points to it.
+    /// Read tables from the storage file.
+    ///
+    Instance      = 0;
+    CurrentTable  = NULL;
+    while (Status == EFI_SUCCESS)
+    {
+        Status = FwVol->ReadSection (
+                     FwVol,
+                     &gPttSsdtAcpiTableGuid,
+                     EFI_SECTION_RAW,
+                     Instance,
+                     (void **)&CurrentTable,
+                     &Size,
+                     &FvStatus
+                 );
+
+        if (!EFI_ERROR (Status))
+        {
+            ///
+            /// Check the table size is at least as large as an EFI_ACPI_COMMON_HEADER
+            ///
+            if (Size < sizeof (EFI_ACPI_COMMON_HEADER))
+            {
+                FreePool(mPttNvsArea);
+                return EFI_BUFFER_TOO_SMALL;
+            }
+            ///
+            /// Check the table ID to modify the table
+            ///PttSsdt
+            if (((EFI_ACPI_DESCRIPTION_HEADER *) CurrentTable)->OemTableId == SIGNATURE_64 ('P', 't', 't', 'S', 's', 'd', 't', 0))
+            {
+                PttAcpiTable = (EFI_ACPI_DESCRIPTION_HEADER *) CurrentTable;
+                ///
+                /// Locate the SSDT package
+                ///
+                ///
+                /// Check the length field isn't larger than the size read in section
+                ///
+                if (PttAcpiTable->Length > Size)
+                {
+                    FreePool(mPttNvsArea);
+                    return EFI_BAD_BUFFER_SIZE;
+                }
+                CurrPtr = (UINT8 *) PttAcpiTable;
+                EndPtr  = CurrPtr + PttAcpiTable->Length;
+
+                for (; CurrPtr <= EndPtr; CurrPtr++)
+                {
+                    Signature = (UINT32 *) (CurrPtr + 3);
+                    if (*Signature == SIGNATURE_32 ('F', 'T', 'N', 'V'))
+                    {
+                        ASSERT_EFI_ERROR (*(UINT32 *) (CurrPtr + 3 + sizeof (*Signature) + 2) == 0xFFFF0000);
+                        ASSERT_EFI_ERROR (*(UINT16 *) (CurrPtr + 3 + sizeof (*Signature) + 2 + sizeof (UINT32) + 1) == 0xAA55);
+                        ///
+                        /// PTT ACPI NVS Area address
+                        ///
+
+                        *(UINT32 *) (CurrPtr + 3 + sizeof (*Signature) + 2) = (UINT32) (UINTN) mPttNvsArea;
+                        ///
+                        /// PTT ACPI NVS Area size
+                        ///
+                        *(UINT16 *) (CurrPtr + 3 + sizeof (*Signature) + 2 + sizeof (UINT32) + 1) =
+                            sizeof (PTT_ACPI_NVS_AREA);
+
+                        AcpiTableKey = 0;
+                        Status = AcpiTable->InstallAcpiTable (
+                                     AcpiTable,
+                                     PttAcpiTable,
+                                     PttAcpiTable->Length,
+                                     &AcpiTableKey
+                                 );
+                        ASSERT_EFI_ERROR (Status);
+
+                        return EFI_SUCCESS;
+                    }
+                }
+            }
+            ///
+            /// Increment the instance
+            ///
+            Instance++;
+            gBS->FreePool(CurrentTable);
+            CurrentTable = NULL;
+        }
+    }
+
+    return Status;
+}
+
 
 EFI_STATUS
 EFIAPI
@@ -572,7 +766,13 @@ Tpm20AcpiInitEntry (
     EFI_STATUS Status;
     EFI_EVENT        ev;
     static VOID      *reg;
-    UINTN       Size = sizeof (EFI_PHYSICAL_ADDRESS);
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
+    EDKII_VARIABLE_LOCK_PROTOCOL    *LockProtocol;
+    EFI_EVENT                       VarLockEvent;
+static VOID                         *VarLockreg;
+#endif
+    EFI_GUID  FlagsStatusguid       = AMI_TCG_CONFIRMATION_FLAGS_GUID;
+    EFI_PHYSICAL_ADDRESS             VarLoc;
 
     Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
                                TPL_CALLBACK,
@@ -594,22 +794,77 @@ Tpm20AcpiInitEntry (
     {
         return Status;
     }
-    
-    Status = gRT->GetVariable(
-                    L"TpmServFlags",
-                    &FlagsStatusguid,
-                    NULL,
-                    &Size,
-                    &MemoryAddress);
 
-    DEBUG(( DEBUG_INFO," %a get TpmServFlags Status = %r \n", __FUNCTION__, Status));
+    Status = gBS->AllocatePool (EfiACPIMemoryNVS, sizeof(AMI_ASL_PPI_NV_VAR), &MemoryAddress);
+    if(!EFI_ERROR(Status))
+    {
+       ZeroMem (MemoryAddress, sizeof(AMI_ASL_PPI_NV_VAR));
+
+       VarLoc = (EFI_PHYSICAL_ADDRESS)MemoryAddress;
+#if NVRAM_VERSION > 6
+       Status = gRT->SetVariable(L"TpmServFlags",
+                              &FlagsStatusguid,
+                              EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                              EFI_VARIABLE_NON_VOLATILE |
+                              EFI_VARIABLE_RUNTIME_ACCESS,
+                              sizeof (EFI_PHYSICAL_ADDRESS),
+                              &VarLoc );
+        ASSERT_EFI_ERROR (Status);
+#else
+       Status = gRT->SetVariable(L"TpmServFlags",
+                              &FlagsStatusguid,
+                              EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                              EFI_VARIABLE_NON_VOLATILE,
+                              sizeof (EFI_PHYSICAL_ADDRESS),
+                              &VarLoc );
+
+       ASSERT_EFI_ERROR (Status);
+#endif
+
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
+
+       //Lock the service flags variable as well
+       Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, &LockProtocol);
+       if(!EFI_ERROR(Status)){
+           Status = LockProtocol->RequestToLock(LockProtocol, L"TpmServFlags", &FlagsStatusguid);
+           DEBUG ((DEBUG_INFO, "TpmServFlags Flags successfully locked\n", Status));
+           ASSERT_EFI_ERROR(Status);
+       }else{
+           //setcallback
+           Status = gBS->CreateEvent (EFI_EVENT_NOTIFY_SIGNAL,
+                                      TPL_CALLBACK,
+                                      AcpiOnVariableLockProtocolGuid,
+                                      NULL,
+                                      &VarLockEvent);
+           if(!EFI_ERROR(Status))
+           {
+               Status = gBS->RegisterProtocolNotify(
+                             &gEdkiiVariableLockProtocolGuid,
+                             VarLockEvent,
+                             &VarLockreg );
+           }
+       }
+
+       ASSERT_EFI_ERROR (Status);
+#endif
+    }else{
+        //use defaults form SDL token.
+        DEBUG ((DEBUG_INFO, "Allocate PPI Memory failed Status = %r\n", Status));
+    }
     return Status;
 }
+
+
+
+
+
+
+
 
 //*************************************************************************
 //*************************************************************************
 //**                                                                     **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.            **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.            **
 //**                                                                     **
 //**                       All Rights Reserved.                          **
 //**                                                                     **

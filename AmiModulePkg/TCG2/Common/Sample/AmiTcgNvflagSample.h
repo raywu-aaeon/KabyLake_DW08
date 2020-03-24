@@ -32,12 +32,19 @@
 //<AMI_FHDR_END>
 //************************************************************************
 //#include <AmiDxeLib.h>
-#include "Token.h"
-#include <Protocol/TcgService.h>
-#include <Protocol/TpmDevice.h>
-#include <AmiTcg/TCGMisc.h>
+#include "token.h"
+#include <protocol\TcgService.h>
+#include <Protocol\TpmDevice.h>
+#include <AmiTcg\TCGMisc.h>
 
 
+#define AMI_TCG_INTERFACE_VAR_GUID \
+    { 0x6e6ebc2d, 0x77ab, 0x46cf, 0xb2, 0xa7, 0xcc, 0x96, 0x8b, 0xe, 0x8a,\
+      0xf3}
+
+#define AMI_PPI_INTERNAL_VAR_GUID \
+    { 0x78097bb6, 0x48cf, 0x449b, 0x9b, 0xdb, 0xf6, 0x38, 0x49, 0x85, 0x64,\
+      0x60}
 
 #pragma pack(1)
 

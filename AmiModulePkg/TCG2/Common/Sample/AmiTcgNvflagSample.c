@@ -32,28 +32,27 @@
 //<AMI_FHDR_END>
 //************************************************************************
 #include "AmiTcgNvflagSample.h"
-#include <Efi.h>
-#include "AmiTcg/TcgEFI12.h"
-#include "AmiTcg/TcgPc.h"
-#include <AmiTcg/TcgCommon12.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include <EFI.h>
+#include "AmiTcg\TcgEFI12.h"
+#include "AmiTcg\TcgPc.h"
+#include <AmiTcg\TcgCommon12.h>
+#include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/DebugLib.h>
 #include<Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
 #if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
 #include <Protocol/VariableLock.h>
 #endif
 
-UINT8       Internal_flag = 0;
 
-EFI_STATUS TcgSetVariableWithNewAttributes(
-    IN CHAR16 *Name, IN EFI_GUID *Guid, IN UINT32 Attributes,
-    IN UINTN DataSize, IN VOID *Data
-);
+
+
+EFI_GUID    gEfiTpmDxeDeviceProtocolGuid = EFI_TPM_DEVICE_PROTOCOL_GUID;
+//EFI_GUID    gEfiTcgProtocolGuid = EFI_TCG_PROTOCOL_GUID;
+UINT8       Internal_flag = 0;
 
 UINT32
 NvSendTpmCommand    (
@@ -64,6 +63,23 @@ NvSendTpmCommand    (
 );
 
 
+EFI_STATUS TcgSetVariableWithNewAttributes(
+    IN CHAR16 *Name, IN EFI_GUID *Guid, IN UINT32 Attributes,
+    IN UINTN DataSize, IN VOID *Data
+)
+{
+    EFI_STATUS Status;
+
+    Status = gRT->SetVariable(Name, Guid, Attributes, DataSize, Data);
+    if (!EFI_ERROR(Status) || Status != EFI_INVALID_PARAMETER) return Status;
+
+    Status = gRT->SetVariable(Name, Guid, 0, 0, NULL);
+    if (EFI_ERROR(Status)) return Status;
+
+    return gRT->SetVariable(Name, Guid, Attributes, DataSize, Data);
+}
+
+
 
 TPM_RESULT SendSelfTest()
 {
@@ -72,16 +88,16 @@ TPM_RESULT SendSelfTest()
     TPM_RESULT              tpmResult = 0;
     EFI_TPM_DEVICE_PROTOCOL *TpmDevice;
 
-    Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid,NULL, (void **)&TpmDevice);
+    Status = gBS->LocateProtocol( &gEfiTpmDxeDeviceProtocolGuid,NULL, &TpmDevice);
     if ( EFI_ERROR( Status ))
     {
         return 0;
     }
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcgSvc );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcgSvc );
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_ERROR, "Error: failed to locate TCG protocol: %r\n"));
+        DEBUG((-1, "Error: failed to locate TCG protocol: %r\n"));
         return 0;
     }
 
@@ -127,7 +143,9 @@ EFI_STATUS Set_Persistent_Bios_TPM_Flags(PERSISTENT_BIOS_TPM_FLAGS *NvBIOSflags)
     EFI_TCG_PROTOCOL        *tcgSvc;
     EFI_TPM_DEVICE_PROTOCOL *TpmDevice;
     UINTN                   Count = 10;
-
+    EFI_GUID                FlagsStatusguid = AMI_TCG_CONFIRMATION_FLAGS_GUID;
+    EFI_GUID                BackupInterfaceguid = AMI_TCG_INTERFACE_VAR_GUID;
+    EFI_GUID                InternalFlagGuid    =AMI_PPI_INTERNAL_VAR_GUID;
     UINTN                   Size = sizeof(PERSISTENT_BIOS_TPM_FLAGS);
     UINTN                   BkupSize = sizeof(INTERNAL_BIOS_TPM_PPI_INTERFACE);
     PERSISTENT_BIOS_TPM_FLAGS  TpmNvflags;
@@ -136,39 +154,34 @@ EFI_STATUS Set_Persistent_Bios_TPM_Flags(PERSISTENT_BIOS_TPM_FLAGS *NvBIOSflags)
 
     if(NvBIOSflags == NULL)return EFI_INVALID_PARAMETER;
 
-    Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid,NULL, (void **)&TpmDevice);
+    Status = gBS->LocateProtocol( &gEfiTpmDxeDeviceProtocolGuid,NULL, &TpmDevice);
     if ( EFI_ERROR( Status ))
     {
         return EFI_NOT_FOUND;
     }
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcgSvc );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcgSvc );
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_ERROR, "Error: failed to locate TCG protocol: %r\n"));
+        DEBUG((-1, "Error: failed to locate TCG protocol: %r\n"));
         return EFI_NOT_FOUND;
     }
 
-    Status = gRT->GetVariable(L"TcgInterfaceVar", &mAmiTcgInterfaceVarGuid, NULL, &BkupSize, &Interface);
+    Status = gRT->GetVariable(L"TcgInterfaceVar", &BackupInterfaceguid, NULL, &BkupSize, &Interface);
     if(!EFI_ERROR(Status) && (Interface.Interface == 1)) //use NVRAM
     {
         gBS->CopyMem (&TpmNvflags, NvBIOSflags, sizeof(PERSISTENT_BIOS_TPM_FLAGS));
 
-        Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &mAmiPpiInternalVarGuid, \
+        Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &InternalFlagGuid, \
                   EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                   Size, &TpmNvflags  );
-        
-        if ( EFI_ERROR( Status ))
-        {
-            DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-        }
     }
 
 #if USE_BIOSNVRAM_ONLY == 1
     SetMem(&Interface, sizeof(Interface), 0);
     Interface.Interface = 1;
 
-    Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &mAmiTcgInterfaceVarGuid, \
+    Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &BackupInterfaceguid, \
               EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
               BkupSize, &Interface );
 
@@ -176,7 +189,7 @@ EFI_STATUS Set_Persistent_Bios_TPM_Flags(PERSISTENT_BIOS_TPM_FLAGS *NvBIOSflags)
     {
         gBS->CopyMem (&TpmNvflags, NvBIOSflags, sizeof(PERSISTENT_BIOS_TPM_FLAGS));
 
-        Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &mAmiPpiInternalVarGuid, \
+        Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &InternalFlagGuid, \
                   EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                   Size, &TpmNvflags  );
     }
@@ -224,7 +237,7 @@ EFI_STATUS Set_Persistent_Bios_TPM_Flags(PERSISTENT_BIOS_TPM_FLAGS *NvBIOSflags)
     if ( EFI_ERROR(Status) || (WriteRet.returnCode != 0))
     {
 
-        DEBUG((DEBUG_ERROR, "(TPM Error) Status: %r; RetCode: %x.\n", \
+        DEBUG((-1, "(TPM Error) Status: %r; RetCode: %x.\n", \
                Status, \
                TPM_H2NL(WriteRet.returnCode)));
 //wait for proper return codes
@@ -263,7 +276,7 @@ EFI_STATUS Set_Persistent_Bios_TPM_Flags(PERSISTENT_BIOS_TPM_FLAGS *NvBIOSflags)
         {
             SetMem(&Interface, sizeof(Interface), 0);
             Interface.Interface = 1;
-            Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &mAmiTcgInterfaceVarGuid, \
+            Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &BackupInterfaceguid, \
                       EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                       BkupSize, &Interface);
         }
@@ -274,7 +287,7 @@ EFI_STATUS Set_Persistent_Bios_TPM_Flags(PERSISTENT_BIOS_TPM_FLAGS *NvBIOSflags)
             TpmNvflags.NoPpiClear = FALSE;
             TpmNvflags.NoPpiMaintenance = FALSE;
 
-            Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &mAmiPpiInternalVarGuid, \
+            Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &InternalFlagGuid, \
                       EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                       Size, &TpmNvflags);
         }
@@ -383,7 +396,9 @@ EFI_STATUS Read_Persistent_Bios_TPM_Flags(  PERSISTENT_BIOS_TPM_FLAGS *NvBIOSfla
 #endif
     EFI_TCG_PROTOCOL        *tcgSvc;
     EFI_TPM_DEVICE_PROTOCOL *TpmDevice;
-
+    EFI_GUID                FlagsStatusguid = AMI_TCG_CONFIRMATION_FLAGS_GUID;
+    EFI_GUID                BackupInterfaceguid = AMI_TCG_INTERFACE_VAR_GUID;
+    EFI_GUID                InternalFlagGuid    =AMI_PPI_INTERNAL_VAR_GUID;
     PERSISTENT_BIOS_TPM_FLAGS  TpmNvflags;
     INTERNAL_BIOS_TPM_PPI_INTERFACE Interface;
     UINTN                       Size = sizeof(PERSISTENT_BIOS_TPM_FLAGS);
@@ -392,26 +407,26 @@ EFI_STATUS Read_Persistent_Bios_TPM_Flags(  PERSISTENT_BIOS_TPM_FLAGS *NvBIOSfla
 
     if(NvBIOSflags == NULL)return EFI_INVALID_PARAMETER;
 
-    Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid,NULL, (void **)&TpmDevice);
+    Status = gBS->LocateProtocol( &gEfiTpmDxeDeviceProtocolGuid,NULL, &TpmDevice);
     if ( EFI_ERROR( Status ))
     {
         return EFI_NOT_FOUND;
     }
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcgSvc );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcgSvc );
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_ERROR, "Error: failed to locate TCG protocol: %r\n"));
+        DEBUG((-1, "Error: failed to locate TCG protocol: %r\n"));
         return EFI_NOT_FOUND;
     }
 
 
-    Status = gRT->GetVariable(L"TcgInterfaceVar", &mAmiTcgInterfaceVarGuid, NULL, &BkupSize, &Interface);
+    Status = gRT->GetVariable(L"TcgInterfaceVar", &BackupInterfaceguid, NULL, &BkupSize, &Interface);
     if(!EFI_ERROR(Status) && (Interface.Interface == 1)) //use NVRAM
     {
         //get variable from BIOS NVRAM
         Status = gRT->GetVariable( L"INTERNALPERBIOSFLAGS", \
-                                   &mAmiPpiInternalVarGuid, \
+                                   &InternalFlagGuid, \
                                    NULL, \
                                    &Size, \
                                    &TpmNvflags );
@@ -453,7 +468,7 @@ EFI_STATUS Read_Persistent_Bios_TPM_Flags(  PERSISTENT_BIOS_TPM_FLAGS *NvBIOSfla
                                         (UINT8*)&ReadRet );
 
     if ( EFI_ERROR(Status) || (ReadRet.returnCode != 0))
-        DEBUG((DEBUG_ERROR, "(TPM Error) Status: %r; RetCode: %x.\n", \
+        DEBUG((-1, "(TPM Error) Status: %r; RetCode: %x.\n", \
                Status, \
                TPM_H2NL(ReadRet.returnCode)));
 
@@ -476,7 +491,7 @@ EFI_STATUS Read_Persistent_Bios_TPM_Flags(  PERSISTENT_BIOS_TPM_FLAGS *NvBIOSfla
             SetMem(&Interface, sizeof(Interface), 0);
             Interface.Interface = 1;
 
-            Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &mAmiTcgInterfaceVarGuid, \
+            Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &BackupInterfaceguid, \
                       EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                       BkupSize, &Interface);
 
@@ -487,7 +502,7 @@ EFI_STATUS Read_Persistent_Bios_TPM_Flags(  PERSISTENT_BIOS_TPM_FLAGS *NvBIOSfla
                 TpmNvflags.NoPpiMaintenance = FALSE;
                 TpmNvflags.Ppi1_3_Flags.PpRequiredForChangePCRS = TRUE;
 
-                Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &mAmiPpiInternalVarGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &InternalFlagGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           Size, &TpmNvflags);
             }
@@ -514,7 +529,7 @@ EFI_STATUS Read_Persistent_Bios_TPM_Flags(  PERSISTENT_BIOS_TPM_FLAGS *NvBIOSfla
         SetMem(&Interface, sizeof(Interface), 0);
         Interface.Interface = 1;
 
-        Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &mAmiTcgInterfaceVarGuid, \
+        Status =  TcgSetVariableWithNewAttributes(L"TcgInterfaceVar", &BackupInterfaceguid, \
                   EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                   BkupSize, &Interface);
 
@@ -524,7 +539,7 @@ EFI_STATUS Read_Persistent_Bios_TPM_Flags(  PERSISTENT_BIOS_TPM_FLAGS *NvBIOSfla
             TpmNvflags.NoPpiClear = FALSE;
             TpmNvflags.NoPpiMaintenance = FALSE;
 
-            TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &mAmiPpiInternalVarGuid, \
+            TcgSetVariableWithNewAttributes(L"INTERNALPERBIOSFLAGS", &InternalFlagGuid, \
                                             EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                                             Size, &TpmNvflags);
         }
@@ -590,7 +605,7 @@ NvSendTpmCommand    (
                                         (UINT8*)&result );
     tpmResult = (TPM_1_2_RET_HEADER*)result;
     if ( EFI_ERROR(Status) || (tpmResult->RetCode != 0))
-        DEBUG((DEBUG_ERROR, "TXT (TPM Error) Status: %r; RetCode: %x.\n", \
+        DEBUG((-1, "TXT (TPM Error) Status: %r; RetCode: %x.\n", \
                Status, \
                TPM_H2NL(tpmResult->RetCode)    ));
     return tpmResult->RetCode;
@@ -610,7 +625,7 @@ PERSISTENT_BIOS_TPM_MANAGEMENT_FLAGS_PROTOCOL   TcmPersistentBiosflagsManagement
     TcmSet_Persistent_Bios_TPM_Flags
 };
 
-
+EFI_GUID Overrideguid = AMI_BIOSPPI_FLAGS_MANAGEMENT_GUID;
 
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -645,7 +660,7 @@ EFIAPI AmiTcgPpiNvflagEntry (
 #if USE_BIOSNVRAM_ONLY == 0
     TPM_RESULT                  RetCode;
 #endif
-
+    EFI_GUID  FlagsStatusguid = AMI_TCG_CONFIRMATION_FLAGS_GUID;
     UINTN     Size = sizeof(PERSISTENT_BIOS_TPM_FLAGS);
     TPM_DEF_NV_DATA  CmdDefineNvram [] = { \
                                            // TPM_NV_DATA_PUBLIC1 & TPM_NV_DATA_PUBLIC1.TPM_PCR_INFO_SHORT
@@ -664,16 +679,16 @@ EFIAPI AmiTcgPpiNvflagEntry (
 
 //    InitAmiLib( ImageHandle, SystemTable );
 
-    Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid,NULL, (void **)&TpmDevice);
+    Status = gBS->LocateProtocol( &gEfiTpmDxeDeviceProtocolGuid,NULL, &TpmDevice);
     if ( EFI_ERROR( Status ))
     {
         return EFI_NOT_FOUND;
     }
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcgSvc );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcgSvc );
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_ERROR, "Error: failed to locate TCG protocol: %r\n"));
+        DEBUG((-1, "Error: failed to locate TCG protocol: %r\n"));
         return EFI_NOT_FOUND;
     }
 
@@ -682,7 +697,7 @@ EFIAPI AmiTcgPpiNvflagEntry (
 
         Status = gBS->InstallProtocolInterface(
                      &ImageHandle,
-                     &AmiBiosPpiFlagsManagementGuid,
+                     &Overrideguid,
                      EFI_NATIVE_INTERFACE,
                      &TcmPersistentBiosflagsManagementProtocol);
 
@@ -777,7 +792,7 @@ EFIAPI AmiTcgPpiNvflagEntry (
 #endif
     Status = gBS->InstallProtocolInterface(
                  &ImageHandle,
-                 &AmiBiosPpiFlagsManagementGuid,
+                 &Overrideguid,
                  EFI_NATIVE_INTERFACE,
                  &PersistentBiosflagsManagementProtocol);
 

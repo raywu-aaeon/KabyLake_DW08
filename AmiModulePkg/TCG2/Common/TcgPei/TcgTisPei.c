@@ -89,21 +89,20 @@
 //<AMI_FHDR_END>
 //*************************************************************************
 #include <Efi.h>
-#include <AmiTcg/TcgCommon12.h>
-#include <AmiTcg/sha.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Token.h>
-#include <AmiTcg/TpmLib.h>
-#include <AmiTcg/TcgPc.h>
-#include <Ppi/AmiTcgPlatformPpi.h>
-#include "Ppi/TcgService.h"
-#include "Ppi/TpmDevice.h"
-#include "Ppi/CpuIo.h"
-#include "Ppi/LoadFile.h"
-#include "Ppi/TcgPlatformSetupPeiPolicy.h"
-#include <AmiTcg/Tpm20.h>
-#include <Library/DebugLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include <AmiTcg\TcgCommon12.h>
+#include <AmiTcg\Sha.h>
+#include <AmiTcg\TcgMisc.h>
+#include <token.h>
+#include <AmiTcg\TpmLib.h>
+#include <AmiTcg\TcgPc.h>
+#include <ppi\AmiTcgPlatformPpi.h>
+#include "PPI\TcgService.h"
+#include "PPI\TpmDevice.h"
+#include "PPI\CpuIo.h"
+#include "PPI\LoadFile.h"
+#include "PPI\TcgPlatformSetupPeiPolicy.h"
+#include <AmiTcg\Tpm20.h>
+#include <Library\DebugLib.h>
 
 //*********************************************************************
 //                      GLOBAL DEFINITIONS
@@ -117,22 +116,25 @@ typedef struct _TCG_PEI_CALLBACK_CONTEXT
 } TCG_PEI_CALLBACK_CONTEXT;
 #pragma pack()
 
+EFI_GUID gEfiPeiAmiTcgLogHobGuid        = EFI_TCG_LOG_HOB_GUID;
+//EFI_GUID gPeiTpmPpiGuid                 = PEI_TPM_PPI_GUID;
+//EFI_GUID gPeiTcgPpiGuid                 = PEI_TCG_PPI_GUID;
 
 UINTN FindNextLogLocation(TCG_PCR_EVENT_HDR   *TcgLog, UINTN EventNum);
 
 static
 EFI_STATUS
-EFIAPI FillCallbackContext(
+__stdcall FillCallbackContext(
     IN EFI_PEI_SERVICES          **PeiService,
     OUT TCG_PEI_CALLBACK_CONTEXT *CallbackContext )
 {
     CallbackContext->PeiServices = PeiService;
     return (*PeiService)->LocatePpi(
-               (CONST EFI_PEI_SERVICES    **)PeiService,
+               PeiService,
                &gPeiTpmPpiGuid,
                0,
                NULL,
-               (void **)&CallbackContext->TpmDevice
+               &CallbackContext->TpmDevice
            );
 }
 
@@ -147,14 +149,14 @@ EFIAPI TcgPeiGetEventLog(
     EFI_STATUS Status;
     VOID       *HobStart;
 
-    Status = (*PeiServices)->GetHobList( (CONST EFI_PEI_SERVICES **)PeiServices, &HobStart );
+    Status = (*PeiServices)->GetHobList( PeiServices, &HobStart );
 
     if ( EFI_ERROR( Status ))
     {
         return Status;
     }
 
-    return TcgGetNextGuidHob( &HobStart, &gEfiPeiTcgLogHobGuid, (void **)EventLog, NULL );
+    return TcgGetNextGuidHob( &HobStart, &gEfiPeiAmiTcgLogHobGuid, EventLog, NULL );
 }
 
 
@@ -168,14 +170,14 @@ void printbuffer(UINT8 *Buffer, UINTN BufferSize)
 
         if(i%16 == 0)
         {
-            DEBUG((DEBUG_INFO,"\n"));
-            DEBUG((DEBUG_INFO,"%04x :", j));
+            DEBUG((-1,"\n"));
+            DEBUG((-1,"%04x :", j));
 
             j+=1;
         }
-        DEBUG((DEBUG_INFO,"%02x ", Buffer[i]));
+        DEBUG((-1,"%02x ", Buffer[i]));
     }
-    DEBUG((DEBUG_INFO,"\n"));
+    DEBUG((-1,"\n"));
 }
 
 
@@ -233,7 +235,7 @@ EFIAPI TcgPeiLogEvent(
     //prepare next location
     NextLocation = FindNextLogLocation((TCG_PCR_EVENT_HDR*)(TcgLog + 1), TcgLog->EventNum);
 
-    DEBUG ((DEBUG_INFO, "NextLocation= %x\n", NextLocation));
+    DEBUG ((-1, "NextLocation= %x\n", NextLocation));
 
     Status = TcgCommonLogEvent(
                  &Context,
@@ -259,7 +261,7 @@ Exit:
 
 
 EFI_STATUS
-EFIAPI TcgPeiCommonExtend(
+__stdcall TcgPeiCommonExtend(
     IN VOID         *CallbackContext,
     IN TPM_PCRINDEX PCRIndex,
     IN TCG_DIGEST   *Digest,
@@ -332,9 +334,7 @@ EFI_STATUS handleEvNoActionEvent(    IN PEI_TCG_PPI       *This,
 // Notes:
 //<AMI_PHDR_END>
 //*********************************************************************
-EFI_STATUS 
-EFIAPI
-TcgPeiHashLogExtendEventSW(
+EFI_STATUS TcgPeiHashLogExtendEventSW(
     IN PEI_TCG_PPI       *This,
     IN EFI_PEI_SERVICES  **PeiServices,
     IN UINT8             *HashData,
@@ -498,8 +498,8 @@ static EFI_PEI_PPI_DESCRIPTOR mTcgPpiList[] =
 //**********************************************************************
 EFI_STATUS
 EFIAPI TcgPeiEntry(
-    IN EFI_PEI_FILE_HANDLE FileHandle,
-    IN CONST EFI_PEI_SERVICES    **PeiServices )
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
+    IN EFI_PEI_SERVICES    **PeiServices )
 {
     EFI_STATUS Status;
     EFI_PHYSICAL_ADDRESS TPM_Base = (EFI_PHYSICAL_ADDRESS)PORT_TPM_IOMEMBASE;

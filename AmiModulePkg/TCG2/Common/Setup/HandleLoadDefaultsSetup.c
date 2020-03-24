@@ -29,21 +29,16 @@
 //<AMI_FHDR_END>
 //*************************************************************************
 
-#include "Token.h"
-#include <Efi.h>
+#include "token.h"
+#include <EFI.h>
 #include <Protocol/SimpleTextIn.h>
 #include <Setup.h>
 #include <Library/HiiLib.h>
-#include "AmiTsePkg/Core/em/AMITSE/Inc/variable.h"
-#include <Protocol/TcgPlatformSetupPolicy.h>
-#if defined(TCG_AMI_MODULE_PKG_VERSION) && (TCG_AMI_MODULE_PKG_VERSION == 1)
-#include "MdePkg/Include/Protocol/NvmExpressPassthru.h"
-#endif
-#include <Library/DebugLib.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include "AmiTsePkg\Core\EM\AMITSE\Inc\Variable.h"
+#include <Protocol\TcgPlatformSetupPolicy.h>
+
 #if EFI_SPECIFICATION_VERSION>0x20000 && !defined(GUID_VARIABLE_DEFINITION)
-#include "Include/UefiHii.h"
+#include "Include\UefiHii.h"
 #include "Protocol/HiiDatabase.h"
 #include "Protocol/HiiString.h"
 #else
@@ -78,25 +73,11 @@ VOID TcgUpdateDefaultsHook(VOID )
     EFI_STATUS  Status;
     SETUP_DATA  SetupData;
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
-    UINTN                           AlgoVal;
-    AMITCGSETUPINFOFLAGS            Info = {0};
-    UINTN                           infoSize = sizeof(AMITCGSETUPINFOFLAGS);
-    UINT32                          infoVariableAttributes=0;
-
-    Status = gRT->GetVariable( L"PCRBitmap", \
-                               &gTcgInternalflagGuid, \
-                               &infoVariableAttributes, \
-                               &infoSize, \
-                               &Info );
-    if (EFI_ERROR (Status))
-    {
-        // Error for did not Get Variable
-    }
-
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
 
     //for OEMS that might want to update some policy on loaddefaults
     //they need to update the policy on load defaults before this function is run
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status) || ProtocolInstance == NULL)
     {
         return;
@@ -115,118 +96,7 @@ VOID TcgUpdateDefaultsHook(VOID )
     Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TcmSupportEnabled - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TcmSupportEnabled );
     Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmError          - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmError );
     Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.SuppressTcg  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.DisallowTpm );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.InterfaceSel - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.InterfaceSel );
 
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x01 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha1  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha256
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x02 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha256  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha384
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x04 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha384  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha512
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x08 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha512  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // SM3
-    AlgoVal = (UINTN)( (ProtocolInstance->ConfigFlags.PcrBanks & 0x10) ? 1 : 0 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.SM3  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-
-    // Sha1Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x01) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha1Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha256Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x02) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha256Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha384Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x04) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha384Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha512Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x08) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha512Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // SM3Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x10) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.SM3Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-
-}
-
-// Help Support MfgMode or Default Mode since gRT->GetVariable(L"Setup") will be always default value.
-// This will cause the BIOS Setup show wrong message.
-VOID TcgSetupDataSync( VOID )
-{
-    EFI_STATUS  Status;
-    SETUP_DATA  SetupData;
-    TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
-    UINTN                           AlgoVal;
-
-    AMITCGSETUPINFOFLAGS            Info = {0};
-    UINTN                           infoSize = sizeof(AMITCGSETUPINFOFLAGS);
-    UINT32                          infoVariableAttributes=0;
-
-    Status = gRT->GetVariable( L"PCRBitmap", \
-                               &gTcgInternalflagGuid, \
-                               &infoVariableAttributes, \
-                               &infoSize, \
-                               &Info );
-    if (EFI_ERROR (Status))
-    {
-        // Error for did not Get Variable
-    }
-
-
-    //for OEMS that might want to update some policy on loaddefaults
-    //they need to update the policy on load defaults before this function is run
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
-    if (EFI_ERROR (Status) || ProtocolInstance == NULL)
-    {
-        return;
-    }
-
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Tpm20Device    - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.Tpm20Device );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmSupport    - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmSupport );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmEnable     - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmEnable );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmAuthenticate - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmAuthenticate );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmOperation    - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmOperation );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmHrdW         - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmHardware );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmEnaDisable   - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmEnaDisable );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmActDeact     - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmActDeact );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmOwnedUnowned - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmOwnedUnowned  );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TcgSupportEnabled - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TcgSupportEnabled );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TcmSupportEnabled - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TcmSupportEnabled );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.TpmError          - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.TpmError );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.SuppressTcg  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.DisallowTpm );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.InterfaceSel - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &ProtocolInstance->ConfigFlags.InterfaceSel );
-
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x01 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha1  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha256
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x02 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha256  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha384
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x04 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha384  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha512
-    AlgoVal = (UINTN)( ProtocolInstance->ConfigFlags.PcrBanks & 0x08 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha512  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // SM3
-    AlgoVal = (UINTN)( (ProtocolInstance->ConfigFlags.PcrBanks & 0x10) ? 1 : 0 );
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.SM3  - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-
-    // Sha1Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x01) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha1Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha256Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x02) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha256Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha384Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x04) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha384Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // Sha512Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x08) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.Sha512Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
-    // SM3Supported
-    AlgoVal = (Info.SupportedPcrBitMap & 0x10) ? 1 : 0;
-    Status = VarSetValue(0, (UINT32)(((UINTN)&SetupData.SM3Supported - (UINTN)&SetupData)), (UINTN)sizeof(UINT8), &AlgoVal );
 }
 
 //**********************************************************************

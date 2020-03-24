@@ -31,7 +31,6 @@ AmiTcgNvflagSample.h
   MdeModulePkg/MdeModulePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
    UefiDriverEntryPoint
@@ -40,23 +39,17 @@ AmiTcgNvflagSample.h
    BaseMemoryLib
    BaseAmiTcmlib
    TpmReportStatusCodeWrapperLibDxe
-   AmiTcgLibDxe
-
-[Guids]   
-   FlagsStatusguid
-   mAmiPpiInternalVarGuid
-   mAmiTcgInterfaceVarGuid
-   AmiBiosPpiFlagsManagementGuid 
+     
 [Protocols]
   gEfiTcgProtocolGuid
   gEfiTpmDeviceProtocolGuid
   gEdkiiVariableLockProtocolGuid
-  #AmiBiosPpiFlagsManagementGuid
 
 [Depex]
     gEfiTcgProtocolGuid
 
- 
+[BuildOptions.X64]
+  
 
 #*************************************************************************
 #**                                                                     **

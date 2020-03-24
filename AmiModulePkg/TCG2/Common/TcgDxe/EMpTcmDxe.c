@@ -27,23 +27,18 @@
 //<AMI_FHDR_END>
 //*************************************************************************
 #include <Efi.h>
-#include "AmiTcg/TcgTpm12.h"
-#include <AmiTcg/TpmLib.h>
-#include "Protocol/TpmDevice.h"
-#include "AmiTcg/TCGMisc.h"
+#include "AmiTcg\TcgTpm12.h"
+#include <AmiTcg\TpmLib.h>
+#include "Protocol\TpmDevice.h"
+#include "AmiTcg\TcgMisc.h"
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/DebugLib.h>
-#include <Library/BaseLib.h>
-#include <AmiTcg/Tcmdxe.h>
+#include<Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include "Token.h"
-
-extern EFI_GUID gEfiTcgMpDriverHobGuid;
-TCM_PC_REGISTERS_PTR      TcmBaseReg = (TCM_PC_REGISTERS_PTR)(UINTN)PORT_TPM_IOMEMBASE;
+#include "token.h"
 
 #define _CR( Record, TYPE,\
      Field )((TYPE*) ((CHAR8*) (Record)- (CHAR8*) &(((TYPE*) 0)->Field)))
@@ -56,7 +51,35 @@ typedef struct _TPM_DXE_PRIVATE_DATA
     EFI_TPM_DEVICE_PROTOCOL TpmInterface;
 } TPM_DXE_PRIVATE_DATA;
 
-EFI_TCMSDRV_PROTOCOL    *TcmDrvProtocol = NULL;
+static UINTN                  FuncID;
+static TPMTransmitEntryStruct EmptyBuf;
+static UINT32                 Ret;
+UINT8                         *SHA_ARRAY;
+
+
+GLOBAL_REMOVE_IF_UNREFERENCED IA32_SEGMENT_DESCRIPTOR mGdtEntries[] =
+{
+    /* selector { Global Segment Descriptor                              } */
+    /* 0x00 */  {{0,      0,  0,  0,    0,  0,  0,  0,    0,  0, 0,  0,  0}}, //null descriptor
+    /* 0x08 */  {{0xffff, 0,  0,  0x3,  1,  0,  1,  0xf,  0,  0, 1,  1,  0}}, //linear data segment descriptor
+    /* 0x10 */  {{0xffff, 0,  0,  0xf,  1,  0,  1,  0xf,  0,  0, 1,  1,  0}}, //linear code segment descriptor
+    /* 0x18 */  {{0xffff, 0,  0,  0x3,  1,  0,  1,  0xf,  0,  0, 1,  1,  0}}, //system data segment descriptor
+    /* 0x20 */  {{0xffff, 0,  0,  0xb,  1,  0,  1,  0xf,  0,  0, 1,  1,  0}}, //system code segment descriptor
+    /* 0x28 */  {{0,      0,  0,  0,    0,  0,  0,  0,    0,  0, 0,  0,  0}}, //spare segment descriptor
+    /* 0x30 */  {{0xffff, 0,  0,  0x3,  1,  0,  1,  0xf,  0,  0, 1,  1,  0}}, //system data segment descriptor
+    /* 0x38 */  {{0xffff, 0,  0,  0xb,  1,  0,  1,  0xf,  0,  1, 0,  1,  0}}, //system code segment descriptor
+    /* 0x40 */  {{0,      0,  0,  0,    0,  0,  0,  0,    0,  0, 0,  0,  0}}, //spare segment descriptor
+};
+
+GLOBAL_REMOVE_IF_UNREFERENCED CONST IA32_DESCRIPTOR mGdt =
+{
+    sizeof (mGdtEntries) - 1,
+    (UINTN) mGdtEntries
+};
+
+
+
+
 
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -82,10 +105,18 @@ EFI_STATUS
 EFIAPI EMpTcmDxeInit(
     IN EFI_TPM_DEVICE_PROTOCOL *This )
 {
-    if(TcmDrvProtocol != NULL)
+    TPM_DXE_PRIVATE_DATA *Private;
+    EFI_PHYSICAL_ADDRESS TPM_Base = (EFI_PHYSICAL_ADDRESS)PORT_TPM_IOMEMBASE;
+
+    FuncID  = MA_FUNCTION_INIT;
+    Private = TPM_DXE_PRIVATE_DATA_FROM_THIS( This );
+    TcmDxeCallMPDriver( FuncID, &EmptyBuf, &Ret );
+
+    if ( !Ret )
+    {
         return EFI_SUCCESS;
-    else
-        return EFI_NOT_FOUND;
+    }
+    return EFI_DEVICE_ERROR;
 }
 
 
@@ -115,10 +146,17 @@ EFI_STATUS
 EFIAPI EMpTcmDxeClose(
     IN EFI_TPM_DEVICE_PROTOCOL *This )
 {
-    if(TcmDrvProtocol != NULL)
+    TPM_DXE_PRIVATE_DATA *Private;
+
+    FuncID  = MP_FUNCTION_CLOSE;
+    Private = TPM_DXE_PRIVATE_DATA_FROM_THIS( This );
+    TcmDxeCallMPDriver( FuncID, &EmptyBuf, &Ret );
+
+    if ( !Ret )
+    {
         return EFI_SUCCESS;
-    else
-        return EFI_NOT_FOUND;
+    }
+    return EFI_DEVICE_ERROR;
 }
 
 
@@ -151,11 +189,19 @@ EFIAPI  EMpTcmDxeGetStatusInfo(
     IN EFI_TPM_DEVICE_PROTOCOL   * This
 )
 {
-    if(TcmDrvProtocol != NULL)
-       return EFI_SUCCESS;
-   else
-       return EFI_NOT_FOUND;
+    TPM_DXE_PRIVATE_DATA *Private;
+
+    FuncID  = MP_FUNCTION_GET_STATUS;
+    Private = TPM_DXE_PRIVATE_DATA_FROM_THIS( This );
+    TcmDxeCallMPDriver( FuncID, &EmptyBuf, &Ret );
+
+    if ( !Ret )
+    {
+        return EFI_SUCCESS;
+    }
+    return EFI_DEVICE_ERROR;
 }
+
 
 
 //**********************************************************************
@@ -192,50 +238,83 @@ EFIAPI EMpTcmDxeTransmit(
     IN UINTN                   NoOutBuffers,
     IN OUT TPM_TRANSMIT_BUFFER *OutBuffers )
 {
-    EFI_STATUS      Status;
-    UINTN           InbufferSize=0, OutbufferSize=0;
-    UINT8           *CmdBuffer, *RespBuff, *BufferPtr;
-    UINTN           i=0;
-    
-    if(TcmDrvProtocol == NULL)
-        return EFI_NOT_FOUND;
-    
-    for(i=0; i< NoInBuffers; i++)
+    TPM_DXE_PRIVATE_DATA   *Private;
+    TPMTransmitEntryStruct FillESI;
+    UINTN                  FuncID = (UINTN)MP_FUNCTION_TRANSMIT;
+    UINT32                 Ret;
+    UINT8                  *SHA_ARRAY_OUT = NULL;
+    BOOLEAN                FillBuff   = FALSE;
+    BOOLEAN                Other      = FALSE;
+    UINTN                  i = 0, loc = 0;
+    UINT8                  *Tpm_SHA_ARRAY= NULL;
+    EFI_STATUS             Status;
+    IA32_DESCRIPTOR        Gdtr;
+
+
+    if(NoInBuffers == 0 || InBuffers == NULL || NoOutBuffers == 0 || OutBuffers == NULL)
+        return EFI_INVALID_PARAMETER;
+
+    FillESI.dwInLen = 0;
+    FillESI.dwOutLen = 0;
+
+    for (; i < NoInBuffers; i++ )
     {
-        InbufferSize += InBuffers[i].Size;
-    }
-    
-    for(i=0; i< NoOutBuffers; i++)
-    {
-        OutbufferSize += OutBuffers[i].Size;
-    }
-    
-    Status = gBS->AllocatePool (EfiBootServicesData, InbufferSize, (void **) &CmdBuffer );
-    if(EFI_ERROR(Status))return Status;
-      
-    Status = gBS->AllocatePool (EfiBootServicesData, OutbufferSize, (void **) &RespBuff );
-    if(EFI_ERROR(Status))return Status;
-    
-    BufferPtr = CmdBuffer;
-    
-    for (i=0; i < NoInBuffers; i++ )
-    {
-        CopyMem(BufferPtr, InBuffers[i].Buffer,\
-                                    InBuffers[i].Size);
-        BufferPtr+=InBuffers[i].Size;
+        FillESI.dwInLen += (UINT32)InBuffers[i].Size;
     }
 
-    Status=  TcmDrvProtocol->TcmLibPassThrough(TcmBaseReg, CmdBuffer, (UINT32)InbufferSize,\
-                                                    RespBuff, (UINT32)OutbufferSize);
+    Status = gBS-> AllocatePool( EfiBootservicesData, FillESI.dwInLen, &Tpm_SHA_ARRAY);
     if(EFI_ERROR(Status))return Status;
-    
+
+    for (i = 0; i < NoOutBuffers; i++ )
+    {
+        FillESI.dwOutLen += (UINT32)OutBuffers[i].Size;
+    }
+
+    Status = gBS-> AllocatePool( EfiBootservicesData, FillESI.dwOutLen, &SHA_ARRAY_OUT );
+    if(EFI_ERROR(Status)){
+        gBS->FreePool(Tpm_SHA_ARRAY);
+        return Status;
+    }
+
+
+    for (i = 0; i < NoInBuffers; i++ )
+    {
+        gBS->CopyMem(Tpm_SHA_ARRAY + loc,
+                     InBuffers[i].Buffer,
+                     InBuffers[i].Size );
+
+        loc += InBuffers[i].Size;
+    }
+
+    FillESI.pbInBuf  = (UINT32)(EFI_PHYSICAL_ADDRESS) Tpm_SHA_ARRAY;
+    FillESI.pbOutBuf = (UINT32)(EFI_PHYSICAL_ADDRESS) SHA_ARRAY_OUT;
+
+    Private = TPM_DXE_PRIVATE_DATA_FROM_THIS( This );
+    AsmReadGdtr (&Gdtr);
+    AsmWriteGdtr (&mGdt);
+    TcmDxeCallMPDriver( FuncID, &FillESI, &Ret );
+    AsmWriteGdtr (&Gdtr);
+
+    if ( Tpm_SHA_ARRAY != NULL )
+    {
+        gBS->FreePool( Tpm_SHA_ARRAY );
+    }
+
+    loc = 0;
+
     for (i=0; i < NoOutBuffers; i++ )
     {
-        CopyMem(OutBuffers[i].Buffer, BufferPtr, \
-                                    OutBuffers[i].Size);
-        BufferPtr+=OutBuffers[i].Size;
+        gBS->CopyMem( OutBuffers[i].Buffer,
+                      &SHA_ARRAY_OUT[loc],
+                      OutBuffers[i].Size );
+        loc += (UINTN)OutBuffers[i].Size;
     }
-        
+
+    if ( SHA_ARRAY_OUT != NULL )
+    {
+        gBS->FreePool( SHA_ARRAY_OUT );
+    }
+
     return EFI_SUCCESS;
 }
 
@@ -253,7 +332,7 @@ static TPM_DXE_PRIVATE_DATA mTpmPrivate =
 };
 
 
-
+EFI_GUID                    legTcgGuid = AMI_TCG_RESETVAR_HOB_GUID;
 //**********************************************************************
 //<AMI_PHDR_START>
 //
@@ -283,17 +362,30 @@ EFIAPI TcmDxeEntry(
     IN EFI_SYSTEM_TABLE *SystemTable)
 {
     EFI_STATUS           Status = EFI_NOT_FOUND;
+    EFI_PHYSICAL_ADDRESS TPM_Base = (EFI_PHYSICAL_ADDRESS)PORT_TPM_IOMEMBASE;
+    FAR32LOCALS          *TempLoc   = NULL;
+    EFI_GUID        gMpDriverHobGuid = EFI_TCG_MPDriver_HOB_GUID;
 
-    Status = gBS->LocateProtocol (&gEfiTcmMPProtocolGuid,  NULL, (void **)&TcmDrvProtocol);
-    if(EFI_ERROR(Status))return Status;
-    
-    Status = gBS->InstallMultipleProtocolInterfaces(
-                         &ImageHandle,
-                         &gEfiTpmDeviceProtocolGuid,
-                         &mTpmPrivate.TpmInterface,
-                         NULL);
+    TempLoc = (FAR32LOCALS*)LocateATcgHob( gST->NumberOfTableEntries,
+                                           gST->ConfigurationTable,
+                                           &gMpDriverHobGuid );
+
+
+    if(TempLoc != NULL)
+    {
+        if(TempLoc->Offset == 0) return EFI_NOT_FOUND;
+
+        Prepare2Thunkproc( TempLoc->Offset, TempLoc->Selector );
+        Status = gBS->InstallMultipleProtocolInterfaces(
+                     &ImageHandle,
+                     &gEfiTpmDeviceProtocolGuid,
+                     &mTpmPrivate.TpmInterface,
+                     NULL);
+    }
+
     return Status;
 }
+
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **

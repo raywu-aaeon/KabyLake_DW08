@@ -161,8 +161,6 @@
     UINT8 SM3;
     UINT8 ForceTpmEnable;
     UINT8 PpiSpecVersion;
-    UINT8 BlockSidSetup;
-    UINT8 NvmeDeviceFound;
 #endif
 
 #if defined(VFRCOMPILE) && !defined(CONTROLS_ARE_DEFINED)
@@ -364,9 +362,8 @@
             prompt       = STRING_TOKEN (STR_TPM_SHA1_PCRBANK_ENABLE),\
             help         = STRING_TOKEN (STR_TPM_SHA1_PCRBANK_ENABLE_HELP),\
             default      = DEFAULT_SHA1_BANK_ENABLE,\
-            default      = DEFAULT_SHA1_BANK_ENABLE, defaultstore = AmiMfgDefault,\
             option text  = STRING_TOKEN(STR_TPMDISABLED), value = 0, flags = RESET_REQUIRED;\
-            option text  = STRING_TOKEN(STR_TPMENABLED), value = 1, flags =  RESET_REQUIRED;\
+            option text  = STRING_TOKEN(STR_TPMENABLED), value = 1, flags = MANUFACTURING | RESET_REQUIRED;\
         endoneof;
         
 #define TCG_PCRSHA256BANK\
@@ -374,9 +371,8 @@
             prompt       = STRING_TOKEN (STR_TPM_SHA256_PCRBANK_ENABLE),\
             help         = STRING_TOKEN (STR_TPM_SHA256_PCRBANK_ENABLE_HELP),\
             default      = DEFAULT_SHA256_BANK_ENABLE,\
-            default      = DEFAULT_SHA256_BANK_ENABLE, defaultstore = AmiMfgDefault,\
             option text  = STRING_TOKEN(STR_TPMDISABLED), value = 0, flags = RESET_REQUIRED;\
-            option text  = STRING_TOKEN(STR_TPMENABLED), value = 2, flags =  RESET_REQUIRED;\
+            option text  = STRING_TOKEN(STR_TPMENABLED), value = 2, flags = MANUFACTURING | RESET_REQUIRED;\
         endoneof;
         
         
@@ -385,9 +381,8 @@
             prompt       = STRING_TOKEN (STR_TPM_SHA384_PCRBANK_ENABLE),\
             help         = STRING_TOKEN (STR_TPM_SHA384_PCRBANK_ENABLE_HELP),\
             default      = DEFAULT_SHA384_BANK_ENABLE,\
-            default      = DEFAULT_SHA384_BANK_ENABLE, defaultstore = AmiMfgDefault,\
             option text  = STRING_TOKEN(STR_TPMDISABLED), value = 0, flags = RESET_REQUIRED;\
-            option text  = STRING_TOKEN(STR_TPMENABLED), value = 4, flags =  RESET_REQUIRED;\
+            option text  = STRING_TOKEN(STR_TPMENABLED), value = 4, flags = MANUFACTURING | RESET_REQUIRED;\
         endoneof;
         
 #define TCG_PCRSHA512BANK\
@@ -395,9 +390,8 @@
             prompt       = STRING_TOKEN (STR_TPM_SHA512_PCRBANK_ENABLE),\
             help         = STRING_TOKEN (STR_TPM_SHA512_PCRBANK_ENABLE_HELP),\
             default      = DEFAULT_SHA512_BANK_ENABLE,\
-            default      = DEFAULT_SHA512_BANK_ENABLE, defaultstore = AmiMfgDefault,\
             option text  = STRING_TOKEN(STR_TPMDISABLED), value = 0, flags = RESET_REQUIRED;\
-            option text  = STRING_TOKEN(STR_TPMENABLED), value = 8, flags = RESET_REQUIRED;\
+            option text  = STRING_TOKEN(STR_TPMENABLED), value = 8, flags = MANUFACTURING | RESET_REQUIRED;\
         endoneof;
                 
 #define TCG_PCRSM3BANK\
@@ -405,9 +399,8 @@
             prompt       = STRING_TOKEN (STR_TPM_SM3_PCRBANK_ENABLE),\
             help         = STRING_TOKEN (STR_TPM_SM3_PCRBANK_ENABLE_HELP),\
             default      = DEFAULT_SM3_BANK_ENABLE,\
-            default      = DEFAULT_SM3_BANK_ENABLE, defaultstore = AmiMfgDefault,\
             option text  = STRING_TOKEN(STR_TPMDISABLED), value = 0, flags = RESET_REQUIRED;\
-            option text  = STRING_TOKEN(STR_TPMENABLED),  value = 1, flags = RESET_REQUIRED;\
+            option text  = STRING_TOKEN(STR_TPMENABLED),  value = 1, flags = MANUFACTURING | RESET_REQUIRED;\
         endoneof;
         
 #define TCG2_PPI_SPEC_VERSION\
@@ -416,14 +409,6 @@
             help         = STRING_TOKEN (STR_PPI_SPEC_VERSION_HELP),\
             option text  = STRING_TOKEN(STR_PPI_SPEC_VERSION_1_2), value = 0, flags = RESET_REQUIRED;\
             option text  = STRING_TOKEN(STR_PPI_SPEC_VERSION_1_3), value = 1, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;\
-        endoneof;
-        
-#define TCG2_BLOCK_SID\
-        oneof varid = SETUP_DATA.BlockSidSetup,\
-            prompt       = STRING_TOKEN (STR_BLOCK_SID_PROMPT),\
-            help         = STRING_TOKEN (STR_BLOCK_SID_PROMPT_HELP),\
-            option text  = STRING_TOKEN(STR_TPMENABLED), value = 1, flags = RESET_REQUIRED;\
-            option text  = STRING_TOKEN(STR_TPMDISABLED), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;\
         endoneof;
 #endif 
 
@@ -453,20 +438,12 @@
 	TCG_PCRSM3BANK
 	TCG_ONEOF_FORCE_TPM_ENABLE
 	TCG2_PPI_SPEC_VERSION
-	TCG2_BLOCK_SID
 #endif //#ifdef CONTROLS_WITH_DEFAULTS
 
 #ifdef FORM_SET_TYPEDEF
-    #include <AmiTcg/TcgSetupBoard.h>
-    #include <Token.h>
+    #include <AmiTcg\TcgSetupBoard.h>
+    #include <token.h>
 #endif // FORM_SET_TYPEDEF
-
-#ifdef FORM_SET_VARSTORE
-    varstore TCG_NVRAM_NVME_VAR,
-        varid   = AUTO_ID(TCG_NVRAM_NVME_KEY),
-        name  = TcgNvmeVar,
-        guid  = SETUP_GUID;
-#endif
 
 #ifdef ADVANCED_FORM_SET
     #ifndef SUPPRESS_GRAYOUT_ENDIF //old Core
@@ -509,10 +486,6 @@
         SUBTITLE(STRING_TOKEN(STR_TPM_CONFIGURATION))
         
         TCG_ONEOF_TPMSUPPORT
-        
-        suppressif ideqval TCG_NVRAM_NVME_VAR.Value == 0;  
-            TCG2_BLOCK_SID
-        endif;  
         
         // Text: No Device Found Page item.
         text 
@@ -802,17 +775,8 @@
 		form formid = AUTO_ID(TCG20_FORM_ID),
 		title = STRING_TOKEN(STR_TCG_FORM);
 
+        SEPARATOR
         SUBTITLE(STRING_TOKEN(STR_TPM_20_DEVICE))
-
-        text
-            help  = STRING_TOKEN(STR_EMPTY),
-            text  = STRING_TOKEN(STR_TPM_FW_VERSION_STRING),
-            text  = STRING_TOKEN(STR_TPM_FW_VERSION);
-      
-        text
-            help  = STRING_TOKEN(STR_EMPTY),
-            text  = STRING_TOKEN(STR_TPM_FW_VENDOR_STRING),
-            text  = STRING_TOKEN(STR_TPM_MANUFACTURER);
         
 #if TPM_PASSWORD_AUTHENTICATION
         SEPARATOR
@@ -915,7 +879,7 @@
          grayoutif ideqval SYSTEM_ACCESS.Access == SYSTEM_PASSWORD_USER AND
             ideqval SETUP_DATA.TpmAuthenticate == 1;
             TCG_INTERFACE_SELC
-        SUPPRESS_GRAYOUT_ENDIF
+        endif;
 #endif 
 
 #if (defined(TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION) && (TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION == 1))    
@@ -927,10 +891,6 @@
             TCG_DEVICE_TYPE
         endif;       
 #endif     
-
-        suppressif ideqval TCG_NVRAM_NVME_VAR.Value == 0;  
-            TCG2_BLOCK_SID
-        endif;  
         
 #else
         SEPARATOR
@@ -1006,8 +966,8 @@
         suppressif ideqval SETUP_DATA.TpmSupport == 0;  
         grayoutif TRUE;  
             TCG_INTERFACE_SELC
-        
-        SUPPRESS_GRAYOUT_ENDIF
+        endif;
+        endif;
 #endif    
 
 #if (defined(TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION) && (TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION == 1))    
@@ -1018,10 +978,7 @@
         suppressif ideqval SETUP_DATA.TpmSupport == 0;  
             TCG_DEVICE_TYPE
         endif;       
-#endif    
-        suppressif ideqval TCG_NVRAM_NVME_VAR.Value == 0;  
-            TCG2_BLOCK_SID
-        endif;  
+#endif
         
         endform;
         #endif

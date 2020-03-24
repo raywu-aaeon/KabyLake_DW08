@@ -84,7 +84,7 @@
 #define _CAL_SHA1_H_
 
 #include "TcgTpm12.h"
-#include "Token.h"
+#include "token.h"
 
 #ifndef __size_t__
 #define __size_t__
@@ -119,16 +119,9 @@ struct hash_state
     UINT8 buf[64];
 };
 
-struct hash_state2
-{
-    UINT64 length, state[8];
-    UINT32 curlen;
-    UINT8 buf[128];
-};
-
 typedef struct hash_state SHA2_CTX;
-typedef struct hash_state2 SHA384_CTX;
-typedef struct hash_state2 SHA512_CTX;
+typedef struct hash_state SHA384_CTX;
+typedef struct hash_state SHA512_CTX;
 
 #define HASH_PROCESS(func_name, compress_name, state_var, block_size);
 HASH_PROCESS(sha512_process, sha512_compress, sha512, 128);
@@ -139,14 +132,14 @@ int  sha256_process(struct hash_state *md, const unsigned char *in, unsigned lon
 int  sha256_done(struct hash_state *md, unsigned char *out);
 
 
-int sha384_init(struct hash_state2 * md);
-void sha384_vector(size_t num_elem, const unsigned char *addr[], const size_t *len, unsigned char *mac);
-int sha384_done(struct hash_state2 * md, unsigned char *out);
+int sha384_init(struct hash_state * md);
+void sha384_vector(size_t num_elem, const unsigned char *addr, const size_t *len, unsigned char *mac);
+int sha384_done(struct hash_state * md, unsigned char *out);
 
-int sha512_process(struct hash_state2 *md, const unsigned char *in, unsigned long inlen);
+int sha512_process(struct hash_state *md, const unsigned char *in, unsigned long inlen);
 
-int sha512_init(struct hash_state2 * md);
+int sha512_init(struct hash_state * md);
 void sha512_vector(size_t num_elem, const unsigned char *addr[], const size_t *len, unsigned char *mac);
-int sha512_done(struct hash_state2 * md, unsigned char *out);
+int sha512_done(struct hash_state * md, unsigned char *out);
 
 #endif  // _CAL_SHA1_H_

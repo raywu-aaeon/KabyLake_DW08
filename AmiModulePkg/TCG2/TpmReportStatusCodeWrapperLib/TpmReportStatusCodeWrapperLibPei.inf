@@ -61,7 +61,7 @@
     ReportStatusCodeLib
 
 [Packages]
-    AmiCompatibilityPkg/AmiCompatibilityPkg.dec
-    MdePkg/MdePkg.dec
-    AmiModulePkg/AmiModulePkg.dec
+    AmiCompatibilityPkg\AmiCompatibilityPkg.dec
+    MdePkg\MdePkg.dec
+    AmiModulePkg\AmiModulePkg.dec
 

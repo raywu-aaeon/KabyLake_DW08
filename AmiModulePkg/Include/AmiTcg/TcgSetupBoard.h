@@ -78,12 +78,6 @@
 #define TCPA_PPIOP_SETNOPPIMAINTENANCE_TRUE     20
 #define TCPA_PPIOP_ENABLE_ACTV_CLEAR            21
 #define TCPA_PPIOP_ENABLE_ACTV_CLEAR_ENABLE_ACTV   22
-
-#pragma pack(1)
-typedef struct{
-    UINT8 Value; 
-} TCG_NVRAM_NVME_VAR;
-#pragma pack()
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **

@@ -51,10 +51,10 @@
 #define _TPM_CLEAR_ON_ROLLBACK_H
 
 //#include <AmiDxeLib.h>
-#include <Protocol/TcgService.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Protocol/SmmBase2.h>
-#include <Protocol/AmiTpmClearOnRollbackProtocol.h>
+#include <Protocol\TcgService.h>
+#include <AmiTcg\TcgMisc.h>
+#include <Protocol\SmmBase2.h>
+#include <Protocol\AmiTpmClearOnRollbackProtocol.h>
 #include "TpmClearOnRollbackWrapperLib.h"
 
 #endif

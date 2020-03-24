@@ -14,7 +14,6 @@ ELINK
     Name  = "TcgHookCoreinit,"
     Parent  = "DxeCoreInitialize"
     InvokeOrder = AfterParent
-    Token = "SAVE_ENTIRE_FV_IN_MEM" "=" "1"
 End
 
 INFComponent

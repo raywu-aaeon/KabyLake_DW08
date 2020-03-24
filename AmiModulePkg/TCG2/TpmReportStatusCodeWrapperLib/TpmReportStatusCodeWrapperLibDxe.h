@@ -35,7 +35,7 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 
 EFI_STATUS 
 EFIAPI

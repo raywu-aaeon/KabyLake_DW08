@@ -29,26 +29,23 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Efi.h>
-#include <Token.h>
-#include <AmiTcg/TcgCommon20.h>
-#include "AmiTcg/sha.h"
-#include <AmiTcg/TCGMisc.h>
-#include <AmiTcg/TpmLib.h>
-#include "Ppi/TcgService.h"
-#include "Ppi/TpmDevice.h"
+#include <efi.h>
+#include <AmiTcg\TcgCommon12.h>
+#include "AmiTcg\Sha.h"
+#include <AmiTcg\TcgMisc.h>
+#include <AmiTcg\TpmLib.h>
+#include <token.h>
+#include "PPI\TcgService.h"
+#include "PPI\TpmDevice.h"
 #include <Library/DebugLib.h>
-#include <Ppi/ReadOnlyVariable2.h>
-#include <Ppi/Reset2.h>
-#include <Ppi/AmiTcgPlatformPpi.h>
-#include <AmiTcg/AmiTcgPlatformPei.h>
-#include <AmiTcg/Tpm20Pei.h>
+#include <Ppi\ReadOnlyVariable2.h>
+#include <Ppi\AmiTcgPlatformPpi.h>
+#include <AmiTcg\AmiTcgPlatformPei.h>
+#include <AmiTcg\Tpm20Pei.h>
 #include <Library/BaseMemoryLib.h>
-#include "Ppi/TcgPlatformSetupPeiPolicy.h"
-#if defined (TCGRomLayout_SUPPORT) && (TCGRomLayout_SUPPORT!=0)
+#include "PPI\TcgPlatformSetupPeiPolicy.h"
 #include <Library/AmiRomLayoutLib.h>
-#endif
-#include <Ppi/EndOfPeiPhase.h>
+#include <Ppi\EndOfPeiPhase.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/PeiServicesLib.h>
@@ -60,9 +57,7 @@
 #include <Library/IoLib.h>
 #include <ImageAuthentication.h>
 #include <Library/UefiLib.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <Ppi/AmiTcgPpis.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 
 // NIST 800-155
 #include <Guid/HobList.h>
@@ -70,17 +65,17 @@
 #include <RomLayout.h>
 // NIST 800-155
 
+#define ___INTERNAL_CONVERT_TO_STRING___(a) #a
+#define CONVERT_TO_STRING(a) ___INTERNAL_CONVERT_TO_STRING___(a)
+#define ___INTERNAL_CONVERT_TO_WSTRING___(a) L###a
+#define CONVERT_TO_WSTRING(a) ___INTERNAL_CONVERT_TO_WSTRING___(a)
 
-extern EFI_GUID gAmiGlobalVariableGuid;
-extern EFI_GUID gTcgPeiPolicyGuid;
-
-//GUID Externs
 #define TCG2_PROTOCOL_SPEC_TCG_1_2  0x01
 #define TCG2_PROTOCOL_SPEC_TCG_2    0x02
 
 BOOLEAN CrbSupported();
 UINT8 GetCurrentInterfaceType();
-EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES     **PeiServices);
+EFI_STATUS FindAndMeasureDxeCore(PeiServices);
 
 #pragma pack(push,1)
 
@@ -99,50 +94,11 @@ typedef struct
     TPMS_CAPABILITY_DATA      CapabilityData;
 } TPM2_GET_CAPABILITY_RESPONSE;
 
-typedef struct
-{
-    TPM2_COMMAND_HEADER     Header;
-    UINT16                  bytesRequested;
-} TPM2_GetRandom_COMMAND;
-
-typedef struct
-{
-    TPM2_RESPONSE_HEADER      Header;
-    TPM2B_DIGEST              randomBytes;
-} TPM2_GetRandom_RESPONSE;
-
-typedef struct
-{
-    TPM2_COMMAND_HEADER       Header;
-    TPMI_RH_HIERARCHY_AUTH    AuthHandle;
-    UINT32                    AuthorizationSize;
-    TPMS_AUTH_COMMAND         AuthSession;
-    TPM2B_AUTH                NewAuth;
-} TPM2_HIERARCHY_CHANGE_AUTH_COMMAND;
-
-typedef struct
-{
-    TPM2_RESPONSE_HEADER       Header;
-    UINT32                     ParameterSize;
-    TPMS_AUTH_RESPONSE         AuthSession;
-} TPM2_HIERARCHY_CHANGE_AUTH_RESPONSE;
-
 #pragma pack(pop)
-
-//*** AMI PORTING BEGIN *****//
-typedef struct _ACPI_RESET_STRUCTURE
-{
-    UINT64          Addess;
-    UINT8           Type;
-    UINT8           AccessSize;
-}ACPI_RESET_STRUCTURE;
-//*** AMI PORTING END *****//
 
 EFI_STATUS MeasureTCGPcClientSpecID(
     IN CONST EFI_PEI_SERVICES **PeiServices);
 
-EFI_STATUS MeasureNISTManifest(
-    IN CONST EFI_PEI_SERVICES **PeiServices);
 UINT8
 EFIAPI FirstBootCheck(
     IN EFI_PEI_SERVICES **PeiServices);
@@ -157,6 +113,10 @@ EFIAPI
 TpmPeiReportStatusCode(  IN EFI_STATUS_CODE_TYPE   Type,
                          IN EFI_STATUS_CODE_VALUE  Value);
 
+#define AMI_GLOBAL_VARIABLE_GUID \
+    {0x1368881,0xc4ad,0x4b1d,0xb6,0x31,0xd5,0x7a,0x8e,0xc8,0xdb,0x6b}
+
+
 #if FTpmPlatformProfile == 1
 #define AMD_FTPM_PPI_GUID \
             {0x91774185, 0xf72d, 0x467e, {0x93, 0x39, 0xe0, 0x8, 0xdb, 0xae, 0xe, 0x14}}
@@ -165,6 +125,8 @@ EFI_STATUS iTpmGetInfo (
     IN OUT UINTN  *iTPMStatus
 );
 #endif
+
+EFI_FFS_FILE_HEADER *gFfsHeader;
 
 extern TPM20_MEASURE_CRTM_VERSION_PEI_FUNC_PTR  TPM20_MEASURE_CRTM_VERSION_PEI_FUNCTION;
 TPM20_MEASURE_CRTM_VERSION_PEI_FUNC_PTR *Tpm20MeasureCRTMVersionFuncPtr = TPM20_MEASURE_CRTM_VERSION_PEI_FUNCTION;
@@ -197,265 +159,6 @@ TPM20_MEASURE_CRTM_VERSION_PEI_FUNC_PTR *Tpm20MeasureCRTMVersionFuncPtr = TPM20_
 #define SHA384_DIGEST_SIZE      48
 #define SHA512_DIGEST_SIZE      64
 
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:  CapAllTpm2Pcrs
-//
-// Description: Caps all TPM PCRS in recovery mde
-//
-//
-// Input:       PeiServices
-//
-// Output:      
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-EFI_STATUS
-CapAllTpm2Pcrs(IN CONST EFI_PEI_SERVICES    **PeiServices,
-               IN AMI_TREE_PPI      *TrEEPeiPpi,
-               IN UINT32            InputEventData)
-{
-    UINT32      Index = 0;
-    EFI_STATUS  Status;
-    UINT32      EventData;
-    UINT64           Flags = 0;
-    AMI_TREE_EVENT   *Tpm20Event=NULL;
-    
-    if(PeiServices == NULL || *PeiServices == NULL \
-            || TrEEPeiPpi == NULL){
-        
-        return EFI_INVALID_PARAMETER;
-    }
-    
-    Status = (*PeiServices)->AllocatePool(PeiServices, (sizeof(AMI_TREE_EVENT_HEADER) + \
-                                               sizeof(UINT32) + sizeof(UINT32)),  (void **)&Tpm20Event);
-
-    if(Tpm20Event==NULL || EFI_ERROR(Status)) return EFI_OUT_OF_RESOURCES;
-  
-    for(Index = 0; Index < 8; Index ++){
-        
-        EventData = InputEventData;
-        Tpm20Event->Size  = sizeof(AMI_TREE_EVENT_HEADER) + sizeof(UINT32) + sizeof(EventData);
-        Tpm20Event->Header.HeaderSize = sizeof(AMI_TREE_EVENT_HEADER);
-        Tpm20Event->Header.HeaderVersion = 1;
-        Tpm20Event->Header.PcrIndex    = Index;
-        Tpm20Event->Header.EventType   = EV_SEPARATOR;
-    
-        (*PeiServices)->CopyMem ((UINT32 *)((UINTN)&Tpm20Event->Event[0]),
-                      &EventData,
-                      sizeof(UINT32));
-        
-        Status = TrEEPeiPpi->HashLogExtendEvent(TrEEPeiPpi,
-                     Flags, (EFI_PHYSICAL_ADDRESS)(UINTN)&EventData, (UINT64)sizeof(EventData),
-                     Tpm20Event);
-
-        if(EFI_ERROR (Status)){
-            break;
-        }
-    }
-    
-    return Status;
-}
-
-
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:  AmiTpmPeiCopyAuthSessionCommand
-//
-// Description:
-//
-//
-// Input:       UINT8  AuthSessionIn
-//
-// Output:      TPMS_AUTH_RESPONSE* AuthSessionOut
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-UINT32
-EFIAPI
-AmiTpmPeiCopyAuthSessionCommand (
-    IN      TPMS_AUTH_COMMAND         *AuthSessionIn, OPTIONAL
-    OUT     UINT8                             *AuthSessionOut
-)
-{
-    UINT8  *Buffer;
-
-    Buffer = (UINT8 *)AuthSessionOut;
-
-    //
-    // Add in Auth session
-    //
-    if (AuthSessionIn != NULL)
-    {
-        //  sessionHandle
-        WriteUnaligned32 ((UINT32 *)Buffer, SwapBytes32(AuthSessionIn->sessionHandle));
-        Buffer += sizeof(UINT32);
-
-        // nonce
-        WriteUnaligned16 ((UINT16 *)Buffer, SwapBytes16 (AuthSessionIn->nonce.size));
-        Buffer += sizeof(UINT16);
-
-        CopyMem (Buffer, AuthSessionIn->nonce.buffer, AuthSessionIn->nonce.size);
-        Buffer += AuthSessionIn->nonce.size;
-
-        // sessionAttributes
-        *(UINT8 *)Buffer = *(UINT8 *)&AuthSessionIn->sessionAttributes;
-        Buffer += sizeof(UINT8);
-
-        // hmac
-        WriteUnaligned16 ((UINT16 *)Buffer, SwapBytes16 (AuthSessionIn->hmac.size));
-        Buffer += sizeof(UINT16);
-
-        CopyMem (Buffer, AuthSessionIn->hmac.buffer, AuthSessionIn->hmac.size);
-        Buffer += AuthSessionIn->hmac.size;
-    }
-    else
-    {
-        //  sessionHandle
-        WriteUnaligned32 ((UINT32 *)Buffer, SwapBytes32(TPM_RS_PW));
-        Buffer += sizeof(UINT32);
-
-        // nonce = nullNonce
-        WriteUnaligned16 ((UINT16 *)Buffer, SwapBytes16(0));
-        Buffer += sizeof(UINT16);
-
-        // sessionAttributes = 0
-        *(UINT8 *)Buffer = 0x00;
-        Buffer += sizeof(UINT8);
-
-        // hmac = nullAuth
-        WriteUnaligned16 ((UINT16 *)Buffer, SwapBytes16(0));
-        Buffer += sizeof(UINT16);
-    }
-
-    return (UINT32)(UINTN)(Buffer - (UINT8 *)AuthSessionOut);
-}
-
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:  Tpm2HierarchyControl
-//
-// Description: enables and disables use of a hierarchy
-//
-//
-// Input:       AuthSize
-//
-// Output:      UINT8* pOutBuf
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-EFI_STATUS
-EFIAPI
-AmiPlatformTpmPei2HierarchyControl (
-    IN CONST EFI_PEI_SERVICES **PeiServices,
-    IN AMI_TREE_PPI      *TrEEPeiPpi,
-    IN TPMI_RH_HIERARCHY  AuthHandle,
-    IN TPMS_AUTH_COMMAND *AuthSession,
-    IN TPMI_RH_HIERARCHY  Hierarchy,
-    IN TPMI_YES_NO        State
-)
-{
-    EFI_STATUS                       Status;
-    AMI_TPM2_HIERARCHY_CONTROL_COMMAND   Cmd;
-    AMI_TPM2_HIERARCHY_CONTROL_RESPONSE  Res;
-    UINT32                           CmdSize;
-    UINT32                           RespSize;
-    UINT8                            *Buffer;
-    UINT32                           SessionInfoSize;
-    UINT8                            *ResultBuf;
-    UINT32                           ResultBufSize;
-
-    if(TrEEPeiPpi == NULL){
-        return EFI_INVALID_PARAMETER;
-    }
-    
-    //
-    // Construct command
-    //
-    Cmd.Header.tag          = (UINT16)TPM_H2NS(TPM_ST_SESSIONS);
-    Cmd.Header.paramSize    = TPM_H2NL(sizeof(Cmd));
-    Cmd.Header.commandCode  = TPM_H2NL(TPM_CC_HierarchyControl);
-    Cmd.AuthHandle          = TPM_H2NL(AuthHandle);
-
-    //
-    // Add in Auth session
-    //
-    Buffer = (UINT8 *)&Cmd.AuthSession;
-
-    // sessionInfoSize
-    SessionInfoSize = AmiTpmPeiCopyAuthSessionCommand (AuthSession, Buffer);
-    Buffer += SessionInfoSize;
-    Cmd.AuthorizationSize = TPM_H2NL(SessionInfoSize);
-
-    WriteUnaligned32 ((UINT32 *)Buffer, TPM_H2NL(Hierarchy));
-    Buffer += sizeof(UINT32);
-
-    *(UINT8 *)Buffer = State;
-    Buffer += sizeof(UINT8);
-
-    CmdSize = (UINT32)(Buffer - (UINT8 *)&Cmd);
-    Cmd.Header.paramSize = TPM_H2NL(CmdSize);
-
-    ResultBuf     = (UINT8 *) &Res;
-    ResultBufSize = sizeof(Res);
-
-    Status = TrEEPeiPpi->SubmitCommand(TrEEPeiPpi, CmdSize, (UINT8 *)&Cmd,  ResultBufSize, ResultBuf );
-    if (EFI_ERROR (Status))
-    {
-        DEBUG(( EFI_D_ERROR, "Tpm2GetRandom TrEEProtocolInstance->SubmitCommand = %r \n", Status));
-        return Status;
-    }
-
-    if (ResultBufSize > sizeof(Res))
-    {
-        DEBUG ((EFI_D_ERROR, "HierarchyControl: Failed ExecuteCommand: Buffer Too Small\r\n"));
-        return EFI_BUFFER_TOO_SMALL;
-    }
-
-    //
-    // Validate response headers
-    //
-    RespSize = TPM_H2NL(Res.Header.paramSize);
-    if (RespSize > sizeof(Res))
-    {
-        DEBUG ((EFI_D_ERROR, "HierarchyControl: Response size too large! %d\r\n", RespSize));
-        return EFI_BUFFER_TOO_SMALL;
-    }
-
-    //
-    // Fail if command failed
-    //
-    if (TPM_H2NL(Res.Header.responseCode) != TPM_RC_SUCCESS)
-    {
-        DEBUG((EFI_D_ERROR,"HierarchyControl: Response Code error! 0x%08x\r\n", TPM_H2NL(Res.Header.responseCode)));
-        return EFI_DEVICE_ERROR;
-    }
-
-    return EFI_SUCCESS;
-}
-
-
-
 
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -487,7 +190,7 @@ EFI_STATUS InternalPeiBuildHobGuid(
     EFI_STATUS Status;
 
     Status = (*PeiServices)->CreateHob(
-                 (CONST EFI_PEI_SERVICES **)PeiServices,
+                 PeiServices,
                  EFI_HOB_TYPE_GUID_EXTENSION,
                  (UINT16) ( sizeof (EFI_HOB_GUID_TYPE) + DataLength ),
                  Hob
@@ -495,11 +198,10 @@ EFI_STATUS InternalPeiBuildHobGuid(
 
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_INFO, "Failed to create TCG/TPM Hob Status = %r \n", Status));
         return Status;
     }
 
-    DEBUG((DEBUG_INFO, "Hob created \n"));
+    DEBUG((-1, "Hob created \n"));
     ((EFI_HOB_GUID_TYPE*)(*Hob))->Name = *Guid;
 
     return EFI_SUCCESS;
@@ -552,7 +254,7 @@ EFI_STATUS MeasureLogDxeFwVol(
     UINT8                             gTcg2SpecVersion = 0;  
     UINT32                            gPcrBanks = 0;
 
-    DEBUG(( DEBUG_INFO, "[%d] Enter MeasureLogDxeFwVol\n", __LINE__));
+    DEBUG(( -1, "[%d] Enter MeasureLogDxeFwVol\n", __LINE__));
 
     FwVolHobCount = TpmFwVolHob->Count;
     gTcg2SpecVersion = TpmFwVolHob->Tcg2SpecVersion;
@@ -593,37 +295,37 @@ EFI_STATUS MeasureLogDxeFwVol(
         }
     }
     
-    DEBUG ((DEBUG_INFO, "FwVolHobCount = %x \n", FwVolHobCount));
+    DEBUG ((-1, "FwVolHobCount = %x \n", FwVolHobCount));
     for(i=0; i< FwVolHobCount; i++)
     {
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob[i].Size = %x \n", TpmFwVolHob[i].Size));
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob[i].baseAddress = %lx \n", TpmFwVolHob[i].baseAddress));
+        DEBUG ((-1, "TpmFwVolHob[i].Size = %x \n", TpmFwVolHob[i].Size));
+        DEBUG ((-1, "TpmFwVolHob[i].baseAddress = %lx \n", TpmFwVolHob[i].baseAddress));
         if(gTcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
         {
-            SHA1Update( &Sha1Ctx,  (unsigned char *)(UINTN)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
+            SHA1Update( &Sha1Ctx, (unsigned char *)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
         }
         else if(gTcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
         {
             if( gPcrBanks & TREE_BOOT_HASH_ALG_SHA256)
             {
-                sha256_process( &Sha2Ctx, (unsigned char *)(UINTN)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
+                sha256_process( &Sha2Ctx, (unsigned char *)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
             }
             if( gPcrBanks & TREE_BOOT_HASH_ALG_SHA1)
             {
-                SHA1Update( &Sha1Ctx, (unsigned char *)(UINTN)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
+                SHA1Update( &Sha1Ctx, (unsigned char *)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
             }
             if( gPcrBanks & TREE_BOOT_HASH_ALG_SHA384)
             {
-                sha512_process(&Sha384Ctx, (unsigned char *)(UINTN)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size);
+                sha512_process(&Sha384Ctx, (unsigned char *)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size);
             }
             if( gPcrBanks & TREE_BOOT_HASH_ALG_SHA512)
             {
-                sha512_process(&Sha512Ctx, (unsigned char *)(UINTN)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size);
+                sha512_process(&Sha512Ctx, (unsigned char *)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size);
             }
             if( gPcrBanks & TREE_BOOT_HASH_ALG_SM3)
             {
                 //until sm3 is available in official OpenSSL, Use SM3[SHA-256[FwVol]]
-                sha256_process( &Sha2Ctx, (unsigned char *)(UINTN)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
+                sha256_process( &Sha2Ctx, (unsigned char *)TpmFwVolHob[i].baseAddress, (u32)TpmFwVolHob[i].Size );
             }
         }
     }
@@ -678,7 +380,7 @@ EFI_STATUS MeasureLogDxeFwVol(
     
     Status = HashLogExtendEx->AmiHashLogExtendEx(PeiServices, TrEEPeiPpi, NULL, 0, 0, &Tcg20Event, (UINT8*)&EventData);
     
-    DEBUG(( DEBUG_INFO, "MeasureLogDxeFwVol - %r\n", Status));
+    DEBUG(( -1, "MeasureLogDxeFwVol - %r\n", Status));
     return Status;
 
 }
@@ -720,10 +422,11 @@ Tpm20MeasureCRTMVersion(
 
     Len =  sizeof(AMI_TREE_EVENT_HEADER) +  sizeof(UINT32) + EventSize;
 
-    Status = (*PeiServices)->AllocatePool(PeiServices, Len,  (void **)&TrEEEventData);
-    if( EFI_ERROR(Status)) return Status;
+    Status = (*PeiServices)->AllocatePool(PeiServices, Len, &TrEEEventData);
 
     TrEEEventData->Size = Len;
+
+    if(EFI_ERROR(Status))return Status;
     TrEEEventData->Header.EventType  = EV_S_CRTM_VERSION;
     TrEEEventData->Header.HeaderSize = sizeof(AMI_TREE_EVENT_HEADER);
     TrEEEventData->Header.HeaderVersion = 1;
@@ -740,7 +443,7 @@ Tpm20MeasureCRTMVersion(
     );
 
     Status = TrEEPeiPpi->HashLogExtendEvent(TrEEPeiPpi,
-                                          0, (EFI_PHYSICAL_ADDRESS)(UINTN)EventDataPtr, EventSize, TrEEEventData);
+                                          0, (EFI_PHYSICAL_ADDRESS)EventDataPtr, EventSize, TrEEEventData);
 
     TpmPeiReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_CRTM_VERSION_MEASURED | EFI_SOFTWARE_PEI_MODULE);
     
@@ -806,7 +509,7 @@ Tpm2PeiGetCapability (
     //
     if (SwapBytes32(RecvBuffer.Header.responseCode) != TPM_RC_SUCCESS)
     {
-        DEBUG((DEBUG_ERROR, "Tpm2GetCapability: Response Code error! 0x%08x\r\n", SwapBytes32(RecvBuffer.Header.responseCode)));
+        DEBUG((-1, "Tpm2GetCapability: Response Code error! 0x%08x\r\n", SwapBytes32(RecvBuffer.Header.responseCode)));
         return EFI_DEVICE_ERROR;
     }
     // Return the response
@@ -825,8 +528,7 @@ EFI_STATUS
 EFIAPI
 Tpm2GetPeiCapabilityFwVersion (
     IN      AMI_TREE_PPI            *TrEEPeiPpi,
-    OUT     UINT32                  *TpmFwVersion1,
-    OUT     UINT32                  *TpmFwVersion2
+    OUT     UINT32                  *TpmFwVersion
 )
 {
     TPMS_CAPABILITY_DATA    TpmCap;
@@ -835,10 +537,9 @@ Tpm2GetPeiCapabilityFwVersion (
     UINT32                  VersionH=0;
     UINT32                  VersionL=0;
 
-    if((TpmFwVersion1 == NULL) || (TpmFwVersion2 == NULL)) return EFI_INVALID_PARAMETER;
+    if(TpmFwVersion == NULL) return EFI_INVALID_PARAMETER;
     
-    *TpmFwVersion1 = 0;
-    *TpmFwVersion2 = 0;    
+    *TpmFwVersion = 0;
     
     Status = Tpm2PeiGetCapability (
                  TrEEPeiPpi,
@@ -854,25 +555,10 @@ Tpm2GetPeiCapabilityFwVersion (
         return Status;
     }
     
-    *TpmFwVersion1 = SwapBytes32 (TpmCap.data.tpmProperties.tpmProperty->value);
+    *TpmFwVersion = SwapBytes32 (TpmCap.data.tpmProperties.tpmProperty->value);
     
-    DEBUG((DEBUG_INFO, "\n TpmFwVersion1 = %x \n", *TpmFwVersion1));
- 
-    Status = Tpm2PeiGetCapability (
-	       TrEEPeiPpi,		    
-               TPM_CAP_TPM_PROPERTIES, 
-               TPM_PT_FIRMWARE_VERSION_2, 
-               1, 
-               &MoreData, 
-               &TpmCap
-               );
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-    *TpmFwVersion2 = SwapBytes32 (TpmCap.data.tpmProperties.tpmProperty->value);
+    DEBUG((-1, "\n Firmware = %x \n", *TpmFwVersion));
     
-    DEBUG((DEBUG_INFO, "\n TpmFwVersion2 = %x \n", *TpmFwVersion2));
-
     return EFI_SUCCESS;
 }
 
@@ -902,7 +588,7 @@ Tpm2PeiGetCapabilityManufactureID (
     }
     *ManufactureId = SwapBytes32 (TpmCap.data.tpmProperties.tpmProperty->value);
     
-    DEBUG((DEBUG_INFO, "\n ManufactureId = %x \n", *ManufactureId));
+    DEBUG((-1, "\n ManufactureId = %x \n", *ManufactureId));
 
     return EFI_SUCCESS;
 }
@@ -932,17 +618,13 @@ Tpm2PeiGetCapabilityManufactureID (
 //**********************************************************************
 EFI_STATUS Tpm20PeiSelfTest(
     IN CONST EFI_PEI_SERVICES **PeiServices,
-    AMI_TREE_PPI *TrEEPeiPpi,
-    UINT32 *TpmDeviceFirmware1,
-    UINT32 *TpmDeviceFirmware2,  
-    UINT32 *TpmDeviceManufacturer)
+    AMI_TREE_PPI *TrEEPeiPpi)
 {
     EFI_STATUS              Status = EFI_SUCCESS;
     TPM2_SelfTest           SelfTestCmd;
     TPM2_Common_RespHdr     SelfTestReponse;
     UINT32                  ReturnSize = 0;
-    UINT32                  TpmFwVersion1;
-    UINT32                  TpmFwVersion2;
+    UINT32                  TpmFwVersion;
     UINT32                  TpmManufacturer;
     
     if(TrEEPeiPpi == NULL) return EFI_INVALID_PARAMETER;
@@ -950,20 +632,16 @@ EFI_STATUS Tpm20PeiSelfTest(
     SelfTestCmd.tag = (TPMI_ST_COMMAND_TAG)TPM_H2NS(TPM_ST_NO_SESSIONS);
     SelfTestCmd.CommandSize = TPM_H2NL((sizeof(TPM2_SelfTest)));
     SelfTestCmd.CommandCode = TPM_H2NL(TPM_CC_SelfTest);
-    SelfTestCmd.SelfTestType = 0; 
-  
-    Status = Tpm2GetPeiCapabilityFwVersion(TrEEPeiPpi, &TpmFwVersion1, &TpmFwVersion2);
+    
+    Status = Tpm2GetPeiCapabilityFwVersion(TrEEPeiPpi, &TpmFwVersion);
     if(Status == EFI_INCOMPATIBLE_VERSION){
         return EFI_DEVICE_ERROR;
     }
     
     Status = Tpm2PeiGetCapabilityManufactureID(TrEEPeiPpi, &TpmManufacturer);
-    *TpmDeviceFirmware1 = TpmFwVersion1;
-    *TpmDeviceFirmware2 = TpmFwVersion2;
-    *TpmDeviceManufacturer = TpmManufacturer;
         
     if(!EFI_ERROR(Status) && TpmManufacturer == 0x49465800){
-        if(TpmFwVersion1 == 0x07003C || TpmFwVersion1 == 0x05003C){ //workaround for Infineon FW 5.60 and 7.60 failure
+        if(TpmFwVersion == 0x07003C || TpmFwVersion == 0x050006){ //workaround for Infineon FW 5.6 and 7.60 failure
             SelfTestCmd.SelfTestType = 1;
         }else{
             SelfTestCmd.SelfTestType = 0;
@@ -974,7 +652,7 @@ EFI_STATUS Tpm20PeiSelfTest(
 
     SetMem((UINT8 *)&SelfTestReponse,(UINTN)sizeof(SelfTestReponse), 0);
 
-    DEBUG((DEBUG_INFO, "\nsending TPM20 SelfTest To Tpm \n"));
+    DEBUG((-1, "\nsending TPM20 SelfTest To Tpm \n"));
     Status = TrEEPeiPpi->SubmitCommand(TrEEPeiPpi,
                                        sizeof(SelfTestCmd),
                                        (UINT8*)&SelfTestCmd,
@@ -996,381 +674,11 @@ EFI_STATUS Tpm20PeiSelfTest(
         Status = EFI_NOT_READY;
     }
 
-    DEBUG((DEBUG_INFO, "SelfTestReponse.Tag = %x \n", TPM_H2NS(SelfTestReponse.tag)));
-    DEBUG((DEBUG_INFO, "SelfTestReponse.ResponseCode = %x \n", TPM_H2NL(SelfTestReponse.ResponseCode)));
-    DEBUG((DEBUG_INFO, "SelfTestReponse.Status = %r \n", Status));
+    DEBUG((-1, "SelfTestReponse.Tag = %x \n", TPM_H2NS(SelfTestReponse.tag)));
+    DEBUG((-1, "SelfTestReponse.ResponseCode = %x \n", TPM_H2NL(SelfTestReponse.ResponseCode)));
+    DEBUG((-1, "SelfTestReponse.Status = %r \n", Status));
 
 
-    return Status;
-}
-
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:  Tpm2PeiHierarchyChangeAuth
-//
-// Description: allows the authorization secret for a hierarchy or lockout to be changed using the current
-//              authorization value
-//
-//
-// Input:       AuthHandle, AuthSession, NewAuth
-//
-// Output:      EFI_STATUS
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-EFI_STATUS
-EFIAPI
-Tpm2PeiHierarchyChangeAuth (IN AMI_TREE_PPI *TrEEPeiPpi,
-    IN TPMI_RH_HIERARCHY_AUTH     AuthHandle,
-    IN TPMS_AUTH_COMMAND *AuthSession,
-    IN TPM2B_AUTH                *NewAuth
-)
-{
-    EFI_STATUS                           Status;
-    TPM2_HIERARCHY_CHANGE_AUTH_COMMAND   Cmd;
-    TPM2_HIERARCHY_CHANGE_AUTH_RESPONSE  Res;
-    UINT32                               CmdSize;
-    UINT32                               RespSize;
-    UINT8                                *Buffer;
-    UINT32                               SessionInfoSize;
-    UINT8                                *ResultBuf;
-    UINT32                               ResultBufSize;
-
-    //
-    // Construct command
-    //
-    Cmd.Header.tag          = (UINT16)TPM_H2NS(TPM_ST_SESSIONS);
-    Cmd.Header.paramSize    = TPM_H2NL(sizeof(Cmd));
-    Cmd.Header.commandCode  = TPM_H2NL(TPM_CC_HierarchyChangeAuth);
-    Cmd.AuthHandle          = TPM_H2NL(AuthHandle);
-
-    //
-    // Add in Auth session
-    //
-    Buffer = (UINT8 *)&Cmd.AuthSession;
-
-    // sessionInfoSize
-    SessionInfoSize = AmiTpmPeiCopyAuthSessionCommand (AuthSession, Buffer);
-    Buffer += SessionInfoSize;
-    Cmd.AuthorizationSize = TPM_H2NL(SessionInfoSize);
-
-    // New Authorization size
-    WriteUnaligned16 ((UINT16 *)Buffer, SwapBytes16(NewAuth->size));
-    Buffer += sizeof(UINT16);
-
-    // New Authorizeation
-    CopyMem(Buffer, NewAuth->buffer, NewAuth->size);
-    Buffer += NewAuth->size;
-
-    CmdSize = (UINT32)(Buffer - (UINT8 *)&Cmd);
-    Cmd.Header.paramSize = TPM_H2NL(CmdSize);
-
-    ResultBuf     = (UINT8 *) &Res;
-    ResultBufSize = sizeof(Res);
-
-    Status = TrEEPeiPpi->SubmitCommand(TrEEPeiPpi, CmdSize, (UINT8*)&Cmd,  ResultBufSize, ResultBuf );
-
-    if (EFI_ERROR(Status))return Status;
-    DEBUG ((EFI_D_ERROR, "HierarchyChangeAuth: Response code   %x\r\n", Res.Header.responseCode));
-    //
-    // Validate response headers
-    //
-    RespSize = TPM_H2NL(Res.Header.paramSize);
-    if (RespSize > sizeof(Res))
-    {
-        DEBUG ((EFI_D_ERROR, "HierarchyChangeAuth: Response size too large! %d\r\n", RespSize));
-        return EFI_BUFFER_TOO_SMALL;
-    }
-
-    //
-    // Fail if command failed
-    //
-    if (TPM_H2NL(Res.Header.responseCode) != TPM_RC_SUCCESS)
-    {
-        DEBUG((EFI_D_ERROR,"HierarchyChangeAuth: Response Code error! 0x%08x\r\n", TPM_H2NL(Res.Header.responseCode)));
-        return EFI_DEVICE_ERROR;
-    }
-    
-    return EFI_SUCCESS;
-}
-
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:  Tpm2GetRandom
-//
-// Description: gets random bytes from the TPM
-//
-//
-// Input:       AuthSize
-//
-// Output:      UINT8* pOutBuf
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-EFI_STATUS Tpm2PeiGetRandom(IN CONST EFI_PEI_SERVICES **PeiServices,
-                            IN AMI_TREE_PPI *TrEEPeiPpi,
-                            IN UINTN                   AuthSize,
-                            IN UINT8*                  pOutBuf
-)
-{
-    EFI_STATUS              Status = EFI_SUCCESS;
-    TPM2_GetRandom_COMMAND  GetRandom_cmd;
-    TPM2_GetRandom_RESPONSE GetRandom_ret;
-    UINT32                  RetSize;
-    UINTN                   i;
-    AMI_TREE_BOOT_SERVICE_CAPABILITY ProtocolCapability;
-
-    // Check the Request Size
-    if( AuthSize > sizeof(TPM2B_DIGEST) - sizeof(UINT16) )
-    {
-        DEBUG(( DEBUG_ERROR, "Tpm2GetRandom Error. Request too large\n"));
-        return EFI_BUFFER_TOO_SMALL;
-    }
-
-    ProtocolCapability.Size = sizeof(AMI_TREE_BOOT_SERVICE_CAPABILITY);       
-    Status = TrEEPeiPpi->GetCapability(TrEEPeiPpi, &ProtocolCapability);
-     
-    if(EFI_ERROR(Status)){
-       DEBUG(( DEBUG_ERROR, "TCG get Capability failed. Aborting. ..\n"));
-       return Status;
-    }
-
-    DEBUG(( DEBUG_INFO, "ManufacturerID = %x\n", ProtocolCapability.ManufacturerID));
-        
-    if( (ProtocolCapability.ManufacturerID == 0x494E5443) ) // INTC
-    {
-        DEBUG(( EFI_D_ERROR, "Matched. ..\n"));
-        for (i=0; i<(AuthSize/2); i++){
-            AsmRdRand16((UINT16 *)&pOutBuf[i] );
-        }
-        return EFI_SUCCESS; 
-    }
-
-    SetMem( &GetRandom_cmd, sizeof(GetRandom_cmd), 0 );
-    SetMem( &GetRandom_ret, sizeof(GetRandom_ret), 0 );
-
-    GetRandom_cmd.Header.tag =  (UINT16)TPM_H2NS(TPM_ST_NO_SESSIONS);
-    GetRandom_cmd.Header.commandCode = TPM_H2NL(TPM_CC_GetRandom);
-    GetRandom_cmd.Header.paramSize = TPM_H2NL( sizeof(GetRandom_cmd) );
-    GetRandom_cmd.bytesRequested = TPM_H2NS(AuthSize );
-
-    RetSize = sizeof(GetRandom_ret);
-
-    Status = TrEEPeiPpi->SubmitCommand(TrEEPeiPpi, sizeof(GetRandom_cmd), (UINT8*)&GetRandom_cmd,  RetSize, (UINT8*)&GetRandom_ret );
-    if (EFI_ERROR (Status))
-    {
-        DEBUG(( DEBUG_ERROR, "Tpm2GetRandom TrEEPeiPpi->SubmitCommand = %r \n", Status));
-        return Status;
-    }
-
-    if (TPM_H2NL(GetRandom_ret.Header.responseCode) != TPM_RC_SUCCESS)
-    {
-        DEBUG(( DEBUG_ERROR, "Tpm2GetRandom TrEEPeiPpi->SubmitCommand Response Code error! = %x \n", TPM_H2NL(GetRandom_ret.Header.responseCode)));
-        return EFI_DEVICE_ERROR;
-    }
-
-    CopyMem( pOutBuf, &GetRandom_ret.randomBytes.buffer[0], AuthSize );
-
-    return Status;
-}
-
-
-
-VOID PeiChangePlatformAuth(IN CONST EFI_PEI_SERVICES **PeiServices,
-                           IN AMI_TREE_PPI *TrEEPeiPpi)
-{
-    TPM2B_AUTH                        NewAuth;
-    UINT32                     HashPolicysize = 0x0;
-    TCG_CONFIGURATION       ConfigFlags;
-    TCG_PLATFORM_SETUP_INTERFACE *TcgPeiPolicy;
-    EFI_GUID                        gTcgPeiPolicyGuid =\
-            TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
-    EFI_STATUS                        Status;
-
-    DEBUG((DEBUG_INFO, "Setting PhRandomization\n"));
-
-    Status = (*PeiServices)->LocatePpi(
-                    (CONST EFI_PEI_SERVICES **)PeiServices,
-                     &gTcgPeiPolicyGuid,
-                     0, NULL,
-                     (void **) &TcgPeiPolicy);
-
-    if(EFI_ERROR(Status) || TcgPeiPolicy == NULL )return;;
-
-    Status = TcgPeiPolicy->getTcgPeiPolicy((EFI_PEI_SERVICES **)PeiServices, &ConfigFlags);
-    
-    if (EFI_ERROR (Status))
-    {
-        //use default SHA1 size
-        HashPolicysize = SHA1_DIGEST_SIZE;
-    }
-    else
-    {
-        ASSERT_EFI_ERROR(Status);
-        if(ConfigFlags.Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
-        {
-            HashPolicysize = SHA1_DIGEST_SIZE;
-        }
-        else if(ConfigFlags.Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
-        {
-            HashPolicysize = SHA256_DIGEST_SIZE;
-        }
-    }
-
-    DEBUG((EFI_D_ERROR, "HashPolicysize = %x \n", HashPolicysize));
-    
-    NewAuth.size = HashPolicysize;
-
-    Tpm2PeiGetRandom(PeiServices,
-        TrEEPeiPpi,
-        NewAuth.size,
-        &NewAuth.buffer[0]
-    );
-
-    Tpm2PeiHierarchyChangeAuth (TrEEPeiPpi, TPM_RH_PLATFORM, NULL, &NewAuth);
-    return;
-}
-
-//*** AMI PORTING BEGIN *****//
-EFI_STATUS S3ResetPrep(IN CONST EFI_PEI_SERVICES **PeiServices)
-{
-    ACPI_RESET_STRUCTURE    AcpiResetVar = {0,0xff,0};
-    EFI_PEI_READ_ONLY_VARIABLE2_PPI *VariableServices = NULL;
-    EFI_GUID gAmiGlobalVariableGuid = { 0x1368881, 0xc4ad, 0x4b1d, { 0xb6, 0x31, 0xd5, 0x7a, 0x8e, 0xc8, 0xdb, 0x6b } };
-    UINTN VarSize = sizeof(ACPI_RESET_STRUCTURE);          
-    EFI_STATUS Status;
-    
-    //Getting the information, saved on ready_to_boot, about PM1 Control Register to clear SLP_TYPx bits before reseting the system
-    Status = PeiServicesLocatePpi (
-                 &gEfiPeiReadOnlyVariable2PpiGuid,
-                 0,
-                 NULL,
-                 (VOID **) &VariableServices
-                 );
-    
-    ASSERT_EFI_ERROR (Status);
-    
-    DEBUG ((EFI_D_ERROR,"VarSize = %x \n", VarSize));
-    //Getting the information, saved on ready_to_boot, about PM1 Control Register to clear SLP_TYPx bits before reseting the system
-    if (VariableServices != NULL)
-        Status = VariableServices->GetVariable (
-                                     VariableServices,
-                                     L"AcpiResetVar",
-                                     &gAmiGlobalVariableGuid,
-                                     NULL,
-                                     &VarSize,
-                                     &AcpiResetVar
-                                     );
-    
-    DEBUG ((EFI_D_ERROR,"VarSize = %x \n", VarSize));
-    
-    ASSERT_EFI_ERROR (Status);
-        DEBUG ((EFI_D_ERROR,"Getting AcpiResetVar: Status=%r Addess=%lx AccessSize=%x Type=%x \n", Status, AcpiResetVar.Addess, AcpiResetVar.AccessSize, AcpiResetVar.Type));   
-  
-    if ((AcpiResetVar.AccessSize == 2) && (AcpiResetVar.Type < 2) && (AcpiResetVar.Addess < 0xffffffff))
-    {
-        if (AcpiResetVar.Type == 1)
-        {  
-            //Clearing SLP_TYPx bits in PM1 Control Register in I/O Space
-            IoWrite32((UINTN)AcpiResetVar.Addess, IoRead32((UINTN)AcpiResetVar.Addess) & ~(0x1c00));
-        }
-        else 
-        {
-             //Clearing SLP_TYPx bits in memory mapped PM1 Control Register
-            UINT32 MemoryMappedReset = *(UINT32*)(UINTN)AcpiResetVar.Addess;
-            *(UINT32*)(UINTN)AcpiResetVar.Addess = MemoryMappedReset & ~(0x1c00);
-          
-      }
-    }
-    else
-    {
-        //We can not clear SLP_TYPx bits in PM1 Control Register at this stage. 
-        DEBUG ((EFI_D_ERROR,"Performing reset without clearing SLP_TYPx bits in PM1 Control Register! \n"));
-        DEBUG ((EFI_D_ERROR,"After system will resets, it may still be on S3 resume path and can asserts or hang somewhere in memory initialization or elsewhere! \n"));
-    }
-    return Status;
-}
-//*** AMI PORTING END *****//
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:   HandleTpmResumeFailure
-//
-// Description: If Startup(State) fails, Cap PCRS and disable all hierarchis
-//
-//
-// Input:       IN    EFI_PEI_SERVICES          **PeiServices,
-//
-// Output:      EFI_STATUS
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-EFI_STATUS HandleTpmResumeFailure(IN CONST EFI_PEI_SERVICES **PeiServices,
-                               AMI_TREE_PPI *TrEEPeiPpi)
-{
-    EFI_STATUS Status = EFI_SUCCESS;
-    EFI_PEI_RESET2_PPI *ResetPpi;
-    
-    DEBUG((DEBUG_INFO, "Handling TPM resume failure \n"));
-    
-    Status = CapAllTpm2Pcrs(PeiServices, TrEEPeiPpi, 1);
-  
-    if(EFI_ERROR (Status)){
-        //failed to cap;  reboot system-failsafe 
-        Status = S3ResetPrep(PeiServices);
-        if(EFI_ERROR(Status)){
-            Status = PeiServicesLocatePpi ( &gEfiPeiReset2PpiGuid, 0, NULL, (void **)&ResetPpi);
-            if(!EFI_ERROR(Status))
-            {
-                (*PeiServices)->ResetSystem2 (EfiResetShutdown, EFI_SECURITY_VIOLATION, 0, NULL);
-            }else{
-                (*PeiServices)->ResetSystem(PeiServices);
-            }
-        }else{
-            Status = PeiServicesLocatePpi ( &gEfiPeiReset2PpiGuid, 0, NULL, (void **)&ResetPpi);
-            if(!EFI_ERROR(Status))
-            {
-                (*PeiServices)->ResetSystem2 (EfiResetCold, EFI_SECURITY_VIOLATION, 0, NULL);
-            }else{
-                (*PeiServices)->ResetSystem(PeiServices);
-            }
-        }
-        CpuDeadLoop ();
-    }
-    
-    Status = AmiPlatformTpmPei2HierarchyControl(PeiServices, TrEEPeiPpi, TPM_RH_PLATFORM,\
-                                                  NULL, TPM_RH_ENDORSEMENT,  0);
-    if(EFI_ERROR(Status)){
-      DEBUG ((EFI_D_ERROR, "Tcg2 Boot in recovery Disable EH Status =%r \n", Status));
-    }
-    Status = AmiPlatformTpmPei2HierarchyControl(PeiServices, TrEEPeiPpi, TPM_RH_PLATFORM,\
-                                                  NULL, TPM_RH_OWNER,  0);
-    if(EFI_ERROR(Status)){
-       DEBUG ((EFI_D_ERROR, "Tcg2 Boot in recovery Disable SH Status =%r \n", Status));
-    }
-    
-    PeiChangePlatformAuth(PeiServices, TrEEPeiPpi);
-    
     return Status;
 }
 
@@ -1405,45 +713,21 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
     TPM2_Common_RespHdr StartupReponse;
     UINT32              ReturnSize = 0;
     AMI_TCG_PEI_FUNCTION_OVERRIDE_PPI       *PpiOverride;
-    AMI_TCG_PEI_FUNCTION_OVERRIDE_PPI       *TpmS3ResumePpiOverride;
+    EFI_GUID            SkipTpmStartupGuid = AMI_SKIP_TPM_STARTUP_GUID;
     BOOLEAN             SkipTpmStartup = FALSE;
     EFI_HOB_GUID_TYPE       *Hob;
     Tpm20DeviceHob          *TrEEDeviceHob;
+    EFI_GUID gTpm20Supporthobguid = TPM20_HOB_GUID;
     TCG_CONFIGURATION       ConfigFlags;
     TCG_PLATFORM_SETUP_INTERFACE *TcgPeiPolicy;
     EFI_GUID                        gTcgPeiPolicyGuid =\
             TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
 
-    UINT32              TpmFirmwareVerion1=0;
-    UINT32              TpmFirmwareVerion2=0;
-    UINT32              TpmManufacturer=0;
-#if ( defined(TPM2_S3_STARTUP_FAILURE_REBOOT_FLOW) && (TPM2_S3_STARTUP_FAILURE_REBOOT_FLOW != 0) )
-    EFI_PEI_RESET2_PPI *ResetPpi;
-#endif
-
-    //A previous call to TpmStartupSave state on S3 resume was called and failed 
-    //so a subsequent call to TpmStartClear was called and now TPM PCRs need to be
-    //capped
-    if(BootMode == BOOT_ON_S3_RESUME)
-    {
-        Status = (*PeiServices)->LocatePpi(
-                     PeiServices,
-                     &gHandleTpmS3ResumeFailure,
-                     0, NULL,
-                     (void **)&TpmS3ResumePpiOverride);
-     
-        if(!EFI_ERROR(Status))
-        {
-            Status = HandleTpmResumeFailure(PeiServices, TrEEPeiPpi);
-            return Status;
-        }
-    }
-    
     Status = (*PeiServices)->LocatePpi(
                  PeiServices,
-                 &gSkipTpmStartupGuid,
+                 &SkipTpmStartupGuid,
                  0, NULL,
-                 (void **)&PpiOverride);
+                 &PpiOverride);
 
     if(!EFI_ERROR(Status))
     {
@@ -1454,7 +738,7 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
                  PeiServices,
                  &gTcgPeiPolicyGuid,
                  0, NULL,
-                 (void **)&TcgPeiPolicy);
+                 &TcgPeiPolicy);
 
     if(EFI_ERROR(Status) || TcgPeiPolicy == NULL )return Status;
 
@@ -1472,7 +756,7 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
 
     if(BootMode == BOOT_ON_S3_RESUME)
     {
-        StartupCmd.StartupType = TPM_H2NS(TPM_SU_STATE);   
+        StartupCmd.StartupType = TPM_H2NS(TPM_SU_STATE);
     }
     else
     {
@@ -1483,8 +767,8 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
 
     SetMem((UINT8 *)&StartupReponse,(UINTN)sizeof(StartupReponse), 0);
     if( !SkipTpmStartup )
-    {                
-        DEBUG((DEBUG_INFO, "sending TPM20 b4 TCGPassThroughToTpm \n"));
+    {
+        DEBUG((-1, "sending TPM20 b4 TCGPassThroughToTpm \n"));
         Status = TrEEPeiPpi->SubmitCommand(TrEEPeiPpi,
                                            sizeof(TPM2_Startup_Cmd),
                                            (UINT8*)&StartupCmd,
@@ -1493,11 +777,10 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
 
         if(EFI_ERROR(Status))return Status;
 
-        if((StartupReponse.ResponseCode) != TPM_RC_SUCCESS 
-                    && ((TPM_H2NL(StartupReponse.ResponseCode))!= TPM_RC_INITIALIZE))
+        if((StartupReponse.ResponseCode) != TPM_RC_SUCCESS)
         {
-            DEBUG((DEBUG_INFO, "StartupReponse.ResponseCode = %x \n", TPM_H2NL(StartupReponse.ResponseCode)));
-            DEBUG((DEBUG_INFO, "StartupReponse.Status = %r \n", Status));
+            DEBUG((-1, "StartupReponse.ResponseCode = %x \n", TPM_H2NL(StartupReponse.ResponseCode)));
+            DEBUG((-1, "StartupReponse.Status = %r \n", Status));
             TpmPeiReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_2_0_STARTUP_ERROR | EFI_SOFTWARE_PEI_MODULE);   
             Status = EFI_DEVICE_ERROR;
         }else{
@@ -1506,7 +789,7 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
         
     }
     
-    if(BootMode == BOOT_ON_S3_RESUME && ConfigFlags.Tpm20Device == 1)
+    if(BootMode == BOOT_ON_S3_RESUME)
     {
 #if defined (SetReadyStateOnExitBootServices) && (SetReadyStateOnExitBootServices == 1)
         // When customer have enable the TOKEN,
@@ -1524,56 +807,12 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
             }
         }
 #endif
-        if((StartupReponse.ResponseCode) != TPM_RC_SUCCESS)
-        {
-#if ( defined(TPM2_S3_STARTUP_FAILURE_REBOOT_FLOW) && (TPM2_S3_STARTUP_FAILURE_REBOOT_FLOW != 0) )
-            Status = S3ResetPrep(PeiServices);
-            if(EFI_ERROR(Status)){
-                Status = PeiServicesLocatePpi ( &gEfiPeiReset2PpiGuid, 0, NULL, (void **)&ResetPpi);
-                if(!EFI_ERROR(Status))
-                {
-                    (*PeiServices)->ResetSystem2 (EfiResetShutdown, EFI_SECURITY_VIOLATION, 0, NULL);
-                }else{
-                    (*PeiServices)->ResetSystem(PeiServices);  //do system reset
-                }
-            }else{
-                Status = PeiServicesLocatePpi ( &gEfiPeiReset2PpiGuid, 0, NULL, (void **) &ResetPpi);
-                if(!EFI_ERROR(Status))
-                {
-                    (*PeiServices)->ResetSystem2 (EfiResetCold, EFI_SECURITY_VIOLATION, 0, NULL);
-                }else{
-                    (*PeiServices)->ResetSystem(PeiServices);  //do system reset
-                }
-            }
-            CpuDeadLoop ();
-#else            
-            StartupCmd.StartupType = TPM_H2NS(TPM_SU_CLEAR);
-            Status = TrEEPeiPpi->SubmitCommand(TrEEPeiPpi,
-                                               sizeof(TPM2_Startup_Cmd),
-                                               (UINT8*)&StartupCmd,
-                                               ReturnSize,
-                                               (UINT8*)&StartupReponse);
-
-             if(EFI_ERROR(Status))return Status;
-
-             if((StartupReponse.ResponseCode) != TPM_RC_SUCCESS)
-             {
-                 DEBUG((DEBUG_INFO, "StartupReponse.ResponseCode = %x \n", TPM_H2NL(StartupReponse.ResponseCode)));
-                 DEBUG((DEBUG_INFO, "StartupReponse.Status = %r \n", Status));
-                 TpmPeiReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_2_0_STARTUP_ERROR | EFI_SOFTWARE_PEI_MODULE);   
-                 Status = EFI_DEVICE_ERROR;
-                 return Status;
-             }
-                    
-             Status = HandleTpmResumeFailure(PeiServices, TrEEPeiPpi);
-#endif
-        }
         return Status;
     }
     // Since the BootGuard will skip startup command, Check here if the TPM 2.0 is present
     if( !EFI_ERROR(Status) )
     {
-        Status = Tpm20PeiSelfTest( PeiServices, TrEEPeiPpi, &TpmFirmwareVerion1, &TpmFirmwareVerion2,  &TpmManufacturer);
+        Status = Tpm20PeiSelfTest( PeiServices, TrEEPeiPpi );
         if( Status == EFI_NOT_READY )
         {
             Status = EFI_SUCCESS;
@@ -1584,8 +823,8 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
         
     }
 
-    Status2 = InternalPeiBuildHobGuid((EFI_PEI_SERVICES **)PeiServices, &gTpm20HobGuid,
-                                     (sizeof(Tpm20DeviceHob)),  (void **)&Hob);
+    Status2 = InternalPeiBuildHobGuid((EFI_PEI_SERVICES **)PeiServices, &gTpm20Supporthobguid,
+                                     (sizeof(Tpm20DeviceHob)),  &Hob);
     ASSERT_EFI_ERROR( Status2 );
     
     if(Status != EFI_DEVICE_ERROR && !EFI_ERROR(Status))
@@ -1600,10 +839,6 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
         {
             TrEEDeviceHob->InterfaceType = 0;
         }
-        TrEEDeviceHob->Tpm2FWersion1 = TpmFirmwareVerion1;
-        TrEEDeviceHob->Tpm2FWersion2 = TpmFirmwareVerion2;        
-        
-        TrEEDeviceHob->Tpm2manufacturer = TpmManufacturer;
     }
     else
     {
@@ -1617,9 +852,9 @@ EFI_STATUS Tpm20PeiSendStartup(IN CONST EFI_PEI_SERVICES **PeiServices,
 
     if( TrEEDeviceHob->Tpm20DeviceState )
     {
-        DEBUG((DEBUG_INFO, "StartupReponse.Tag = %x \n", StartupReponse.tag));
-        DEBUG((DEBUG_INFO, "StartupReponse.Size = %x \n", StartupReponse.ResponsSize));
-        DEBUG((DEBUG_INFO, "StartupReponse.ResponseCode = %x \n", StartupReponse.ResponseCode));
+        DEBUG((-1, "StartupReponse.Tag = %x \n", StartupReponse.tag));
+        DEBUG((-1, "StartupReponse.Size = %x \n", StartupReponse.ResponsSize));
+        DEBUG((-1, "StartupReponse.ResponseCode = %x \n", StartupReponse.ResponseCode));
     }
     
     return Status;
@@ -1654,19 +889,19 @@ EFIAPI FirstBootCheck(
     EFI_STATUS  Status;
     CHAR16      Monotonic[] = L"MonotonicCounter";
 #if defined(CORE_COMBINED_VERSION) && (CORE_COMBINED_VERSION > 262797)
-    EFI_GUID    Guid        = gAmiGlobalVariableGuid;
+    EFI_GUID    Guid        = AMI_GLOBAL_VARIABLE_GUID;
 #else
-    EFI_GUID    Guid        = gEfiGlobalVariableGuid;
+    EFI_GUID    Guid        = EFI_GLOBAL_VARIABLE;
 #endif
     UINTN                          Size        = sizeof(UINT32);
     UINT32                         Counter;
     EFI_PEI_READ_ONLY_VARIABLE2_PPI  *ReadOnlyVariable;
 
     Status = (*PeiServices)->LocatePpi(
-                 (CONST EFI_PEI_SERVICES    **)PeiServices,
+                 PeiServices,
                  &gEfiPeiReadOnlyVariable2PpiGuid,
                  0, NULL,
-                 (void **)&ReadOnlyVariable
+                 &ReadOnlyVariable
              );
 
     if(EFI_ERROR(Status) || ReadOnlyVariable == NULL )return Status;
@@ -1677,11 +912,11 @@ EFIAPI FirstBootCheck(
 
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_INFO, "TPM20::First boot Scenario determined \n"));
+        DEBUG((-1, "TPM20::First boot Scenario determined \n"));
         return 01;
     }
 
-    DEBUG((DEBUG_INFO, "TPM20::Not First boot Scenario\n"));
+    DEBUG((-1, "TPM20::Not First boot Scenario\n"));
     return 0xFF;
 }
 
@@ -1720,26 +955,31 @@ EFIAPI AmdPspAvailable(
     TCG_CONFIGURATION               ConfigFlags;
     EFI_GUID                        gTcgPeiPolicyGuid =\
             TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
+#if defined(TcgNistSp800_155_SUPPORT) && (TcgNistSp800_155_SUPPORT == 1)
+    BOOLEAN                         measureSpecIdEvent = TRUE;
+#else
+    BOOLEAN                         measureSpecIdEvent = FALSE;
+#endif
     EFI_BOOT_MODE       BootMode;
 
     Status = (*PeiServices)->LocatePpi(
-                  (CONST EFI_PEI_SERVICES    **)PeiServices,
+                 PeiServices,
                  &gAmiTreePpiGuid,
                  0, NULL,
-                 (void **)&TrEEPeiPpi);
+                 &TrEEPeiPpi);
 
     if(EFI_ERROR(Status) || TrEEPeiPpi == NULL )return Status;
 
-    Status = (*PeiServices)->GetBootMode ((CONST EFI_PEI_SERVICES    **)PeiServices, &BootMode);
+    Status = (*PeiServices)->GetBootMode (PeiServices, &BootMode);
     if(EFI_ERROR(Status))return Status;
 
     Status = (*PeiServices)->LocatePpi(
-                 (CONST EFI_PEI_SERVICES    **)PeiServices,
+                 PeiServices,
                  &gTcgPeiPolicyGuid,
                  0, NULL,
-                 (void **)&TcgPeiPolicy);
+                 &TcgPeiPolicy);
 
-    if(TcgPeiPolicy == NULL || EFI_ERROR(Status))
+    if(TcgPeiPolicy == NULL)
     {
         return EFI_NOT_FOUND;
     }
@@ -1749,7 +989,7 @@ EFIAPI AmdPspAvailable(
 
 
     //send TPM 2.0 Startup
-    Status = Tpm20PeiSendStartup((CONST EFI_PEI_SERVICES **)PeiServices, TrEEPeiPpi, BootMode);
+    Status = Tpm20PeiSendStartup(PeiServices, TrEEPeiPpi, BootMode);
     if( EFI_ERROR(Status) )
     {
         return EFI_SUCCESS;
@@ -1760,32 +1000,12 @@ EFIAPI AmdPspAvailable(
         return EFI_SUCCESS;
     }
 
-    if(ConfigFlags.Tcg2SpecVersion ==  TCG2_PROTOCOL_SPEC_TCG_2)
+    if(measureSpecIdEvent == TRUE || ConfigFlags.Tcg2SpecVersion ==  TCG2_PROTOCOL_SPEC_TCG_2)
     {
-        Status =  MeasureTCGPcClientSpecID((CONST EFI_PEI_SERVICES **)PeiServices);
-        if ( EFI_ERROR( Status ))
-        {
-            DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-        }
+        Status =  MeasureTCGPcClientSpecID(PeiServices);
     }
-    
-#if defined(TcgNistSp800_155_SUPPORT) && (TcgNistSp800_155_SUPPORT == 1)
-    Status = MeasureNISTManifest(PeiServices);
-    if ( EFI_ERROR( Status ))
-    {
-        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-    }
-#endif
-    Status = Tpm20MeasureCRTMVersionFuncPtr((CONST EFI_PEI_SERVICES **)PeiServices, TrEEPeiPpi);
-    if ( EFI_ERROR( Status ))
-    {
-        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-    }
-    Status = FindAndMeasureDxeCore((CONST EFI_PEI_SERVICES   **)PeiServices);
-    if ( EFI_ERROR( Status ))
-    {
-        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-    }
+    Status = Tpm20MeasureCRTMVersionFuncPtr( PeiServices, TrEEPeiPpi);
+    Status = FindAndMeasureDxeCore(PeiServices);
     return Status;
 }
 
@@ -1815,19 +1035,19 @@ void printbuffer(UINT8 *Buffer, UINTN BufferSize)
     UINTN i=0;
     UINTN j=0;
 
-    DEBUG((DEBUG_INFO,"\n**********PrintBuffer Entry********"));
+    DEBUG((-1,"\n**********PrintBuffer Entry********"));
     for(i=0; i<BufferSize; i++)
     {
 
         if(i%16 == 0)
         {
-            DEBUG((DEBUG_INFO,"\n"));
-            DEBUG((DEBUG_INFO,"%04x :", j));
+            DEBUG((-1,"\n"));
+            DEBUG((-1,"%04x :", j));
             j+=1;
         }
-        DEBUG((DEBUG_INFO,"%02x ", Buffer[i]));
+        DEBUG((-1,"%02x ", Buffer[i]));
     }
-    DEBUG((DEBUG_INFO,"\n"));
+    DEBUG((-1,"\n"));
 }
 
 
@@ -1863,19 +1083,19 @@ EFI_STATUS MeasureNISTManifest(
     UINTN                           Size=sizeof(EFI_GUID) + sizeof(UINT32) + sizeof(AMI_TREE_EVENT_HEADER) + sizeof(UINT32);
     UINT8                           *EventDataPtr;
 
-    DEBUG((DEBUG_INFO,  "TCG Pei: MeasureNISTManifest\n"));
+    DEBUG((-1,  "TCG Pei: MeasureNISTManifest\n"));
     Status = (*PeiServices)->LocatePpi(
                  PeiServices,
                  &gAmiTreePpiGuid,
                  0, NULL,
-                 (void **)&TrEEPeiPpi);
+                 &TrEEPeiPpi);
 
-    if(TrEEPeiPpi == NULL || EFI_ERROR(Status))
+    if(TrEEPeiPpi == NULL)
     {
         return EFI_NOT_FOUND;
     }
 
-    Status = (*PeiServices)->AllocatePool(PeiServices, Size, (void **)&TrEEEventData);
+    Status = (*PeiServices)->AllocatePool(PeiServices, Size, &TrEEEventData);
     if(EFI_ERROR(Status))return Status;
 
     TrEEEventData->Header.EventType = EV_NO_ACTION;
@@ -1946,14 +1166,14 @@ EFI_STATUS MeasureTCGPcClientSpecID(
     UINT32                          PcrBanks;
 
 
-    DEBUG((DEBUG_INFO,  "TCG Pei: MeasureTCGPcClientSpecID\n"));
+    DEBUG((-1,  "TCG Pei: MeasureTCGPcClientSpecID\n"));
     Status = (*PeiServices)->LocatePpi(
                  PeiServices,
                  &gAmiTreePpiGuid,
                  0, NULL,
-                 (void **)&TrEEPeiPpi);
+                 &TrEEPeiPpi);
 
-    if(TrEEPeiPpi == NULL || EFI_ERROR(Status))
+    if(TrEEPeiPpi == NULL)
     {
         return EFI_NOT_FOUND;
     }
@@ -1962,9 +1182,9 @@ EFI_STATUS MeasureTCGPcClientSpecID(
                  PeiServices,
                  &gTcgPeiPolicyGuid,
                  0, NULL,
-                 (void **)&TcgPeiPolicy);
+                 &TcgPeiPolicy);
 
-    if(TcgPeiPolicy == NULL || EFI_ERROR(Status))
+    if(TcgPeiPolicy == NULL)
     {
         return EFI_NOT_FOUND;
     }
@@ -1974,9 +1194,9 @@ EFI_STATUS MeasureTCGPcClientSpecID(
 
     PcrBanks = ConfigFlags.PcrBanks;   
 
-    DEBUG((DEBUG_INFO, "TCG Pei: TCG_PcClientSpecID\n"));
+    DEBUG((-1, "TCG Pei: TCG_PcClientSpecID\n"));
 
-    Status = (*PeiServices)->AllocatePool(PeiServices,Size, (void **)&TrEEEventData);
+    Status = (*PeiServices)->AllocatePool(PeiServices,Size, &TrEEEventData);
     if(EFI_ERROR(Status))return Status;
 
     EventDataPtr = (UINT8 *)TrEEEventData;
@@ -1990,8 +1210,8 @@ EFI_STATUS MeasureTCGPcClientSpecID(
 
     EventDataPtr +=  sizeof(AMI_TREE_EVENT_HEADER) + sizeof(UINT32);
 
-    DEBUG((DEBUG_INFO, "TrEEEventData->Size = %x \n", TrEEEventData->Size ));
-    DEBUG((DEBUG_INFO, "TPML_DIGEST_VALUES Size = %x \n",sizeof(TPML_DIGEST_VALUES)));
+    DEBUG((-1, "TrEEEventData->Size = %x \n", TrEEEventData->Size ));
+    DEBUG((-1, "TPML_DIGEST_VALUES Size = %x \n",sizeof(TPML_DIGEST_VALUES)));
 
     CopyMem(
         EventDataPtr,
@@ -2065,13 +1285,1034 @@ EFI_STATUS MeasureTCGPcClientSpecID(
 
     Status = TrEEPeiPpi->HashLogExtendEvent(TrEEPeiPpi,
                                             0,
-                                            (EFI_PHYSICAL_ADDRESS)(UINTN)EventDataPtr,  //not used
+                                            (EFI_PHYSICAL_ADDRESS)EventDataPtr,  //not used
                                             0,
                                             TrEEEventData);
 
     return Status;
 }
 
+
+TCG_PEI_MEMORY_CALLBACK    *FvMemCallback;
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Procedure:   MeasureFVOnMemAvail
+//
+// Description: On Memory available callback for DxeCore measurement
+//
+//
+// Input:       IN      EFI_PEI_SERVICES          **PeiServices,
+//
+// Output:      EFI_STATUS
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS
+EFIAPI MeasureFVOnMemAvail(
+    IN EFI_PEI_SERVICES          **PeiServices,
+    IN EFI_PEI_NOTIFY_DESCRIPTOR *NotifyDesc,
+    IN VOID                      *Ppi )
+{
+    EFI_STATUS Status=EFI_SUCCESS;
+    Status = FindAndMeasureDxeCore(PeiServices);
+    return Status;
+}
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Procedure:   MeasureTeImage
+//
+// Description: Measure Te Images (if DxeCore is a TE image)
+//
+//
+// Input:       IN      EFI_PEI_SERVICES          **PeiServices,
+//
+// Output:      EFI_STATUS
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS
+MeasureTeImage (
+    IN  CONST EFI_PEI_SERVICES **PeiServices,
+    IN  EFI_IMAGE_LOAD_EVENT     *ImageLoad,
+    IN  UINTN                     Tcg2SpecVersion,
+    IN  UINT32                    PcrBanks,
+    IN  TPM2_HALG                *Tpm2Digest)
+{
+    EFI_TE_IMAGE_HEADER               *ptrToTEHdr;
+    EFI_IMAGE_SECTION_HEADER          *Section;
+    UINT8                             *HashBase;
+    UINT64                            HashSize;
+    UINT64                             SumOfBytesHashed;
+    UINTN                             SectionHeaderOffset;
+    UINTN                             numOfSectionHeaders;
+    UINTN                             Index;
+    AMI_PEI_HASH_INTERFACE_PPI        *HashInterface;
+    AMI_TREE_PPI                      *TrEEPeiPpi = NULL;
+    EFI_GUID                          Intfceguid = AMI_PEI_HASH_INTERFACE_PROTOCOL_GUID;
+    SHA1_CTX                          Sha1Ctx;
+    SHA2_CTX                          Sha2Ctx;
+    SHA384_CTX                        Sha384Ctx;
+    SHA512_CTX                        Sha512Ctx;
+    VOID                              *HashInterfaceContext;
+    UINTN                             HashInterfaceContextSize = 0x100;
+    UINT8                             HashSxBuffer[0x100];
+    TPM2B_DIGEST                      Result;
+    EFI_STATUS                        Status;
+
+    HashInterfaceContext = &HashSxBuffer[0];
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Init(&Sha1Ctx);
+    }
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+            SHA1Init(&Sha1Ctx);
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+            sha256_init( &Sha2Ctx );
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+            sha384_init( &Sha384Ctx );
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+            sha512_init(&Sha512Ctx);
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+
+            //locate the PeiTree Protocol
+            Status = (*PeiServices)->LocatePpi(PeiServices,
+                                               &Intfceguid,
+                                               0, NULL,
+                                               &HashInterface);
+
+            if(EFI_ERROR(Status) || HashInterface == NULL) return Status;
+
+            //locate the PeiTree Protocol
+            Status = (*PeiServices)->LocatePpi(
+                         PeiServices,
+                         &gAmiTreePpiGuid,
+                         0, NULL,
+                         &TrEEPeiPpi);
+
+            if(EFI_ERROR(Status) || TrEEPeiPpi == NULL) return Status;
+
+            HashInterface->Init(TrEEPeiPpi, AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext, &HashInterfaceContextSize);
+        }
+    }
+
+    DEBUG ((-1, "Printing TE Image Buffer in Memory Image Location = %x, Image size = %x\n",
+            (UINTN)ImageLoad->ImageLocationInMemory, ImageLoad->ImageLengthInMemory));
+
+    //printbuffer((UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory, 1024);
+
+    ptrToTEHdr = (EFI_TE_IMAGE_HEADER *)((UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory);
+    //Hash TE Image header and section headers
+
+    HashBase = (UINT8 *)(UINTN)ptrToTEHdr;
+    HashSize = sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);
+
+    DEBUG ((-1, "Printing Hashed TE Hdr and Section Header\n"));
+    DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
+
+    //printbuffer(HashBase, HashSize);
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Update(&Sha1Ctx,
+                   HashBase,
+                   (u32)HashSize);
+    }
+
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+        {
+            sha256_process( &Sha2Ctx, HashBase, (u32)HashSize );
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+        {
+            sha512_process((SHA384_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+        {
+            sha512_process((SHA512_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+            HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize, AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+        }
+    }
+
+
+    SectionHeaderOffset = sizeof(EFI_TE_IMAGE_HEADER) + (UINTN)ptrToTEHdr;
+    numOfSectionHeaders = ptrToTEHdr->NumberOfSections;
+
+    SumOfBytesHashed = HashSize;
+
+    //check for alignment
+    //hash Alignment buffer
+    HashSize = (((EFI_IMAGE_SECTION_HEADER *)((UINT8 *)SectionHeaderOffset))->PointerToRawData
+                - ptrToTEHdr->StrippedSize + sizeof(EFI_TE_IMAGE_HEADER)+ (UINT64)ImageLoad->ImageLocationInMemory - ((UINT64)ImageLoad->ImageLocationInMemory + HashSize));
+
+    if(HashSize !=0)
+    {
+        HashBase += sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);
+
+        DEBUG ((-1, "Printing Hashed TE Alignment Buffer\n"));
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
+//        printbuffer(HashBase, HashSize);
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+        {
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+            {
+                SHA1Update(&Sha1Ctx,
+                           HashBase,
+                           (u32)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+            {
+                sha256_process( &Sha2Ctx, HashBase, (u32)HashSize );
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+            {
+                sha512_process((SHA384_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+            {
+                sha512_process((SHA512_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+            {
+
+                HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize, AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+            }
+
+            SumOfBytesHashed+=HashSize;
+        }
+    }
+
+
+    //
+    // TE Images do not have a CertDirector
+    //
+
+    //process hash section by section
+    //hash in order sections. We do not sort TE sections
+    for (Index = 0; Index < numOfSectionHeaders; Index++)
+    {
+
+        Section = (EFI_IMAGE_SECTION_HEADER *)((UINT8 *)SectionHeaderOffset);
+
+        if (Section->SizeOfRawData == 0)
+        {
+            continue;
+        }
+
+        //Hash raw data
+
+        HashBase = (UINT8 *)(((UINTN)ImageLoad->ImageLocationInMemory)
+                             + (UINTN)Section->PointerToRawData - ptrToTEHdr->StrippedSize + sizeof(EFI_TE_IMAGE_HEADER));
+
+        HashSize = (UINTN) Section->SizeOfRawData;
+
+        DEBUG ((-1, "Section Base = %x Section Len = %x \n", HashBase, HashSize));
+        //printbuffer(HashBase, 1024);
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+        {
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+            {
+                SHA1Update(&Sha1Ctx,
+                           HashBase,
+                           (u32)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+            {
+                sha256_process( &Sha2Ctx, HashBase, (u32)HashSize );
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+            {
+                sha512_process((SHA384_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+            {
+                sha512_process((SHA512_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+            {
+                Status = HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize,\
+                                                                           AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+            }
+        }
+
+        SumOfBytesHashed += HashSize;
+        SectionHeaderOffset += EFI_IMAGE_SIZEOF_SECTION_HEADER;
+
+    }
+
+    DEBUG ((-1, "SumOfBytesHashed = %x \n", SumOfBytesHashed));
+
+    //verify size
+    if ( ImageLoad->ImageLengthInMemory > SumOfBytesHashed)
+    {
+
+        DEBUG ((-1, "Hash rest of Data if true \n"));
+
+        HashBase = (UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory + SumOfBytesHashed;
+        HashSize = (UINTN)(ImageLoad->ImageLengthInMemory - SumOfBytesHashed);
+
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
+        //printbuffer(HashBase, 106);
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+        {
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+            {
+                SHA1Update(&Sha1Ctx,
+                           HashBase,
+                           (u32)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+            {
+                sha256_process( &Sha2Ctx, HashBase, (u32)HashSize );
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+            {
+                sha512_process((SHA384_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+            {
+                sha512_process((SHA512_CTX *)HashInterfaceContext, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+            {
+                Status = HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize,\
+                                                                           AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+            }
+        }
+
+    }
+
+    //
+    // Finalize the SHA hash.
+    //
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Final(Tpm2Digest->sha1, &Sha1Ctx);
+    }
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+        {
+            SHA1Final(Tpm2Digest->sha1, &Sha1Ctx);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+        {
+            sha256_done( &Sha2Ctx, Tpm2Digest->sha256 );
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+        {
+            sha384_done(&Sha384Ctx, (unsigned char *)Tpm2Digest->sha384);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+        {
+            sha512_done(&Sha512Ctx, (unsigned char *)Tpm2Digest->sha512);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+            UINTN   TempVal = 64;
+
+            HashInterface->GetHashResults(TrEEPeiPpi,
+                                          HashInterfaceContext,AMI_TREE_BOOT_HASH_ALG_SM3,
+                                          (UINT8 *)&Result.buffer,  &TempVal);
+            Result.size = (UINT16)TempVal;
+
+            if (EFI_ERROR(Status))
+            {
+                return EFI_DEVICE_ERROR;
+            }
+
+            (*PeiServices)->CopyMem(Tpm2Digest->sm3_256 , Result.buffer, Result.size);
+        }
+
+    }
+    return EFI_SUCCESS;
+}
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Procedure:   MeasureDxeCorePEImage
+//
+// Description: Measure Dxe Core as a PE Image
+//
+//
+// Input:       IN      EFI_PEI_SERVICES          **PeiServices,
+//
+// Output:      EFI_STATUS
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS
+EFIAPI
+MeasureDxeCorePEImage (
+    IN  CONST EFI_PEI_SERVICES **PeiServices,
+    IN  EFI_PHYSICAL_ADDRESS      ImageAddress,
+    IN  UINTN                     ImageSize,
+    IN  AMI_TREE_PPI             *TrEEPeiPpi,
+    IN  AMI_INTERNAL_HLXE_PPI    *HashLogExtendEx,
+    IN  TCG_CONFIGURATION        *ConfigFlags
+)
+{
+    EFI_STATUS                        Status;
+    TCG_PCR_EVENT2_HDR                TcgEvent;
+    UINT8                             *EventData = NULL;
+    EFI_IMAGE_LOAD_EVENT              *ImageLoad;
+    EFI_DEVICE_PATH_PROTOCOL          *FullPath;
+    UINT32                            FullPathSize;
+    EFI_IMAGE_DOS_HEADER              *DosHdr;
+    UINT32                            PeCoffHeaderOffset;
+    EFI_IMAGE_NT_HEADERS64            *Hdr;
+    EFI_IMAGE_SECTION_HEADER          *Section;
+    UINT8                             *HashBase;
+    UINTN                             HashSize;
+    UINTN                             SumOfBytesHashed;
+    EFI_IMAGE_SECTION_HEADER          *SectionHeader;
+    UINTN                             Index, iPos;
+    AMI_INTERNAL_HLXE_PPI             *InternalHLXE = NULL;
+    EFI_GUID                          gEfiAmiHLXEGuid =  AMI_PROTOCOL_INTERNAL_HLXE_GUID;
+    AMI_PEI_HASH_INTERFACE_PPI        *HashInterface;
+    EFI_GUID                          Intfceguid = AMI_PEI_HASH_INTERFACE_PROTOCOL_GUID;
+    VOID                              *HashInterfaceContext;
+    UINTN                             HashInterfaceContextSize = 0x100;
+    UINT8                             HashSxBuffer[0x100];
+    UINT32                            Tcg2SpecVersion;
+    UINT32                            PcrBanks;
+    TPM2B_DIGEST                      *Result;
+    TPM2_HALG                         TpmDigest;
+    SHA1_CTX                          Sha1Ctx;
+    SHA2_CTX                          Sha256Ctxt;
+    SHA384_CTX                        Sha384Ctxt;
+    SHA512_CTX                        Sha512Ctxt;
+    TPM2_HALG                         *Tpm2Digest;
+    UINT8                             *Buffer;
+    TPM2_ALG_ID                       Algo;
+    UINTN                             i=0;
+
+    Tcg2SpecVersion = ConfigFlags->Tcg2SpecVersion;
+    PcrBanks = ConfigFlags->PcrBanks;
+
+    HashInterfaceContext = &HashSxBuffer[0];
+
+    ImageLoad     = NULL;
+    FullPath      = NULL;
+    SectionHeader = NULL;
+    FullPathSize  = 0;
+
+    DEBUG ((-1, "PeiMeasurePeImage Entry\n"));
+
+    //Allocate Event log memory
+    Status = (*PeiServices)->AllocatePool(PeiServices, ((sizeof (*ImageLoad)
+                                          - sizeof (ImageLoad->DevicePath)) + FullPathSize), &EventData);
+
+    if(EFI_ERROR(Status))return Status;
+    //
+    // Determine destination PCR by BootPolicy
+    //
+    TcgEvent.EventSize  = sizeof (*ImageLoad) - sizeof (ImageLoad->DevicePath);
+    TcgEvent.EventSize += FullPathSize;
+
+    Status = (*PeiServices)->AllocatePool(PeiServices,TcgEvent.EventSize, &ImageLoad);
+
+    if (ImageLoad == NULL)
+    {
+        Status = EFI_OUT_OF_RESOURCES;
+        goto Done;
+    }
+
+    ImageLoad->ImageLocationInMemory = ImageAddress;
+    ImageLoad->ImageLengthInMemory   = ImageSize;
+    ImageLoad->ImageLinkTimeAddress  = 0;
+    ImageLoad->LengthOfDevicePath    = 0;
+
+    DEBUG ((-1, "ImageLoad->ImageLocationInMemory = %lx,  ImageLoad->ImageLengthInMemory = %lx \n",
+            ImageLoad->ImageLocationInMemory, ImageLoad->ImageLengthInMemory));
+
+    //
+    // Check PE/COFF image
+    //
+    DosHdr = (EFI_IMAGE_DOS_HEADER *)(UINTN)ImageAddress;
+    PeCoffHeaderOffset = 0;
+    if (DosHdr->e_magic == EFI_IMAGE_DOS_SIGNATURE)
+    {
+        PeCoffHeaderOffset = DosHdr->e_lfanew;
+    }
+
+    if (((EFI_TE_IMAGE_HEADER *)((UINT8 *)(UINTN)ImageAddress + PeCoffHeaderOffset))->Signature
+            == EFI_TE_IMAGE_HEADER_SIGNATURE)
+    {
+
+        //Measure TE Image
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+        {
+            MeasureTeImage(PeiServices, ImageLoad, Tcg2SpecVersion, PcrBanks, &TpmDigest);
+            (*PeiServices)->CopyMem(&TcgEvent.Digests.digests[0].digest.sha1, TpmDigest.sha1, SHA1_DIGEST_SIZE);
+        }
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+        {
+            MeasureTeImage(PeiServices, ImageLoad, Tcg2SpecVersion, PcrBanks, &TpmDigest);
+            (*PeiServices)->CopyMem(&TcgEvent.Digests.digests, &TpmDigest, sizeof(TPM2_HALG));
+        }
+
+        goto TEImageDone;
+    }
+
+    DEBUG ((-1, "Image is a PE image\n"));
+
+    //
+    // PE/COFF Image Measurement
+    //
+    //    NOTE: The following codes/steps are based upon the authenticode image hashing in
+    //      PE/COFF Specification 8.0 Appendix A.
+    //
+    //
+
+    // 1. Load the image header into memory.
+
+    // 2. Initialize a SHA hash context.
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Init(&Sha1Ctx);
+    }
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+            SHA1Init(&Sha1Ctx);
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+            sha256_init( &Sha256Ctxt );
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+            sha384_init( &Sha384Ctxt );
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+            sha512_init(&Sha512Ctxt);
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+
+            //locate the PeiTree Protocol
+            Status = (*PeiServices)->LocatePpi(PeiServices,
+                                               &Intfceguid,
+                                               0, NULL,
+                                               &HashInterface);
+
+            if(EFI_ERROR(Status) || HashInterface == NULL) return Status;
+
+            //locate the PeiTree Protocol
+            Status = (*PeiServices)->LocatePpi(
+                         PeiServices,
+                         &gAmiTreePpiGuid,
+                         0, NULL,
+                         &TrEEPeiPpi);
+
+            if(EFI_ERROR(Status) || TrEEPeiPpi == NULL) return Status;
+
+            HashInterface->Init(TrEEPeiPpi, AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext, &HashInterfaceContextSize);
+        }
+    }
+
+
+    //
+    // Measuring PE/COFF Image Header;
+    // But CheckSum field and SECURITY data directory (certificate) are excluded
+    //
+    Hdr   = (EFI_IMAGE_NT_HEADERS64 *)((UINT8 *)(UINTN)ImageAddress + PeCoffHeaderOffset);
+
+    //
+    // 3. Calculate the distance from the base of the image header to the image checksum address.
+    // 4. Hash the image header from its base to beginning of the image checksum.
+    //
+    HashBase = (UINT8 *)(UINTN)ImageAddress;
+    HashSize = (UINTN) ((UINT8 *)(&Hdr->OptionalHeader.CheckSum) - HashBase);
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Update(&Sha1Ctx,
+                   HashBase,
+                   (u32)HashSize);
+    }
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+        {
+            sha256_process( &Sha256Ctxt, HashBase, (u32)HashSize );
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+        {
+            sha512_process(&Sha384Ctxt, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+        {
+            sha512_process(&Sha512Ctxt, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+            HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize, AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+        }
+    }
+
+    DEBUG ((-1, "CheckPoint 1\n"));
+    //
+    // 5. Skip over the image checksum (it occupies a single ULONG).
+    // 6. Get the address of the beginning of the Cert Directory.
+    // 7. Hash everything from the end of the checksum to the start of the Cert Directory.
+    //
+
+    HashBase = (UINT8 *) &Hdr->OptionalHeader.CheckSum + sizeof (UINT32);
+    HashSize = (UINTN) ((UINT8 *)(&Hdr->OptionalHeader.DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_SECURITY]) - HashBase);
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Update(&Sha1Ctx,
+                   HashBase,
+                   (u32)HashSize);
+    }
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+        {
+            sha256_process( &Sha256Ctxt, HashBase, (u32)HashSize );
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+        {
+            sha512_process(&Sha384Ctxt, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+        {
+            sha512_process(&Sha512Ctxt, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+            Status = HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize,\
+                                                                   AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+        }
+    }
+    //
+    // 8. Skip over the Cert Directory. (It is sizeof(IMAGE_DATA_DIRECTORY) bytes.)
+    // 9. Hash everything from the end of the Cert Directory to the end of image header.
+    //
+    HashBase = (UINT8 *) &Hdr->OptionalHeader.DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_SECURITY + 1];
+    HashSize = Hdr->OptionalHeader.SizeOfHeaders -
+               (UINTN) ((UINT8 *)(&Hdr->OptionalHeader.DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_SECURITY + 1]) - (UINT8 *)(UINTN)ImageAddress);
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Update(&Sha1Ctx,
+                   HashBase,
+                   (u32)HashSize);
+    }
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+        {
+            sha256_process( &Sha256Ctxt, HashBase, (u32)HashSize );
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+        {
+            sha512_process(&Sha384Ctxt, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+        {
+            sha512_process(&Sha512Ctxt, HashBase, (unsigned long)HashSize);
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+            Status = HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize,\
+                                                                   AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+        }
+    }
+    //
+    // 10. Set the SUM_OF_BYTES_HASHED to the size of the header
+    //
+    SumOfBytesHashed = Hdr->OptionalHeader.SizeOfHeaders;
+
+    //
+    // 11. Build a temporary table of pointers to all the IMAGE_SECTION_HEADER
+    //     structures in the image. The 'NumberOfSections' field of the image
+    //     header indicates how big the table should be. Do not include any
+    //     IMAGE_SECTION_HEADERs in the table whose 'SizeOfRawData' field is zero.
+    //
+    (*PeiServices)->AllocatePool(PeiServices,sizeof (EFI_IMAGE_SECTION_HEADER) * Hdr->FileHeader.NumberOfSections, &SectionHeader);
+
+    if(SectionHeader==NULL)return EFI_OUT_OF_RESOURCES;
+    (*PeiServices)->SetMem(SectionHeader, (sizeof (EFI_IMAGE_SECTION_HEADER) * Hdr->FileHeader.NumberOfSections), 0);
+
+    //
+    // 12.    Using the 'PointerToRawData' in the referenced section headers as
+    //      a key, arrange the elements in the table in ascending order. In other
+    //      words, sort the section headers according to the disk-file offset of
+    //      the section.
+    //
+    Section = (EFI_IMAGE_SECTION_HEADER *) (
+                  (UINT8 *)(UINTN)ImageAddress +
+                  PeCoffHeaderOffset +
+                  sizeof(UINT32) +
+                  sizeof(EFI_IMAGE_FILE_HEADER) +
+                  Hdr->FileHeader.SizeOfOptionalHeader
+              );
+
+    for (Index = 0; Index < Hdr->FileHeader.NumberOfSections; Index++)
+    {
+        iPos = Index;
+        while ((iPos > 0) && (Section->PointerToRawData < SectionHeader[iPos - 1].PointerToRawData))
+        {
+            (*PeiServices)->CopyMem (&SectionHeader[iPos], &SectionHeader[iPos - 1], sizeof(EFI_IMAGE_SECTION_HEADER));
+            iPos--;
+        }
+
+        (*PeiServices)->CopyMem( &SectionHeader[iPos], Section,
+                                 sizeof(EFI_IMAGE_SECTION_HEADER));
+        Section += 1;
+    }
+
+    //
+    // 13.    Walk through the sorted table, bring the corresponding section
+    //      into memory, and hash the entire section (using the 'SizeOfRawData'
+    //      field in the section header to determine the amount of data to hash).
+    // 14.    Add the section's 'SizeOfRawData' to SUM_OF_BYTES_HASHED .
+    // 15.    Repeat steps 13 and 14 for all the sections in the sorted table.
+    //
+    for (Index = 0; Index < Hdr->FileHeader.NumberOfSections; Index++)
+    {
+        Section  = (EFI_IMAGE_SECTION_HEADER *) &SectionHeader[Index];
+        if (Section->SizeOfRawData == 0)
+        {
+            continue;
+        }
+        HashBase = (UINT8 *)(UINTN)ImageAddress + Section->PointerToRawData;
+        HashSize = (UINTN) Section->SizeOfRawData;
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+        {
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+            {
+                SHA1Update(&Sha1Ctx,
+                           HashBase,
+                           (u32)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+            {
+                sha256_process( &Sha256Ctxt, HashBase, (u32)HashSize );
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+            {
+                sha512_process(&Sha384Ctxt, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+            {
+                sha512_process(&Sha512Ctxt, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+            {
+                Status = HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize,\
+                                               AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+            }
+        }
+
+
+        SumOfBytesHashed += HashSize;
+    }
+
+    //
+    // 16.    If the file size is greater than SUM_OF_BYTES_HASHED, there is extra
+    //      data in the file that needs to be added to the hash. This data begins
+    //      at file offset SUM_OF_BYTES_HASHED and its length is:
+    //             FileSize  -  (CertDirectory->Size)
+    //
+    if (ImageSize > SumOfBytesHashed)
+    {
+        HashBase = (UINT8 *)(UINTN)ImageAddress + SumOfBytesHashed;
+        HashSize = (UINTN)(ImageSize -
+                           Hdr->OptionalHeader.DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_SECURITY].Size -
+                           SumOfBytesHashed);
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+        {
+            SHA1Update(&Sha1Ctx,
+                       HashBase,
+                       (u32)HashSize);
+        }
+
+        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+        {
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+            {
+                SHA1Update(&Sha1Ctx,
+                           HashBase,
+                           (u32)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+            {
+                sha256_process( &Sha256Ctxt, HashBase, (u32)HashSize );
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+            {
+                sha512_process(&Sha384Ctxt, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+            {
+                sha512_process(&Sha512Ctxt, HashBase, (unsigned long)HashSize);
+            }
+
+            if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+            {
+                Status = HashInterface->Update(TrEEPeiPpi, HashBase, (UINTN)HashSize,\
+                                                                           AMI_TREE_BOOT_HASH_ALG_SM3, HashInterfaceContext);
+            }
+        }
+    }
+
+    //
+    // 17.    Finalize the SHA hash.
+    //
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
+    {
+        SHA1Final(TpmDigest.sha1, &Sha1Ctx);
+        (*PeiServices)->CopyMem(&TcgEvent.Digests.digests[0].digest.sha1, TpmDigest.sha1, SHA1_DIGEST_SIZE);
+    }
+
+    if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    {
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+        {
+            SHA1Final(Tpm2Digest->sha1, &Sha1Ctx);
+            i+=1;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+        {
+            sha256_done( &Sha256Ctxt, Tpm2Digest->sha256 );
+            i+=1;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+        {
+            sha384_done(&Sha384Ctxt, (unsigned char *)Tpm2Digest->sha384);
+            i+=1;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+        {
+            sha512_done(&Sha512Ctxt, (unsigned char *)Tpm2Digest->sha512);
+            i+=1;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+            UINTN   TempVal = 64;
+
+            HashInterface->GetHashResults(TrEEPeiPpi,
+                                          HashInterfaceContext,AMI_TREE_BOOT_HASH_ALG_SM3,
+                                          (UINT8 *)&Result->buffer,  &TempVal );
+            Result->size = (UINT16)TempVal;
+
+            if (EFI_ERROR(Status))
+            {
+                return EFI_DEVICE_ERROR;
+            }
+
+            i+=1;
+
+            (*PeiServices)->CopyMem(Tpm2Digest->sm3_256 , Result->buffer, Result->size);
+        }
+
+        TcgEvent.Digests.count = i;
+
+        Buffer = (UINT8 *)&TcgEvent.Digests.digests[0];
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA1)
+        {
+            Algo = TPM2_ALG_SHA1;
+            (*PeiServices)->CopyMem( Buffer , &Algo , sizeof(UINT16));
+            Buffer+=sizeof(UINT16);
+            (*PeiServices)->CopyMem( Buffer , Tpm2Digest->sha1, SHA1_DIGEST_SIZE);
+            Buffer+=SHA1_DIGEST_SIZE;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA256)
+        {
+            Algo = TPM2_ALG_SHA256;
+            (*PeiServices)->CopyMem( Buffer , &Algo , sizeof(UINT16));
+            Buffer+=sizeof(UINT16);
+            (*PeiServices)->CopyMem( Buffer , Tpm2Digest->sha256, SHA256_DIGEST_SIZE);
+            Buffer+=SHA256_DIGEST_SIZE;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA384)
+        {
+            Algo = TPM2_ALG_SHA384;
+            (*PeiServices)->CopyMem( Buffer , &Algo , sizeof(UINT16));
+            Buffer+=sizeof(UINT16);
+            (*PeiServices)->CopyMem( Buffer , Tpm2Digest->sha384, SHA384_DIGEST_SIZE);
+            Buffer+=SHA384_DIGEST_SIZE;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SHA512)
+        {
+            Algo = TPM2_ALG_SHA512;
+            (*PeiServices)->CopyMem( Buffer , &Algo , sizeof(UINT16));
+            Buffer+=sizeof(UINT16);
+            (*PeiServices)->CopyMem( Buffer , Tpm2Digest->sha512, SHA512_DIGEST_SIZE);
+            Buffer+=SHA512_DIGEST_SIZE;
+        }
+
+        if( PcrBanks & AMI_TREE_BOOT_HASH_ALG_SM3)
+        {
+            Algo = TPM2_ALG_SM3_256;
+            (*PeiServices)->CopyMem( Buffer , &Algo , sizeof(UINT16));
+            Buffer+=sizeof(UINT16);
+            (*PeiServices)->CopyMem( Buffer , Tpm2Digest->sm3_256, SM3_256_DIGEST_SIZE);
+            Buffer+=SM3_256_DIGEST_SIZE;
+        }
+
+    }
+
+TEImageDone:
+
+    //
+    // HashLogExtendEvent
+    //
+    TcgEvent.PCRIndex = PCRi_CRTM_AND_POST_BIOS;
+    TcgEvent.EventType = EV_POST_CODE;
+    (*PeiServices)->CopyMem(EventData, ImageLoad, TcgEvent.EventSize);
+
+    HashLogExtendEx->AmiHashLogExtendEx(PeiServices, TrEEPeiPpi, NULL, 0, 0, &TcgEvent, EventData);
+Done:
+
+    DEBUG ((-1, "Pei Measure PE Image Done\n"));
+    return Status;
+}
 
 #if defined (TCGRomLayout_SUPPORT) && (TCGRomLayout_SUPPORT!=0)
 // <AMI_PHDR_START>
@@ -2137,14 +2378,18 @@ EFI_STATUS GetRomArea(
 // Notes:
 //<AMI_PHDR_END>
 //******************************************************************************
-EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
+EFI_STATUS FindAndMeasureDxeCore(IN CONST EFI_PEI_SERVICES **PeiServices)
 {
 
     EFI_STATUS              Status;
     AMI_TREE_PPI                    *TrEEPeiPpi = NULL;
-    AMI_INTERNAL_HLXE_PPI           *HashLogExtendEx = NULL;
+    AMI_INTERNAL_HLXE_PPI           *HashLogExtendEx;
+    EFI_GUID                        gAmiHashLogExtendEx = AMI_HASH_LOG_EXTEX_GUID;
     TCG_PLATFORM_SETUP_INTERFACE    *TcgPeiPolicy;
     TCG_CONFIGURATION               ConfigFlags;
+    EFI_GUID                        gTcgPeiPolicyGuid =\
+            TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
+
 #if defined (TCGRomLayout_SUPPORT) && (TCGRomLayout_SUPPORT!=0)
     AMI_ROM_AREA                    *RomArea = NULL;
     UINTN                           RomArea_size;
@@ -2154,6 +2399,7 @@ EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
     UINTN                           i=0;
     UINTN                            Count=0;
     EFI_HOB_GUID_TYPE               *VolHob;
+    EFI_GUID                        amiFVhoblistguid = AMI_FV_HOB_LIST_GUID;
 
     
     
@@ -2162,20 +2408,20 @@ EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
                  PeiServices,
                  &gAmiTreePpiGuid,
                  0, NULL,
-                 (void **)&TrEEPeiPpi);
+                 &TrEEPeiPpi);
 
-    if(EFI_ERROR(Status))
+    if(TrEEPeiPpi == NULL)
     {
         return EFI_NOT_FOUND;
     }
 
     Status = (*PeiServices)->LocatePpi(
                  PeiServices,
-                 &gAmiHashLogExtendExGuid,
+                 &gAmiHashLogExtendEx,
                  0, NULL,
-                 (void **)&HashLogExtendEx);
+                 &HashLogExtendEx);
 
-    if(EFI_ERROR(Status))
+    if(HashLogExtendEx == NULL)
     {
         return EFI_NOT_FOUND;
     }
@@ -2185,8 +2431,9 @@ EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
     Status = GetRomArea(&RomArea,&RomArea_size, NULL);
     if( (!EFI_ERROR(Status))&&(RomArea != NULL) )
     {
-        for(i=0; RomArea!=NULL; i++)
+        for(i=0; i<10; i++)
         {
+            if(RomArea == NULL)break;
             
             if((RomArea->Attributes & ROM_AREA_FV_SIGNED) && (RomArea->Attributes & ROM_AREA_TCG_MEASURED) ||
                     ((RomArea->Attributes & (ROM_AREA_FV_PEI+ROM_AREA_FV_DXE)) &&
@@ -2195,8 +2442,8 @@ EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
                 
                 FwVolHobArray[Count].baseAddress = RomArea->Address;
                 FwVolHobArray[Count].Size        = RomArea->Size;
-                DEBUG ((DEBUG_INFO, "RomArea->Address = %x \n", RomArea->Address));
-                DEBUG ((DEBUG_INFO, "RomArea->Size = %x \n",RomArea->Size));
+            DEBUG ((-1, "RomArea->Address = %x \n", RomArea->Address));
+            DEBUG ((-1, "RomArea->Size = %x \n",RomArea->Size));
                 Count +=1;
             }
             
@@ -2216,19 +2463,15 @@ EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
 #endif
 
     Status = InternalPeiBuildHobGuid((EFI_PEI_SERVICES **)PeiServices, &amiFVhoblistguid,
-                                     (sizeof(FwVolHob)*Count),   (void **)&VolHob);
-    if (EFI_ERROR(Status))
-    {
-        return Status;
-    }
+                                     (sizeof(FwVolHob)*Count),  &VolHob);
 
     Status = (*PeiServices)->LocatePpi(
                  PeiServices,
                  &gTcgPeiPolicyGuid,
                  0, NULL,
-                 (void **)&TcgPeiPolicy);
+                 &TcgPeiPolicy);
 
-    if(TcgPeiPolicy == NULL || EFI_ERROR(Status))
+    if(TcgPeiPolicy == NULL)
     {
         return EFI_NOT_FOUND;
     }
@@ -2257,10 +2500,10 @@ EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
             TpmFwVolHob->PcrBanks = 0;
         }
 
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob->Size = %x \n", TpmFwVolHob->Size));
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob->baseAddress = %x \n",TpmFwVolHob->baseAddress));
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob->Tcg2SpecVersion = %x \n",TpmFwVolHob->Tcg2SpecVersion));
-        DEBUG ((DEBUG_INFO, "TpmFwVolHob address = %x \n", TpmFwVolHob));
+        DEBUG ((-1, "TpmFwVolHob->Size = %x \n", TpmFwVolHob->Size));
+        DEBUG ((-1, "TpmFwVolHob->baseAddress = %x \n",TpmFwVolHob->baseAddress));
+        DEBUG ((-1, "TpmFwVolHob->Tcg2SpecVersion = %x \n",TpmFwVolHob->Tcg2SpecVersion));
+        DEBUG ((-1, "TpmFwVolHob address = %x \n", TpmFwVolHob));
         
         TpmFwVolHob+=1;
     }
@@ -2305,7 +2548,7 @@ EFI_STATUS FindAndMeasureDxeCore(CONST EFI_PEI_SERVICES  **PeiServices)
 //**********************************************************************
 EFI_STATUS
 EFIAPI AmiTpm20PlatformPeiEntry(
-    IN EFI_PEI_FILE_HANDLE  FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices
 )
 {
@@ -2316,7 +2559,16 @@ EFIAPI AmiTpm20PlatformPeiEntry(
 #endif
     TCG_PLATFORM_SETUP_INTERFACE    *TcgPeiPolicy;
     TCG_CONFIGURATION               ConfigFlags;
+    EFI_GUID                        gTcgPeiPolicyGuid =\
+            TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
+#if defined(TcgNistSp800_155_SUPPORT) && (TcgNistSp800_155_SUPPORT == 1)
+    BOOLEAN                         measureSpecIdEvent = TRUE;
+#else
+    BOOLEAN                         measureSpecIdEvent = FALSE;
+#endif
     EFI_BOOT_MODE       BootMode;
+    gFfsHeader = FfsHeader;
+
 
 #if FTpmPlatformProfile == 1
     Status = EFI_SUCCESS;
@@ -2332,7 +2584,7 @@ EFIAPI AmiTpm20PlatformPeiEntry(
                  PeiServices,
                  &gAmiTreePpiGuid,
                  0, NULL,
-                 (void **)&TrEEPeiPpi);
+                 &TrEEPeiPpi);
 
     if(EFI_ERROR(Status) || TrEEPeiPpi == NULL )return Status;
 
@@ -2340,9 +2592,9 @@ EFIAPI AmiTpm20PlatformPeiEntry(
                  PeiServices,
                  &gTcgPeiPolicyGuid,
                  0, NULL,
-                 (void **)&TcgPeiPolicy);
+                 &TcgPeiPolicy);
 
-    if(TcgPeiPolicy == NULL || EFI_ERROR(Status))
+    if(TcgPeiPolicy == NULL)
     {
         return EFI_NOT_FOUND;
     }
@@ -2364,42 +2616,23 @@ EFIAPI AmiTpm20PlatformPeiEntry(
     {
         return EFI_SUCCESS;
     }
-       
-    if(BootMode == BOOT_IN_RECOVERY_MODE){
-        
-        Status = CapAllTpm2Pcrs(PeiServices, TrEEPeiPpi, 0);
-        DEBUG ((DEBUG_INFO, "Tcg2 Boot in recovery CapPcrs Status =%r \n", Status));
-        
-        Status = AmiPlatformTpmPei2HierarchyControl(PeiServices, TrEEPeiPpi, TPM_RH_PLATFORM,\
-                                                        NULL, TPM_RH_ENDORSEMENT,  0);
-        if(EFI_ERROR(Status)){
-            DEBUG ((DEBUG_INFO, "Tcg2 Boot in recovery Disable EH Status =%r \n", Status));
-        }
-        Status = AmiPlatformTpmPei2HierarchyControl(PeiServices, TrEEPeiPpi, TPM_RH_PLATFORM,\
-                                                        NULL, TPM_RH_OWNER,  0);
-        if(EFI_ERROR(Status)){
-            DEBUG ((DEBUG_INFO, "Tcg2 Boot in recovery Disable SH Status =%r \n", Status));
-        }
-    }
 
-    if(ConfigFlags.Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
+    if(measureSpecIdEvent == TRUE || ConfigFlags.Tcg2SpecVersion ==  TCG2_PROTOCOL_SPEC_TCG_2)
     {
         Status =  MeasureTCGPcClientSpecID(PeiServices);
-        if ( EFI_ERROR( Status ))
-        {
-            DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-        }
     }
-    
 #if defined(TcgNistSp800_155_SUPPORT) && (TcgNistSp800_155_SUPPORT == 1)
     Status =  MeasureNISTManifest(PeiServices);
 #endif
-    
     Status = Tpm20MeasureCRTMVersionFuncPtr( PeiServices, TrEEPeiPpi);
 
     if ( !EFI_ERROR( Status ))
     {
-        Status = FindAndMeasureDxeCore(PeiServices);
+#if defined(SAVE_ENTIRE_FV_IN_MEM) && SAVE_ENTIRE_FV_IN_MEM == 0
+        Status = MeasureFVOnMemAvail( (EFI_PEI_SERVICES**)PeiServices, NULL, NULL );
+#else
+    Status = FindAndMeasureDxeCore(PeiServices);
+#endif
     }
     return Status;
 

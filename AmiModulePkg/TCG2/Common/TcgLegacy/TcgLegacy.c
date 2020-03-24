@@ -31,20 +31,20 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Efi.h>
+#include <EFI.h>
 #include <TcgLegacy.h>
-#include "Token.h"
-#include <AmiTcg/TCGMisc.h>
-#include <Protocol/LegacyRegion.h>
-#include <AmiTcg/TcgCommon12.h>
-#include "Protocol/TcgTcmService.h"
-#include "Protocol/TcgService.h"
-#include "Protocol/TpmDevice.h"
-#include <Protocol/FirmwareVolume2.h>
-#include <Protocol/LegacyBios.h>
-#include <Protocol/LegacyRegion2.h>
-#include <AmiTcg/TrEEProtocol.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include "token.h"
+#include <AmiTcg\TCGMisc.h>
+#include <Protocol\LegacyRegion.h>
+#include <AmiTcg\TcgCommon12.h>
+#include "protocol\TcgTcmService.h"
+#include "protocol\TcgService.h"
+#include "protocol\TpmDevice.h"
+#include <Protocol\FirmwareVolume2.h>
+#include <Protocol\LegacyBios.h>
+#include <Protocol\LegacyRegion2.h>
+#include <AmiTcg\TrEEProtocol.h>
+#include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Guid/EventLegacyBios.h>
 #include <Library/DevicePathLib.h>
@@ -52,12 +52,40 @@
 #include<Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Guid/HobList.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+
+
+EFI_GUID  gEfiAmiTcgWakeEventDataHobGuid = EFI_TCG_WAKE_EVENT_DATA_HOB_GUID;
+EFI_GUID  gEfiAmiHobListGuid     = TCG_EFI_HOB_LIST_GUID;
+EFI_GUID  gEfiAmiTcgLogHobGuid   = EFI_TCG_LOG_HOB_GUID;
+EFI_GUID  gEfiIntTcgProtocolGuid = EFI_TCG_PROTOCOL_GUID;
+
+
 
 #define  GUID_VARIABLE_DECLARATION( Variable, Guid ) extern EFI_GUID Variable
+EFI_GUID gEfiAmiTHobListGuid = TCG_EFI_HOB_LIST_GUID;
 
-#include "AmiTcg/TcgPc.h"
+#include "Amitcg\TcgPc.h"
+
+void* AllocateRTMemory (
+    UINTN size );
+
+EFI_GUID  TCGLEGX16_FILE_GUID
+ = {0x142204e2, 0xc7b1, 0x4af9, 0xa7, 0x29, 0x92, 0x37, 0x58, 0xd9, 0x6d, 0x3};
+
+EFI_GUID  TPM32_FILE_GUID = 
+   {0xaa31bc6, 0x3379, 0x41e8, 0x82, 0x5a, 0x53, 0xf8, 0x2c, 0xc0, 0xf2, 0x54};
+
+EFI_GUID  MPTPM_FILE_GUID
+  ={0x7d113aa9, 0x6280, 0x48c6, 0xba, 0xce, 0xdf, 0xe7, 0x66, 0x8e, 0x83, 0x7};
+
+EFI_GUID  TCMLEGX16_FILE_GUID
+ = {0x1E753E16, 0xDCEF, 0x47d0, 0x9A, 0x38, 0x7A, 0xDE, 0xCD, 0xB9, 0x83, 0xED};
+
+EFI_GUID  TCM32_FILE_GUID = 
+   {0xB74E676E,0x3B2E, 0x483f, 0x94, 0x58, 0xC3, 0x78, 0xFE, 0x0A, 0xC6, 0x9F};
+
+
+EFI_GUID  gEfiLegacyRegionProtocol = EFI_LEGACY_REGION_PROTOCOL_GUID;
 
 #define GET_HOB_TYPE( Hob )     ((Hob).Header->HobType)
 #define GET_HOB_LENGTH( Hob )   ((Hob).Header->HobLength)
@@ -70,12 +98,15 @@ static EFI_TCG_PROTOCOL * gTcgProtocol   = 0;
 extern TCG_ACPI_TABLE   mTcgAcpiTableTemplate;
 UINT8                   Tpm20Support = 0;
 
+
 #define _CR( Record, TYPE,\
        Field )((TYPE*) ((CHAR8*) (Record) - (CHAR8*) &(((TYPE*) 0)->Field)))
 
 #define TCG_DXE_PRIVATE_DATA_FROM_THIS( This )  \
     _CR( This, TCG_DXE_PRIVATE_DATA, TcgServiceProtocol )
 
+#define TCM_DXE_PRIVATE_DATA_FROM_THIS( This )  \
+    _CR( This, TCM_DXE_PRIVATE_DATA, TcgServiceProtocol )
 
 typedef struct _TCG_DXE_PRIVATE_DATA
 {
@@ -83,12 +114,20 @@ typedef struct _TCG_DXE_PRIVATE_DATA
     EFI_TPM_DEVICE_PROTOCOL *TpmDevice;
 } TCG_DXE_PRIVATE_DATA;
 
+typedef struct _TCM_DXE_PRIVATE_DATA
+{
+    EFI_TCM_PROTOCOL        TcgServiceProtocol;
+    EFI_TPM_DEVICE_PROTOCOL *TpmDevice;
+} TCM_DXE_PRIVATE_DATA;
 
 EFI_TREE_PROTOCOL          *TrEEProtocolInstance = NULL;
+#define                     MAX_LOG_AREA_SIZE (32 * 1024) // Make this an SDL token
+
 
 #define SEG_ALIGNMENT    0x10
 
 VOID DummyFunction(IN EFI_EVENT Event, IN VOID *Context) {}
+
 
 VOID* GetHob(
     IN UINT16 Type,
@@ -178,6 +217,7 @@ EFI_STATUS TcgGetNextGuidHob(
     return Status;
 }
 
+
 void TcgLogEventProxy(
     TCG_PCR_EVENT* data )
 {
@@ -218,9 +258,9 @@ void linkTPMDriver(
 {
     TCG_LOG_HOB                         *TcgLog;
     TCG_EFI_BOOT_SERVICE_CAPABILITY     Cap;
-    EFI_PHYSICAL_ADDRESS                EventLogLoc = 0;
-    EFI_PHYSICAL_ADDRESS                LastEv = 0;
-    BOOLEAN                             IsTrancated = TRUE;
+    EFI_PHYSICAL_ADDRESS                EventLogLoc;
+    EFI_PHYSICAL_ADDRESS                LastEv;
+    BOOLEAN                             IsTrancated;
     EFI_STATUS                          Status;
 
     gTcgProtocol = tcgProtocol;
@@ -236,7 +276,7 @@ void linkTPMDriver(
         TcgLog = (TCG_LOG_HOB*)(UINTN)EventLogLoc;
         TcgLog--;
 
-        DEBUG((DEBUG_INFO, "\n\n linkTPMDriver: TCGLOG( %x )\n", TcgLog));
+        DEBUG((-1, "\n\n linkTPMDriver: TCGLOG( %x )\n", TcgLog));
 
 
         tpm32->log.memptr      = (UINT32)( UINTN ) EventLogLoc;
@@ -251,7 +291,7 @@ void linkTPMDriver(
         Status = TrEEProtocolInstance->GetEventLog(TrEEProtocolInstance, TREE_BOOT_HASH_ALG_SHA1,\
                                            &EventLogLoc, &LastEv, &IsTrancated);
         
-        DEBUG((DEBUG_INFO, "\n\n TcgLegacy.c Status = %r \n", Status));
+        DEBUG((-1, "\n\n TcgLegacy.c Status = %r \n", Status));
         
         tpm32->lastEventShadow   = 0;
         tpm32->ptrOnTPMFailue    = 0;
@@ -287,28 +327,28 @@ void linkTPMDriver(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID EFIAPI UnlinkTPM32fromEFI(
+EFI_STATUS EFIAPI UnlinkTPM32fromEFI(
     IN EFI_EVENT Event,
     IN VOID      *Context )
 {
     TCG_LOG_HOB                     *TcgLog;
     TPM32HEADER                     * tpm32 = (TPM32HEADER*)Context;
-    EFI_PHYSICAL_ADDRESS            logStart = 0,         logLast = 0;
+    EFI_PHYSICAL_ADDRESS            logStart,         logLast;
     TCG_EFI_BOOT_SERVICE_CAPABILITY TcgCapability;
-    BOOLEAN                         IsTrancated = TRUE;
+    BOOLEAN                         IsTrancated;
     EFI_STATUS                      Status;
     UINT32                          FreeLogSize;
     SHA1_PCR_EVENT                   *PtrtoLastEvent;
 
     if ( installedTpm32 == 0 )
     {
-      return; 
+      return EFI_SUCCESS; 
     }
     
     if(Tpm20Support == 0)
     {
         //ASSERT( installedTpm32 == tpm32 );
-        DEBUG((DEBUG_INFO, "UnlinkTPM32fromEFI: TPM32( %x )\n", tpm32));
+        DEBUG((-1, "UnlinkTPM32fromEFI: TPM32( %x )\n", tpm32));
 
         tpm32->lastEventShadow   = 0;
         tpm32->efi_log_event_ptr = 0;
@@ -322,7 +362,7 @@ VOID EFIAPI UnlinkTPM32fromEFI(
         {
             tpm32->last    = 0;
             tpm32->freelog = 0;
-            return;
+            return Status;
         }
         TcgLog = (TCG_LOG_HOB*)(UINTN)logStart;
         TcgLog--;
@@ -336,10 +376,10 @@ VOID EFIAPI UnlinkTPM32fromEFI(
     }else{
 
         ASSERT( installedTpm32 == tpm32 );
-        DEBUG((DEBUG_INFO, "UnlinkTPM32fromEFI: TPM32( %x )\n", tpm32));
+        DEBUG((-1, "UnlinkTPM32fromEFI: TPM32( %x )\n", tpm32));
         installedTpm32 = 0;
 
-        if(TrEEProtocolInstance ==NULL) return;
+        if(TrEEProtocolInstance ==NULL) return EFI_SUCCESS;
        
         Status = TrEEProtocolInstance->GetEventLog(TrEEProtocolInstance, TREE_BOOT_HASH_ALG_SHA1,\
                                            &logStart, &logLast, &IsTrancated);
@@ -361,7 +401,107 @@ VOID EFIAPI UnlinkTPM32fromEFI(
 
     }
 
-    return;
+    return EFI_SUCCESS;
+}
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Procedure:   TcmGetRawImage
+//
+// Description: Loads binary from RAW section of main firwmare volume
+//
+//
+// Input:       IN     EFI_GUID   *NameGuid,
+//              IN OUT VOID   **Buffer,
+//              IN OUT UINTN  *Size
+//
+// Output:      EFI STATUS
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS TcmGetRawImage(
+    IN EFI_GUID  *NameGuid,
+    IN OUT VOID  **Buffer,
+    IN OUT UINTN *Size  )
+{
+    EFI_STATUS                   Status;
+    EFI_HANDLE                   *HandleBuffer = 0;
+    UINTN                        HandleCount   = 0;
+    UINTN                        i;
+    EFI_FIRMWARE_VOLUME2_PROTOCOL *Fv;
+    UINT32                       AuthenticationStatus;
+    EFI_FV_FILETYPE               FileType;
+    EFI_FV_FILE_ATTRIBUTES        FileAttributes;
+
+    
+    Status = gBS->LocateHandleBuffer(
+        ByProtocol,
+        &gEfiFirmwareVolume2ProtocolGuid,
+        NULL,
+        &HandleCount,
+        &HandleBuffer
+        );
+
+    if ( EFI_ERROR( Status ) || HandleCount == 0 )
+    {
+        return EFI_NOT_FOUND;
+    }
+
+    //
+    // Find desired image in all Fvs
+    //
+    for ( i = 0; i < HandleCount; i++ )
+    {
+        Status = gBS->HandleProtocol(
+            HandleBuffer[i],
+            &gEfiFirmwareVolume2ProtocolGuid,
+            &Fv
+            );
+
+        if ( EFI_ERROR( Status ))
+        {
+            gBS->FreePool( HandleBuffer );
+            return EFI_LOAD_ERROR;
+        }
+
+        DEBUG((-1, "Tcm Before ReadSection\n"));
+        
+        //
+        // Try a raw file
+        //
+        *Buffer = NULL;
+        *Size   = 0;
+        Status = Fv->ReadFile (
+                            Fv,
+                            NameGuid,
+                            Buffer,
+                            Size,
+                            &FileType,
+                            &FileAttributes,
+                            &AuthenticationStatus
+                            );
+        
+        DEBUG((-1, "Tcm ReadSection Status %r \n",  Status));
+        if ( !EFI_ERROR( Status ))
+        {
+            DEBUG((-1, "Buffer Sign  %x \n", *( (UINT16 *) *Buffer)));
+            break;
+        }
+    }
+    gBS->FreePool( HandleBuffer );
+
+    if ( i >= HandleCount )
+    {
+        return EFI_NOT_FOUND;
+    }
+
+    return EFI_SUCCESS;
 }
 
 
@@ -399,7 +539,11 @@ EFI_STATUS GetRawImage(
     EFI_FIRMWARE_VOLUME2_PROTOCOL *Fv;
     UINT32                       AuthenticationStatus;
 
-        
+    
+    if(IsTcmSupportType()){
+    	return (TcmGetRawImage(NameGuid,Buffer, Size));
+    }
+    
     Status = gBS->LocateHandleBuffer(
         ByProtocol,
         &gEfiFirmwareVolume2ProtocolGuid,
@@ -421,7 +565,7 @@ EFI_STATUS GetRawImage(
         Status = gBS->HandleProtocol(
             HandleBuffer[i],
             &gEfiFirmwareVolume2ProtocolGuid,
-            (void **)&Fv
+            &Fv
             );
 
         if ( EFI_ERROR( Status ))
@@ -464,82 +608,31 @@ EFI_STATUS GetRawImage(
 //**********************************************************************
 //<AMI_PHDR_START>
 //
+// Procedure:   AllocateRTMemory
 //
-// Name:  AllocateMemoryBelow4G
+// Description: Allocates memory used by TCG Legacy code during run-time
 //
-// Description: Allocate Memory Pages below 4G
 //
-// Input:       IN  EFI_MEMORY_TYPE
-//              IN  Size
+// Input:       IN  UINTN size
 //
-// Output:      VOID* allocated memory address
+// Output:      VOID*
 //
+// Modified:
+//
+// Referrals:
+//
+// Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-
-VOID*
-AllocateMemoryBelow4G (
-  IN EFI_MEMORY_TYPE    MemoryType,
-  IN UINTN              Size
-  )
+void* AllocateRTMemory(
+    IN UINTN size )
 {
-  UINTN                 Pages;
-  EFI_PHYSICAL_ADDRESS  Address;
-  EFI_STATUS            Status;
-  VOID*                 Buffer;
-  
-  Pages = EFI_SIZE_TO_PAGES (Size);
-  
-  Address = 0xffffffff;		//limit to 4G
+    EFI_STATUS Status;
+    void       * addr = 0;
 
-  Status  = gBS->AllocatePages (
-                   AllocateMaxAddress,
-                   MemoryType,
-                   Pages,
-                   &Address
-                   );
-  
-  ASSERT_EFI_ERROR (Status);
-
-  Buffer = (UINT8 *) (UINTN) Address;
-  
-  if(Status == EFI_SUCCESS) ZeroMem (Buffer, Size);
-
-  return Buffer;
-}
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-//
-// Name:  ChecksumCSM16Header
-//
-// Description: Calculates and updates a checksum field of $EFI header.
-//
-// Input:       IN   Csm16Header Pointer to the EFI_COMPATIBILITY16_TABLE structure
-//
-// Output:      
-//
-//<AMI_PHDR_END>
-//**********************************************************************
-
-VOID
-ChecksumCSM16Header (
-    EFI_COMPATIBILITY16_TABLE   *Csm16Header
-)
-{
-    UINT8   i;
-    UINT8   chksum;
-    UINT8   *p;
-
-    Csm16Header->TableChecksum = 0;
-    p = (UINT8*)Csm16Header;
-    for (chksum = 0, i = 0; i < Csm16Header->TableLength; i++) {
-        chksum += *p++;
-    }
-    Csm16Header->TableChecksum = ~(--chksum);
-
-    return;
+    Status = gBS->AllocatePool( EfiRuntimeServicesCode, size, &addr );
+    DEBUG((-1, "Legacy.c::AllocateRTMemory Status = %r \n",  Status));
+    return addr;
 }
 
 //**********************************************************************
@@ -615,7 +708,7 @@ VOID*  TcgLegacyLocateHob(
 {
     VOID *HobStart;
     VOID *PtrHob;
-
+    EFI_GUID       localHobListGuid = TCG_EFI_HOB_LIST_GUID;
 
     while ( NoTableEntries > 0 )
     {
@@ -623,7 +716,7 @@ VOID*  TcgLegacyLocateHob(
 
         if ((!CompareMem(
                  &ConfigTable[NoTableEntries].VendorGuid,
-                 &gEfiHobListGuid, sizeof(EFI_GUID)
+                 &localHobListGuid, sizeof(EFI_GUID)
                  )))
         {
             HobStart = ConfigTable[NoTableEntries].VendorTable;
@@ -646,19 +739,20 @@ EFI_STATUS CreateLegacyBootEvent(
     IN VOID *pNotifyContext, OUT EFI_EVENT *pEvent
 )
 {
-
+    static EFI_GUID guidLegacyBoot = EFI_EVENT_LEGACY_BOOT_GUID;
     return gBS->CreateEventEx(
         EVT_NOTIFY_SIGNAL, NotifyTpl,
         (NotifyFunction) ? NotifyFunction : DummyFunction,
-        pNotifyContext, &gEfiEventLegacyBootGuid,
+        pNotifyContext, &guidLegacyBoot,
         pEvent
     );
 }
 
+
 //**********************************************************************
 //<AMI_PHDR_START>
 //
-// Procedure:   InitTCGLegacyInterface
+// Procedure:   GetTCGLegacyInterface
 //
 // Description: Loads legacy BIOS binary extensions (TcgLegX16,
 //                TPM32 and MPTPM ) and initializes the TCG Legacy support.
@@ -675,199 +769,216 @@ EFI_STATUS CreateLegacyBootEvent(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-EFI_STATUS 
-EFIAPI
-InitTCGLegacyInterface(
+EFI_STATUS InitTCGLegacyInterface(
     IN EFI_HANDLE       ImageHandle,
     IN EFI_SYSTEM_TABLE *SystemTable )
 {
     EFI_STATUS                 Status;
     TCG_LEGX16_HEADER          *legX16header;
-    void                       *legX16dest;
+    void                       * legX16dest;
     UINTN                      legX16size;
     EFI_LEGACY_BIOS_PROTOCOL   *legBios;
-    void                       *rawPtr;
+    void                       * rawPtr;
     static TpmBinaryStruct     tpmBinary;
     UINT16                     segLegX16;
-    TPM32HEADER                *tpm32hdr;
+    TPM32HEADER                * tpm32hdr;
     UINTN                      tpm32size;
-    TPMBIOSDriverHeader        *mptpmHdr;
+    TPMBIOSDriverHeader        * mptpmHdr;
 #if TCG_LEGACY == 0
     UINTN                      mpTpmSize;
 #endif
     EFI_TCG_PROTOCOL           *tcgProtocol;
     EFI_EVENT                  event;
-    EFI_LEGACY_REGION2_PROTOCOL *iRegion;
-    FAR32LOCALS                *LegFill = NULL;
-    UINT32		       		   Granularity;
-    EFI_GUID                   X16FileGuid  = gTcgLegX16FileGuid;
-    EFI_GUID                   X32FileGuid  = gTpm32FileGuid;
-    EFI_IA32_REGISTER_SET      Regs;
-    void                       *legPtr = 0;
-    EFI_COMPATIBILITY16_TABLE  *bfi16  = 0;
-    EFI_PHYSICAL_ADDRESS       Buffer = 0;
-    UINT8					   mtpmallocated = 0;
+    EFI_LEGACY_REGION2_PROTOCOL * iRegion;
+    EFI_GUID                   gMpDriverHobGuid = EFI_TCG_MPDriver_HOB_GUID;
+    FAR32LOCALS                *LegFill         =    NULL;
+    UINT32					Granularity;
+    void                       *Table           = NULL;
+    UINTN                      TableSize        = 0;
+    UINTN                      Location         = 0;
+    EFI_GUID                   gEfiTrEEProtocolGuid = EFI_TREE_PROTOCOL_GUID;
     
-    if(IsTcmSupportType()){
-    	return EFI_SUCCESS;
-    }
-    
-    if ( installedTpm32 != 0 ){
+    if ( installedTpm32 != 0 )
+    {
         ASSERT( installedTpm32 == 0 );
         return EFI_UNSUPPORTED;
     }
     
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcgProtocol);
-    
-    if ( EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed Locate: error %r\n",  Status));
+    //
+    // Access EFI TPM driver
+    //
+    Status = gBS->LocateProtocol( &gEfiIntTcgProtocolGuid, NULL,
+                                  &tcgProtocol );
+
+    if ( EFI_ERROR( Status ))
+    {
+        DEBUG((-1, "TCG Service is not found: error=%x\n",  Status));
         tcgProtocol = 0;
-        Status = gBS->LocateProtocol( &gEfiTrEEProtocolGuid, NULL, (void **)&TrEEProtocolInstance);
+        Status = gBS->LocateProtocol( &gEfiTrEEProtocolGuid, NULL, &TrEEProtocolInstance );
         if(EFI_ERROR(Status))return Status;
         Tpm20Support = 1;
     }
 
-    Status = gBS->LocateProtocol( &gEfiLegacyBiosProtocolGuid, NULL, (void **)&legBios);
-    
-    if ( EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed Locate Legacybiosprotocol %r\n",  Status));
+
+    //
+    // Access legacyBios internals
+    //
+    Status = gBS->LocateProtocol(
+            &gEfiLegacyBiosProtocolGuid,
+            NULL,
+            &legBios
+            );
+
+    if ( EFI_ERROR( Status ))
+    {
+        DEBUG((-1, "Failed Locate Legacybiosprotocol=%r\n",  Status));
         return Status;
     }
 
-    Status = gBS->LocateProtocol( &gEfiLegacyRegion2ProtocolGuid, NULL, (void **)&iRegion);
-    
-    if ( EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed Locate Legacybiosprotocol2 %r\n",  Status));        
-        return Status;
+#if TCG_LEGACY == 0
+    if(IsTcmSupportType()){
+        TCGLEGX16_FILE_GUID = TCMLEGX16_FILE_GUID;
+        TPM32_FILE_GUID = TCM32_FILE_GUID;
     }
+#else
+	TCGLEGX16_FILE_GUID = TCMLEGX16_FILE_GUID;
+        TPM32_FILE_GUID = TCM32_FILE_GUID;
+#endif
+
 
     //
     // Load LEGX16 into legacy region
     //
     rawPtr = 0;
-    Status = GetRawImage( &X16FileGuid, &rawPtr, &legX16size);
+    Status = GetRawImage( &TCGLEGX16_FILE_GUID, &rawPtr, &legX16size    );
 
-    if ( EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed to load LEGX16: error=%r\n",  Status));
+    if ( EFI_ERROR( Status ))
+    {
+        DEBUG((-1, "Failed to load LEGX16: error=%x\n",  Status));
         return Status;
     }
-    
     legX16header = (TCG_LEGX16_HEADER* )rawPtr;
     
     Status = legBios->GetLegacyRegion( legBios, legX16size + SEG_ALIGNMENT, 0,
             SEG_ALIGNMENT, &legX16dest);
             
-    if ( EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed to allocate legacy region LEGX16 file error=%r\n",  Status));        
-        return Status;
-    }
-    //
-    // Load TPM32 into runtime-code memory
-    //
-    Status = GetRawImage( &X32FileGuid, &rawPtr, &tpm32size);
-
-    if ( EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed to load TPM32: error=%r\n",  Status));
+    if ( EFI_ERROR( Status ))
+    {
+        DEBUG((-1, "GetLegacy Region Status =%r\n",  Status));        
         return Status;
     }
     
-    Buffer = (EFI_PHYSICAL_ADDRESS)(UINTN)AllocateMemoryBelow4G(EfiRuntimeServicesCode,tpm32size);
-    if(Buffer == 0xffffffff) return EFI_OUT_OF_RESOURCES;
+    DEBUG((-1, "GetLegacy Region Status =%r\n",  Status));        
+        
+    segLegX16 = (UINT16)((UINTN)legX16dest >> 4 );
 
-    tpm32hdr = (VOID *)Buffer;
-    gBS->CopyMem( tpm32hdr, rawPtr, tpm32size );
+    //
+    // Load TPM32 into runtime-code memory
+    //
+    Status = GetRawImage( &TPM32_FILE_GUID, &rawPtr, &tpm32size    );
 
-    Buffer = (EFI_PHYSICAL_ADDRESS)(UINTN)AllocateMemoryBelow4G(EfiRuntimeServicesCode,TPM32_SCRATCHMEM_SIZE);
-    if(Buffer == 0xffffffff){
-	    gBS->FreePages ((EFI_PHYSICAL_ADDRESS) (UINTN) tpm32hdr,EFI_SIZE_TO_PAGES (tpm32size));
-    	return EFI_OUT_OF_RESOURCES;
+    if ( EFI_ERROR( Status ))
+    {
+        DEBUG((-1, "Failed to load TPM32: error=%x\n",  Status));
+        return Status;
     }
-    tpm32hdr->scratch.memptr = (UINT32)( UINTN ) Buffer;
-    tpm32hdr->scratch.dwSize = TPM32_SCRATCHMEM_SIZE;
+    tpm32hdr = AllocateRTMemory( tpm32size );
+    gBS->CopyMem( tpm32hdr, rawPtr, tpm32size );
 
     //
     // Load MPTPM into runtime-code memory
     //
 #if TCG_LEGACY == 0
     if(!(IsTcmSupportType())){
-
-      Status = GetRawImage( &gMpTpmFileGuid, &rawPtr, &mpTpmSize );
+      Status = GetRawImage( &MPTPM_FILE_GUID, &rawPtr, &mpTpmSize );
 
       if ( EFI_ERROR( Status )){
-          DEBUG((DEBUG_ERROR, "Failed to load MPTPM: error=%r\n",  Status));
-          goto ERROR_FREE_RESOURCE_1;
-      }
-      
-      Buffer = (EFI_PHYSICAL_ADDRESS)(UINTN)AllocateMemoryBelow4G(EfiRuntimeServicesCode,mpTpmSize);
-      if(Buffer == 0xffffffff){
-          DEBUG((DEBUG_ERROR, "Failed to allocate MPTPM space =%r\n",  Status));    	  
-          goto ERROR_FREE_RESOURCE_1;
-      }
-      
-      mtpmallocated = 1; //indicate tpm binary driver allocated here
-      mptpmHdr = (VOID *)Buffer;
-      gBS->CopyMem( mptpmHdr, rawPtr, mpTpmSize );
-        
+            DEBUG((-1, "Failed to load MPTPM: error=%x\n",  Status));
+            return Status;
+        }
+        mptpmHdr = AllocateRTMemory( mpTpmSize );
+        gBS->CopyMem( mptpmHdr, rawPtr, mpTpmSize );
     }else{
-      LegFill = (FAR32LOCALS*)TcgLegacyLocateHob( gST->NumberOfTableEntries,
+        LegFill = (FAR32LOCALS*)TcgLegacyLocateHob( gST->NumberOfTableEntries,
                                                gST->ConfigurationTable,
-                                               &gEfiTcgMpDriverHobGuid );
-      mptpmHdr = (TPMBIOSDriverHeader*)(UINTN)( LegFill->Offset - LegFill->Codep );
+                                               &gMpDriverHobGuid );
+        mptpmHdr = (TPMBIOSDriverHeader*)(UINTN)( LegFill->Offset - LegFill->Codep );
     }
 #else
     LegFill = (FAR32LOCALS*)TcgLegacyLocateHob( gST->NumberOfTableEntries,
                                                gST->ConfigurationTable,
-                                               &gEfiTcgMpDriverHobGuid );
+                                               &gMpDriverHobGuid );
     mptpmHdr = (TPMBIOSDriverHeader*)(UINTN)( LegFill->Offset - LegFill->Codep );
 #endif
+
+
 
     //
     // Link pointers from TPM32 to MPTPM
     //
-    tpm32hdr->MP_HDR = (UINT32)( UINTN ) mptpmHdr;
-	{
-        UINT32 * p =  (UINT32*)((UINT8*)legX16header + legX16header->wTpm32entryPtr);
+    tpm32hdr->MP_HDR         = (UINT32)( UINTN ) mptpmHdr;
+    tpm32hdr->scratch.memptr =  (UINT32)( UINTN ) AllocateRTMemory(
+        TPM32_SCRATCHMEM_SIZE );
+    tpm32hdr->scratch.dwSize = TPM32_SCRATCHMEM_SIZE;
+    {
+        UINT32 * p
+            =  (UINT32*)((UINT8*)legX16header + legX16header->wTpm32entryPtr);
         *p  = (UINT32)( UINTN ) tpm32hdr + tpm32hdr->entryPoint;
     }
-	
     legX16header->wTpm32hdr = (UINT32)( UINTN ) tpm32hdr;
     linkTPMDriver( tpm32hdr, tcgProtocol );
-    legX16header->regMOR = ((TCG_MOR_REG) << 8);        
+    legX16header->regMOR = ((TCG_MOR_REG) << 8);
+
     //
     // Copy final LegX16 to dest (F000-E000 area)
     //
-    Status = legBios->CopyLegacyRegion( legBios, legX16size, legX16dest, legX16header );
-    if ( EFI_ERROR( Status )){
-        DEBUG((DEBUG_ERROR, "Failed to Copy final LegX16 to dest (F000-E000 area) error=%r\n",  Status));
-        goto ERROR_FREE_RESOURCE_0;
-    }
-    
+    legBios->CopyLegacyRegion( legBios, legX16size, legX16dest, legX16header );
     legX16header = (TCG_LEGX16_HEADER* )legX16dest;
+
+
     //
     // Unlock E000-F000: Init will update variable inside LEGX16
     //
+    Status = gBS->LocateProtocol( &gEfiLegacyRegion2ProtocolGuid, NULL, &iRegion );
+
+    if ( EFI_ERROR( Status ))
+    {
+        DEBUG((-1,
+               "Failed to locate Legacy Region Protocol to unlock E000: %r\n",
+               Status));
+        return Status;
+    }
     Status = iRegion->UnLock( iRegion, 0xE0000, 0x20000,  &Granularity);
-    ASSERT_EFI_ERROR(Status);
-    if (EFI_ERROR(Status)) goto ERROR_FREE_RESOURCE_0;
-    
+
     //
     // Init LEGX16
     //
-    gBS->SetMem( &Regs, sizeof (EFI_IA32_REGISTER_SET), 0 );
-    segLegX16 = (UINT16)((UINTN)legX16dest >> 4 );
-	
-    Status = legBios->FarCall86(
-		      legBios,
-		      segLegX16,
-		      legX16header->InitCode,
-		      &Regs,
-		      NULL,
-		      0 );
-    
-    ASSERT_EFI_ERROR(Status);
-    
-    if (EFI_ERROR(Status)) goto ERROR_LOCK_BIOS;
-    
+    {
+        EFI_IA32_REGISTER_SET Regs;
+
+        if ( EFI_ERROR( Status ))
+        {
+            DEBUG((-1, "Failed to unlock Legacy region E000: %r\n",
+                   Status));
+            return Status;
+        }
+
+       gBS->SetMem( &Regs, sizeof (EFI_IA32_REGISTER_SET), 0 );
+        legBios->FarCall86(
+            legBios,
+            segLegX16,
+            legX16header->InitCode,
+            &Regs,
+            NULL,
+            0
+            );
+    }
+
+    //
+    // Lock E000-F000
+    //
+    iRegion->Lock( iRegion, 0xE0000, 0x20000, &Granularity );
+
     //
     // Fills TpmBinaryStruct : Setup int1Ahook, int19Hook, and osloaderHook
     //
@@ -876,43 +987,6 @@ InitTCGLegacyInterface(
     tpmBinary.int19Ev        = legX16header->int19Ev;
     tpmBinary.intLoaderEv    = legX16header->intLoaderEv;
     tpmBinary.BevBcvEv       = legX16header->BevBcvEv;
-    
-    DEBUG((DEBUG_INFO, "\tLEGX16: %x:%x, %x, %x\n",
-           tpmBinary.wLegX16Seg, tpmBinary.int1a_dispatch, tpmBinary.int19Ev,
-           tpmBinary.intLoaderEv));
-    DEBUG((DEBUG_INFO, "\tTPM32: header:%x entry:%x log:%x logsize:%x\n",
-           (UINT32)( UINTN ) tpm32hdr, (UINT32)( UINTN ) tpm32hdr
-           + tpm32hdr->entryPoint));
-    DEBUG((DEBUG_INFO, "\tMPTPM: %x\n", (UINT32)( UINTN ) mptpmHdr));
-
-    //
-    // Put them int Leg Segment on our own
-    //
-    Status = legBios->GetLegacyRegion( legBios, sizeof(tpmBinary)+ SEG_ALIGNMENT, 0,SEG_ALIGNMENT, &legPtr );
-    if(EFI_ERROR(Status)) goto ERROR_LOCK_BIOS;
-
-    Status = legBios->CopyLegacyRegion( legBios, sizeof(tpmBinary), legPtr, &tpmBinary );
-    if(EFI_ERROR(Status)) goto ERROR_LOCK_BIOS;
-    //We need to UnLock region because the region would be locked by CopyLegacyRegion.
-    //Unlock E000-F000: Update CSM16 table
-    Status = iRegion->UnLock( iRegion, 0xE0000, 0x20000, &Granularity );
-    ASSERT_EFI_ERROR(Status);
-    if (EFI_ERROR(Status)) goto ERROR_LOCK_BIOS;
-    
-    bfi16 = FindCompatibility16Table();
-
-    if( bfi16 != 0 ){
-        DEBUG((DEBUG_INFO, "\tFound BFI at 0x%x\n", bfi16));
-        bfi16->TpmSegment =  (UINT16)((UINTN)legPtr >> 4 );
-        bfi16->TpmOffset  = 0;
-        ChecksumCSM16Header(bfi16);  // Update CSM16 header checksum
-    }
-    else
-    {
-        DEBUG((DEBUG_ERROR, "\t!!!Not Found BFI\n"));
-    }
-
-    Status = iRegion->Lock( iRegion, 0xE0000, 0x20000, &Granularity );
 
     //
     // Hookup for BootimeServices shutdown: need to strip *installedTpm32 off the
@@ -920,6 +994,13 @@ InitTCGLegacyInterface(
     //
     installedTpm32 = tpm32hdr;
 
+    #if defined(EFI_EVENT_SIGNAL_READY_TO_BOOT) && EFI_SPECIFICATION_VERSION <\
+    0x20000
+    EFI_VERIFY(
+        Status = gBS->CreateEvent( EFI_EVENT_SIGNAL_LEGACY_BOOT,
+                                   EFI_TPL_CALLBACK, UnlinkTPM32fromEFI,
+                                   tpm32hdr, &event ));
+    #else
     EFI_VERIFY(
         Status = CreateLegacyBootEvent(
             EFI_TPL_CALLBACK,
@@ -927,21 +1008,72 @@ InitTCGLegacyInterface(
             tpm32hdr,
             &event
             ));
+    #endif
+    DEBUG((-1, "\tLEGX16: %x:%x, %x, %x\n",
+           tpmBinary.wLegX16Seg, tpmBinary.int1a_dispatch, tpmBinary.int19Ev,
+           tpmBinary.intLoaderEv));
+    DEBUG((-1, "\tTPM32: header:%x entry:%x log:%x logsize:%x\n",
+           (UINT32)( UINTN ) tpm32hdr, (UINT32)( UINTN ) tpm32hdr
+           + tpm32hdr->entryPoint));
+    DEBUG((-1, "\tMPTPM: %x\n", (UINT32)( UINTN ) mptpmHdr));
+
+    //
+    // Returns table pointing to TpmBinaryStruct
+    //
+    if ( Table != NULL && TableSize != 0 )
+    {
+        Table     = &tpmBinary;
+        TableSize = (UINTN)sizeof(tpmBinary);
+        
+        DEBUG((-1, "tpmBinary TableSize: %x\n", TableSize));
+        
+        if ( Location )
+        {
+            Location = 0;
+        }
+    }
+    else {
+        //
+        // Put them int Leg Segment on our own
+        //
+        void                      * legPtr = 0;
+        EFI_COMPATIBILITY16_TABLE * bfi16  = 0;
+		UINT8					  * p;
+    	UINT8   				  chksum;
+		UINT8					  i=0;
+
+        EFI_VERIFY(
+            legBios->GetLegacyRegion( legBios, sizeof(tpmBinary)
+                                      + SEG_ALIGNMENT, 0,
+                                      SEG_ALIGNMENT, &legPtr ));
+        Status = iRegion->UnLock( iRegion, 0xE0000, 0x20000, &Granularity );
+        DEBUG((-1, "iRegion->UnLock Status = %r\n",  Status));
+        gBS->CopyMem( legPtr, &tpmBinary, sizeof(tpmBinary));
+        bfi16 = FindCompatibility16Table( );
+
+        if ( bfi16 != 0 )
+        {
+            DEBUG((-1, "\tFound BFI at 0x%x\n", bfi16));
+            bfi16->TpmSegment =  (UINT16)((UINTN)legPtr >> 4 );
+            bfi16->TpmOffset  = 0;
+
+			bfi16->TableChecksum = 0;
+   			p = (UINT8*)bfi16;
+    		for (chksum=0, i=0; i<bfi16->TableLength; i++) {
+        	chksum+=*p++;
+    		}
+    		bfi16->TableChecksum = ~(--chksum);
+        }
+				
+		
+        else {
+                 DEBUG((-1, "\t!!!Not Found BFI\n"));
+        }
+        iRegion->Lock( iRegion, 0xE0000, 0x20000, &Granularity );
+    }
+
 
     return EFI_SUCCESS;
-    
-ERROR_LOCK_BIOS:    	
-	Status = iRegion->Lock( iRegion, 0xE0000, 0x20000, &Granularity );
-    ASSERT_EFI_ERROR(Status);
-ERROR_FREE_RESOURCE_0:	
-	if(mtpmallocated == 1) gBS->FreePages ((EFI_PHYSICAL_ADDRESS) (UINTN) mptpmHdr,EFI_SIZE_TO_PAGES (mpTpmSize));
-ERROR_FREE_RESOURCE_1:
-	gBS->FreePages ((EFI_PHYSICAL_ADDRESS) (UINTN) tpm32hdr,EFI_SIZE_TO_PAGES (tpm32size));	
-	gBS->FreePages ((EFI_PHYSICAL_ADDRESS) (UINTN) (tpm32hdr->scratch.memptr),EFI_SIZE_TO_PAGES (TPM32_SCRATCHMEM_SIZE));
-	
-    DEBUG((DEBUG_ERROR, "InitTCGLegacyInterface exit fail Status = %r\n",Status));
-	return Status;
-    
 }
 
 //*************************************************************************

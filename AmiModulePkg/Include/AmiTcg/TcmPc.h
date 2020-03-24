@@ -28,8 +28,7 @@
 //*************************************************************************
 #ifndef _TCMPC_H_
 #define _TCMPC_H_
-#include "AmiTcg/TcgEFI12.h"
-#include <AmiTcg/Tcm.h>
+#include "AmiTcg\TcgEfi12.h"
 
 
 #pragma pack (push)
@@ -47,46 +46,46 @@ typedef struct tdTCM_PCR_EVENT
 } TCM_PCR_EVENT;
 
 
-typedef struct _EFI_TCM_EV_S_CRTM_VERSION
+struct _EFI_TCM_EV_S_CRTM_VERSION
 {
     EFI_GUID                          VersionGuid;
-}EFI_TCM_EV_S_CRTM_VERSION;
+};
 
 
-typedef struct _EFI_TCM_EV_POST_CODE
+struct _EFI_TCM_EV_POST_CODE
 {
     EFI_PHYSICAL_ADDRESS              PostCodeAddress;
     UINT64                            PostCodeLength;
-}EFI_TCM_EV_POST_CODE;
+};
 
 
-typedef struct _EFI_TCM_EV_TAG_OPTION_ROM_EXECUTE
+struct _EFI_TCM_EV_TAG_OPTION_ROM_EXECUTE
 {
     UINT16     Reserved;
     UINT16     PFA;
     TCM_DIGEST Hash;
-} EFI_TCM_EV_TAG_OPTION_ROM_EXECUTE;
+};
 
 
-typedef struct _EFI_TCM_EV_CPU_MICROCODE
+struct _EFI_TCM_EV_CPU_MICROCODE
 {
     EFI_PHYSICAL_ADDRESS MicrocodeEntrypoint;
-}EFI_TCM_EV_CPU_MICROCODE;
+};
 
 
-typedef union _EFI_TCM_EV_TAG_EVENT_DATA
+union _EFI_TCM_EV_TAG_EVENT_DATA
 {
     struct _EFI_TCM_EV_TAG_OPTION_ROM_EXECUTE
         OptionRomExecute;
-}EFI_TCM_EV_TAG_EVENT_DATA;
+};
 
 
-typedef struct _EFI_TCM_EV_TAG
+struct _EFI_TCM_EV_TAG
 {
     UINT32 EventID;
     UINT32 EventSize;
     union _EFI_TCM_EV_TAG_EVENT_DATA EventData;
-}EFI_TCM_EV_TAG;
+};
 
 
 typedef struct _EFI_TCM_PCR_EVENT_HEADER

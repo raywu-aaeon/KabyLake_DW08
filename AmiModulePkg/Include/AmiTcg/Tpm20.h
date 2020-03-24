@@ -33,7 +33,7 @@
 #ifndef _TPM20_H_
 #define _TPM20_H_
 
-#include <Uefi.h>
+#include <uefi.h>
 
 #pragma pack (push)
 #pragma pack (1)
@@ -46,8 +46,6 @@
 #ifdef FALSE
 #undef FALSE
 #endif
-
-
 
 // Table 189 -- Hash Algorithm Digest and Block Size Values
 #define    SHA1_DIGEST_SIZE            20    // 20

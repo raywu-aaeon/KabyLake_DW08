@@ -5,6 +5,7 @@
 	RefName = "ShaLib"
 [INF]
 "ShaLib.inf"
+"TcgHashIntrinsicLib.inf"
 [files]
 "ShaLib.sdl"	
 <endComponent>

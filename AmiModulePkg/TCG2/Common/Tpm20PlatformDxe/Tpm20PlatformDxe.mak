@@ -1,6 +1,6 @@
 Prepare : $(BUILD_DIR)/Tpm20PlatformElinks.h Tpm20Files
 
-$(BUILD_DIR)/Tpm20PlatformElinks.h :  $(BUILD_DIR)/Token.mak
+$(BUILD_DIR)/Tpm20PlatformElinks.h :  $(BUILD_DIR)/token.mak
 	$(ECHO) \
 "#define TPM2SETUPFUNCTIONS_LIST $(TPM2SETUPFUNCTIONS)$(EOL)\
 #define TPM2PHAUTHFUNCTIONS_LIST $(TPM2PHAUTHFUNCTIONS)$(EOL)\
@@ -35,10 +35,10 @@ $(EOL)\
 #$(EOL)\
 $(EOL)\
 [Sources]$(EOL)\
-	../$(TPM_20_PLATFORM_DXE_DIR)/Tpm20PlatformDxe.c$(EOL)\
-	../$(TPM_20_PLATFORM_DXE_DIR)/Tpm20PlatformDxe.h$(EOL)\
-	../$(TPM_20_PLATFORM_DXE_DIR)/Tpm20PlatformDxeFakeTokens.c$(EOL)\
-	../$(TPM_20_PLATFORM_DXE_DIR)/Tpm20PlatformDxeString.uni$(EOL)\
+	..\$(TPM_20_PLATFORM_DXE_DIR)\Tpm20PlatformDxe.c$(EOL)\
+	..\$(TPM_20_PLATFORM_DXE_DIR)\Tpm20PlatformDxe.h$(EOL)\
+	..\$(TPM_20_PLATFORM_DXE_DIR)\Tpm20PlatformDxeFakeTokens.c$(EOL)\
+	..\$(TPM_20_PLATFORM_DXE_DIR)\Tpm20PlatformDxeString.uni$(EOL)\
 "> $(BUILD_DIR)/Tpm20PlatformDxe.inf
 ifneq ($(TpmFunctionCallFiles),"")
 	@$(ECHO) \
@@ -51,33 +51,24 @@ endif
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec$(EOL)\
   AmiModulePkg/AmiModulePkg.dec$(EOL)\
   MdePkg/MdePkg.dec$(EOL)\
-  AmiTsePkg/AmiTsePkg.dec$(EOL)\
-  AmiTcgPkg/AmiTcgPkg.dec$(EOL)\
   MdeModulePkg/MdeModulePkg.dec$(EOL)\
 ">> $(BUILD_DIR)/Tpm20PlatformDxe.inf
 
 	@$(ECHO) \
-"[LibraryClasses]$(EOL)\
-  UefiDriverEntryPoint    ## CONSUMES$(EOL)\
-  UefiRuntimeServicesTableLib ## CONSUMES$(EOL)\
-  DevicePathLib		   ## CONSUMES$(EOL)\
-  UefiLib		   ## CONSUMES$(EOL)\
-  ShaLib		   ## CONSUMES$(EOL)\
-  HiiLib		   ## CONSUMES$(EOL)\
-  DebugLib		   ## CONSUMES$(EOL)\
-  TimerLib		   ## CONSUMES$(EOL)\
-  NetLib		   ## CONSUMES$(EOL)\
-  PcdLib		   ## CONSUMES$(EOL)\
-  BaseCrbLibDxe		   ## CONSUMES$(EOL)\
-  TpmReportStatusCodeWrapperLibDxe		   ## CONSUMES$(EOL)\
-  AmiTcgLibDxe     	## CONSUMES$(EOL)\
-  ">> $(BUILD_DIR)/Tpm20PlatformDxe.inf
-ifeq ($(TCG_AMI_MODULE_PKG_VERSION), 1) 
-	@$(ECHO) \
-  "UefiAmiNvmeLib       	## CONSUMES$(EOL)\
+"$(EOL)\
+[LibraryClasses]$(EOL)\
+  UefiDriverEntryPoint$(EOL)\
+  DevicePathLib$(EOL)\
+  UefiLib$(EOL)\
+  ShaLib$(EOL)\
+  HiiLib$(EOL)\
+  DebugLib$(EOL)\
+  TimerLib$(EOL)\
+  NetLib$(EOL)\
+  TpmReportStatusCodeWrapperLibDxe$(EOL)\
+  BaseCrbLibDxe$(EOL)\
+  BaseTisLib20$(EOL)\
 ">> $(BUILD_DIR)/Tpm20PlatformDxe.inf
-endif 
-
 
 	@$(ECHO) \
 "$(EOL)\
@@ -91,63 +82,22 @@ endif
   gEfiHiiImageProtocolGuid		## CONSUMES$(EOL)\
   gOpromStartEndProtocolGuid    ## CONSUMES$(EOL)\
   gEfiHiiPackageListProtocolGuid      ## CONSUMES$(EOL)\
-  gEfiTrEEProtocolGuid      ## CONSUMES$(EOL)\
-  gTcgPlatformSetupPolicyGuid      ## CONSUMES$(EOL)\
-  AmiProtocolInternalHlxeGuid      ## CONSUMES$(EOL)\
-  gBdsAllDriversConnectedProtocolGuid      ## CONSUMES$(EOL)\
-  gAmiPostManagerProtocolGuid      ## CONSUMES$(EOL)\
   gEdkiiVariableLockProtocolGuid      ## CONSUMES$(EOL)\
-  gEfiResetArchProtocolGuid  ## CONSUMES$(EOL)\
   gEfiTrEEProtocolGuid      		  ## CONSUMES$(EOL)\
-  AmiProtocolInternalHlxeGuid 		  ## CONSUMES$(EOL)\
-  gAmiDxeHashInterfaceguid 			  ## CONSUMES$(EOL)\
-  gEfiSimpleTextInProtocolGuid        ## CONSUMES$(EOL)\
-">> $(BUILD_DIR)/Tpm20PlatformDxe.inf
-
-ifeq ($(TCG_AMI_MODULE_PKG_VERSION), 1) 
-	@$(ECHO) \
-  "gEfiNvmExpressPassThruProtocolGuid	## CONSUMES$(EOL)\
-  ">> $(BUILD_DIR)/Tpm20PlatformDxe.inf
-endif
-
-	@$(ECHO) \
-"[Pcd]$(EOL)\
-  gAmiTcgPkgTokenSpaceGuid.PcdPostStatusCheck  $(EOL)\
 ">> $(BUILD_DIR)/Tpm20PlatformDxe.inf
 
 	@$(ECHO) \
 "[Guids]$(EOL)\
   gEfiImageSecurityDatabaseGuid    ## CONSUMES$(EOL)\
-  gSetupVariableGuid  ## CONSUMES$(EOL)\
-  gAmiTsePasswordPromptExitGuid  ## CONSUMES$(EOL)\
-  gAmiTseAdminPasswordValidGuid  ## CONSUMES$(EOL)\
-  gTcgEfiGlobalVariableGuid  ## CONSUMES$(EOL)\
-  AmitcgefiOsVariableGuid   ## CONSUMES$(EOL)\
-  AmiValidBootImageCertTblGuid   ## CONSUMES$(EOL)\
-  FastBootVariableGuid   ## CONSUMES$(EOL)\
-  gTcgInternalflagGuid   ## CONSUMES$(EOL)\
-  gEfiSmbiosTableGuid   ## CONSUMES$(EOL)\
-  FlagsStatusguid   ## CONSUMES$(EOL)\
-  gAmiOsPpiConfirmationOverrideGuid      ## CONSUMES$(EOL)\
-  TcgPasswordAuthenticationGuid   ## CONSUMES$(EOL)\
-  gEfiMemoryOverwriteControlDataGuid   ## CONSUMES$(EOL)\
-  gEfiPartTypeUnusedGuid  ## CONSUMES$(EOL)\
-  gAmiTpm20MeasureConfigurationInfoGuid      ## CONSUMES$(EOL)\
-  gAmiTsePasswordPromptExitGuid      ## CONSUMES$(EOL)\
-  gAmiTseAdminPasswordValidGuid      ## CONSUMES$(EOL)\
-  gMicrocodeGuid  ## CONSUMES$(EOL)\
-  gTcgNvramHobGuid ## CONSUMES$(EOL)\
+  gEfiMemoryOverwriteControlDataGuid      ## CONSUMES$(EOL)\
   gEfiSmbiosTableGuid  ## CONSUMES$(EOL)\
-  gAmiTsePasswordPromptExitGuid ## CONSUMES$(EOL)\
-  gAmiTseAdminPasswordValidGuid ## CONSUMES$(EOL)\
-  gEfiEndOfDxeEventGroupGuid		  ## CONSUMES$(EOL)\
 ">> $(BUILD_DIR)/Tpm20PlatformDxe.inf
 
 	@$(ECHO) \
 "$(EOL)\
 #//>>>$(EOL)\
 [Depex]$(EOL)\
-  TRUE$(EOL)\
+  gEfiTrEEProtocolGuid$(EOL)\
 #//<<<$(EOL)\
 $(EOL)\
 [BuildOptions]$(EOL)\

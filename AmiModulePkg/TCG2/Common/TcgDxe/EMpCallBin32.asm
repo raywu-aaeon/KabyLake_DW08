@@ -44,9 +44,6 @@
 ;
 ;<AMI_FHDR_END>
 ;**********************************************************************
-#if defined __GNUC_PATCHLEVEL__
-
-#else
 .686
 .model  flat
 .code
@@ -190,6 +187,10 @@ Empty_Buff:
         ret
 _TcmDxeCallMPDriver ENDP
 
+
+
+
+
 ;<AMI_PHDR_START>
 ;-----------------------------------------------------------------------------
 ; 
@@ -238,4 +239,3 @@ _TcgThunk32 ENDP
 _TcgThunkSwitchback proc
 _TcgThunkSwitchback ENDP
 END
-#endif

@@ -85,35 +85,34 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include "AmiTcg/TcgCommon12.h"
-#include "Token.h"
-#include "AmiTcg/sha.h"
-#include <AmiTcg/Tpm20.h>
-#include <AmiTcg/TCGMisc.h>
+#include "AmiTcg\TcgCommon12.h"
+#include "token.h"
+#include "AmiTcg\Sha.h"
+#include <AmiTcg\Tpm20.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Library/DebugLib.h>
-#include <Guid/HobList.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <AmiTcg/Tcm.h>
 
+#define TCG_EFI_HOB_LIST_GUID \
+    { 0x7739f24c, 0x93d7, 0x11d4, 0x9a, 0x3a, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d}
 
 UINT16
-EFIAPI TcgCommonH2NS(
+__stdcall TcgCommonH2NS(
     IN UINT16 Val )
 {
     return TPM_H2NS( Val );
 }
 
 UINT32
-EFIAPI TcgCommonH2NL(
+__stdcall TcgCommonH2NL(
     IN UINT32 Val )
 {
     return TPM_H2NL( Val );
 }
 
+
+
 VOID
-EFIAPI TcgCommonCopyMem(
+__stdcall TcgCommonCopyMem(
     IN VOID  *CallbackContext,
     OUT VOID *Dest,
     IN VOID  *Src,
@@ -191,7 +190,7 @@ UINTN FindNextLogLocation(TCG_PCR_EVENT_HDR   *TcgLog, UINTN EventNum)
 
 
 EFI_STATUS
-EFIAPI TcgCommonLogEvent(
+__stdcall TcgCommonLogEvent(
     IN VOID          *CallbackContext,
     IN TCG_PCR_EVENT *EvtLog,
     IN OUT UINT32    *TableSize,
@@ -226,7 +225,7 @@ EFIAPI TcgCommonLogEvent(
 
 
 EFI_STATUS
-EFIAPI TcmCommonLogEvent(
+__stdcall TcmCommonLogEvent(
     IN VOID          *CallbackContext,
     IN TCM_PCR_EVENT *EvtLog,
     IN OUT UINT32    *TableSize,
@@ -252,7 +251,7 @@ EFIAPI TcmCommonLogEvent(
 
 
 EFI_STATUS
-EFIAPI TcgCommonSha1Start(
+__stdcall TcgCommonSha1Start(
     IN VOID             *CallbackContext,
     IN TCG_ALGORITHM_ID AlgId,
     OUT UINT32          *MaxBytes )
@@ -272,12 +271,25 @@ EFIAPI TcgCommonSha1Start(
         return EFI_UNSUPPORTED;
     }
 
+    if(IsTcmSupportType())
+    {
+        cmdSHA1Start.Ordinal = TPM_H2NL(TCM_ORD_SHA1Start);
+    }
+
+
     InBuffer[0].Buffer  = &cmdSHA1Start;
     InBuffer[0].Size    = sizeof (cmdSHA1Start);
     OutBuffer[0].Buffer = &retSHA1Start;
     OutBuffer[0].Size   = sizeof (retSHA1Start);
+    if(IsTcmSupportType())
+    {
+        Status              = TCMPASSTHROUGH( CallbackContext, InBuffer, OutBuffer );
+    }
+    else
+    {
+        Status              = TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer );
+    }
 
-    Status              = TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer );
     if ( EFI_ERROR( Status ) || retSHA1Start.Header.RetCode != 0 )
     {
         return Status;
@@ -293,7 +305,7 @@ EFIAPI TcgCommonSha1Start(
 
 
 EFI_STATUS
-EFIAPI TcgCommonSha1Update(
+__stdcall TcgCommonSha1Update(
     IN VOID   *CallbackContext,
     IN VOID   *Data,
     IN UINT32 DataLen,
@@ -312,6 +324,11 @@ EFIAPI TcgCommonSha1Update(
 
     cmdSHA1Update.Header.Tag     = TPM_H2NS( TPM_TAG_RQU_COMMAND );
     cmdSHA1Update.Header.Ordinal = TPM_H2NL( TPM_ORD_SHA1Update );
+
+    if(IsTcmSupportType())
+    {
+        cmdSHA1Update.Header.Ordinal = TPM_H2NL(TCM_ORD_SHA1Update);
+    }
 
     InBuffer[0].Buffer           = &cmdSHA1Update;
     InBuffer[0].Size             = sizeof (cmdSHA1Update);
@@ -334,7 +351,14 @@ EFIAPI TcgCommonSha1Update(
         DataPtr += InBuffer[1].Size;
         DataLen -= (UINT32)InBuffer[1].Size;
 
-        Status              = TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer );
+        if(IsTcmSupportType())
+        {
+            Status              = TCMPASSTHROUGH( CallbackContext, InBuffer, OutBuffer );
+        }
+        else
+        {
+            Status              = TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer );
+        }
     }
     while ( !EFI_ERROR( Status ) && DataLen >= 64 );
 
@@ -344,7 +368,7 @@ EFIAPI TcgCommonSha1Update(
 
 
 EFI_STATUS
-EFIAPI TcgCommonSha1CompleteExtend(
+__stdcall TcgCommonSha1CompleteExtend(
     IN VOID         *CallbackContext,
     IN VOID         *Data,
     IN UINT32       DataLen,
@@ -366,6 +390,11 @@ EFIAPI TcgCommonSha1CompleteExtend(
                                        + DataLen);
     cmdSHA1Complete.Header.Ordinal = TPM_H2NL( TPM_ORD_SHA1CompleteExtend );
 
+    if(IsTcmSupportType())
+    {
+        cmdSHA1Complete.Header.Ordinal = TPM_H2NL(TCM_ORD_SHA1CompleteExtend);
+    }
+
     cmdSHA1Complete.PCRIndex       = TcgCommonH2NL( PCRIndex );
     cmdSHA1Complete.NumBytes       = TcgCommonH2NL( DataLen );
 
@@ -381,12 +410,19 @@ EFIAPI TcgCommonSha1CompleteExtend(
     OutBuffer[2].Buffer = NewPCRValue;
     OutBuffer[2].Size   = sizeof (*NewPCRValue);
 
-    return (TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer ));
+    if(IsTcmSupportType())
+    {
+        return (TCMPASSTHROUGH( CallbackContext, InBuffer, OutBuffer ));
+    }
+    else
+    {
+        return (TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer ));
+    }
 }
 
 
 EFI_STATUS
-EFIAPI TcmCommonSha1CompleteExtend(
+__stdcall TcmCommonSha1CompleteExtend(
     IN VOID         *CallbackContext,
     IN VOID         *Data,
     IN UINT32       DataLen,
@@ -403,10 +439,15 @@ EFIAPI TcmCommonSha1CompleteExtend(
         return EFI_INVALID_PARAMETER;
     }
 
-    cmdSHA1Complete.Header.Tag       = TPM_H2NS( TCM_TAG_RQU_COMMAND );
+    cmdSHA1Complete.Header.Tag       = TPM_H2NS( TPM_TAG_RQU_COMMAND );
     cmdSHA1Complete.Header.ParamSize = TcgCommonH2NL(sizeof(cmdSHA1Complete)
                                        + DataLen);
-    cmdSHA1Complete.Header.Ordinal = TPM_H2NL( TCM_ORD_SCHCompleteExtend );
+    cmdSHA1Complete.Header.Ordinal = TPM_H2NL( TPM_ORD_SHA1CompleteExtend );
+
+    if(IsTcmSupportType())
+    {
+        cmdSHA1Complete.Header.Ordinal = TPM_H2NL(TCM_ORD_SHA1CompleteExtend);
+    }
 
     cmdSHA1Complete.PCRIndex       = TcgCommonH2NL( PCRIndex );
     cmdSHA1Complete.NumBytes       = TcgCommonH2NL( DataLen );
@@ -423,13 +464,20 @@ EFIAPI TcmCommonSha1CompleteExtend(
     OutBuffer[2].Buffer = NewPCRValue;
     OutBuffer[2].Size   = sizeof (*NewPCRValue);
 
-    return (TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer ));
+    if(IsTcmSupportType())
+    {
+        return (TCMPASSTHROUGH( CallbackContext, InBuffer, OutBuffer ));
+    }
+    else
+    {
+        return (TCGPASSTHROUGH( CallbackContext, InBuffer, OutBuffer ));
+    }
 }
 
 
 
 EFI_STATUS
-EFIAPI TcmCommonExtend(
+__stdcall TcmCommonExtend(
     IN  VOID         *CallbackContext,
     IN  TPM_PCRINDEX PCRIndex,
     IN  TCM_DIGEST   *Digest,
@@ -451,7 +499,7 @@ EFIAPI TcmCommonExtend(
     OutBuffer[1].Buffer = NewPCRValue->digest;
     OutBuffer[1].Size   = sizeof (NewPCRValue->digest);
 
-    cmdHeader.Tag       = TPM_H2NS( TCM_TAG_RQU_COMMAND );
+    cmdHeader.Tag       = TPM_H2NS( TPM_TAG_RQU_COMMAND );
     cmdHeader.ParamSize = TPM_H2NL(sizeof (cmdHeader)
                                    + sizeof (PCRIndex) + sizeof (Digest->digest));
 
@@ -464,7 +512,7 @@ EFIAPI TcmCommonExtend(
 
 
 EFI_STATUS
-EFIAPI SHA1HashAll(
+__stdcall SHA1HashAll(
     IN VOID            *CallbackContext,
     IN VOID            *HashData,
     IN UINTN           HashDataLen,
@@ -491,6 +539,64 @@ EFIAPI SHA1HashAll(
 
 
 
+EFI_STATUS
+__stdcall SHA2HashAll(
+    IN  VOID            *CallbackContext,
+    IN  VOID            *HashData,
+    IN  UINTN           HashDataLen,
+    OUT UINT8           *Digest
+)
+{
+    SHA2_CTX       Sha2Ctx;
+    unsigned char  DigestArray[32];
+
+    sha256_init( &Sha2Ctx );
+
+    sha256_process( &Sha2Ctx, HashData, (u32)HashDataLen );
+
+    sha256_done( &Sha2Ctx, DigestArray );
+
+    TcgCommonCopyMem(
+        CallbackContext,
+        Digest,
+        DigestArray,
+        sizeof (DigestArray));
+
+    return EFI_SUCCESS;
+}
+
+
+EFI_STATUS
+__stdcall SHA384HashAll(
+    IN  VOID            *HashData,
+    IN  UINTN           HashDataLen,
+    OUT UINT8           *Digest
+)
+{
+    unsigned char    DigestArray[48];
+    VOID            *CallbackContext=NULL;
+
+    sha384_vector(1, HashData, &HashDataLen, DigestArray);
+    TcgCommonCopyMem(CallbackContext, Digest, DigestArray, sizeof (DigestArray));
+    return EFI_SUCCESS;
+}
+
+
+EFI_STATUS
+__stdcall SHA512HashAll(
+    IN  VOID            *HashData,
+    IN  UINTN           HashDataLen,
+    OUT UINT8           *Digest
+)
+{
+    unsigned char    DigestArray[64];
+    VOID             *CallbackContext=NULL;
+
+    sha384_vector(1, HashData, &HashDataLen, DigestArray);
+    TcgCommonCopyMem(CallbackContext, Digest, DigestArray, sizeof (DigestArray));
+
+    return EFI_SUCCESS;
+}
 
 
 //**********************************************************************
@@ -678,6 +784,7 @@ EFI_STATUS TcgGetNextGuidHob(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
+EFI_GUID gEfiAmiTHobListGuid = TCG_EFI_HOB_LIST_GUID;
 VOID* LocateATcgHob(
     UINTN                   NoTableEntries,
     EFI_CONFIGURATION_TABLE *ConfigTable,
@@ -692,7 +799,7 @@ VOID* LocateATcgHob(
 
         if ((!CompareMem(
                     &ConfigTable[NoTableEntries].VendorGuid,
-                    &gEfiHobListGuid, sizeof(EFI_GUID)
+                    &gEfiAmiTHobListGuid, sizeof(EFI_GUID)
                 )))
         {
             HobStart = ConfigTable[NoTableEntries].VendorTable;

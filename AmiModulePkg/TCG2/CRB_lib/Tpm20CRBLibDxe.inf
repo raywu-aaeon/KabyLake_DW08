@@ -64,3 +64,9 @@ $(AMI_FTPM_LIB)
 AmiCompatibilityPkg\AmiCompatibilityPkg.dec
 MdePkg\MdePkg.dec
 AmiModulePkg\AmiModulePkg.dec
+
+
+[BuildOptions]
+  MSFT:*_*_X64_CC_FLAGS = /GL- 
+
+

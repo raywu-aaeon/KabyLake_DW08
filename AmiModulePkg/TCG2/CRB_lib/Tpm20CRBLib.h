@@ -41,7 +41,7 @@
 //<AMI_FHDR_END>
 //**********************************************************************
 #include <Efi.h>
-#include <Token.h>
+#include <token.h>
 
 
 //Defines ACPI Interface for Control Resource Buffer Access
@@ -81,6 +81,8 @@
 
 #define RESPONSE_HEADER_SIZE  12
 
+#define B_CRB_LOCALITY_STATE_LOCALITY_ASSIGNED  0x00000002 ///< BIT1
+#define V_CRB_LOCALITY_STATE_ACTIVE_LOC_MASK    0x0000001C /// Bits [4:2]
 
 
 typedef struct
@@ -99,6 +101,14 @@ typedef struct _STATUS_FIELD_
     UINT32   Cancel;
     UINT32   Start;
 } STATUS_FIELD;
+
+
+typedef struct
+{
+    EFI_HOB_GUID_TYPE     EfiHobGuidType;
+    UINT64                PttBufferAddress;
+    UINT32                LocalityState;
+} ME_DATA_HOB;
 
 
 typedef struct _CONTROL_AREA_LAYOUT_

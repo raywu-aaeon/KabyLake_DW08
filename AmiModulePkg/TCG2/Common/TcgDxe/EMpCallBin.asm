@@ -27,9 +27,6 @@
 ;
 ;<AMI_FHDR_END>
 ;**********************************************************************
-#if defined __GNUC_PATCHLEVEL__
-
-#else
 .code
     INCLUDE token.equ
 
@@ -276,4 +273,3 @@ TcgThunkSwitchback proc
 TcgThunkSwitchback ENDP
 
 END
-#endif

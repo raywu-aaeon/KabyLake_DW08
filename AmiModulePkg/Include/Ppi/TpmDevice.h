@@ -34,8 +34,8 @@
 #ifndef _PEI_TPMDEVICE_H_
 #define _PEI_TPMDEVICE_H_
 
-#include  <AmiTcg/TcgEfiTpm.h>
-#include  <AmiTcg/TcgEFI12.h>
+#include  <AmiTcg\TcgEfiTpm.h>
+#include  <AmiTcg\TcgEfi12.h>
 #include  "TcgPlatformSetupPeiPolicy.h"
 
 #define PEI_TPM_PPI_GUID \
@@ -89,8 +89,8 @@ EFI_STATUS FillDriverLocByFile (
 
 EFI_STATUS
 EFIAPI TpmPeiEntry (
-    IN       EFI_PEI_FILE_HANDLE  FileHandle,
-    IN CONST EFI_PEI_SERVICES    **PeiServices );
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
+    IN CONST EFI_PEI_SERVICES    **PeiServices);
 
 
 typedef

@@ -1,10 +1,12 @@
 #ifndef TPM_2_0_PEI_H
 #define TPM_2_0_PEI_H
 
-#include <Ppi/AmiTreePpi.h>
+#include <AmiTcg\Tpm20.h>
+#include "PPI\AmiTreePpi.h"
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER <= 0xb)
+#include <AmiTcg\Tpm20.h>
+#endif
 #include <PiPei.h>
-#include <AmiTcg/Tpm20.h>
-#include <AmiTcg/TcgCommon20.h>
 
 #pragma pack(push, 1)
 
@@ -16,8 +18,15 @@ typedef struct
     BYTE  sha384[SHA384_DIGEST_SIZE];
     BYTE  sha512[SHA512_DIGEST_SIZE];
 } TPM2_HALG;
-
-
+//ray_override / [TAG-FixedTCG2Windows7] Downgrade TCG2 to Ver.11 / Fixed Build Error >>
+//typedef struct
+//{
+//    TCG_PCRINDEX         PCRIndex;
+//    TCG_EVENTTYPE        EventType;
+//    TPML_DIGEST_VALUES   Digests;
+//    UINT32               EventSize; // UINT32 aligned
+//} TCG_PCR_EVENT2_HDR;
+//ray_override / [TAG-FixedTCG2Windows7] Downgrade TCG2 to Ver.11 / Fixed Build Error <<
 typedef struct _TPM2_Startup
 {
     TPMI_ST_COMMAND_TAG tag;

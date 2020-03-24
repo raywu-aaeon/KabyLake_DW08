@@ -23,3 +23,15 @@ INFComponent
     Package  = "AmiModulePkg"
 End
 
+INFComponent
+    Name  = "TcgHashIntrinsicLib"
+    File  = "TcgHashIntrinsicLib.inf"
+    Package  = "AmiModulePkg"
+    ModuleTypes  = "BASE"
+End
+
+LibraryMapping
+    Class  = "TcgHashIntrinsicLib"
+    Instance  = "AmiModulePkg.TcgHashIntrinsicLib"
+    Arch  = "IA32 X64 IPF AARCH64"
+End

@@ -37,21 +37,22 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Uefi.h>
-#include <AmiTcg/TcgTpm12.h>
-#include <AmiTcg/TpmLib.h>
-#include <Protocol/TpmDevice.h>
-#include <Library/DebugLib.h>
-#include <Token.h>
-#include <Library/IoLib.h>
+#include <UEfi.h>
+#include <AmiTcg\TcgTpm12.h>
+#include <AmiTcg\TpmLib.h>
+#include <Protocol\TpmDevice.h>
+#include <Library\DebugLib.h>
+#include <token.h>
+#include <Library\IoLib.h>
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Protocol/TcgPlatformSetupPolicy.h>
+#include <Protocol\TcgPlatformSetupPolicy.h>
 
-extern EFI_GUID TcgPlatformSetupPolicyGuid;
 
 #define _CR( Record, TYPE,\
         Field )((TYPE*) ((CHAR8*) (Record) - (CHAR8*) &(((TYPE*) 0)->Field)))
+
+EFI_GUID TcgGuid = AMI_TCG_RESETVAR_HOB_GUID;
 
 VOID* LocateATcgHob (
     UINTN                   NoTableEntries,
@@ -67,8 +68,7 @@ typedef struct _TPM_DXE_PRIVATE_DATA
     EFI_PHYSICAL_ADDRESS    BaseAddr;
 } TPM_DXE_PRIVATE_DATA;
 
-
-void FixedDelay(UINT32 dCount);
+FixedDelay(UINT32 dCount);
 
 static UINTN                  TpmFuncID;
 static TPMTransmitEntryStruct TpmEmptyBuf;
@@ -76,6 +76,7 @@ static UINT32                 TpmRet;
 static UINTN                  ReadytoBootVar = 0;
 
 
+#if TCG_LEGACY == 0
 EFI_STATUS
 EFIAPI TpmDxeInit(
     IN EFI_TPM_DEVICE_PROTOCOL *This )
@@ -125,6 +126,326 @@ EFIAPI TpmDxeTransmit(
            );
 }
 
+#else
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Name: TpmDxeInit
+//
+// Description: Call to OEM driver to initialize TPM.
+//
+// Input:       IN  EFI_TPM_DEVICE_PROTOCOL   *This
+//
+// Returns:     EFI_STATUS
+//
+// Output:
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS
+EFIAPI TpmDxeInit(
+    IN EFI_TPM_DEVICE_PROTOCOL *This )
+{
+    return EFI_SUCCESS;  //init command is only sent once and done in PEI
+}
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Name:  TpmDxeClose
+//
+// Description: Close TPM connection for locality 0
+//
+// Input:       IN  PEI_TPM_PPI               *This,
+//              IN  EFI_PEI_SERVICES          **PeiServices
+//
+// Output:      EFI STATUS
+///
+// Output:
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS
+EFIAPI TpmDxeClose(
+    IN EFI_TPM_DEVICE_PROTOCOL *This )
+{
+    return EFI_SUCCESS;
+}
+
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+//
+// Name:  TpmDxeGetStatusInfo
+//
+// Description: GetStatus Info from MP driver
+//
+// Input:       IN  PEI_TPM_PPI               *This,
+//              IN  EFI_PEI_SERVICES          **PeiServices
+//
+// Output:      EFI STATUS
+//
+// Output:
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS
+EFIAPI  TpmDxeGetStatusInfo(
+    IN EFI_TPM_DEVICE_PROTOCOL   * This
+)
+{
+    return EFI_UNSUPPORTED;
+}
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Procedure:   SetEfiOSTransitions
+//
+// Description: SetEfiOSTransitions
+//
+// Input:       IN  EFI_EVENT       efiev
+//              IN  VOID            *ctx
+//
+// Output:      EFI_STATUS
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+void SetEfiOSTransitions(
+    IN EFI_EVENT efiev,
+    IN VOID      *ctx )
+{
+    ReadytoBootVar = 1;
+}
+
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+// Procedure:   EfiOSReadyToBoot
+//
+// Description: Sets ready to boot callback on ready to boot
+//
+// Input:   NONE
+//
+// Output:   EFI_STATUS
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+EFI_STATUS
+EFIAPI EfiOSReadyToBoot()
+{
+    EFI_EVENT  ReadToBootEvent;
+    EFI_STATUS Status;
+
+#if defined(EFI_EVENT_SIGNAL_READY_TO_BOOT)\
+        && EFI_SPECIFICATION_VERSION < 0x20000
+
+    Status = pBS->CreateEvent( EFI_EVENT_SIGNAL_READY_TO_BOOT,
+                               EFI_TPL_CALLBACK,
+                               SetEfiOSTransitions, NULL, &ReadToBootEvent );
+
+#else
+    Status = CreateReadyToBootEvent( EFI_TPL_CALLBACK-1,
+                                     SetEfiOSTransitions,
+                                     NULL,
+                                     &ReadToBootEvent );
+#endif
+
+    return Status;
+}
+
+
+
+EFI_STATUS
+EFIAPI EfiPreOSTransition(
+    IN EFI_TPM_DEVICE_PROTOCOL *This,
+    IN UINTN                   NoInBuffers,
+    IN TPM_TRANSMIT_BUFFER     *InBuffers,
+    IN UINTN                   NoOutBuffers,
+    IN OUT TPM_TRANSMIT_BUFFER *OutBuffers )
+{
+    TPM_DXE_PRIVATE_DATA  *Private;
+    TPM_1_2_REGISTERS_PTR TpmReg;
+    EFI_STATUS            Status;
+
+    Private = TPM_DXE_PRIVATE_DATA_FROM_THIS( This );
+
+    TisRequestLocality(
+        (TPM_1_2_REGISTERS_PTR)( UINTN ) Private->BaseAddr);
+
+    TpmReg  = (TPM_1_2_REGISTERS_PTR)( UINTN ) Private->BaseAddr;
+
+    Status = TpmLibPassThrough(
+                 TpmReg,
+                 NoInBuffers,
+                 InBuffers,
+                 NoOutBuffers,
+                 OutBuffers
+             );
+
+    TisReleaseLocality(
+        (TPM_1_2_REGISTERS_PTR)( UINTN ) Private->BaseAddr);
+
+    return Status;
+}
+
+
+
+//**********************************************************************
+//<AMI_PHDR_START>
+//
+//
+// Name: TpmDxeTransmit
+//
+// Description: Dxe Transmit Tcg Data
+//
+// Input:    IN      EFI_TPM_DEVICE_PROTOCOL   *This,
+//           IN      UINTN                     NoInBuffers,
+//           IN      TPM_TRANSMIT_BUFFER       *InBuffers,
+//           IN      UINTN                     NoOutBuffers,
+//           IN OUT  TPM_TRANSMIT_BUFFER       *OutBuffers
+//
+// Output:     EFI STATUS
+//
+// Output:
+//
+// Modified:
+//
+// Referrals:
+//
+// Notes:
+//<AMI_PHDR_END>
+//**********************************************************************
+
+EFI_STATUS
+EFIAPI TpmDxeTransmit(
+    IN EFI_TPM_DEVICE_PROTOCOL *This,
+    IN UINTN                   NoInBuffers,
+    IN TPM_TRANSMIT_BUFFER     *InBuffers,
+    IN UINTN                   NoOutBuffers,
+    IN OUT TPM_TRANSMIT_BUFFER *OutBuffers )
+{
+    TPM_DXE_PRIVATE_DATA   *Private;
+    TPMTransmitEntryStruct FillESI;
+    UINTN                  FuncID = (UINTN)MP_FUNCTION_TRANSMIT;
+    UINT32                 Ret;
+    UINT8                  *SHA_ARRAY_OUT = NULL;
+    BOOLEAN                FillBuff   = FALSE;
+    BOOLEAN                Other      = FALSE;
+    UINTN                  i = 0, loc = 0;
+    UINT8                  *Tpm_SHA_ARRAY= NULL;
+    EFI_STATUS             Status;
+
+
+    if(NoInBuffers == 0 || InBuffers == NULL || NoOutBuffers == 0 || OutBuffers == NULL)
+        return EFI_INVALID_PARAMETER;
+
+    if(ReadytoBootVar == 1)
+    {
+        return EfiPreOSTransition(This, NoInBuffers, InBuffers, NoOutBuffers, OutBuffers);
+    }
+
+
+    FillESI.dwInLen = 0;
+    FillESI.dwOutLen = 0;
+
+    for (; i < NoInBuffers; i++ )
+    {
+        FillESI.dwInLen += (UINT32)InBuffers[i].Size;
+    }
+
+    Status = pBS-> AllocatePool( EfiBootservicesData, FillESI.dwInLen, &Tpm_SHA_ARRAY);
+    if(EFI_ERROR(Status))return Status;
+
+
+    for (i = 0; i < NoOutBuffers; i++ )
+    {
+        FillESI.dwOutLen += (UINT32)OutBuffers[i].Size;
+    }
+
+    Status = pBS-> AllocatePool( EfiBootservicesData, FillESI.dwOutLen, &SHA_ARRAY_OUT );
+    if(EFI_ERROR(Status)){
+        gBS->FreePool(Tpm_SHA_ARRAY);
+        return Status;
+    }
+
+
+    for (i = 0; i < NoInBuffers; i++ )
+    {
+        pBS->CopyMem(Tpm_SHA_ARRAY + loc,
+                     InBuffers[i].Buffer,
+                     InBuffers[i].Size );
+
+        loc += InBuffers[i].Size;
+    }
+
+    FillESI.pbInBuf  = (UINT32)(EFI_PHYSICAL_ADDRESS) Tpm_SHA_ARRAY;
+    FillESI.pbOutBuf = (UINT32)(EFI_PHYSICAL_ADDRESS) SHA_ARRAY_OUT;
+
+    Private = TPM_DXE_PRIVATE_DATA_FROM_THIS( This );
+    TpmDxeCallMPDriver( FuncID, &FillESI, &Ret );
+
+    if ( Tpm_SHA_ARRAY != NULL )
+    {
+        pBS->FreePool( Tpm_SHA_ARRAY );
+    }
+
+    loc = 0;
+
+    for (i=0; i < NoOutBuffers; i++ )
+    {
+        pBS->CopyMem( OutBuffers[i].Buffer,
+                      &SHA_ARRAY_OUT[loc],
+                      OutBuffers[i].Size );
+        loc += (UINTN)OutBuffers[i].Size;
+    }
+
+    if ( SHA_ARRAY_OUT != NULL )
+    {
+        pBS->FreePool( SHA_ARRAY_OUT );
+    }
+
+    return EFI_SUCCESS;
+}
+
+#endif
 
 static TPM_DXE_PRIVATE_DATA mTpmPrivate =
 {
@@ -147,11 +468,13 @@ EFIAPI TpmDxeEntry(
 {
     EFI_STATUS Status;
 #if TCG_LEGACY == 1
+    EFI_GUID        gMpDriverHobGuid = EFI_TCG_MPDriver_HOB_GUID;
     FAR32LOCALS          *TempLoc   = NULL;
 #endif
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
 
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status))
     {
         return Status;
@@ -172,7 +495,7 @@ EFIAPI TpmDxeEntry(
 #else
     TempLoc = (FAR32LOCALS*)LocateATcgHob( pST->NumberOfTableEntries,
                                            pST->ConfigurationTable,
-                                           &gEfiTcgMpDriverHobGuid );
+                                           &gMpDriverHobGuid );
 
 
     if(TempLoc == NULL || TempLoc->Offset == NULL  ) return EFI_NOT_FOUND;

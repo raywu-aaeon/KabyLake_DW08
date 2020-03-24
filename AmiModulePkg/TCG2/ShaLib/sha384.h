@@ -11,8 +11,8 @@
 
 #include <commonheader.h>
 
-//int sha384_init(struct hash_state * md);
+int sha384_init(struct hash_state * md);
 void sha384_vector(size_t num_elem, const u8 *addr[], const size_t *len,
                    u8 *mac);
-//int sha384_done(struct hash_state * md, unsigned char *out);
+int sha384_done(struct hash_state * md, unsigned char *out);
 #endif /* SHA384_H */

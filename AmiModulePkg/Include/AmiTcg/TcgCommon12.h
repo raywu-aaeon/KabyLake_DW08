@@ -39,15 +39,13 @@
 #ifndef _TCG_COMMON_H_
 #define _TCG_COMMON_H_
 
-#include <Uefi.h>
-#include "AmiTcg/TcgPc.h"
-#include "AmiTcg/TcgEfiTpm.h"
-#include "AmiTcg/sha.h"
-#include "AmiTcg/Tpm20.h"
-#include <Pi/PiBootMode.h>
-#include <Pi/PiHob.h>
-#include "TCGMisc.h"
-#include "AmiTcg/TcmPc.h"
+#include <UEFI.h>
+#include "AmiTcg\TcgPc.h"
+#include "AmiTcg\TcgEfiTpm.h"
+#include "AmiTcg\Sha.h"
+#include "AmiTcg\Tpm20.h"
+#include <HOB.h>
+#include "TcgMisc.h"
 
 #define TcgCommonN2HS( v16 ) TcgCommonH2NS( v16 )
 #define TcgCommonN2HL( v32 ) TcgCommonH2NL( v32 )
@@ -56,7 +54,7 @@
 #define EFI_TPL_CALLBACK            8
 #define EFI_TPL_NOTIFY              16
 #define EFI_TPL_HIGH_LEVEL          31
-//#define STRING_TOKEN( x ) x
+#define STRING_TOKEN( x ) x
 
 
 #define TCGGET_HOB_TYPE( Hob )     ((Hob).Header->HobType)
@@ -85,12 +83,12 @@
 
 extern
 UINT16
-EFIAPI TcgCommonH2NS (
+__stdcall TcgCommonH2NS (
     IN UINT16 Val );
 
 extern
 UINT32
-EFIAPI TcgCommonH2NL (
+__stdcall TcgCommonH2NL (
     IN UINT32 Val );
 
 VOID* GetHob (
@@ -105,7 +103,7 @@ EFI_STATUS TcgGetNextGuidHob(
 
 extern
 EFI_STATUS
-EFIAPI TcgCommonPassThrough (
+__stdcall TcgCommonPassThrough (
     IN VOID                    *CallbackContext,
     IN UINT32                  NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -114,7 +112,7 @@ EFIAPI TcgCommonPassThrough (
 
 extern
 EFI_STATUS
-EFIAPI TcmCommonPassThrough (
+__stdcall TcmCommonPassThrough (
     IN VOID                    *CallbackContext,
     IN UINT32                  NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -123,14 +121,14 @@ EFIAPI TcmCommonPassThrough (
 
 extern
 VOID
-EFIAPI TcgCommonCopyMem (
+__stdcall TcgCommonCopyMem (
     IN VOID  *CallbackContext,
     OUT VOID *Dest,
     IN VOID  *Src,
     IN UINTN Len );
 
 EFI_STATUS
-EFIAPI TcgCommonLogEvent(
+__stdcall TcgCommonLogEvent(
     IN VOID          *CallbackContext,
     IN TCG_PCR_EVENT *EvtLog,
     IN OUT UINT32    *TableSize,
@@ -140,7 +138,7 @@ EFIAPI TcgCommonLogEvent(
 
 extern
 EFI_STATUS
-EFIAPI TcmCommonLogEvent (
+__stdcall TcmCommonLogEvent (
     IN VOID          *CallbackContext,
     IN TCM_PCR_EVENT *EvtLog,
     IN OUT UINT32    *TableSize,
@@ -149,14 +147,14 @@ EFIAPI TcmCommonLogEvent (
 
 extern
 EFI_STATUS
-EFIAPI TcgCommonSha1Start (
+__stdcall TcgCommonSha1Start (
     IN VOID             *CallbackContext,
     IN TCG_ALGORITHM_ID AlgId,
     OUT UINT32          *MaxBytes );
 
 extern
 EFI_STATUS
-EFIAPI TcgCommonSha1Update (
+__stdcall TcgCommonSha1Update (
     IN VOID   *CallbackContext,
     IN VOID   *Data,
     IN UINT32 DataLen,
@@ -164,7 +162,7 @@ EFIAPI TcgCommonSha1Update (
 
 extern
 EFI_STATUS
-EFIAPI TcgCommonSha1CompleteExtend (
+__stdcall TcgCommonSha1CompleteExtend (
     IN VOID         *CallbackContext,
     IN VOID         *Data,
     IN UINT32       DataLen,
@@ -174,7 +172,7 @@ EFIAPI TcgCommonSha1CompleteExtend (
 
 
 EFI_STATUS
-EFIAPI TcmCommonSha1CompleteExtend(
+__stdcall TcmCommonSha1CompleteExtend(
     IN VOID         *CallbackContext,
     IN VOID         *Data,
     IN UINT32       DataLen,
@@ -184,14 +182,14 @@ EFIAPI TcmCommonSha1CompleteExtend(
 
 extern
 EFI_STATUS
-EFIAPI TcgCommonExtend (
+__stdcall TcgCommonExtend (
     IN VOID         *CallbackContext,
     IN TPM_PCRINDEX PCRIndex,
     IN TCG_DIGEST   *Digest,
     OUT TCG_DIGEST  *NewPCRValue );
 
 EFI_STATUS
-EFIAPI TcmCommonExtend(
+__stdcall TcmCommonExtend(
     IN  VOID         *CallbackContext,
     IN  TPM_PCRINDEX PCRIndex,
     IN  TCM_DIGEST   *Digest,
@@ -199,7 +197,7 @@ EFIAPI TcmCommonExtend(
 
 extern
 EFI_STATUS
-EFIAPI SHA1HashAll (
+__stdcall SHA1HashAll (
     IN VOID            *CallbackContext,
     IN VOID            *HashData,
     IN UINTN           HashDataLen,
@@ -212,7 +210,7 @@ EFI_STATUS EfiLibGetSystemConfigurationTable(
 
 extern
 BOOLEAN
-EFIAPI IsTcmSupportType (
+__stdcall IsTcmSupportType (
 );
 
 #pragma pack(push,1)
@@ -244,7 +242,7 @@ typedef struct
 } TPM2_PCRExtend_res_t;
 
 EFI_STATUS
-EFIAPI SHA2HashAll(
+__stdcall SHA2HashAll(
     IN  VOID            *CallbackContext,
     IN  VOID            *HashData,
     IN  UINTN           HashDataLen,

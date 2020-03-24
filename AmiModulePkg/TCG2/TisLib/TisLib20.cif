@@ -6,4 +6,6 @@
 [INF]
 "TisLib20.inf"
 "TisLib20x32.inf"
+[files]
+"TisLib.sdl"	
 <endComponent>

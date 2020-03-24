@@ -32,7 +32,6 @@ ENTRY_POINT 				   = TCGSmmInit
   MdeModulePkg/MdeModulePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint
@@ -41,24 +40,21 @@ ENTRY_POINT 				   = TCGSmmInit
   BaseMemoryLib
   UefiLib
   IoLib
-  AmiBufferValidationLib
   
 [Protocols]
   gEfiSmmBase2ProtocolGuid
   gEfiSmmSwDispatch2ProtocolGuid
   gEfiSmmVariableProtocolGuid
-  gAmiNvramControlProtocolGuid
 
 [Guids]  
-  SmmRsTableGuid
-  FlagsStatusguid
   gEfiMemoryOverwriteControlDataGuid
-  gSetupVariableGuid
-  AmitcgefiOsVariableGuid
   
 [Depex]
   gEfiSmmBase2ProtocolGuid AND
   gEfiSmmSwDispatch2ProtocolGuid
+
+[BuildOptions.X64]
+  *_*_X64_CC_FLAGS = /D EFIx64 
 
 #*************************************************************************
 #**                                                                     **
