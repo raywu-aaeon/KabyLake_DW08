@@ -115,15 +115,15 @@ typedef struct
     BYTE  sha512[SHA512_DIGEST_SIZE];
 } TPM2_HALG;
 
-
-typedef struct
-{
-    TCG_PCRINDEX         PCRIndex;
-    TCG_EVENTTYPE        EventType;
-    TPML_DIGEST_VALUES   Digests;
-    UINT32               EventSize; // UINT32 aligned
-} TCG_PCR_EVENT2_HDR;
-
+//raydebug >>
+//typedef struct
+//{
+//    TCG_PCRINDEX         PCRIndex;
+//    TCG_EVENTTYPE        EventType;
+//    TPML_DIGEST_VALUES   Digests;
+//    UINT32               EventSize; // UINT32 aligned
+//} TCG_PCR_EVENT2_HDR;
+//raydebug <<
 typedef struct _AMI_INTERNAL_HLXE_PROTOCOL  AMI_INTERNAL_HLXE_PROTOCOL;
 
 typedef
