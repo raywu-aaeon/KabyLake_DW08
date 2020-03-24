@@ -41,9 +41,10 @@
 #ifndef _TCGEFI_H_
 #define _TCGEFI_H_
 
-#include "AmiTcg/TcgTpm12.h"
+#include "AmiTcg\TcgTpm12.h"
 #include <IndustryStandard/Tpm12.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
+#include "AmiTcg\TcgPc.h"
 
 #define _TPM_NTH_BIT( x )             (1 << (x))
 #define _TPM_STRUCT_PARTIAL_SIZE( type, field )  \

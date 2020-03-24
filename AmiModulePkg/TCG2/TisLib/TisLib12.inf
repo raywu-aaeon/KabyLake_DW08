@@ -48,8 +48,6 @@ TimerLib
  gEfiHobListGuid            
 
 [Packages]
-AmiCompatibilityPkg/AmiCompatibilityPkg.dec
-MdePkg/MdePkg.dec
-AmiModulePkg/AmiModulePkg.dec
- AmiTcgPkg/AmiTcgPkg.dec
-
+ AmiCompatibilityPkg\AmiCompatibilityPkg.dec
+ MdePkg\MdePkg.dec
+ AmiModulePkg\AmiModulePkg.dec

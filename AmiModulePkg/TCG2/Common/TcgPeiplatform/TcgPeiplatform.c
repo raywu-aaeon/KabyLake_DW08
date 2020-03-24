@@ -59,19 +59,20 @@
 //*************************************************************************
 #include <Efi.h>
 #include <Pei.h>
-#include <AmiTcg/TcgCommon12.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Ppi/TcgTcmService.h>
+#include <AmiTcg\TcgCommon12.h>
+#include <AmiTcg\TcgMisc.h>
+#include <PPI/TcgTcmService.h>
 #include <Ppi/TcgService.h>
 #include <Ppi/TpmDevice.h>
-#include "Ppi/CpuIo.h"
-#include "Ppi/LoadFile.h"
-#include <Ppi/ReadOnlyVariable.h>
-#include <AmiTcg/AmiTcgPlatformPei.h>
-#include <Library/DebugLib.h>
+#include "PPI\CpuIo.h"
+#include "PPI\LoadFile.h"
+#include <Ppi\ReadOnlyVariable.h>
+#include <AmiTcg\AmiTcgPlatformPei.h>
+#include <Library\DebugLib.h>
 
-extern EFI_GUID gAmiTcgPlatformPpiAfterMem;
-extern EFI_GUID gAmiTcgPlatformPpiBeforeMem;
+extern  EFI_GUID gAmiTcgPlatformPpiBeforeMem;
+extern  EFI_GUID gAmiTcgPlatformPpiAfterMem;
+EFI_GUID gCacheInstallGuid      = EFI_PEI_PERMANENT_MEMORY_INSTALLED_PPI;
 
 EFI_STATUS
 EFIAPI OnMemoryDiscovered(
@@ -123,17 +124,17 @@ EFIAPI OnMemoryDiscovered(
 
 
     Status =  (*PeiServices)->LocatePpi (
-                  (CONST EFI_PEI_SERVICES    **)PeiServices,
+                  PeiServices,
                   &gAmiTcgPlatformPpiAfterMem ,
                   0,
                   NULL,
-                  (void **)&AmiTcgPlatformPPI);
+                  &AmiTcgPlatformPPI);
 
-    DEBUG((DEBUG_INFO, "Locate PpiAfterMem Status = %r \n", Status));
+    DEBUG((-1, "Locate PpiAfterMem Status = %r \n", Status));
 
     if ( EFI_ERROR( Status ))
     {
-        Status = (*PeiServices)->NotifyPpi ( (CONST EFI_PEI_SERVICES    **)PeiServices, \
+        Status = (*PeiServices)->NotifyPpi (PeiServices, \
                                             TcgAmiPlatformInitNotify);
 
         return Status;
@@ -141,7 +142,7 @@ EFIAPI OnMemoryDiscovered(
 
     ASSERT_EFI_ERROR( Status );
 
-    Status = (*PeiServices)->GetBootMode( (CONST EFI_PEI_SERVICES    **)PeiServices, &BootMode );
+    Status = (*PeiServices)->GetBootMode( PeiServices, &BootMode );
     ASSERT_EFI_ERROR( Status );
 
     Status = AmiTcgPlatformPPI->VerifyTcgVariables(PeiServices);
@@ -181,7 +182,7 @@ EFIAPI OnMemoryDiscovered(
 //**********************************************************************
 EFI_STATUS
 EFIAPI TcgPeiplatformEntry(
-    IN       EFI_PEI_FILE_HANDLE  FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST  EFI_PEI_SERVICES    **PeiServices )
 {
 
@@ -194,7 +195,7 @@ EFIAPI TcgPeiplatformEntry(
                   &gAmiTcgPlatformPpiBeforeMem,
                   0,
                   NULL,
-                  (void **)&AmiTcgPlatformPPI);
+                  &AmiTcgPlatformPPI);
 
 
     if(EFI_ERROR(Status))
@@ -205,18 +206,18 @@ EFIAPI TcgPeiplatformEntry(
     AmiTcgPlatformPPI->MemoryAbsentFunctionOverride( (EFI_PEI_SERVICES    **)PeiServices);
 
     Status = (**PeiServices).AllocatePool(
-                  PeiServices,
+                 PeiServices,
                  sizeof (TCG_PEI_MEMORY_CALLBACK),
-                 (void **)&MemCallback);
+                 &MemCallback);
 
     if ( !EFI_ERROR( Status ))
     {
         MemCallback->NotifyDesc.Flags
             = (EFI_PEI_PPI_DESCRIPTOR_NOTIFY_CALLBACK
                | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST);
-        MemCallback->NotifyDesc.Guid   = &gEfiPeiMemoryDiscoveredPpiGuid;
+        MemCallback->NotifyDesc.Guid   = &gCacheInstallGuid;
         MemCallback->NotifyDesc.Notify = OnMemoryDiscovered;
-        MemCallback->FfsHeader         = FileHandle;
+        MemCallback->FfsHeader         = FfsHeader;
 
         Status = (*PeiServices)->NotifyPpi( PeiServices,
                                             &MemCallback->NotifyDesc );

@@ -29,12 +29,11 @@
 //<AMI_FHDR_END>
 //*************************************************************************
 
-#include "Token.h"
-#include <Efi.h>
-#include <AmiTcg/TCGMisc.h>
+#include "token.h"
+#include <EFI.h>
+#include <AmiTcg\TcgMisc.h>
 
 
-extern EFI_GUID gAmiPpiGuid;
 extern EFI_BOOT_SERVICES    *gBS;
 extern EFI_SYSTEM_TABLE     *gST;
 extern EFI_RUNTIME_SERVICES *gRT;
@@ -105,6 +104,7 @@ void ConsoleInCallback(
 //****************************************************************************************
 VOID AmiTcgInstallPpiGuid(VOID )
 {
+    EFI_GUID gAmiPpiguid = AMI_PPI_GUID;
     EFI_EVENT                   SigEvent;
     EFI_STATUS Status;
 
@@ -121,7 +121,7 @@ VOID AmiTcgInstallPpiGuid(VOID )
                      TPL_CALLBACK,
                      AmiTcgDummyTseFunction,
                      NULL,
-                     &gAmiPpiGuid,
+                     &gAmiPpiguid,
                      &SigEvent);
 
         gBS->SignalEvent(SigEvent);

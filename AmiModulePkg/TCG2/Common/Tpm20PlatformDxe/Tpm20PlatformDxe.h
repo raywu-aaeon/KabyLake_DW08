@@ -108,12 +108,11 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <AmiTcg/TCGMisc.h>
+#include <AmiTcg/TcgMisc.h>
 #include <Token.h>
-#include <AmiTcg/Tpm20.h>
-#include <AmiTcg/TcgCommon20.h>
-#include <AmiTcg/TrEEProtocol.h>
-#include <AmiTcg/Tpm20.h>
+#include <AmiTcg\TrEEProtocol.h>
+#include "protocol\TpmDevice.h"
+#include <Amitcg\Tpm20.h>
 #include <Protocol/HiiFont.h>
 
 //--------------------------------------------------------------------------
@@ -136,13 +135,6 @@
 
 #define MBR_SIZE                    512
 
-#ifndef EFI_AUDIT_MODE_NAME
-#define EFI_AUDIT_MODE_NAME L"AuditMode"
-#endif
-
-#ifndef EFI_DEPLOYED_MODE_NAME
-#define EFI_DEPLOYED_MODE_NAME L"DeployedMode"
-#endif
 
 //---------------------------------------------------------------------------
 //      Structure Definitions
@@ -237,6 +229,19 @@ typedef UINT32 Clear_In;
 
 #pragma pack(push, 1)
 
+typedef struct
+{
+    TPM_ST tag;
+    UINT32 paramSize;
+    TPM_CC commandCode;
+} INT_TPM2_COMMAND_HEADER;
+
+typedef struct
+{
+    TPM_ST tag;
+    UINT32 paramSize;
+    TPM_RC responseCode;
+} INT_TPM2_RESPONSE_HEADER;
 
 typedef struct
 {
@@ -281,6 +286,24 @@ typedef struct
     INT_TPM2_RESPONSE_HEADER      Header;
     TPM2B_DIGEST                 randomBytes;
 } TPM2_GetRandom_RESPONSE;
+
+typedef struct
+{
+    INT_TPM2_COMMAND_HEADER       Header;
+    TPMI_RH_HIERARCHY             AuthHandle;
+    UINT32                        AuthorizationSize;
+    TPMS_AUTH_COMMAND             AuthSession;
+    TPMI_RH_HIERARCHY             Hierarchy;
+    TPMI_YES_NO                   State;
+} TPM2_HIERARCHY_CONTROL_COMMAND;
+
+typedef struct
+{
+    INT_TPM2_RESPONSE_HEADER      Header;
+    UINT32                        ParameterSize;
+    TPMS_AUTH_RESPONSE            AuthSession;
+} TPM2_HIERARCHY_CONTROL_RESPONSE;
+
 
 typedef struct
 {

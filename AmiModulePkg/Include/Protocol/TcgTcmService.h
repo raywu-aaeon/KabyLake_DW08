@@ -36,19 +36,23 @@
 #ifndef _TCG_TCM_SERVICE_PROTOCOL_H_
 #define _TCG_TCM_SERVICE_PROTOCOL_H_
 
-#include <AmiTcg/TcgEfiTpm.h>
-#include <AmiTcg/Tcm.h>
-#include <AmiTcg/TcmPc.h>
+#include <AmiTcg\TcgEfiTpm.h>
 
 
 #define TSS_EVENT_DATA_MAX_SIZE   256
 
-typedef struct _EFI_TCM_PROTOCOL EFI_TCM_PROTOCOL;
+EFI_FORWARD_DECLARATION( EFI_TCM_PROTOCOL );
 // Set structure alignment to 1-byte
 //
 #pragma pack (push, 1)
 
-
+typedef struct
+{
+    UINT8 Major;
+    UINT8 Minor;
+    UINT8 RevMajor;
+    UINT8 RevMinor;
+} TCM_VERSION;
 
 typedef struct _TCM_EFI_BOOT_SERVICE_CAPABILITY
 {
@@ -125,7 +129,7 @@ typedef struct _EFI_TCM_PROTOCOL
     EFI_TCM_LOG_EVENT             LogEvent;
     EFI_TCM_PASS_THROUGH_TO_TPM   PassThroughToTpm;
     EFI_TCM_HASH_LOG_EXTEND_EVENT HashLogExtendEvent;
-}EFI_TCM_PROTOCOL;
+} EFI_TCM_PROTOCOL;
 
 extern EFI_GUID gEfiTcgProtocolGuid;
 

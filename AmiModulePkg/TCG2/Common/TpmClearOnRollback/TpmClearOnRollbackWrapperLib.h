@@ -51,11 +51,11 @@
 #define _TPM_CLEAR_ON_ROLLBACK_WRAPPER_H
 
 //#include <AmiDxeLib.h>
-#include <Protocol/TcgService.h>
-#include <AmiTcg/TCGMisc.h>
+#include <Protocol\TcgService.h>
+#include <AmiTcg\TcgMisc.h>
 //#include <Protocol\SmmBase2.h>
-#include <Protocol/AmiTpmClearOnRollbackProtocol.h>
-#include <Ppi/FwVersion.h>
+#include <Protocol\AmiTpmClearOnRollbackProtocol.h>
+#include <PPI/FwVersion.h>
 #include <Hob.h>
 #include <Token.h>
 //#include <AmiHobs.h>
@@ -153,19 +153,19 @@ typedef struct _DATA_CMD
 #pragma pack()
 
 EFI_STATUS
-EFIAPI IsTpmPresent (
+__stdcall IsTpmPresent (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 EFI_STATUS
-EFIAPI TisReleaseLocality (
+__stdcall TisReleaseLocality (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 EFI_STATUS
-EFIAPI TisRequestLocality (
+__stdcall TisRequestLocality (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 EFI_STATUS
-EFIAPI TpmLibPassThrough (
+__stdcall TpmLibPassThrough (
     IN TPM_1_2_REGISTERS_PTR   TpmReg,
     IN UINTN                   NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -173,7 +173,7 @@ EFIAPI TpmLibPassThrough (
     IN OUT TPM_TRANSMIT_BUFFER *OutputBuffers );
 
 BOOLEAN
-EFIAPI IsTcmSupportType ();
+__stdcall IsTcmSupportType ();
 
 EFI_STATUS TpmRecoveryGetFidFromFv(
     OUT VOID *Fid
@@ -187,7 +187,7 @@ EFI_STATUS TpmGetFidFromBuffer(
 UINT8 ClearTpmBeforeFlash();
 
 void
-EFIAPI
+__stdcall
 FixedDelay(UINT32 dCount);
 
 #endif

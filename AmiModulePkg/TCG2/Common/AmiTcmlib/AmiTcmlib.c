@@ -27,7 +27,7 @@
 //<AMI_FHDR_END>
 //**********************************************************************
 #include "AmiTcmlib.h"
-#include "Token.h"
+#include "token.h"
 
 
 TCM_ID_STRUC  TCMSupportedArray[NUMBER_OF_SUPPORTED_TCM_DEVICES]=
@@ -60,7 +60,7 @@ TCM_ID_STRUC  TCMSupportedArray[NUMBER_OF_SUPPORTED_TCM_DEVICES]=
 //**********************************************************************
 extern
 BOOLEAN
-EFIAPI IsTcmSupportType ()
+__stdcall IsTcmSupportType ()
 {
 #if TCG_LEGACY == 0
     UINTN i=0;

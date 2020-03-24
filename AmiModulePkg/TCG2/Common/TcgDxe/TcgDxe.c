@@ -36,42 +36,38 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
+#include <AmiTcg\TcgCommon12.h>
+#include <AmiTcg\sha.h>
+#include <AmiTcg\TcgMisc.h>
 #include <Token.h>
-#include <AmiTcg/TcgCommon12.h>
-#include <AmiTcg/sha.h>
-#include <AmiTcg/TCGMisc.h>
-#include <AmiTcg/Tcmdxe.h>
-#include <Protocol/TcgTcmService.h>
-#include <Protocol/TcgPlatformSetupPolicy.h>
-#include <Protocol/AcpiSupport.h>
-#include "AmiTcg/TcgPc.h"
-#include "Protocol/TcgService.h"
-#include "Protocol/TpmDevice.h"
+#include <protocol\TcgTcmService.h>
+#include <protocol\TcgPlatformSetupPolicy.h>
+#include <protocol\AcpiSupport.h>
+#include "AmiTcg\TcgPc.h"
+#include "protocol\TcgService.h"
+#include "protocol\TpmDevice.h"
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/TimerLib.h>
 #include <Library/LocalApicLib.h>
-#include <IndustryStandard/Acpi30.h>
-#include <Protocol/Runtime.h>
-#include <Library/UefiLib.h>
-#include <Guid/MemoryOverwriteControl.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
-#include <Library/PcdLib.h>
+#include <industrystandard/Acpi30.h>
+#include <Protocol\Runtime.h>
+#include <Library\UefiLib.h>
+#include <Guid\MemoryOverwriteControl.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 
 #include <AmiProtocol.h>
-#include <Guid/AmiTcgGuidIncludes.h>
 
 #if PI_SPECIFICATION_VERSION<0x00010000
-#include <Protocol/FirmwareVolume.h>
+#include <Protocol\FirmwareVolume.h>
 #else
-#include <Protocol/FirmwareVolume2.h>
+#include <Protocol\FirmwareVolume2.h>
 #endif
 
-extern EFI_GUID TcgPlatformSetupPolicyGuid;
-extern EFI_GUID gEfiHobListGuid;
-extern TCM_PC_REGISTERS_PTR TcmBaseReg;
+
+EFI_GUID gEfiAmiDTcgLogHobGuid = EFI_TCG_LOG_HOB_GUID;
 
 UINT8  GetHashPolicy();
 
@@ -124,11 +120,12 @@ EFI_STATUS EFIAPI TcmDxeLogEvent(
 
 BOOLEAN IsTpm20Device()
 {
+   EFI_GUID gTpm20Supporthobguid = TPM20_HOB_GUID;
    Tpm20DeviceHob  *TpmSupport = NULL;
    
    TpmSupport = LocateATcgHob( gST->NumberOfTableEntries,
                   gST->ConfigurationTable,
-                  &gTpm20HobGuid);
+                  &gTpm20Supporthobguid);
 
    if(TpmSupport != NULL){
       if((*(volatile UINT8 *)((UINTN)(0xfed40000))!=0xff) &&
@@ -144,6 +141,7 @@ BOOLEAN IsTpm20Device()
 UINTN FindNextLogLocation(TCG_PCR_EVENT_HDR   *TcgLog, UINTN EventNum);
 UINTN GetLogEventCount(TCG_PCR_EVENT_HDR   *TcgLog);
 
+EFI_GUID gEfiTcgCapHobGuid = EFI_TCG_CAP_HOB_GUID;
 static UINTN    TcmBootVar = 0;
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -196,11 +194,21 @@ EFIAPI TcmOSTransition()
    EFI_EVENT  ReadToBootEvent;
    EFI_STATUS Status;
 
-   Status = EfiCreateEventReadyToBootEx( EFI_TPL_CALLBACK,
+   #if defined(EFI_EVENT_SIGNAL_READY_TO_BOOT)\
+        && EFI_SPECIFICATION_VERSION < 0x20000
+       
+         Status = gBS->CreateEvent( EFI_EVENT_SIGNAL_READY_TO_BOOT,
+                                   EFI_TPL_CALLBACK,
+                                   TcmBootDone, NULL, &ReadToBootEvent );
+        
+   #else
+        Status = EfiCreateEventReadyToBootEx( EFI_TPL_CALLBACK,
                                          TcmBootDone,
                                          NULL,
                                          &ReadToBootEvent );
-   return Status;
+   #endif
+
+   return EFI_SUCCESS;
 }
 
 
@@ -227,15 +235,15 @@ TCG_ACPI_TABLE                        mTcgAcpiTableTemplate = {
 #if TCG_PLATFORM_CLASS == 1
     0,
 #endif
-    MAX_LOG_AREA_SIZE,
+    TPM_LOG_AREA_MAX_LEN,
     (EFI_PHYSICAL_ADDRESS)( -1 ),
-    0
+    {0}
 };
 
 static TPM_Capabilities_PermanentFlag TcgDxe_Cap;
 
 EFI_STATUS
-EFIAPI TcgCommonPassThrough(
+__stdcall TcgCommonPassThrough(
     IN VOID                    *Context,
     IN UINT32                  NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -291,7 +299,7 @@ EFIAPI TcgCommonPassThrough(
 //<AMI_PHDR_END>
 //**********************************************************************
 EFI_STATUS
-EFIAPI  TcmCommonPassThrough(
+__stdcall TcmCommonPassThrough(
     IN VOID                    *Context,
     IN UINT32                  NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -315,18 +323,18 @@ void printbuffer(UINT8 *Buffer, UINTN BufferSize)
 {
     UINTN i=0; UINTN j=0;
     
-    DEBUG((DEBUG_INFO,"\n**********PrintBuffer Entry******** \n"));
+    DEBUG((-1,"\n**********PrintBuffer Entry******** \n"));
     
     for(i=0; i<BufferSize; i++){
         
         if(i%16 == 0){
-            DEBUG((DEBUG_INFO,"\n"));
-            DEBUG((DEBUG_INFO,"%04x :", j));
+            DEBUG((-1,"\n"));
+            DEBUG((-1,"%04x :", j));
             j+=1;
         }
-        DEBUG((DEBUG_INFO,"%02x ", Buffer[i]));
+        DEBUG((-1,"%02x ", Buffer[i]));
     }
-    DEBUG((DEBUG_INFO,"\n"));
+    DEBUG((-1,"\n"));
 }
 
 
@@ -372,7 +380,7 @@ EFI_STATUS EFIAPI TcgDxePassThroughToTpm(
 
 
 EFI_STATUS
-EFIAPI  TcgDxeCommonExtend(
+__stdcall TcgDxeCommonExtend(
     IN VOID         *CallbackContext,
     IN TPM_PCRINDEX PCRIndex,
     IN TCG_DIGEST   *Digest,
@@ -382,7 +390,7 @@ EFIAPI  TcgDxeCommonExtend(
     TPM_1_2_RET_HEADER  retHeader;
     TPM_TRANSMIT_BUFFER InBuffer[3], OutBuffer[2];  
 
-    DEBUG((DEBUG_INFO,"Tpm1_2 Extend Status \n"));
+    DEBUG((-1,"Tpm1_2 Extend Status \n"));
     InBuffer[0].Buffer = &cmdHeader;
     InBuffer[0].Size   = sizeof (cmdHeader);
     InBuffer[1].Buffer = &PCRIndex;
@@ -391,7 +399,7 @@ EFIAPI  TcgDxeCommonExtend(
     InBuffer[2].Size   = sizeof (Digest->digest);
 
     OutBuffer[0].Buffer = &retHeader;
-    OutBuffer[0].Size   = sizeof (retHeader);
+    OutBuffer[0].Size   = sizeof (retHeader);
     OutBuffer[1].Buffer = NewPCRValue->digest;
     OutBuffer[1].Size   = sizeof (NewPCRValue->digest);
 
@@ -427,12 +435,12 @@ EFI_STATUS EFIAPI TcgDxeStatusCheck(
     {
         gBS->SetMem( ProtocolCapability, sizeof (*ProtocolCapability), 0 );
         ProtocolCapability->Size = sizeof (TCG_EFI_BOOT_SERVICE_CAPABILITY);
-        ProtocolCapability->StructureVersion.Major = 1;     
-        ProtocolCapability->StructureVersion.Minor = 2;     
+        ProtocolCapability->StructureVersion.Major = TCG_SPEC_VERSION_MAJOR;
+        ProtocolCapability->StructureVersion.Minor = TCG_SPEC_VERSION_MINOR;
         ProtocolCapability->StructureVersion.RevMajor = 0;
         ProtocolCapability->StructureVersion.RevMinor = 0;
-        ProtocolCapability->ProtocolSpecVersion.Major = 1;  
-        ProtocolCapability->ProtocolSpecVersion.Minor = 2;  
+        ProtocolCapability->ProtocolSpecVersion.Major = TCG_SPEC_VERSION_MAJOR;
+        ProtocolCapability->ProtocolSpecVersion.Minor = TCG_SPEC_VERSION_MINOR;
         ProtocolCapability->ProtocolSpecVersion.RevMajor = 0;
         ProtocolCapability->ProtocolSpecVersion.RevMinor = 0;
         ProtocolCapability->HashAlgorithmBitmap          = 1;    // SHA-1
@@ -465,7 +473,7 @@ EFI_STATUS EFIAPI TcgDxeStatusCheck(
             TcgLog->EventNum = (UINT32)GetLogEventCount( (TCG_PCR_EVENT_HDR*)(TcgLog + 1) );
             Index = TcgLog->EventNum;
             *LastEvent = (EFI_PHYSICAL_ADDRESS)( UINTN )FindNextLogLocation((TCG_PCR_EVENT_HDR *)mTcgAcpiTableTemplate.LogStart,
-                            (TcgLog->EventNum - ((UINT32)1)));
+                            (TcgLog->EventNum - 1));
         }
     }
 
@@ -518,14 +526,14 @@ EFI_STATUS EFIAPI TcgTcmDxeStatusCheck(
     {
         gBS->SetMem( ProtocolCapability, sizeof (*ProtocolCapability), 0 );
         ProtocolCapability->Size = sizeof (TCG_EFI_BOOT_SERVICE_CAPABILITY);
-        ProtocolCapability->StructureVersion.major = 1;     // For TCM, the spec version might be 1.2 or 1.0
-        ProtocolCapability->StructureVersion.minor = 2;
-        ProtocolCapability->StructureVersion.revMajor = 0;
-        ProtocolCapability->StructureVersion.revMinor = 0;
-        ProtocolCapability->ProtocolSpecVersion.major = 1;  // For Protocol version, we still follow the UEFI TPM 1.2 protocol( Latest version is 1.22 )
-        ProtocolCapability->ProtocolSpecVersion.minor = 2;
-        ProtocolCapability->ProtocolSpecVersion.revMajor = 0;
-        ProtocolCapability->ProtocolSpecVersion.revMinor = 0;
+        ProtocolCapability->StructureVersion.Major = TCG_SPEC_VERSION_MAJOR;
+        ProtocolCapability->StructureVersion.Minor = TCG_SPEC_VERSION_MINOR;
+        ProtocolCapability->StructureVersion.RevMajor = 0;
+        ProtocolCapability->StructureVersion.RevMinor = 0;
+        ProtocolCapability->ProtocolSpecVersion.Major = TCG_SPEC_VERSION_MAJOR;
+        ProtocolCapability->ProtocolSpecVersion.Minor = TCG_SPEC_VERSION_MINOR;
+        ProtocolCapability->ProtocolSpecVersion.RevMajor = 0;
+        ProtocolCapability->ProtocolSpecVersion.RevMinor = 0;
         ProtocolCapability->HashAlgorithmBitmap          = 1;    // SHA-1
         ProtocolCapability->TPMPresentFlag               = 1;   // TPM is present.
         ProtocolCapability->TPMDeactivatedFlag    = TcgDxe_Cap.deactivated;
@@ -585,8 +593,6 @@ EFI_STATUS EFIAPI TcgDxeHashAll(
     IN OUT UINT64       *HashedDataLen,
     IN OUT UINT8        **HashedDataResult )
 {
-    EFI_STATUS Status; 
-    
     if ( AlgorithmId != TCG_ALG_SHA )
     {
         return EFI_UNSUPPORTED;
@@ -595,12 +601,11 @@ EFI_STATUS EFIAPI TcgDxeHashAll(
     if ( *HashedDataResult == NULL || *HashedDataLen == 0 )
     {
         *HashedDataLen = sizeof (TCG_DIGEST);
-        
-        Status = gBS->AllocatePool( EfiBootServicesData,
+        gBS->AllocatePool( EfiBootServicesData,
                            (UINTN)*HashedDataLen,
-                           (void **)HashedDataResult );
+                           HashedDataResult );
 
-        if ( *HashedDataResult == NULL  || EFI_ERROR(Status))
+        if ( *HashedDataResult == NULL )
         {
             return EFI_OUT_OF_RESOURCES;
         }
@@ -647,7 +652,34 @@ EFI_STATUS EFIAPI TcmDxeHashAll(
     IN OUT UINT64       *HashedDataLen,
     IN OUT UINT8        **HashedDataResult )
 {
-   return EFI_UNSUPPORTED;
+
+    if((IsTcmSupportType()) && (TcmBootVar == 1)){
+         return EFI_UNSUPPORTED;
+    }
+
+    if ( AlgorithmId != TCG_ALG_SHA )
+    {
+        return EFI_UNSUPPORTED;
+    }
+
+    if ( *HashedDataResult == NULL || *HashedDataLen == 0 )
+    {
+        *HashedDataLen = sizeof (TCG_DIGEST);
+        gBS->AllocatePool( EfiBootServicesData,
+                           (UINTN)*HashedDataLen,
+                           HashedDataResult );
+
+        if ( *HashedDataResult == NULL )
+        {
+            return EFI_OUT_OF_RESOURCES;
+        }
+    }
+
+    return SHA1HashAll(
+                    This,
+                    (VOID*)(UINTN)HashData,
+                    (UINTN)HashDataLen,
+                    *HashedDataResult);
 }
 
 
@@ -703,7 +735,7 @@ EFIAPI TcgDxeHashLogExtendEventTpm(
 
     if ( EFI_ERROR( Status ))
     {
-         DEBUG((DEBUG_ERROR,"Private->TpmDevice Status = %r \n", Status));
+         DEBUG((-1,"Private->TpmDevice Status = %r \n", Status));
         goto Exit;
     }
 
@@ -711,7 +743,7 @@ EFIAPI TcgDxeHashLogExtendEventTpm(
 
     if ( EFI_ERROR( Status ))
     {
-         DEBUG((DEBUG_ERROR,"TcgCommonSha1Start Status = %r \n", Status));
+         DEBUG((-1,"TcgCommonSha1Start Status = %r \n", Status));
         goto Exit;
     }
 
@@ -724,7 +756,7 @@ EFIAPI TcgDxeHashLogExtendEventTpm(
 
     if ( EFI_ERROR( Status ))
     {
-         DEBUG((DEBUG_ERROR,"TcgCommonSha1Update Status = %r \n", Status));
+         DEBUG((-1,"TcgCommonSha1Update Status = %r \n", Status));
         goto Exit;
     }
 
@@ -747,12 +779,12 @@ EFIAPI TcgDxeHashLogExtendEventTpm(
 
     if ( EFI_ERROR( Status ))
     {
-         DEBUG((DEBUG_ERROR,"TcgCommonSha1CompleteExtend Status = %r \n", Status));
+         DEBUG((-1,"TcgCommonSha1CompleteExtend Status = %r \n", Status));
         goto Exit;
     }
 
     Status = TcgDxeLogEvent( This, TCGLogData, EventNum, 1 );
-     DEBUG((DEBUG_INFO,"TcgDxeLogEvent Status = %r \n", Status));    
+     DEBUG((-1,"TcgDxeLogEvent Status = %r \n", Status));    
 
 Exit:
     Private->TpmDevice->Close( Private->TpmDevice );
@@ -796,7 +828,57 @@ EFIAPI TcgDxeHashLogExtendEventTcm(
     IN OUT UINT32            *EventNum,
     OUT EFI_PHYSICAL_ADDRESS *EventLogLastEntry )
 {
-   return EFI_UNSUPPORTED;
+    EFI_STATUS           Status;
+    UINT32               Sha1MaxBytes;
+    TCM_DIGEST           NewPCRValue;
+    TCM_DXE_PRIVATE_DATA *Private;
+
+    Private = TCM_DXE_PRIVATE_DATA_FROM_THIS( This );
+
+    if((IsTcmSupportType()) && (TcmBootVar == 1)){
+        return EFI_UNSUPPORTED;
+    }
+
+    Status = TcgCommonSha1Start( This, TCG_ALG_SHA, &Sha1MaxBytes );
+
+    if ( EFI_ERROR( Status ))
+    {
+        goto Exit;
+    }
+
+    Status = TcgCommonSha1Update(
+        This,
+        (UINT8 *)HashData,
+        (UINT32)HashDataLen,
+        Sha1MaxBytes
+        );
+
+    if ( EFI_ERROR( Status ))
+    {
+        goto Exit;
+    }
+
+    HashData    += (HashDataLen & ~63);
+    HashDataLen &= 63;
+
+    Status = TcmCommonSha1CompleteExtend(
+        This,
+        (UINT8 *)HashData,
+        (UINT32)HashDataLen,
+        TCGLogData->PCRIndex,
+        &TCGLogData->Digest,
+        &NewPCRValue
+        );
+
+    if ( EFI_ERROR( Status ))
+    {
+        goto Exit;
+    }
+
+    Status = TcmDxeLogEvent( This, TCGLogData, EventNum, 1 );
+
+Exit:
+    return Status;
 }
 
 
@@ -851,10 +933,10 @@ EFI_STATUS EFIAPI TcgDxeLogEvent(
     
     if ( !(Flags & (UINT32)(0x1)))
     {
-         DEBUG((DEBUG_INFO, "Flags = %x \n", Flags));
+         DEBUG((-1, "Flags = %x \n", Flags));
         Status = Private->TpmDevice->Init( Private->TpmDevice );
 
-         DEBUG((DEBUG_INFO, "Private->TpmDevice->Init = %r \n", Status));
+         DEBUG((-1, "Private->TpmDevice->Init = %r \n", Status));
 
         if ( !EFI_ERROR( Status ))
         {          
@@ -865,7 +947,7 @@ EFI_STATUS EFIAPI TcgDxeLogEvent(
             &NewPCR
             );
             
-             DEBUG((DEBUG_INFO, "TcgDxeCommonExtend Status = %r \n", Status));
+             DEBUG((-1, "TcgDxeCommonExtend Status = %r \n", Status));
         }
         Private->TpmDevice->Close( Private->TpmDevice );
     }
@@ -895,7 +977,7 @@ EFI_STATUS EFIAPI TcgDxeLogEvent(
                 TcgLog->TableMaxSize,
                 TCGLogData, 0);
 
-             DEBUG((DEBUG_INFO, "TcgCommonLogEvent Status = %r \n", Status));
+             DEBUG((-1, "TcgCommonLogEvent Status = %r \n", Status));
              
              //printbuffer((UINT8 *)TcgLog + 1, 0x100);
 
@@ -939,7 +1021,54 @@ EFI_STATUS EFIAPI TcmDxeLogEvent(
     IN OUT UINT32       *EventNumber,
     IN UINT32           Flags )
 {
-   return EFI_UNSUPPORTED;
+    EFI_STATUS           Status;
+    TCG_LOG_HOB          *TcgLog;
+    TCM_DXE_PRIVATE_DATA *Private;
+    TCM_DIGEST           NewPCR;
+
+    Private = TCM_DXE_PRIVATE_DATA_FROM_THIS( This );
+
+    if((IsTcmSupportType()) && (TcmBootVar == 1)){
+        return EFI_UNSUPPORTED;
+    }
+
+    Status = EFI_SUCCESS;
+
+    if ( !(Flags & 1))
+    {
+        if ( !EFI_ERROR( Status ))
+        {
+            Status = TcmCommonExtend(
+                This,
+                TCGLogData->PCRIndex,
+                &TCGLogData->Digest,
+                &NewPCR);
+        }
+    }
+
+    if ( !TcgDxe_Cap.deactivated )
+    {
+        TcgLog = (TCG_LOG_HOB*)(UINTN)mTcgAcpiTableTemplate.LogStart;
+        TcgLog--;
+
+        if ( !EFI_ERROR( Status ))
+        {
+            Status = TcmCommonLogEvent(
+                This,
+                (TCM_PCR_EVENT*)(TcgLog + 1),
+                &TcgLog->TableSize,
+                TcgLog->TableMaxSize,
+                TCGLogData
+                );
+
+            if ( !EFI_ERROR( Status ))
+            {
+                TcgLog->EventNum = (UINT32)GetLogEventCount( (TCG_PCR_EVENT_HDR*)(TcgLog + 1) );
+                *EventNumber = TcgLog->EventNum;
+            }
+        }
+    }
+    return Status;
 }
 
 
@@ -974,15 +1103,30 @@ EFI_STATUS EFIAPI TcgDxePassThroughToTcm(
     IN UINT32           TpmOutputParameterBlockSize,
     IN UINT8            *TpmOutputParameterBlock )
 {
-    EFI_TCMSDRV_PROTOCOL    *TcmDrvProtocol = NULL;
-    EFI_STATUS              Status;
-    
-    Status = gBS->LocateProtocol (&gEfiTcmMPProtocolGuid,  NULL, (void **)&TcmDrvProtocol);
-    if(EFI_ERROR(Status))return Status;
-    
-    Status=  TcmDrvProtocol->TcmLibPassThrough(TcmBaseReg, TpmInputParamterBlock, (UINT32)TpmInputParamterBlockSize,\
-                                                TpmOutputParameterBlock, (UINT32)TpmOutputParameterBlockSize);
-    if(EFI_ERROR(Status))return Status;
+    TPM_TRANSMIT_BUFFER InBuffer[1], OutBuffer[1];
+    EFI_STATUS Status;
+    TCM_DXE_PRIVATE_DATA              *Private;
+
+    //some applications might not set init command before making this call.
+    //Just set init commands[locality zero for them]
+    Private = TCM_DXE_PRIVATE_DATA_FROM_THIS( This );
+
+    if((IsTcmSupportType()) && (TcmBootVar == 1)){
+        return EFI_UNSUPPORTED;
+    }
+
+    InBuffer[0].Buffer  = TpmInputParamterBlock;
+    InBuffer[0].Size    = TpmInputParamterBlockSize;
+    OutBuffer[0].Buffer = TpmOutputParameterBlock;
+    OutBuffer[0].Size   = TpmOutputParameterBlockSize;
+
+    Status = TcmCommonPassThrough(
+        This,
+        sizeof (InBuffer) / sizeof (*InBuffer),
+        InBuffer,
+        sizeof (OutBuffer) / sizeof (*OutBuffer),
+        OutBuffer
+        );
 
     return EFI_SUCCESS;
 }
@@ -1023,7 +1167,7 @@ EFI_STATUS EFIAPI TcgDxeHashLogExtendEvent(
         &HashResult
         );
 
-     DEBUG((DEBUG_INFO, "TcgDxeHashAll Status = %r \n", Status));
+     DEBUG((-1, "TcgDxeHashAll Status = %r \n", Status));
 
 
     if ( !EFI_ERROR( Status ))
@@ -1035,7 +1179,7 @@ EFI_STATUS EFIAPI TcgDxeHashLogExtendEvent(
             0
             );
 
-         DEBUG((DEBUG_INFO, "TcgDxeLogEvent Status = %r \n", Status));
+         DEBUG((-1, "TcgDxeLogEvent Status = %r \n", Status));
     }else{
         TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_ERR_TCG_PROTOCOL_HASH_LOG_EXTEND_EVENT_FAIL | EFI_SOFTWARE_DXE_BS_DRIVER);
     }
@@ -1126,9 +1270,6 @@ EFI_STATUS OverwriteSystemMemory(
                   (VOID**)&MemoryMap
                   );
   ASSERT_EFI_ERROR (Status);
-  if(EFI_ERROR(Status)){
-      return Status;
-  }
 
   //
   // Get System MemoryMap
@@ -1141,10 +1282,6 @@ EFI_STATUS OverwriteSystemMemory(
                   &DescriptorVersion
                   );
   ASSERT_EFI_ERROR (Status);
-  if(EFI_ERROR(Status)){
-      gBS->FreePool (MemoryMap);
-      return Status;
-  }
 
   MemoryMapPtr = MemoryMap;
   //
@@ -1167,13 +1304,13 @@ EFI_STATUS OverwriteSystemMemory(
             case EfiLoaderData:
             case EfiMaxMemoryType:
               	Size = MemoryMap->NumberOfPages <<  EFI_PAGE_SHIFT; 
-        	DEBUG((DEBUG_INFO,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
-        	DEBUG((DEBUG_INFO," Left Alone \n"));
+        	DEBUG((-1,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
+        	DEBUG((-1," Left Alone \n"));
                 break;
             default: 
                	Size = MemoryMap->NumberOfPages <<  EFI_PAGE_SHIFT; 
-            	DEBUG((DEBUG_INFO,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
-       	        DEBUG((DEBUG_INFO," Cleaned \n"));
+            	DEBUG((-1,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
+       	        DEBUG((-1," Cleaned \n"));
                Size = MemoryMap->NumberOfPages <<  EFI_PAGE_SHIFT; 
                SetMem((VOID*)MemoryMap->PhysicalStart, (UINTN)Size, 0);
         }
@@ -1208,13 +1345,14 @@ EFI_STATUS OverwriteSystemMemory(
 //**********************************************************************
 VOID ReadMORValue( )
 {
+    CHAR16     UefiMor[]   = L"MemoryOverwriteRequestControl";
     EFI_GUID   MorUefiGuid = MEMORY_ONLY_RESET_CONTROL_GUID;
     UINT8      mor         = 0;
     UINTN      size        = sizeof(mor);
     EFI_STATUS Status;
 
    
-    Status = gRT->GetVariable( L"MemoryOverwriteRequestControl", &MorUefiGuid,
+    Status = gRT->GetVariable( UefiMor, &MorUefiGuid,
                                NULL, &size, &mor );
 
     if(EFI_ERROR(Status))return;
@@ -1223,13 +1361,13 @@ VOID ReadMORValue( )
     {
 
         //clear memory
-        DEBUG((DEBUG_INFO,"MOR: before Clear memory"));
+        DEBUG((-1,"MOR: before Clear memory"));
 #if !(defined(TCG_SKIP_MOR_FULL) && TCG_SKIP_MOR_FULL == 1)
         Status = OverwriteSystemMemory();
-        DEBUG((DEBUG_INFO,"Status: %r", Status));
+        DEBUG((-1,"Status: %r", Status));
         TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_MOR_REQUEST_ACK_EXECUTED | EFI_SOFTWARE_DXE_BS_DRIVER);
 #endif
-        DEBUG((DEBUG_INFO,"MOR: After Clear memory"));
+        DEBUG((-1,"MOR: After Clear memory"));
 	}	
 }
 
@@ -1258,44 +1396,32 @@ VOID ReadMORValue( )
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID  OnAcpiInstalled(
+EFI_STATUS OnAcpiInstalled(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
     EFI_STATUS                Status;
     EFI_ACPI_SUPPORT_PROTOCOL *acpi;
     UINTN                     handle = 0;
-#if defined ACPI_MODULE_VER && ACPI_MODULE_VER < 120     
-    UINT8                     OemTblId[8] = CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID);
-    UINT8                     OemId[6]    = CONVERT_TO_STRING(T_ACPI_OEM_ID);
-#endif
     
-
-    DEBUG((DEBUG_INFO, "Adding TCG ACPI table...\n"));
-    Status = gBS->LocateProtocol( &gEfiAcpiSupportGuid, NULL, (void **)&acpi );
+    DEBUG((-1, "Adding TCG ACPI table...\n"));
+    Status = gBS->LocateProtocol( &gEfiAcpiSupportGuid, NULL, &acpi );
 
     if ( EFI_ERROR( Status ))
     {
-        return;
+        return EFI_ABORTED;
     }
-    
-    mTcgAcpiTableTemplate.Header.Revision = TCG_TBL_REV;
 
-#if defined ACPI_MODULE_VER && ACPI_MODULE_VER > 110   
-    
-    CopyMem (&mTcgAcpiTableTemplate.Header.OemId,
-            PcdGetPtr (PcdAcpiDefaultOemId),
-            sizeof (mTcgAcpiTableTemplate.Header.OemId));
-    
-    mTcgAcpiTableTemplate.Header.OemTableId = PcdGet64 (PcdAcpiDefaultOemTableId);
-#else
-    gBS->CopyMem(&mTcgAcpiTableTemplate.Header.OemTableId, OemTblId, 8);
-    gBS->CopyMem(&mTcgAcpiTableTemplate.Header.OemId, OemId, 6);
-#endif
+    mTcgAcpiTableTemplate.Header.Revision = TCG_TBL_REV;
+    CopyMem( mTcgAcpiTableTemplate.Header.OemId,
+            TCG_OEMID,
+            sizeof(mTcgAcpiTableTemplate.Header.OemId));
+
+    mTcgAcpiTableTemplate.Header.OemTableId      = TCG_TBL_OEM_ID;
     mTcgAcpiTableTemplate.Header.OemRevision     = TCG_TBL_OEM_REV;
     mTcgAcpiTableTemplate.Header.CreatorId       = TCG_CREATOR_ID;
     mTcgAcpiTableTemplate.Header.CreatorRevision = TCG_CREATOR_REVISION;
-    mTcgAcpiTableTemplate.PlatformClass          = TCG_PLATFORM_CLASS;
+    mTcgAcpiTableTemplate.Reserved          = TCG_PLATFORM_CLASS;
     
     if( TCG_PLATFORM_CLASS == 0 )
     {
@@ -1309,6 +1435,7 @@ VOID  OnAcpiInstalled(
                                  &handle );
 	
     gBS->CloseEvent(ev);
+    return Status;
 }
 
 
@@ -1322,14 +1449,12 @@ EFIAPI SetTcgAcpiTable()
    EFI_STATUS                Status;
    EFI_ACPI_SUPPORT_PROTOCOL *acpi;
    UINTN                     handle = 0;
-
-    DEBUG((DEBUG_INFO, "SetTcgAcpiTable....\n"));
-   Status = gBS->LocateProtocol( &gEfiAcpiSupportGuid, NULL, (void **)&acpi );
-
-   DEBUG((DEBUG_INFO, "gEfiAcpiSupportGuid Status = %r \n", Status));
    
+   DEBUG((-1, "SetTcgAcpiTable....\n"));
+   Status = gBS->LocateProtocol( &gEfiAcpiSupportGuid, NULL, &acpi );
+
    if(EFI_ERROR(Status)){
-       
+    
       Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
                                    EFI_TPL_CALLBACK,
                                    OnAcpiInstalled,
@@ -1338,7 +1463,6 @@ EFIAPI SetTcgAcpiTable()
 
       ASSERT( !EFI_ERROR( Status ));
       Status = gBS->RegisterProtocolNotify( &gEfiAcpiSupportGuid, ev1, &reg1 );
-      DEBUG((DEBUG_INFO, "RegisterProtocolNotify gEfiAcpiSupportGuid Status = %r \n", Status));
       return Status;
    }
 
@@ -1350,7 +1474,7 @@ EFIAPI SetTcgAcpiTable()
     mTcgAcpiTableTemplate.Header.OemRevision     = TCG_TBL_OEM_REV;
     mTcgAcpiTableTemplate.Header.CreatorId       = TCG_CREATOR_ID;
     mTcgAcpiTableTemplate.Header.CreatorRevision = TCG_CREATOR_REVISION;
-    mTcgAcpiTableTemplate.PlatformClass          = TCG_PLATFORM_CLASS;
+    mTcgAcpiTableTemplate.Reserved               = TCG_PLATFORM_CLASS;
   
 
     if( TCG_PLATFORM_CLASS == 0 )
@@ -1363,8 +1487,6 @@ EFIAPI SetTcgAcpiTable()
     Status = acpi->SetAcpiTable( acpi, &mTcgAcpiTableTemplate, TRUE,
                                  EFI_ACPI_TABLE_VERSION_ALL,
                                  &handle );
-    
-    DEBUG((DEBUG_INFO, "SetTcgAcpiTable::returning %r \n", Status));
 
     return Status;
 }
@@ -1380,27 +1502,24 @@ static EFI_STATUS CopyLogToAcpiNVS(
     TcgLog = (TCG_LOG_HOB*)                   LocateATcgHob(
         gST->NumberOfTableEntries,
         gST->ConfigurationTable,
-        &gEfiPeiTcgLogHobGuid );
+        &gEfiAmiDTcgLogHobGuid );
 
-    DummyPtr = (void **) &TcgLog;
+    DummyPtr = &TcgLog;
 
     if ( *DummyPtr == NULL )
     {
         return EFI_NOT_FOUND;
     }
-    
-    DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::gEfiPeiTcgLogHobGuid\n"));
 
     Status = gBS->AllocatePages(
         AllocateMaxAddress,
-        EfiACPIMemoryNVS,
+        EfiACPIReclaimMemory,
         EFI_SIZE_TO_PAGES( mTcgAcpiTableTemplate.LogMaxLength + sizeof (*TcgLog)),
         (UINT64*)(UINTN)&mTcgAcpiTableTemplate.LogStart
         );
 
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::AllocatePages1 failed\n"));
         return Status;
     }
 
@@ -1437,8 +1556,6 @@ static EFI_STATUS CopyLogToAcpiNVS(
 
     Status = SetTcgAcpiTable();
 
-    DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::return %r \n", Status));
-
     return Status;
 }
 
@@ -1465,6 +1582,248 @@ typedef struct _TCG_DXE_FWVOL_LIST
     EFI_HANDLE FvHandle;
 } TCG_DXE_FWVOL_LIST;
 
+static EFI_LIST_ENTRY mMeasuredFvs = {
+    &mMeasuredFvs,
+    &mMeasuredFvs
+};
+
+static EFI_STATUS AddFvToMeasuredFvList(
+    EFI_HANDLE FvHandle )
+{
+    TCG_DXE_FWVOL_LIST                *NewEntry=NULL;
+    EFI_STATUS                        Status;
+
+    Status = gBS->AllocatePool( EfiBootServicesData, sizeof (*NewEntry), &NewEntry );
+
+    if ( NewEntry == NULL || EFI_ERROR(Status))
+    {
+        return Status;
+    }
+
+    NewEntry->FvHandle = FvHandle;
+    InsertTailList( &mMeasuredFvs, &NewEntry->Link );
+    return EFI_SUCCESS;
+}
+
+static EFI_STATUS HashAllFilesInFv(
+    IN SHA1_CTX        *Sha1Ctx,
+    IN EFI_FIRMWARE_VOLUME2_PROTOCOL  *FwVol,
+    IN EFI_FV_FILETYPE FileType )
+{
+    EFI_STATUS Status;
+    VOID                              *KeyBuffer = NULL;
+    EFI_GUID FileName;
+    EFI_FV_FILE_ATTRIBUTES FileAttr;
+    UINTN FileSize;
+    VOID                              *FileBuffer;
+    UINT32 AuthStat;
+
+
+    Status = gBS->AllocatePool( EfiBootServicesData, FwVol->KeySize, KeyBuffer );
+
+    if ( KeyBuffer != NULL )
+    {
+        gBS->SetMem( KeyBuffer, FwVol->KeySize, 0 );
+    }
+
+    if ( KeyBuffer == NULL || EFI_ERROR(Status))
+    {
+        return EFI_OUT_OF_RESOURCES;
+    }
+
+    do
+    {
+        Status = FwVol->GetNextFile(
+            FwVol,
+            KeyBuffer,
+            &FileType,
+            &FileName,
+            &FileAttr,
+            &FileSize
+            );
+
+        if ( !EFI_ERROR( Status ))
+        {
+            FileBuffer = NULL;
+            Status     = FwVol->ReadFile(
+                FwVol,
+                &FileName,
+                &FileBuffer,
+                &FileSize,
+                &FileType,
+                &FileAttr,
+                &AuthStat
+                );
+            ASSERT( !EFI_ERROR( Status ));
+
+            SHA1Update(Sha1Ctx, FileBuffer, (u32)FileSize );
+            if(FileBuffer!=NULL)
+            {
+                gBS->FreePool( FileBuffer );
+            }
+        }
+    } while ( !EFI_ERROR( Status ));
+
+    if(KeyBuffer != NULL)
+    {
+        gBS->FreePool( KeyBuffer );
+    }
+    return EFI_SUCCESS;
+}
+
+
+
+static EFI_STATUS MeasureFv(
+    IN EFI_TCG_PROTOCOL *This,
+    IN EFI_HANDLE       FvHandle )
+{
+    EFI_STATUS Status;
+    EFI_FIRMWARE_VOLUME2_PROTOCOL      *FwVol;
+    EFI_LIST_ENTRY                    *Link;
+    TCG_DXE_FWVOL_LIST    *FwVolList;
+    SHA1_CTX                                Sha1Ctx;
+    TCG_DIGEST                          *FvDigest;
+    EFI_TCG_PCR_EVENT TcgEvent;
+    UINT32 EventNum;
+
+    for ( Link = mMeasuredFvs.ForwardLink;
+          Link != &mMeasuredFvs;
+          Link = Link->ForwardLink )
+    {
+        FwVolList = _CR( Link, TCG_DXE_FWVOL_LIST, Link );
+
+        if ( FvHandle == FwVolList->FvHandle )
+        {
+            return EFI_SUCCESS;
+        }
+    }
+
+    Status = AddFvToMeasuredFvList( FvHandle );
+
+    if ( EFI_ERROR( Status ))
+    {
+        return Status;
+    }
+
+    Status = gBS->HandleProtocol(
+        FvHandle,
+        &gEfiFirmwareVolume2ProtocolGuid,
+        &FwVol
+        );
+    ASSERT( !EFI_ERROR( Status ));
+
+    SHA1Init(&Sha1Ctx );
+    Status = HashAllFilesInFv( &Sha1Ctx, FwVol, EFI_FV_FILETYPE_DRIVER );
+
+    if ( EFI_ERROR( Status ))
+    {
+        goto Exit;
+    }
+    Status = HashAllFilesInFv( &Sha1Ctx, FwVol, EFI_FV_FILETYPE_APPLICATION );
+
+    if ( EFI_ERROR( Status ))
+    {
+        goto Exit;
+    }
+    SHA1Final((unsigned char *)&FvDigest->digest, &Sha1Ctx);
+
+    TcgEvent.Header.PCRIndex      = PCRi_OPROM_CODE;
+    TcgEvent.Header.EventType     = EV_EVENT_TAG;
+    TcgEvent.Event.Tagged.EventID = EV_ID_OPROM_EXECUTE;
+    TcgEvent.Event.Tagged.EventSize
+        = sizeof (TcgEvent.Event.Tagged.EventData.OptionRomExecute);
+    TcgEvent.Header.EventDataSize
+        = _TPM_STRUCT_PARTIAL_SIZE( struct _EFI_TCG_EV_TAG, EventData )
+        + TcgEvent.Event.Tagged.EventSize;
+
+    TcgEvent.Event.Tagged.EventData.OptionRomExecute.PFA      = 0;
+    TcgEvent.Event.Tagged.EventData.OptionRomExecute.Reserved = 0;
+    TcgEvent.Event.Tagged.EventData.OptionRomExecute.Hash     = *FvDigest;
+
+    Status = TcgDxeHashLogExtendEvent(
+        This,
+        (UINTN)&TcgEvent.Event,
+        TcgEvent.Header.EventDataSize,
+        TCG_ALG_SHA,
+        (TCG_PCR_EVENT*)&TcgEvent,
+        &EventNum,
+        0
+        );
+
+Exit:
+    return Status;
+}
+
+
+
+
+static
+VOID
+EFIAPI OnFwVolInstalled(
+    IN EFI_EVENT Event,
+    IN VOID      *Context )
+{
+    EFI_STATUS Status;
+    EFI_HANDLE                        *Handles;
+    UINTN NumHandles;
+
+    Handles    = NULL;
+    NumHandles = 0;
+    Status     = gBS->LocateHandleBuffer(
+        ByRegisterNotify,
+        NULL,
+        *(VOID**)Context,
+        &NumHandles,
+        &Handles
+        );
+
+    ASSERT(!EFI_ERROR( Status ));
+
+    while (!EFI_ERROR( Status ) && NumHandles > 0 )
+    {
+        NumHandles--;
+        Status = MeasureFv( &mTcgDxeData.TcgServiceProtocol,
+                            Handles[NumHandles] );
+    }
+
+    if ( Handles != NULL )
+    {
+        gBS->FreePool( Handles );
+    }
+}
+
+static EFI_STATUS MonitorFvs(
+    void )
+{
+    EFI_STATUS Status;
+    EFI_EVENT Event;
+    static VOID                       *RegFwVol;
+
+    Status = gBS->CreateEvent(
+        EFI_EVENT_NOTIFY_SIGNAL,
+        EFI_TPL_DRIVER,
+        OnFwVolInstalled,
+        (VOID*)&RegFwVol,
+        &Event
+        );
+    ASSERT( !EFI_ERROR( Status ));
+
+    Status = gBS->RegisterProtocolNotify(
+        &gEfiFirmwareVolume2ProtocolGuid,
+        Event,
+        &RegFwVol
+        );
+    ASSERT( !EFI_ERROR( Status ));
+
+    return Status;
+}
+
+
+#define FAST_BOOT_VARIABLE_GUID \
+    { 0xb540a530, 0x6978, 0x4da7, 0x91, 0xcb, 0x72, 0x7, 0xd7, 0x64, 0xd2, 0x62 }
+EFI_GUID FastBootVariableGuid = FAST_BOOT_VARIABLE_GUID;
+EFI_GUID AmitcgefiOsVariableGuid = AMI_TCG_EFI_OS_VARIABLE_GUID;
+
 
 
 //*******************************************************************************
@@ -1489,7 +1848,9 @@ EFI_STATUS FindAndMeasureDxeFWVol()
 {
     PEI_EFI_POST_CODE       ev;
     EFI_STATUS              Status;
-
+    EFI_GUID                      NameGuid =\
+                            {0x7739f24c, 0x93d7, 0x11d4,\
+                             0x9a, 0x3a, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d};
     UINTN                         Size;
     void                          *Buffer = NULL;
     UINTN                         BufferSize=0x10000;
@@ -1515,7 +1876,7 @@ EFI_STATUS FindAndMeasureDxeFWVol()
 
         if ((!CompareMem(
                  &gST->ConfigurationTable[TableEntries].VendorGuid,
-                 &gEfiHobListGuid, sizeof(EFI_GUID))))
+                 &NameGuid, sizeof(EFI_GUID))))
         {            
             HobStart = gST->ConfigurationTable[TableEntries].VendorTable;
             FirmwareVolumeHob.Raw = GetHob (EFI_HOB_TYPE_FV, HobStart);
@@ -1544,19 +1905,21 @@ EFI_STATUS FindAndMeasureDxeFWVol()
         FirmwareVolumeHob.Raw = TCGGET_NEXT_HOB (FirmwareVolumeHob);
     }
 
-    DEBUG((DEBUG_INFO,"TcgDxe:: Found Volume: Base = %x Length = %x",\
+    if(Found== FALSE)return EFI_NOT_FOUND;
+
+    DEBUG((-1,"TcgDxe:: Found Volume: Base = %x Length = %x",\
          FirmwareVolumeHob.FirmwareVolume->BaseAddress,\
          FirmwareVolumeHob.FirmwareVolume->Length));
 
     Status = gBS->AllocatePool(
                     EfiBootServicesData, 
                     BufferSize, 
-					(void **)&Buffer);
+					&Buffer);
 
     if(EFI_ERROR(Status) || Buffer == NULL) return EFI_OUT_OF_RESOURCES;
   
      Status = gBS->LocateProtocol (&gEfiTcgProtocolGuid,\
-                                                 NULL, (void **)&TcgProtocol);
+                                                 NULL, &TcgProtocol);
      if(EFI_ERROR(Status)){
          gBS->FreePool(Buffer);
          return Status;
@@ -1598,12 +1961,9 @@ EFI_STATUS FindAndMeasureDxeFWVol()
                          &Sha1Digest,
                          &OutSha1Digest
                         );
+
                
             Status = Private->TpmDevice->Close( Private->TpmDevice );
-		    if ( EFI_ERROR( Status ))
-    		{
-        		DEBUG((DEBUG_INFO, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-    		}
             
             break;
         }
@@ -1645,12 +2005,12 @@ EFIAPI TcgDxeEntry(
     Status = gBS->LocateProtocol(
                 &gEfiTpmDeviceProtocolGuid,
                 NULL,
-                (void **)&mTcgDxeData.TpmDevice);    
+                &mTcgDxeData.TpmDevice);    
 
     Status = gBS->LocateProtocol(
         &gEfiTpmDeviceProtocolGuid,
         NULL,
-        (void **)&mTcmDxeData.TpmDevice); 
+        &mTcmDxeData.TpmDevice); 
   
     if ( EFI_ERROR( Status )){
         return Status;
@@ -1658,7 +2018,6 @@ EFIAPI TcgDxeEntry(
 
     Status = CopyLogToAcpiNVS( );
  
-    DEBUG((DEBUG_INFO, "CopyLogToAcpiNVS::return %r \n", Status));
     if ( EFI_ERROR( Status ))
     {
         return Status;
@@ -1686,22 +2045,12 @@ EFIAPI TcgDxeEntry(
                                            (UINT8*)&cmdGetCap,
                                            sizeof (TPM_Capabilities_PermanentFlag),
                                            (UINT8*)&TcgDxe_Cap );
-          
-           if ( EFI_ERROR( Status ))
-           {
-             DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-           }
-          
      }else{
             Status = TcgDxePassThroughToTpm( &mTcgDxeData.TcgServiceProtocol,
                                          sizeof (cmdGetCap),
                                          (UINT8*)&cmdGetCap,
                                          sizeof (TPM_Capabilities_PermanentFlag),
                                          (UINT8*)&TcgDxe_Cap );
-            if ( EFI_ERROR( Status ))
-            {
-                DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-            }
      }
 
     if ( TPM_H2NL(TcgDxe_Cap.RetCode)!=0)
@@ -1722,23 +2071,15 @@ EFIAPI TcgDxeEntry(
         if(EFI_ERROR(Status)){
             TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MINOR, AMI_SPECIFIC_TPM_ERR_TCG2_PROTOCOL_NOT_INSTALLED_TPM_1_2_DEVICE_FOUND | EFI_SOFTWARE_DXE_BS_DRIVER);
         }
-       
+        return Status;
     }else{
 
-        Status = TcmOSTransition();
-        if(EFI_ERROR(Status))
-        {
-            DEBUG((DEBUG_ERROR, "Error: TcgDxe.c Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-        }
-        
-        Status = gBS->InstallMultipleProtocolInterfaces(
+        TcmOSTransition();
+        return gBS->InstallMultipleProtocolInterfaces(
                    &ImageHandle,
                    &gEfiTcgProtocolGuid,
                    &mTcmDxeData.TcgServiceProtocol,
                    NULL);
-        if(EFI_ERROR(Status)){
-            DEBUG((DEBUG_ERROR, "Error: TcgDxe.c Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-        }
     }
-    return EFI_SUCCESS;
+
 }

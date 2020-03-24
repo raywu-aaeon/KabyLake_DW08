@@ -34,10 +34,10 @@
 #ifndef _EFI_TPM_DEVICE_H_
 #define _EFI_TPM_DEVICE_H_
 
-#include "AmiTcg/TcgEfiTpm.h"
-#include "AmiTcg/TcgEFI12.h"
-#include "AmiTcg/TCGMisc.h"
-#include "AmiTcg/TcgCommon12.h"
+#include "AmiTcg\TcgEfiTpm.h"
+#include "AmiTcg\TcgEFI12.h"
+#include "AmiTcg\TCGMisc.h"
+#include "AmiTcg\TcgCommon12.h"
 
 #define EFI_TPM_DEVICE_PROTOCOL_GUID \
     { 0xde161cfe, 0x1e60, 0x42a1, 0x8c, 0xc3, 0xee, 0x7e, 0xf0, 0x73, 0x52,\
@@ -48,7 +48,7 @@
 
 
 
-typedef struct _EFI_TPM_DEVICE_PROTOCOL EFI_TPM_DEVICE_PROTOCOL;
+EFI_FORWARD_DECLARATION( EFI_TPM_DEVICE_PROTOCOL );
 
 
 typedef
@@ -168,6 +168,6 @@ typedef struct _EFI_TPM_DEVICE_PROTOCOL
 } EFI_TPM_DEVICE_PROTOCOL;
 
 extern EFI_GUID gEfiTpmDeviceProtocolGuid;
-extern EFI_GUID AmiTcgPlatformProtocolguid;
+extern AmiTcgPlatformProtocolguid;
 
 #endif

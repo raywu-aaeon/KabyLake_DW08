@@ -136,20 +136,18 @@
 
 #include "TCGSmm.h"
 #include <Setup.h>
-#include <Library/IoLib.h>
-#include <Protocol/SmmVariable.h>
+#include <Library\IoLib.h>
+#include <Protocol\SmmVariable.h>
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/SmmServicesTableLib.h>
-#include <Library/DebugLib.h>
+#include <Library/Debuglib.h>
 #include <Library/IoLib.h>
 #include <Token.h>
 #include <Library/BaseMemoryLib.h>
-#include <Guid/MemoryOverwriteControl.h>
+#include <Guid\MemoryOverwriteControl.h>
 #include <AmiDxeLib.h>
-#include <AmiTcg/tcg.h>
-#include <Protocol/AmiTcgProtocols.h>
-#include <Library/AmiBufferValidationLib.h>
+#include <AmiTcg\tcg.h>
 
 #pragma optimize("",off)
 
@@ -172,6 +170,7 @@ VOID EnablePlatformSMI() {} // Porting routine. modify if required for platform
 
 
 #if NVRAM_VERSION < 7
+static EFI_GUID AmiNvramControlProtocolGuid = { 0xf7ca7568, 0x5a09, 0x4d2c, { 0x8a, 0x9b, 0x75, 0x84, 0x68, 0x59, 0x2a, 0xe2 } };
 typedef EFI_STATUS (*SHOW_BOOT_TIME_VARIABLES)(BOOLEAN Show);
 
 typedef struct
@@ -198,8 +197,6 @@ VOID NVOSRead_PPI_request ( );
 EFI_SMM_BASE2_PROTOCOL              *pSmmBase2;
 
 static UINT8         Tpm20Device = 0;
-static BOOLEAN       sidSupport = FALSE;
-
 EFI_STATUS TcgGetNextGuidHob(
     IN OUT VOID          **HobStart,
     IN EFI_GUID          * Guid,
@@ -276,17 +273,17 @@ VOID NVOSRead_PPI_request()
 
 #if defined (NVRAM_VERSION) && (NVRAM_VERSION > 6)
     Status = SmmVarProtocol->SmmGetVariable(L"AMITCGPPIVAR",
-                                            &AmitcgefiOsVariableGuid,
+                                            &SmmtcgefiOsVariableGuid,
                                             NULL,
                                             &Size,
                                             &Temp);
 #else
     if (NvramControl == NULL)
-        NvramControl = TcgGetSmstConfigurationTablePi(&gAmiNvramControlProtocolGuid);
+        NvramControl = TcgGetSmstConfigurationTablePi(&AmiNvramControlProtocolGuid);
 
     if (NvramControl) NvramControl->ShowBootTimeVariables(TRUE);
     Status = ptrRuntimeServices->GetVariable( L"AMITCGPPIVAR", \
-             &AmitcgefiOsVariableGuid, \
+             &SmmtcgefiOsVariableGuid, \
              NULL, \
              &Size, \
              &Temp );
@@ -347,15 +344,6 @@ VOID NVOSWrite_PPI_request( )
     AMI_ASL_PPI_NV_VAR   *TpmAcpiNvsFlags = ((AMI_ASL_PPI_NV_VAR *)(UINTN)NvsMemoryAddress);
 
     Read_value = TpmAcpiNvsFlags->RQST;
-        
-    if((Read_value > TCPA_PPIOP_DISABLE_ENDORSEMENT_ENABLE_STORAGE_HIERARCHY &&
-       Read_value < TCPA_PPIOP_ENABLE_BLOCK_SID_FUNC) ||
-       (Read_value > TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE &&
-                  Read_value < TCPA_PPIOP_VENDOR)){
-        
-        TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_SUBMIT_REQUEST_TO_PREOS_NOT_IMPLEMENTED;
-        return;
-    }
 
     if( (Read_value == TCPA_PPIOP_UNOWNEDFIELDUPGRADE && Tpm20Device == 1)
             || Read_value == TCPA_PPIOP_SETOPAUTH
@@ -370,18 +358,18 @@ VOID NVOSWrite_PPI_request( )
             || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_CHANGE_EPS_TRUE
             || Read_value == TCPA_PPIOP_LOG_ALL_DIGESTS
             || Read_value == TCPA_PPIOP_DISABLE_ENDORSEMENT_ENABLE_STORAGE_HIERARCHY
-            || (Read_value == TCPA_PPIOP_ENABLE_BLOCK_SID_FUNC && sidSupport == 0)
-            || (Read_value == TCPA_PPIOP_DISABLE_BLOCK_SID_FUNC && sidSupport == 0)
-            || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_TRUE && sidSupport == 0)
-            || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_FALSE && sidSupport == 0)
-            || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_TRUE && sidSupport == 0)
-            || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE && sidSupport == 0))
+            || Read_value == TCPA_PPIOP_ENABLE_BLOCK_SID_FUNC
+            || Read_value == TCPA_PPIOP_DISABLE_BLOCK_SID_FUNC
+            || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_TRUE
+            || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_FALSE
+            || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_TRUE
+            || Read_value >= TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE)
     {
         TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_SUBMIT_REQUEST_TO_PREOS_NOT_IMPLEMENTED;
         return;
     }
 
-    if(Read_value < TCPA_PPIOP_VENDOR)
+    if(Read_value >= 0 && Read_value < TCPA_PPIOP_VENDOR)
     {
         Temp.RQST  = Read_value;
         Temp.RCNT  = Read_value;
@@ -393,14 +381,14 @@ VOID NVOSWrite_PPI_request( )
 #if defined (NVRAM_VERSION) && (NVRAM_VERSION > 6)
         attrib = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
         Status = SmmVarProtocol->SmmSetVariable(L"AMITCGPPIVAR",
-                                                &AmitcgefiOsVariableGuid,
+                                                &SmmtcgefiOsVariableGuid,
                                                 attrib,
                                                 Size,
                                                 &Temp);
         if(Status == EFI_INVALID_PARAMETER)
         {
             Status = SmmVarProtocol->SmmSetVariable(L"AMITCGPPIVAR", \
-                                                    &AmitcgefiOsVariableGuid, \
+                                                    &SmmtcgefiOsVariableGuid, \
                                                     0, \
                                                     0, \
                                                     NULL);
@@ -412,7 +400,7 @@ VOID NVOSWrite_PPI_request( )
             }
 
             Status = SmmVarProtocol->SmmSetVariable( L"AMITCGPPIVAR", \
-                     &AmitcgefiOsVariableGuid, \
+                     &SmmtcgefiOsVariableGuid, \
                      EFI_VARIABLE_NON_VOLATILE   \
                      | EFI_VARIABLE_BOOTSERVICE_ACCESS \
                      | EFI_VARIABLE_RUNTIME_ACCESS,\
@@ -421,19 +409,19 @@ VOID NVOSWrite_PPI_request( )
         }
 #else
         if (NvramControl == NULL)
-            NvramControl = TcgGetSmstConfigurationTablePi(&gAmiNvramControlProtocolGuid);
+            NvramControl = TcgGetSmstConfigurationTablePi(&AmiNvramControlProtocolGuid);
 
         if (NvramControl) NvramControl->ShowBootTimeVariables(TRUE);
 
         Status = ptrRuntimeServices->SetVariable ( L"AMITCGPPIVAR", \
-                 &AmitcgefiOsVariableGuid, \
+                 &SmmtcgefiOsVariableGuid, \
                  attrib, \
                  Size, \
                  &Temp );
         if(Status == EFI_INVALID_PARAMETER)
         {
             Status = ptrRuntimeServices->SetVariable(L"AMITCGPPIVAR", \
-                     &AmitcgefiOsVariableGuid, \
+                     &SmmtcgefiOsVariableGuid, \
                      0, \
                      0, \
                      NULL);
@@ -450,7 +438,7 @@ VOID NVOSWrite_PPI_request( )
             }
 
             Status = ptrRuntimeServices->SetVariable( L"AMITCGPPIVAR", \
-                     &AmitcgefiOsVariableGuid, \
+                     &SmmtcgefiOsVariableGuid, \
                      attrib, \
                      Size, \
                      &Temp );
@@ -512,7 +500,7 @@ VOID Read_User_Confirmation_Status( )
     attrib = 0;
     Status = SmmVarProtocol->SmmGetVariable(
                  L"AMITCGPPIVAR",
-                 &AmitcgefiOsVariableGuid,
+                 &SmmtcgefiOsVariableGuid,
                  &attrib,
                  &BiosSize,
                  &Temp);
@@ -520,12 +508,12 @@ VOID Read_User_Confirmation_Status( )
 
 #else
     if (NvramControl == NULL)
-        NvramControl = TcgGetSmstConfigurationTablePi(&gAmiNvramControlProtocolGuid);
+        NvramControl = TcgGetSmstConfigurationTablePi(&AmiNvramControlProtocolGuid);
 
     if (NvramControl) NvramControl->ShowBootTimeVariables(TRUE);
 
     Status = ptrRuntimeServices->GetVariable( L"AMITCGPPIVAR", \
-             &AmitcgefiOsVariableGuid, \
+             &SmmtcgefiOsVariableGuid, \
              NULL, \
              &BiosSize, \
              &Temp );
@@ -534,7 +522,7 @@ VOID Read_User_Confirmation_Status( )
 #if defined (NVRAM_VERSION) && (NVRAM_VERSION > 6)
     Status = SmmVarProtocol->SmmSetVariable(
                  L"AMITCGPPIVAR",
-                 &AmitcgefiOsVariableGuid,
+                 &SmmtcgefiOsVariableGuid,
                  attrib,
                  BiosSize,
                  &Temp);
@@ -542,7 +530,7 @@ VOID Read_User_Confirmation_Status( )
     if(Status == EFI_INVALID_PARAMETER)
     {
         Status = SmmVarProtocol->SmmSetVariable(L"AMITCGPPIVAR", \
-                                                &AmitcgefiOsVariableGuid, \
+                                                &SmmtcgefiOsVariableGuid, \
                                                 attrib, \
                                                 0, \
                                                 NULL);
@@ -553,22 +541,18 @@ VOID Read_User_Confirmation_Status( )
             return;
         }
 
-        Status = SmmVarProtocol->SmmSetVariable( L"AMITCGPPIVAR", \
-                          &AmitcgefiOsVariableGuid, \
+        Status = Status = SmmVarProtocol->SmmSetVariable( L"AMITCGPPIVAR", \
+                          &SmmtcgefiOsVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE   \
                           | EFI_VARIABLE_BOOTSERVICE_ACCESS \
                           | EFI_VARIABLE_RUNTIME_ACCESS, \
                           BiosSize, \
                           &Temp );
-        
-        if(EFI_ERROR(Status)){
-            return;
-        }
     }
 
 #else
     Status = ptrRuntimeServices->SetVariable ( L"AMITCGPPIVAR", \
-             &AmitcgefiOsVariableGuid, \
+             &SmmtcgefiOsVariableGuid, \
              EFI_VARIABLE_NON_VOLATILE   \
              | EFI_VARIABLE_BOOTSERVICE_ACCESS, \
              BiosSize, \
@@ -577,7 +561,7 @@ VOID Read_User_Confirmation_Status( )
     if(Status == EFI_INVALID_PARAMETER)
     {
         Status = ptrRuntimeServices->SetVariable(L"AMITCGPPIVAR", \
-                 &AmitcgefiOsVariableGuid, \
+                 &SmmtcgefiOsVariableGuid, \
                  0, \
                  0, \
                  NULL);
@@ -591,14 +575,10 @@ VOID Read_User_Confirmation_Status( )
         }
 
         Status = ptrRuntimeServices->SetVariable( L"AMITCGPPIVAR", \
-                 &AmitcgefiOsVariableGuid, \
+                 &SmmtcgefiOsVariableGuid, \
                  attrib, \
                  BiosSize, \
                  &Temp );
-        
-        if(EFI_ERROR(Status)){
-            return;
-        }
     }
 #endif
 
@@ -608,14 +588,14 @@ VOID Read_User_Confirmation_Status( )
     attrib = 0;
     Status = SmmVarProtocol->SmmGetVariable(
                  L"TPMPERBIOSFLAGS",
-                 &FlagsStatusguid,
+                 &SmmFlagsStatusguid,
                  &attrib,
                  &Size,
                  &TpmNvFlags);
 
 #else
     Status = ptrRuntimeServices->GetVariable( L"TPMPERBIOSFLAGS", \
-             &FlagsStatusguid, \
+             &SmmFlagsStatusguid, \
              NULL, \
              &Size, \
              &TpmNvFlags );
@@ -629,7 +609,7 @@ VOID Read_User_Confirmation_Status( )
         return;
     }
 
-    if(Read_value < TCPA_PPIOP_VENDOR)
+    if(Read_value >= 0  && Read_value < TCPA_PPIOP_VENDOR)
     {
         if(Read_value == 0 )
         {
@@ -637,16 +617,6 @@ VOID Read_User_Confirmation_Status( )
             TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
             return;
         }
-        
-        if((Read_value > TCPA_PPIOP_DISABLE_ENDORSEMENT_ENABLE_STORAGE_HIERARCHY &&
-           Read_value < TCPA_PPIOP_ENABLE_BLOCK_SID_FUNC) ||
-           (Read_value > TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE &&
-                      Read_value < TCPA_PPIOP_VENDOR)){
-            
-            TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_NOT_IMPLEMENTED;
-            return;
-        }
-        
 
         if( (Read_value == TCPA_PPIOP_UNOWNEDFIELDUPGRADE && Tpm20Device == 1)
                 || Read_value == TCPA_PPIOP_SETOPAUTH
@@ -661,12 +631,12 @@ VOID Read_User_Confirmation_Status( )
                 || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_CHANGE_EPS_TRUE
                 || Read_value == TCPA_PPIOP_LOG_ALL_DIGESTS
                 || Read_value == TCPA_PPIOP_DISABLE_ENDORSEMENT_ENABLE_STORAGE_HIERARCHY
-                || (Read_value == TCPA_PPIOP_ENABLE_BLOCK_SID_FUNC && sidSupport == 0)
-                || (Read_value == TCPA_PPIOP_DISABLE_BLOCK_SID_FUNC && sidSupport == 0)
-                || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_TRUE && sidSupport == 0)
-                || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_FALSE && sidSupport == 0)
-                || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_TRUE && sidSupport == 0)
-                || (Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE && sidSupport == 0))
+                || Read_value == TCPA_PPIOP_ENABLE_BLOCK_SID_FUNC
+                || Read_value == TCPA_PPIOP_DISABLE_BLOCK_SID_FUNC
+                || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_TRUE
+                || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_FALSE
+                || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_TRUE
+                || Read_value >= TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE)
         {
             TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_NOT_IMPLEMENTED;
             return;
@@ -726,18 +696,6 @@ VOID Read_User_Confirmation_Status( )
             }
             return;
         }
-        else if(Read_value == TCPA_PPIOP_SETNOPPIMAINTENANCE_FALSE || Read_value == TCPA_PPIOP_SETNOPPIMAINTENANCE_TRUE)
-        {
-            if(Read_value == TCPA_PPIOP_SETNOPPIMAINTENANCE_FALSE )
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
-            }
-            else
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_REQUIRED;
-            }
-            return;
-        }
         else if(Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_CHANGE_PCR_FALSE || Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_CHANGE_PCR_TRUE)
 		{
 			if(Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_CHANGE_PCR_FALSE )
@@ -761,49 +719,7 @@ VOID Read_User_Confirmation_Status( )
 				TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
 			}
 			return;
-		}else if(Read_value == TCPA_PPIOP_ENABLE_BLOCK_SID_FUNC)
-		{
-		    if(TpmNvFlags.Ppi1_3_Flags.PpRequiredForEnable_BlockSIDFunc)
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_REQUIRED;
-            }else{
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
-            }
-		    return;
-		}else if(Read_value == TCPA_PPIOP_DISABLE_BLOCK_SID_FUNC)
-        {
-            if(TpmNvFlags.Ppi1_3_Flags.PpRequiredForDisable_BlockSIDFunc)
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_REQUIRED;
-            }else{
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
-            }
-            return;
-        }else if(Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_TRUE || \
-                Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_FALSE )
-        {
-            if(Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_ENABLE_BLOCK_SID_FUNC_FALSE )
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_REQUIRED;
-            }
-            else
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
-            }
-            return;
-        }else if(Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_TRUE || \
-                Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE )
-        {
-            if(Read_value == TCPA_PPIOP_SET_PPREQUIRED_FOR_DISABLE_BLOCK_SID_FUNC_FALSE )
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_REQUIRED;
-            }
-            else
-            {
-                TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
-            }
-            return;
-        }
+		}
         else if(TpmNvFlags.NoPpiProvision == TRUE)
         {
             TpmAcpiNvsFlags->RequestFuncResponse = TREE_PP_GET_USER_CONFIRMATION_ALLOWED_AND_PPUSER_NOT_REQUIRED;
@@ -885,6 +801,7 @@ VOID NVOSWrite_MOR_request( )
 
 VOID GetTpmNVSFlags()
 {
+    EFI_GUID    FlagsStatusguid       = AMI_TCG_CONFIRMATION_FLAGS_GUID;
     UINTN       Size = sizeof (EFI_PHYSICAL_ADDRESS);
     static      BOOLEAN Init=0;
     EFI_STATUS  Status;
@@ -894,7 +811,7 @@ VOID GetTpmNVSFlags()
     Init = 1;
 #if NVRAM_VERSION < 7
     if (NvramControl == NULL)
-        NvramControl = TcgGetSmstConfigurationTablePi(&gAmiNvramControlProtocolGuid);
+        NvramControl = TcgGetSmstConfigurationTablePi(&AmiNvramControlProtocolGuid);
 
     if (NvramControl) NvramControl->ShowBootTimeVariables(TRUE);
 
@@ -947,46 +864,22 @@ EFI_STATUS TcgSmiCommonHandler(
     UINTN               Size = sizeof(AMI_PPI_NV_VAR);
     AMI_PPI_NV_VAR      Temp;
     UINT32              Attributes=0;
-    UINT32              VariableAttributes = 0;
-    UINTN               VariableSize  = sizeof(BOOLEAN);
 
 #if defined (NVRAM_VERSION) && (NVRAM_VERSION > 6)
-    
-    Status = SmmVarProtocol->SmmGetVariable(L"SIDSUPPORT",
-                                &FlagsStatusguid,
-                                NULL,
-                                &VariableSize,
-                                &sidSupport);
-    
-    if(EFI_ERROR(Status)){
-        sidSupport = FALSE;
-    }
-    
     Status = SmmVarProtocol->SmmGetVariable(
                  L"AMITCGPPIVAR",
-                 &AmitcgefiOsVariableGuid,
+                 &SmmtcgefiOsVariableGuid,
                  NULL,
                  &Size,
                  &Temp);
-    
 #else
     if (NvramControl == NULL)
-        NvramControl = TcgGetSmstConfigurationTablePi(&gAmiNvramControlProtocolGuid);
+        NvramControl = TcgGetSmstConfigurationTablePi(&AmiNvramControlProtocolGuid);
 
     if (NvramControl) NvramControl->ShowBootTimeVariables(TRUE);
-    
-    Status = ptrRuntimeServices->GetVariable( L"SIDSUPPORT", \
-                                         &FlagsStatusguid, \
-                                         NULL, \
-                                         &VariableSize, \
-                                         &sidSupport );
-    
-    if(EFI_ERROR(Status)){
-        sidSupport = FALSE;
-    }
 
     Status = ptrRuntimeServices->GetVariable( L"AMITCGPPIVAR", \
-             &AmitcgefiOsVariableGuid, \
+             &SmmtcgefiOsVariableGuid, \
              NULL, \
              &Size, \
              &Temp );
@@ -996,11 +889,9 @@ EFI_STATUS TcgSmiCommonHandler(
 
     GetTpmNVSFlags();
     if(NvsMemoryAddress == 0){
+        TpmAcpiNvsFlags->RequestFuncResponse = (TCPA_PPI_RESPONSE_MASK | TCPA_PPI_BIOSFAIL);
         return EFI_NOT_FOUND;
     }
-    
-    if(EFI_ERROR(AmiValidateMemoryBuffer((VOID *) NvsMemoryAddress,\
-                        sizeof(AMI_ASL_PPI_NV_VAR)))) return EFI_NOT_FOUND;
 
     TpmAcpiNvsFlags =  ((AMI_ASL_PPI_NV_VAR *)(UINTN)NvsMemoryAddress);
 
@@ -1050,9 +941,7 @@ EFI_STATUS TcgSmiCommonHandler(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-EFI_STATUS
-EFIAPI
-TCGSmmInit(
+EFI_STATUS TCGSmmInit(
     IN EFI_HANDLE       ImageHandle,
     IN EFI_SYSTEM_TABLE *SystemTable )
 {
@@ -1060,24 +949,27 @@ TCGSmmInit(
     EFI_SMM_SW_REGISTER_CONTEXT  SwContext;
     EFI_HANDLE                   Handle;
     EFI_STATUS                   Status;
+    EFI_GUID                     SmmRtServTableGuid  = EFI_SMM_RUNTIME_SERVICES_TABLE_GUID;
     SETUP_DATA                   SetupDataBuffer;
     UINTN                        SetupVariableSize = sizeof(SETUP_DATA);
     UINT32                       SetupVariableAttributes=0;
+    EFI_GUID                     gSetupGuid = SETUP_GUID;
     UINT32                       attrib =     EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS;
 
-    Status =  gSmst->SmmLocateProtocol(&gEfiSmmSwDispatch2ProtocolGuid, NULL, (void **)&pSwDispatch2);
+    Status =  gSmst->SmmLocateProtocol(&gEfiSmmSwDispatch2ProtocolGuid, NULL, &pSwDispatch2);
     if (EFI_ERROR(Status)) return Status;
 
+
 #if defined (NVRAM_VERSION) && (NVRAM_VERSION > 6)
-    Status =  gSmst->SmmLocateProtocol(&gEfiSmmVariableProtocolGuid, NULL, (void **)&SmmVarProtocol);
+    Status =  gSmst->SmmLocateProtocol(&gEfiSmmVariableProtocolGuid, NULL, &SmmVarProtocol);
     if (EFI_ERROR(Status)) return Status;
 #endif
 
-    ptrRuntimeServices = (EFI_RUNTIME_SERVICES *)TcgGetSmstConfigurationTablePi(&SmmRsTableGuid);
+    ptrRuntimeServices = (EFI_RUNTIME_SERVICES *)TcgGetSmstConfigurationTablePi(&SmmRtServTableGuid);
     if(ptrRuntimeServices == NULL) return EFI_NOT_FOUND;
 
     Status = ptrRuntimeServices->GetVariable (L"Setup",
-             &gSetupVariableGuid,
+             &gSetupGuid,
              &SetupVariableAttributes,
              &SetupVariableSize,
              &SetupDataBuffer);
@@ -1085,7 +977,7 @@ TCGSmmInit(
     {
         return EFI_SUCCESS;
     }
-    
+
 //prevent _PTS (Method;\_SB.TPM.TPTS(Arg0)) call SMI as TpmSupport disabled.
 //As TpmSupport disabled, TpmServFlags still keeps NvsMemoryAddress last boot but now this address is not used/allocated by TCG module.
     if (SetupDataBuffer.TpmSupport == 0)

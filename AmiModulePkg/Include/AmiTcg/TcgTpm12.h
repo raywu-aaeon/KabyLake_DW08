@@ -40,10 +40,10 @@
 #ifndef _TCG_TPM12_H_
 #define _TCG_TPM12_H_
 
-#include "Token.h"
+#include "token.h"
 #include <IndustryStandard/Tpm12.h>
 #include <IndustryStandard/UefiTcgPlatform.h>
-#include "AmiTcg/ZTEICTcmOrdinals.h"
+#include "AmiTcg\ZTEICTcmOrdinals.h"
 
 //
 // Structures are all packed on 1-byte alignment
@@ -71,6 +71,10 @@ typedef union tdTPM2_DIGEST
     UINT8 digestSha2[TPM_SHA2_256_HASH_LEN];
 } TPM2_DIGEST;
 
+typedef struct tdTCM_DIGEST
+{
+    UINT8 digest[TPM_SHA2BASED_NONCE_LEN];
+} TCM_DIGEST;
 
 #pragma pack (pop)
 

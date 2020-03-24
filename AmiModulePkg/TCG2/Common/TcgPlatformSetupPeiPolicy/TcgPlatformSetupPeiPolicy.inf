@@ -42,38 +42,30 @@ FILE_GUID = 0FE9DA53-043D-4265-A94D-FD77FEDE2EB4
 ENTRY_POINT = TcgPlatformSetupPeiPolicyEntryPoint
 
 [Sources]
- TcgPlatformSetupPeiPolicy.c
+TcgPlatformSetupPeiPolicy.c
 
 [LibraryClasses]
- PeimEntryPoint
- BaseLib
- DebugLib
- IoLib
- HobLib
- PeiServicesLib
+PeimEntryPoint
+BaseLib
+DebugLib
+IoLib
+PeiServicesLib
 
 [Ppis]
- gTcgPeiPolicyGuid
- gEfiPeiReadOnlyVariable2PpiGuid
-
-[Guids]
- gSetupVariableGuid
- gTcgInternalflagGuid
- gTcgPpiSyncFlagGuid
- TcgPeiPolicyHobGuid
+gTcgPeiPolicyGuid
+gEfiPeiReadOnlyVariable2PpiGuid
 
 [Packages]
- AmiCompatibilityPkg/AmiCompatibilityPkg.dec
- AmiModulePkg/AmiModulePkg.dec
- MdePkg\MdePkg.dec
- AmiTcgPkg/AmiTcgPkg.dec
- $(AdditionalTcgSetupPeiPolicyPackages)
+AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+AmiModulePkg/AmiModulePkg.dec
+MdePkg\MdePkg.dec
+$(AdditionalTcgSetupPeiPolicyPackages)
 
 [Depex]
- gEfiPeiReadOnlyVariable2PpiGuid
- $(AdditionalTcgSetupPeiPolicyDepex)
+gEfiPeiReadOnlyVariable2PpiGuid
+$(AdditionalTcgSetupPeiPolicyDepex)
 
 
 [BuildOptions.IA32]
- *_*_IA32_CC_FLAGS = -DPEI_COMPILE 
+*_*_IA32_CC_FLAGS = -DPEI_COMPILE 
 

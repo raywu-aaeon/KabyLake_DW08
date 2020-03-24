@@ -10,26 +10,16 @@ TOKEN
     Token = "TCG2Support" "=" "1"
 End
 
-ELINK
-    Name  = "SkipTpm12InitializationHook"
-    Help  = "Called before TPM 1.2 Initialization"
-    InvokeOrder = ReplaceParent
+PATH
+    Name  = "TCGPEI_DIR"
 End
 
-TOKEN
-    Name  = "TPM_HOOK_LIB_COMMA"
-    Value  = ","
-    Help  = "This strange token is used by the SDL template expression in AmiTpm12PeiPlatformHooksTemplate.h.\DO NOT CHANGE!"
-    TokenType = Expression
-    Lock = Yes
-End
 
-OUTPUTREGISTER
-    Name  = "TPM12_PEI_ELINKS_H"
-    Path  = "Build"
-    File  = "AmiTpm12PeiPlatformHooks.h"
-    Template  = "AmiTpm12PeiPlatformHooksTemplate.h"
-End
+#ELINK
+#   Name  = "$(BUILD_DIR)\tcgPei.ffs"
+#   Parent  = "$(BUILD_DIR)\TcgPlatformSetupPeiPolicy.ffs"
+#   InvokeOrder = AfterParent
+#End
 
 
 INFComponent
@@ -39,6 +29,13 @@ INFComponent
     ModuleTypes  = "PEIM"
 End
 
+
+#INFComponent
+#    Name  = "TcgPeiAfterMem"
+#    File  = "../../Common/TcgPeiAfterMem/TcgPeiAfterMem.inf"
+#    Package  = "AmiModulePkg"
+#    ModuleTypes  = "PEIM"
+#End
 
 INFComponent
     Name  = "TrEEPei"

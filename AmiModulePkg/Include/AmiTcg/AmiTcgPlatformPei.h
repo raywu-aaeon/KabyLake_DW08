@@ -27,10 +27,34 @@
 //*************************************************************************
 #include <Include/Setup.h>
 #include <AmiTcg/TcgPc.h>
-#include <Ppi/TcgTcmService.h>
-#include <Ppi/TcgService.h>
-#include <Ppi/TpmDevice.h>
+#include <ppi/TcgTcmService.h>
+#include <ppi/TcgService.h>
+#include <ppi/TpmDevice.h>
 #include <PiPei.h>
+
+#define TCG_LOCK_DOWN_VAR_GUID\
+  {0x6e605536, 0xa30a, 0x4d56, 0x93, 0x9e, 0x1c, 0x37, 0x3f, 0x79, 0x8d, 0x7b}
+
+#define  AMI_MEMORY_ABSENT_OVERRIDE_GUID\
+    { 0x9c109e5e, 0xbf38, 0x4a78, 0x9c, 0xac, 0x43, 0xde, 0x7e, 0x72, 0x6f,\
+      0x9e}
+
+#define  AMI_VERIFY_TCG_VARIABLES_GUID\
+    { 0x4f44fa64, 0xa8d6, 0x4c19, 0xb6, 0x1d, 0x63, 0x10, 0x9d, 0x77, 0xd3,\
+      0xd2}
+
+#define  AMI_MEMORY_PRESENT_FUNCTION_OVERRIDE_GUID\
+    { 0x4d7161bc, 0xbe35, 0x43af, 0x87, 0x9b, 0x95, 0x6e, 0xb3, 0x79, 0x83,\
+      0xd6}
+
+#define  AMI_SET_PHYSICAL_PRESENCE_GUID\
+    { 0x126f424e, 0xf45b, 0x4406, 0x80, 0x1e, 0x2a, 0xac, 0xf4, 0x4, 0x16,\
+      0x7f}
+
+#define AMI_SKIP_TPM_STARTUP_GUID \
+    { 0x6ee1b483, 0xa9b8, 0x4eaf, 0x9a, 0xe1, 0x3b, 0x28, 0xc5, 0xcf, 0xf3,\
+      0x6b}
+
 
 #define EFI_MAX_BIT       0x80000000
 
@@ -38,6 +62,8 @@
 #define _CR( Record, TYPE,\
        Field )((TYPE*) ((CHAR8*) (Record) - (CHAR8*) &(((TYPE*) 0)->Field)))
 
+
+static EFI_GUID gSetupGuid = SETUP_GUID;
 
 #pragma pack (1)
 typedef struct
@@ -66,7 +92,7 @@ typedef struct
 typedef struct _TCG_PEI_MEMORY_CALLBACK
 {
     EFI_PEI_NOTIFY_DESCRIPTOR NotifyDesc;
-    EFI_PEI_FILE_HANDLE       *FfsHeader;
+    EFI_FFS_FILE_HEADER       *FfsHeader;
 } TCG_PEI_MEMORY_CALLBACK;
 
 
@@ -174,12 +200,13 @@ EFI_STATUS LocateTcgPpi(
 
 EFI_STATUS LocateTcmPpi(
     IN EFI_PEI_SERVICES **PeiServices,
+    IN PEI_TPM_PPI      **gTpmDevicePpi,
     IN PEI_TCM_PPI      **gTcmPpi
 );
 
 
 EFI_STATUS TcgPeiBuildHobGuid(
-    IN CONST EFI_PEI_SERVICES **PeiServices,
+    IN EFI_PEI_SERVICES **PeiServices,
     IN EFI_GUID         *Guid,
     IN UINTN            DataLength,
     OUT VOID            **Hob );

@@ -1,7 +1,7 @@
 //*************************************************************************
 //*************************************************************************
 //**                                                                     **
-//**        (C)Copyright 1985-2019, American Megatrends, Inc.            **
+//**        (C)Copyright 1985-2011, American Megatrends, Inc.            **
 //**                                                                     **
 //**                       All Rights Reserved.                          **
 //**                                                                     **
@@ -27,22 +27,23 @@
 //
 //---------------------------------------------------------------------------
 //<AMI_FHDR_END>
-#include <Uefi.h>
-#include <Token.h>
-#include <Library/IoLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include <UEfi.h>
+#include <token.h>
+#include <Library\IoLib.h>
+#include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Protocol/TcgPlatformSetupPolicy.h>
-#include <AmiTcg/TCGMisc.h>
-#include <AmiTcg/TcgCommon20.h>
-#include <Protocol/LegacyBiosExt.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include <Library\BaseMemoryLib.h>
+#include <Protocol\TcgPlatformSetupPolicy.h>
+#include <Amitcg\TcgMisc.h>
+#include <amitcg\TcgCommon20.h>
 
 TCG_PLATFORM_SETUP_PROTOCOL *TcgPlatformSetupInstance  = NULL;
 
-
+EFI_HANDLE gImageHandle;
 static TCG_CONFIGURATION  InitialConfigFlags;
+//SEFI_GUID  gTcgPlatformSetupPolicyGuid = TCG_PLATFORM_SETUP_POLICY_GUID;
+EFI_GUID  gTcgInternalSyncflagGuid = TCG_PPI_SYNC_FLAG_GUID;
+EFI_GUID  gTcgInternalflagsGuid = TCG_INTERNAL_FLAGS_GUID;
 
 
 EFI_STATUS
@@ -53,13 +54,10 @@ UpdateTcgStatusFlags (TCG_CONFIGURATION *StatusFlags, BOOLEAN UpdateNvram)
     SETUP_DATA              SetupDataBuffer;
     UINTN                   SetupVariableSize = sizeof(SETUP_DATA);
     UINT32                  SetupVariableAttributes;
-    AMITCGSETUPINFOFLAGS    Info;
-    UINTN                   infoSize = sizeof(AMITCGSETUPINFOFLAGS);
-    UINT32                  infoVariableAttributes=0;
+    EFI_GUID                gSetupGuid = SETUP_GUID;
 
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
     if(InitialConfigFlags.DisallowTpm == 1)return EFI_INVALID_PARAMETER;
-#endif
+
     if(StatusFlags == NULL)
     {
         return EFI_INVALID_PARAMETER;
@@ -97,82 +95,45 @@ UpdateTcgStatusFlags (TCG_CONFIGURATION *StatusFlags, BOOLEAN UpdateNvram)
 
         Status = gRT->GetVariable (
                      L"Setup",
-                     &gSetupVariableGuid,
+                     &gSetupGuid,
                      &SetupVariableAttributes,
                      &SetupVariableSize,
                      &SetupDataBuffer);
-                
-        if (!EFI_ERROR(Status))
-        {
-            Status = gRT->GetVariable( L"PCRBitmap", \
-                                       &gTcgInternalflagGuid, \
-                                       &infoVariableAttributes, \
-                                       &infoSize, \
-                                       &Info );
-            
-            if(!EFI_ERROR(Status)){
-                if(Info.SupportedPcrBitMap & 1){
-                    SetupDataBuffer.Sha1Supported=1;
-                }
-                
-                if(Info.SupportedPcrBitMap & 2)
-                {
-                    SetupDataBuffer.Sha256Supported=1;
-                }
-                
-                if(Info.SupportedPcrBitMap & 4)
-                {
-                    SetupDataBuffer.Sha384Supported=1;
-               }
 
-               if(Info.SupportedPcrBitMap & 0x8)
-               {
-                    SetupDataBuffer.Sha512Supported=1;
-               }
-
-               if(Info.SupportedPcrBitMap & 0x10)
-               {
-                   SetupDataBuffer.SM3Supported=0x1;
-               }
-            }
-            
-            SetupDataBuffer.TpmEnable            =   TcgPlatformSetupInstance->ConfigFlags.TpmEnable;
-            SetupDataBuffer.TpmSupport           =   TcgPlatformSetupInstance->ConfigFlags.TpmSupport;
-            SetupDataBuffer.TpmAuthenticate      =   TcgPlatformSetupInstance->ConfigFlags.TpmAuthenticate;
-            SetupDataBuffer.TpmOperation         =   TcgPlatformSetupInstance->ConfigFlags.TpmOperation;
-            SetupDataBuffer.TpmEnaDisable        =   TcgPlatformSetupInstance->ConfigFlags.TpmEnaDisable;
-            SetupDataBuffer.TpmActDeact          =   TcgPlatformSetupInstance->ConfigFlags.TpmActDeact;
-            SetupDataBuffer.TpmHrdW              =   TcgPlatformSetupInstance->ConfigFlags.TpmHardware;
-            SetupDataBuffer.TpmOwnedUnowned      =   TcgPlatformSetupInstance->ConfigFlags.TpmOwnedUnowned;
-            SetupDataBuffer.TpmError             =   TcgPlatformSetupInstance->ConfigFlags.TpmError;
-            SetupDataBuffer.TcgSupportEnabled    =   TcgPlatformSetupInstance->ConfigFlags.TcgSupportEnabled;
-            SetupDataBuffer.TcmSupportEnabled    =   TcgPlatformSetupInstance->ConfigFlags.TcmSupportEnabled;
-            SetupDataBuffer.Tpm20Device          =   TcgPlatformSetupInstance->ConfigFlags.Tpm20Device;
-            SetupDataBuffer.Tcg2SpecVersion      =   TcgPlatformSetupInstance->ConfigFlags.Tcg2SpecVersion;
-            SetupDataBuffer.DeviceType           =   TcgPlatformSetupInstance->ConfigFlags.DeviceType;
-            SetupDataBuffer.EndorsementHierarchy   = TcgPlatformSetupInstance->ConfigFlags.EndorsementHierarchy;
-            SetupDataBuffer.StorageHierarchy       = TcgPlatformSetupInstance->ConfigFlags.StorageHierarchy;
-            SetupDataBuffer.PlatformHierarchy      = TcgPlatformSetupInstance->ConfigFlags.PlatformHierarchy;
-            SetupDataBuffer.InterfaceSel           = TcgPlatformSetupInstance->ConfigFlags.InterfaceSel;
+        SetupDataBuffer.TpmEnable            =   TcgPlatformSetupInstance->ConfigFlags.TpmEnable;
+        SetupDataBuffer.TpmSupport           =   TcgPlatformSetupInstance->ConfigFlags.TpmSupport;
+        SetupDataBuffer.TpmAuthenticate      =   TcgPlatformSetupInstance->ConfigFlags.TpmAuthenticate;
+        SetupDataBuffer.TpmOperation         =   TcgPlatformSetupInstance->ConfigFlags.TpmOperation;
+        SetupDataBuffer.TpmEnaDisable        =   TcgPlatformSetupInstance->ConfigFlags.TpmEnaDisable;
+        SetupDataBuffer.TpmActDeact          =   TcgPlatformSetupInstance->ConfigFlags.TpmActDeact;
+        SetupDataBuffer.TpmHrdW              =   TcgPlatformSetupInstance->ConfigFlags.TpmHardware;
+        SetupDataBuffer.TpmOwnedUnowned      =   TcgPlatformSetupInstance->ConfigFlags.TpmOwnedUnowned;
+        SetupDataBuffer.TpmError             =   TcgPlatformSetupInstance->ConfigFlags.TpmError;
+        SetupDataBuffer.TcgSupportEnabled    =   TcgPlatformSetupInstance->ConfigFlags.TcgSupportEnabled;
+        SetupDataBuffer.TcmSupportEnabled    =   TcgPlatformSetupInstance->ConfigFlags.TcmSupportEnabled;
+        SetupDataBuffer.Tpm20Device          =   TcgPlatformSetupInstance->ConfigFlags.Tpm20Device;
+        SetupDataBuffer.Tcg2SpecVersion            =   TcgPlatformSetupInstance->ConfigFlags.Tcg2SpecVersion;
+        SetupDataBuffer.DeviceType           =   TcgPlatformSetupInstance->ConfigFlags.DeviceType;
+        SetupDataBuffer.EndorsementHierarchy   = TcgPlatformSetupInstance->ConfigFlags.EndorsementHierarchy;
+        SetupDataBuffer.StorageHierarchy       = TcgPlatformSetupInstance->ConfigFlags.StorageHierarchy;
+        SetupDataBuffer.PlatformHierarchy      = TcgPlatformSetupInstance->ConfigFlags.PlatformHierarchy;
+        SetupDataBuffer.InterfaceSel           = TcgPlatformSetupInstance->ConfigFlags.InterfaceSel;
 #if (defined(EXPOSE_FORCE_TPM_ENABLE) && (EXPOSE_FORCE_TPM_ENABLE == 1))
-            SetupDataBuffer.ForceTpmEnable         = TcgPlatformSetupInstance->ConfigFlags.Reserved4;
+        SetupDataBuffer.ForceTpmEnable         = TcgPlatformSetupInstance->ConfigFlags.Reserved4;
 #endif
 
-            Status = gRT->SetVariable (
-                         L"Setup",
-                         &gSetupVariableGuid,
-                         SetupVariableAttributes,
-                         SetupVariableSize,
-                         &SetupDataBuffer);
-
-            if(EFI_ERROR(Status))return Status;
-        }
+        Status = gRT->SetVariable (
+                     L"Setup",
+                     &gSetupGuid,
+                     SetupVariableAttributes,
+                     SetupVariableSize,
+                     &SetupDataBuffer);
 
         SetupVariableAttributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE;
 
         Status = gRT->SetVariable (
                      L"TcgInternalSyncFlag",
-                     &gTcgPpiSyncFlagGuid,
+                     &gTcgInternalSyncflagGuid,
                      SetupVariableAttributes,
                      sizeof(UINT8),
                      &(TcgPlatformSetupInstance->ConfigFlags.PpiSetupSyncFlag));
@@ -180,7 +141,7 @@ UpdateTcgStatusFlags (TCG_CONFIGURATION *StatusFlags, BOOLEAN UpdateNvram)
         if(Status == EFI_INVALID_PARAMETER)
         {
             Status = gRT->SetVariable( L"TcgInternalSyncFlag", \
-                                       &gTcgPpiSyncFlagGuid, \
+                                       &gTcgInternalSyncflagGuid, \
                                        0, \
                                        0, \
                                        NULL);
@@ -188,7 +149,7 @@ UpdateTcgStatusFlags (TCG_CONFIGURATION *StatusFlags, BOOLEAN UpdateNvram)
             if(EFI_ERROR(Status))return Status;
 
             Status = gRT->SetVariable( L"TcgInternalSyncFlag", \
-                                       &gTcgPpiSyncFlagGuid, \
+                                       &gTcgInternalSyncflagGuid, \
                                        SetupVariableAttributes, \
                                        sizeof(UINT8), \
                                        &(TcgPlatformSetupInstance->ConfigFlags.PpiSetupSyncFlag));
@@ -198,7 +159,10 @@ UpdateTcgStatusFlags (TCG_CONFIGURATION *StatusFlags, BOOLEAN UpdateNvram)
     return Status;
 }
 
+#define BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID \
+        {0xdbc9fd21, 0xfad8, 0x45b0, 0x9e, 0x78, 0x27, 0x15, 0x88, 0x67, 0xcc, 0x93}
 
+EFI_GUID    gBdsAllDriversConnectedProtocolGuid = BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID;
 
 VOID
 EFIAPI
@@ -209,9 +173,10 @@ TCGSyncUpdateData (
 {
     EFI_STATUS                      Status;
     TCG_PLATFORM_SETUP_PROTOCOL     *PolicyInstance;
+    EFI_GUID                        gPolicyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
     TCG_CONFIGURATION               Config;
-    
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&PolicyInstance);
+
+    Status = gBS->LocateProtocol (&gPolicyguid,  NULL, &PolicyInstance);
     if (EFI_ERROR (Status))
     {
         return;
@@ -255,11 +220,9 @@ TcgPlatformSetupPolicyEntryPoint (
     SETUP_DATA                   *SetupData = &SetupDataBuffer;
     UINTN                         SetupVariableSize;
     UINT32                        SetupVariableAttributes;
-
+    EFI_GUID                      gSetupGuid = SETUP_GUID;
     UINT8                         SyncVar;
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
     UINT8                         DisallowTpmFlag=0;
-#endif
     UINTN                         TempSizeofSyncVar = sizeof(UINT8);
     EFI_EVENT                     ev;
     static VOID                   *reg;
@@ -277,10 +240,10 @@ TcgPlatformSetupPolicyEntryPoint (
     {
         return EFI_OUT_OF_RESOURCES;
     }
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
+
     Status = gRT->GetVariable (
                  L"InternalDisallowTpmFlag",
-                 &gTcgInternalflagGuid,
+                 &gTcgInternalflagsGuid,
                  &SetupVariableAttributes,
                  &TempSizeofSyncVar,
                  &DisallowTpmFlag);
@@ -304,14 +267,11 @@ TcgPlatformSetupPolicyEntryPoint (
 
         Status = gRT->GetVariable (
                      L"Setup",
-                     &gSetupVariableGuid,
+                     &gSetupGuid,
                      &SetupVariableAttributes,
                      &SetupVariableSize,
                      &SetupDataBuffer);
-        if (EFI_ERROR(Status))
-        {
-            return Status;
-        }
+
 
         SetupDataBuffer.TpmEnable            =   0;
         SetupDataBuffer.TpmSupport           =   0;
@@ -328,20 +288,20 @@ TcgPlatformSetupPolicyEntryPoint (
 
         Status = gRT->SetVariable (
                      L"Setup",
-                     &gSetupVariableGuid,
+                     &gSetupGuid,
                      SetupVariableAttributes,
                      SetupVariableSize,
                      &SetupDataBuffer);
 
         return Status;
     }
-#endif
+
 
     SetupVariableAttributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE;
 
     Status = gRT->GetVariable (
                  L"TcgInternalSyncFlag",
-                 &gTcgPpiSyncFlagGuid,
+                 &gTcgInternalSyncflagGuid,
                  &SetupVariableAttributes,
                  &TempSizeofSyncVar,
                  &SyncVar);
@@ -355,7 +315,7 @@ TcgPlatformSetupPolicyEntryPoint (
 
     Status = gRT->GetVariable (
                  L"Setup",
-                 &gSetupVariableGuid,
+                 &gSetupGuid,
                  &SetupVariableAttributes,
                  &SetupVariableSize,
                  &SetupDataBuffer);
@@ -378,11 +338,7 @@ TcgPlatformSetupPolicyEntryPoint (
         TcgPlatformSetupInstance->ConfigFlags.PpiSetupSyncFlag = SyncVar;
         TcgPlatformSetupInstance->ConfigFlags.Tcg2SpecVersion        = (SetupData->Tcg2SpecVersion);
         TcgPlatformSetupInstance->ConfigFlags.DeviceType           =   SetupData->DeviceType;
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
         TcgPlatformSetupInstance->ConfigFlags.DisallowTpm      = DisallowTpmFlag;
-#else
-        TcgPlatformSetupInstance->ConfigFlags.DisallowTpm = 0;
-#endif
         TcgPlatformSetupInstance->ConfigFlags.TpmHardware     = 1;
         TcgPlatformSetupInstance->ConfigFlags.TpmEnaDisable   = (SetupData->TpmEnaDisable);
         TcgPlatformSetupInstance->ConfigFlags.TpmActDeact     = (SetupData->TpmActDeact);
@@ -408,8 +364,8 @@ TcgPlatformSetupPolicyEntryPoint (
         TcgPlatformSetupInstance->ConfigFlags.StorageHierarchy       = SetupData->StorageHierarchy;
         TcgPlatformSetupInstance->ConfigFlags.PlatformHierarchy      = SetupData->PlatformHierarchy;
         TcgPlatformSetupInstance->ConfigFlags.InterfaceSel           = SetupData->InterfaceSel;
-        TcgPlatformSetupInstance->ConfigFlags.PcrBanks               = (SetupData->Sha1 & 0x01) | (SetupData->Sha256 & 0x02) |\
-                                                                        (SetupData->Sha384 & 0x04) | ( SetupData->Sha512 & 0x08 );
+        TcgPlatformSetupInstance->ConfigFlags.PcrBanks               = SetupData->Sha1 | SetupData->Sha256 | SetupData->Sha384 |\
+                SetupData->Sha512;
         if(SetupData->SM3 == 1)
         {
             TcgPlatformSetupInstance->ConfigFlags.PcrBanks |= 0x10;
@@ -455,17 +411,28 @@ TcgPlatformSetupPolicyEntryPoint (
              );
 
     gImageHandle  = ImageHandle;
-    
-    Status = gBS->CreateEventEx(
-            EFI_EVENT_NOTIFY_SIGNAL, EFI_TPL_CALLBACK, TCGSyncUpdateData,
-            NULL, &gEfiEndOfDxeEventGroupGuid, &ev);
+
+    Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
+                               EFI_TPL_CALLBACK,
+                               &TCGSyncUpdateData,
+                               0,
+                               &ev );
+
+    if(!EFI_ERROR(Status))
+    {
+        Status = gBS->RegisterProtocolNotify(
+                     &gBdsAllDriversConnectedProtocolGuid,
+                     ev,
+
+                     &reg );
+    }
 
     return Status;
 }
 //*************************************************************************
 //*************************************************************************
 //**                                                                     **
-//**        (C)Copyright 1985-2019, American Megatrends, Inc.            **
+//**        (C)Copyright 1985-2010, American Megatrends, Inc.            **
 //**                                                                     **
 //**                       All Rights Reserved.                          **
 //**                                                                     **

@@ -44,9 +44,22 @@
 #define _TPM20ACPI_H_
 
 #include <Efi.h>
-#include <Protocol/AcpiTable.h>
+#include <Protocol\AcpiTable.h>
 #include <Hob.h>
 #include <IndustryStandard/Acpi.h>
+
+#define ME_DATA_HOB_GUID \
+  { 0x1e94f097, 0x5acd, 0x4089, 0xb2, 0xe3, 0xb9, 0xa5, 0xc8, 0x79, 0xa7, 0x0c }
+
+#define INTERNAL_NVS_AREA_PROTOCOL_GUID \
+  { \
+    0x74e1e48, 0x8132, 0x47a1, 0x8c, 0x2c, 0x3f, 0x14, 0xad, 0x9a, 0x66, 0xdc \
+  }
+
+#define EDKII_VARIABLE_LOCK_PROTOCOL_GUID \
+  { \
+    0xcd3d0a05, 0x9e24, 0x437c, { 0xa8, 0x91, 0x1e, 0xe0, 0x53, 0xdb, 0x76, 0x38 } \
+  }
 
 #define EFI_SIGNATURE_16(A, B)        ((A) | (B << 8))
 #define EFI_SIGNATURE_32(A, B, C, D)  (EFI_SIGNATURE_16 (A, B) | (EFI_SIGNATURE_16 (C, D) << 16))
@@ -61,7 +74,7 @@
 #define EFI_TPM2_ACPI_TABLE_START_METHOD_CRB_INTF    7
 #define EFI_TPM2_ACPI_TABLE_START_METHOD_CRB_INTF_ACPI  8
 
-#define EFI_TPM2_ACPI_TABLE_REVISION  4
+#define EFI_TPM2_ACPI_TABLE_REVISION  3
 
 #pragma pack (1)
 
@@ -99,6 +112,11 @@ typedef struct
     UINT64        PttCRBAddress;
 } PTT_ACPI_NVS_AREA;
 
+//This guid is from PttSsdt.inf(file guid)
+#define PPT_SSDT_ACPI_TABLE_GUID \
+  { \
+    0xb733c141, 0xe88f, 0x4786, 0x94, 0xaf, 0x8b, 0x87, 0xbc, 0x48, 0x67, 0xfe \
+  }
 #pragma pack ()
 
 /*

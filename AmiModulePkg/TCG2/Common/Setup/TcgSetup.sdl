@@ -95,13 +95,13 @@ ELINK
 End
 
 ELINK
-    Name  = "$(TCG_SETUP_DIR)/TcgSetup.uni"
+    Name  = "$(TCG_SETUP_DIR)\TcgSetup.uni"
     Parent  = "SetupStringFiles"
     InvokeOrder = AfterParent
 End
 
 ELINK
-    Name  = "$(TCG_SETUP_DIR)/TcgSetup.c"
+    Name  = "$(TCG_SETUP_DIR)\TcgSetup.c"
     Parent  = "SetupCallbackFiles"
     InvokeOrder = AfterParent
 End
@@ -113,7 +113,7 @@ ELINK
 End
 
 #ELINK
-#   Name  = "$(TCG_SETUP_DIR)/TPMPwd.c"
+#   Name  = "$(TCG_SETUP_DIR)\TPMPwd.c"
 #  Parent  = "SetupCallbackFiles"
 # InvokeOrder = AfterParent
 #End
@@ -122,25 +122,6 @@ ELINK
     Name  = "TcgUpdateDefaultsHook,"
     Parent  = "LoadedConfigDefaultsHook,"
     InvokeOrder = AfterParent
-End
-
-
-ELINK
-    Name  = "TcgSetupDataSync,"
-    Parent  = "ProcessUIInitHook,"
-    InvokeOrder = AfterParent
-End
-
-ELINK
-    Name  = "gTcgInternalflagGuid"
-    Parent  = "ADDITIONAL_AMITSE_Guids"
-    InvokeOrder = AfterParent    
-End
-
-ELINK
-    Name  = "AmiTcgPkg/AmiTcgPkg.dec"
-    Parent  = "AdditionalSetupPackages"
-    InvokeOrder = AfterParent    
 End
 
 ELINK
@@ -157,52 +138,13 @@ ELINK
 End
 
 ELINK
-    Name  = "$(TCG_SETUP_DIR)/HandleLoadDefaultsSetup.c"
+    Name  = "$(TCG_SETUP_DIR)\HandleLoadDefaultsSetup.c"
     Parent  = "TSE_SOURCE_FILES"
     InvokeOrder = AfterParent
 End
 
 ELINK
-   Name  = "$(TCG_SETUP_DIR)/AmiTcgPpiHandshake.c"
+   Name  = "$(TCG_SETUP_DIR)\AmiTcgPpiHandshake.c"
    Parent  = "TSE_SOURCE_FILES"
    InvokeOrder = AfterParent
 End
-
-ELINK
-    Name  = "AmiTcgPkg/AmiTcgPkg.dec"
-    Parent  = "ADDITIONAL_AMITSE_Packages"
-    InvokeOrder = AfterParent    
-End
-
-ELINK
-    Name  = "gTcgInternalflagGuid"
-    Parent  = "ADDITIONAL_AMITSE_Guids"
-    InvokeOrder = AfterParent    
-End
-
-ELINK
-    Name  = "gTcgInternalflagGuid"
-    Parent  = "AdditionalSetupGuids"
-    InvokeOrder = AfterParent    
-End
-
-
-ELINK
-    Name  = "gAmiPpiGuid"
-    Parent  = "ADDITIONAL_AMITSE_Guids"
-    InvokeOrder = AfterParent    
-End
-
-ELINK
-    Name  = "gTcgPlatformSetupPolicyGuid"
-    Parent  = "ADDITIONAL_AMITSE_Protocols"
-    InvokeOrder = AfterParent    
-End
-
-ELINK
-    Name  = "AmiTcgPkg/AmiTcgPkg.dec"
-    Parent  = "AdditionalSetupPackages"
-    InvokeOrder = AfterParent    
-End
-
-

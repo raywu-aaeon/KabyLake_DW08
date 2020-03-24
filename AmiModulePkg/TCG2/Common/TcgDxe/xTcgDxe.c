@@ -29,24 +29,26 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Efi.h>
-#include <AmiTcg/TcgCommon12.h>
-#include <Token.h>
-#include <AmiTcg/TCGMisc.h>
-#include<AmiTcg/sha1.h>
-//#include <AmiDxeLib.h>
+#include <EFI.h>
+#include <AmiTcg\TcgCommon12.h>
+#include <token.h>
+
+#include <IndustryStandard/SmBios.h>
+
+#include <AmiTcg\TcgMisc.h>
+#include<AmiTcg\sha1.h>
 #include <IndustryStandard/PeImage.h>
 #include <Protocol/DiskIo.h>
 #include <Protocol/BlockIo.h>
-#include <Protocol/TcgService.h>
-#include <Protocol/TpmDevice.h>
+#include <protocol\TcgService.h>
+#include <protocol\TpmDevice.h>
 #include "Protocol/CpuIo.h"
 #include "Protocol/FirmwareVolume.h"
 #include "Protocol/DevicePath.h"
 #include "Protocol/PciIo.h"
-#include <Protocol/TcgPlatformSetupPolicy.h>
+#include <Protocol\TcgPlatformSetupPolicy.h>
 #include <AmiProtocol.h>
-#include <Protocol/AmiTpmSupportTypeProtocol.h>
+#include <Protocol\AmiTpmSupportTypeProtocol.h>
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 //#include <Library/DevicePathLib.h>
@@ -55,15 +57,11 @@
 #include<Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 #include <Library/UefiLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <Guid/Gpt.h>
 #if (defined(TCGMeasureSecureBootVariables) && (TCGMeasureSecureBootVariables != 0))
 #include <ImageAuthentication.h>
 #endif
-#include <Protocol/Smbios.h>
-#include <IndustryStandard/SmBios.h>
 
 //------------------------------------------------------------------------
 //Internal Structures
@@ -75,26 +73,26 @@ typedef struct _TCG_DXE_PRIVATE_DATA
 } TCG_DXE_PRIVATE_DATA;
 
 EFI_STATUS
-EFIAPI TcgDxeCommonExtend(
+__stdcall TcgDxeCommonExtend(
     IN VOID         *CallbackContext,
     IN TPM_PCRINDEX PCRIndex,
     IN TCG_DIGEST   *Digest,
     OUT TCG_DIGEST  *NewPCRValue );
 
 EFI_STATUS
-EFIAPI SHA1_init (
+__stdcall SHA1_init (
     IN VOID     *CallbackContext,
     IN SHA1_CTX *Sha1Ctx );
 
 EFI_STATUS
-EFIAPI SHA1_update (
+__stdcall SHA1_update (
     IN VOID     *CallbackContext,
     IN SHA1_CTX *Sha1Ctx,
     IN VOID     *Data,
     IN UINTN    DataLen );
 
 EFI_STATUS
-EFIAPI SHA1_final (
+__stdcall SHA1_final (
     IN VOID        *CallbackContext,
     IN SHA1_CTX    *Sha1Ctx,
     OUT TCG_DIGEST **Digest
@@ -106,15 +104,21 @@ EFIAPI SHA1_final (
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 
+#define   GUID_VARIABLE_DECLARATION( Variable, Guid ) extern EFI_GUID Variable
 
+//EFI_GUID                  gEfiTcgProtocolGuid = EFI_TCG_PROTOCOL_GUID;
+EFI_GUID                  gDsdtGuidDxe        = DSDT_GUID;
+EFI_GUID                  TcgEfiGlobalVariableGuid = TCG_EFI_GLOBAL_VARIABLE_GUID;
+EFI_GUID                  AmiTcgPlatformProtocolGuid = AMI_TCG_PLATFORM_PROTOCOL_GUID;
+EFI_GUID                  mAmiTpmSupportTypeProtocol =AMI_TPM_SUPPORT_TYPE_PROTOCOL_GUID;
 static BOOLEAN            BootLaunchDone = FALSE;
 static BOOLEAN  		  ReadyToBootSignaled=FALSE;
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 
-#include <Protocol/AcpiSupport.h>
-
+#include <protocol/AcpiSupport.h>
+extern EFI_GUID gEfiSmbiosTableGuid;
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 EFI_STATUS EFIAPI TcgDxeHashLogExtendEvent (
@@ -132,6 +136,9 @@ TcgMeasureGptTable (
 );
 
 
+/////////////////////////////////////////////////
+#define AMI_VALID_BOOT_IMAGE_CERT_TBL_GUID \
+    { 0x6683D10C, 0xCF6E, 0x4914, 0xB5, 0xB4, 0xAB, 0x8E, 0xD7, 0x37, 0x0E, 0xD7 }
 //
 //
 // Data Table definition
@@ -175,7 +182,7 @@ MeasureCertificate(UINTN sizeOfCertificate,
     }
 
     Status = gBS->LocateProtocol(&gEfiTcgProtocolGuid,
-                                 NULL, (void **)&tcgSvc );
+                                 NULL, &tcgSvc );
 
     if(EFI_ERROR(Status))return Status;
 
@@ -184,7 +191,7 @@ MeasureCertificate(UINTN sizeOfCertificate,
                                 _TPM_STRUCT_PARTIAL_SIZE( TCG_PCR_EVENT,Event )
                                 + (UINT32)(sizeof(*VarLog) + VarNameLength
                                            * sizeof(CHAR16) + sizeOfCertificate - 3),
-                                           (void **)&TcgEvent);
+                                &TcgEvent);
 
     if(EFI_ERROR(Status))return Status;
 
@@ -194,11 +201,14 @@ MeasureCertificate(UINTN sizeOfCertificate,
     TcgEvent->EventSize = (UINT32)( sizeof (*VarLog) + VarNameLength
                                     * sizeof (CHAR16) + sizeOfCertificate) - 3;
 
-    Status = gBS->AllocatePool( EfiBootServicesData, TcgEvent->EventSize, (void **)&VarLog );
+    Status = gBS->AllocatePool( EfiBootServicesData, TcgEvent->EventSize, &VarLog );
 
     if ( EFI_ERROR(Status) )
     {
-        gBS->FreePool(TcgEvent);
+        if(TcgEvent != NULL)
+        {
+            gBS->FreePool(TcgEvent);
+        }
         return EFI_OUT_OF_RESOURCES;
     }
 
@@ -248,11 +258,18 @@ MeasureCertificate(UINTN sizeOfCertificate,
                                         TcgEvent,
                                         &evNum,
                                         &Last );
-    
+
     TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_SECURE_BOOT_CERTIFICATE_MEASURED | EFI_SOFTWARE_DXE_BS_DRIVER);
-    
-    gBS->FreePool(TcgEvent);
-    gBS->FreePool(VarLog);
+
+    if(TcgEvent!=NULL)
+    {
+        gBS->FreePool(TcgEvent);
+    }
+
+    if(VarLog!=NULL)
+    {
+        gBS->FreePool(VarLog);
+    }
 
     return Status;
 }
@@ -283,6 +300,7 @@ EFI_STATUS FindandMeasureSecureBootCertificate()
     UINT8           *SecureDBBuffer = NULL;
     UINT8           *CertificateBuffer = NULL;
     UINTN           SizeofCerificate = 0;
+    EFI_GUID     Certificateguid = AMI_VALID_BOOT_IMAGE_CERT_TBL_GUID;
     AMI_VALID_CERT_IN_SIG_DB    *CertInfo;
     UINT8           *CertOffsetPtr = NULL;
 
@@ -301,7 +319,7 @@ EFI_STATUS FindandMeasureSecureBootCertificate()
     }
 
 
-    Status = gBS->AllocatePool( EfiBootServicesData, VarSize, (void **)&SecureDBBuffer );
+    Status = gBS->AllocatePool( EfiBootServicesData, VarSize, &SecureDBBuffer );
 
     if (!EFI_ERROR(Status))
     {
@@ -325,16 +343,16 @@ EFI_STATUS FindandMeasureSecureBootCertificate()
     //we need to find the pointer in the EFI system table and work from
     //there
     CertInfo = NULL;
-    CertInfo = TcgGetConfigurationTable(gST, &AmiValidBootImageCertTblGuid);
+    CertInfo = TcgGetConfigurationTable(gST, &Certificateguid);
     if(CertInfo == NULL)
     {
-        DEBUG(( DEBUG_ERROR,"db variable found SecCertificate Information not found in EFI System Table \n"));
+        DEBUG(( -1,"db variable found SecCertificate Information not found in EFI System Table \n"));
         gBS->FreePool( SecureDBBuffer  );
         return EFI_NOT_FOUND;
     }
     if(CertInfo->SigLength == 0)
     {
-        DEBUG(( DEBUG_ERROR,"SecCertificate Information found in EST but Information might be invalid \n"));
+        DEBUG(( -1,"SecCertificate Information found in EST but Information might be invalid \n"));
         gBS->FreePool( SecureDBBuffer  );
         return EFI_NOT_READY;
     }
@@ -418,20 +436,24 @@ EFI_STATUS EfiLibGetSystemConfigurationTable(
 
 EFI_STATUS MeasureHandoffTables()
 {
-    EFI_STATUS                     Status = EFI_SUCCESS;
-#if (defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0))    
+    EFI_STATUS                     Status;
     EFI_TCG_PROTOCOL               *tcgSvc;
     TCG_PCR_EVENT                  *ev = NULL;
+#if (defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0))
     TCG_EFI_HANDOFF_TABLE_POINTERS HandoffTables;
     SMBIOS_TABLE_ENTRY_POINT       *SmbiosTable;
+#endif
+#if ( defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0) )
     EFI_PHYSICAL_ADDRESS           Last;
     UINT32                         evNum;
+#endif
 
     Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid,
                                   NULL,
-                                  (void **)&tcgSvc );
+                                  &tcgSvc );
     ASSERT( !EFI_ERROR( Status ));
 
+#if ( defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0) )
     Status = EfiLibGetSystemConfigurationTable(
                  &gEfiSmbiosTableGuid,
                  &SmbiosTable
@@ -441,10 +463,9 @@ EFI_STATUS MeasureHandoffTables()
     {
         Status = gBS->AllocatePool( EfiBootServicesData,
                                     _TPM_STRUCT_PARTIAL_SIZE( TCG_PCR_EVENT, Event )
-                                    + sizeof (HandoffTables), (void **)&ev );
+                                    + sizeof (HandoffTables), &ev );
 
         ASSERT( !EFI_ERROR( Status ));
-        if(EFI_ERROR(Status))return Status;
 
         ev->PCRIndex  = 1;
         ev->EventType = EV_EFI_HANDOFF_TABLES;
@@ -467,12 +488,13 @@ EFI_STATUS MeasureHandoffTables()
                      &evNum,
                      &Last );
     }
+#endif
 
     if ( ev != NULL )
     {
         gBS->FreePool( ev );
     }
-#endif
+
     return Status;
 }
 
@@ -514,7 +536,7 @@ MeasureTeImage (
     // 2. Initialize a SHA hash context.
     SHA1Init(&Sha1Ctx);
 
-    DEBUG ((DEBUG_INFO, "Printing TE Image Buffer in Memory Image Location = %x, Image size = %x\n",
+    DEBUG ((-1, "Printing TE Image Buffer in Memory Image Location = %x, Image size = %x\n",
             (UINTN)ImageLoad->ImageLocationInMemory, ImageLoad->ImageLengthInMemory));
 
     //printbuffer((UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory, 1024);
@@ -526,9 +548,9 @@ MeasureTeImage (
     HashBase = (UINT8 *)(UINTN)ptrToTEHdr;
     HashSize = sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);
 
-    DEBUG ((DEBUG_INFO, "Printing Hashed TE Hdr and Section Header\n"));
+    DEBUG ((-1, "Printing Hashed TE Hdr and Section Header\n"));
 
-    DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+    DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
 
     //printbuffer(HashBase, HashSize);
 
@@ -552,9 +574,9 @@ MeasureTeImage (
     {
         HashBase += sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);
 
-        DEBUG ((DEBUG_INFO, "Printing Hashed TE Alignment Buffer\n"));
+        DEBUG ((-1, "Printing Hashed TE Alignment Buffer\n"));
 
-        DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
         //printbuffer(HashBase, HashSize);
 
         SHA1Update(&Sha1Ctx,
@@ -586,7 +608,7 @@ MeasureTeImage (
                              + (UINTN)Section->PointerToRawData - ptrToTEHdr->StrippedSize + sizeof(EFI_TE_IMAGE_HEADER));
         HashSize = (UINTN) Section->SizeOfRawData;
 
-        DEBUG ((DEBUG_INFO, "Section Base = %x Section Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Section Base = %x Section Len = %x \n", HashBase, HashSize));
 
 //        printbuffer(HashBase, 1024);
 
@@ -598,18 +620,18 @@ MeasureTeImage (
         SectionHeaderOffset += EFI_IMAGE_SIZEOF_SECTION_HEADER;
     }
 
-    DEBUG ((DEBUG_INFO, "SumOfBytesHashed = %x \n", SumOfBytesHashed));
+    DEBUG ((-1, "SumOfBytesHashed = %x \n", SumOfBytesHashed));
 
     //verify size
     if ( ImageLoad->ImageLengthInMemory > SumOfBytesHashed)
     {
 
-        DEBUG ((DEBUG_INFO, "Hash rest of Data if true \n"));
+        DEBUG ((-1, "Hash rest of Data if true \n"));
 
         HashBase = (UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory + SumOfBytesHashed;
         HashSize = (UINTN)(ImageLoad->ImageLengthInMemory - SumOfBytesHashed);
 
-        DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
 //      printbuffer(HashBase, 106);
 
 
@@ -979,6 +1001,7 @@ TcgMeasurePeImage (
     TCG_PCR_EVENT                     *TcgEventlog = NULL;
     EFI_IMAGE_LOAD_EVENT              *ImageLoad=NULL;
     UINT32                            FilePathSize;
+    EFI_GUID                          ExtendedDataGuid = TCG_IMGEXTENDED_DATA_GUID;
 
     EFI_IMAGE_DOS_HEADER              *DosHdr;
     UINT32                            PeCoffHeaderOffset;
@@ -998,13 +1021,13 @@ TcgMeasurePeImage (
         return EFI_SUCCESS;
     }
 
-    Status = gBS->LocateProtocol (&gEfiTcgProtocolGuid,  NULL, (void **)&TcgProtocol);
+    Status = gBS->LocateProtocol (&gEfiTcgProtocolGuid,  NULL, &TcgProtocol);
     if (EFI_ERROR (Status))
     {
         return Status;
     }
 
-    Status = gBS->LocateProtocol (&gEfiTpmDeviceProtocolGuid,  NULL, (void **)&TpmProtocol );
+    Status = gBS->LocateProtocol (&gEfiTpmDeviceProtocolGuid,  NULL, &TpmProtocol );
     if (EFI_ERROR (Status))
     {
         return Status;
@@ -1114,10 +1137,6 @@ MeasurePeTeImageDone:
     {
 
         TcgEventlog  = AllocateZeroPool (EventSize + sizeof (TCG_PCR_EVENT));
-        if (TcgEventlog == NULL)
-        {
-            goto Finish;
-        }
 
 //Now log the event
         TcgEventlog->PCRIndex  = TcgEvent->PCRIndex;
@@ -1148,60 +1167,6 @@ Finish:
     return Status;
 }
 
-#if defined(MeasureGptFilterIntelIDER) && MeasureGptFilterIntelIDER == 1
-EFI_STATUS  SkipIntelIDERDevicePath (EFI_DEVICE_PATH_PROTOCOL *DevicePath)
-{
-    EFI_STATUS      Status = EFI_UNSUPPORTED;
-    UINT8           ParentPortNumber;
-    UINT8           InterfaceNumber;
-
-    for ( ; !IsDevicePathEnd (DevicePath); DevicePath = NextDevicePathNode (DevicePath))
-    {
-        if(DevicePath->Type == MESSAGING_DEVICE_PATH)
-        {
-             if(DevicePath->SubType == MSG_USB_DP)
-             {
-                 ParentPortNumber = ((USB_DEVICE_PATH*)DevicePath)->ParentPortNumber;
-                 InterfaceNumber = ((USB_DEVICE_PATH*)DevicePath)->InterfaceNumber;
-
-                 ///USBR ParentPortNumber is 0xB(PCH-LP) and 0xF(PCH-H)
-                 ///     InterfaceNumber is 0 and 1
-                 ///If we find this device, skip it
-
-                 if ( ( (ParentPortNumber == 0xB)   || (ParentPortNumber == 0xF) ) &&
-                      ( (InterfaceNumber == 0)      || (InterfaceNumber == 1) ) )
-                 {
-                     Status = EFI_SUCCESS;
-                     break;
-                 }
-             }
-        }
-    }
-
-    return Status;
-}
-
-
-
-EFI_STATUS  SkipSpecialDevicePath (EFI_DEVICE_PATH_PROTOCOL *DevicePath)
-{
-    EFI_STATUS      Status = EFI_UNSUPPORTED;
-
-    do
-    {
-
-        Status = SkipIntelIDERDevicePath( DevicePath );
-        if (!EFI_ERROR (Status))
-        {
-            break;
-        }
-
-    } while (FALSE);
-
-    return Status;
-}
-
-#endif
 
 EFI_STATUS
 EFIAPI
@@ -1220,6 +1185,7 @@ TcgMeasureGptTable (
     UINT32                            Index;
     TCG_PCR_EVENT                     *TcgEvent=NULL;
     EFI_GPT_DATA                  *GptData;
+    EFI_GUID                          NullGuid = EFI_NULL_GUID;
     EFI_HANDLE                        Handle;
     EFI_TCG_PROTOCOL                  *TcgProtocol=NULL;
     EFI_TPM_DEVICE_PROTOCOL           *TpmProtocol=NULL;
@@ -1242,33 +1208,25 @@ TcgMeasureGptTable (
     {
         return EFI_UNSUPPORTED;
     }
-#if defined(MeasureGptFilterIntelIDER) && MeasureGptFilterIntelIDER == 1
-    Status = SkipSpecialDevicePath (DevicePath);
-    if (!EFI_ERROR (Status))
-    {
-        return EFI_SUCCESS;
-    }
-#endif
-
-    Status = gBS->HandleProtocol (Handle, &gEfiBlockIoProtocolGuid, (void **)&BlockIo);
+    Status = gBS->HandleProtocol (Handle, &gEfiBlockIoProtocolGuid, &BlockIo);
     if (EFI_ERROR (Status))
     {
         return EFI_UNSUPPORTED;
     }
-    Status = gBS->HandleProtocol (Handle, &gEfiDiskIoProtocolGuid, (void **)&DiskIo);
+    Status = gBS->HandleProtocol (Handle, &gEfiDiskIoProtocolGuid, &DiskIo);
     if (EFI_ERROR (Status))
     {
         return EFI_UNSUPPORTED;
     }
 
 
-    Status = gBS->LocateProtocol (&gEfiTcgProtocolGuid,  NULL, (void **)&TcgProtocol);
+    Status = gBS->LocateProtocol (&gEfiTcgProtocolGuid,  NULL, &TcgProtocol);
     if (EFI_ERROR (Status))
     {
         return Status;
     }
 
-    Status = gBS->LocateProtocol (&gEfiTpmDeviceProtocolGuid,  NULL, (void **)&TpmProtocol );
+    Status = gBS->LocateProtocol (&gEfiTpmDeviceProtocolGuid,  NULL, &TpmProtocol );
     if (EFI_ERROR (Status))
     {
         return Status;
@@ -1282,7 +1240,7 @@ TcgMeasureGptTable (
 
     Status = gBS->AllocatePool( EfiBootServicesData,
                                 BlockIo->Media->BlockSize,
-                                (void **)&PrimaryHeader );
+                                &PrimaryHeader );
 
     if (EFI_ERROR(Status) ||PrimaryHeader == NULL)
     {
@@ -1299,7 +1257,7 @@ TcgMeasureGptTable (
 
     if (EFI_ERROR (Status))
     {
-        DEBUG ((DEBUG_ERROR, "Failed to Read Partition Table Header!\n"));
+        DEBUG ((-1, "Failed to Read Partition Table Header!\n"));
         gBS->FreePool (PrimaryHeader);
         return EFI_DEVICE_ERROR;
     }
@@ -1308,7 +1266,7 @@ TcgMeasureGptTable (
     //
     Status = gBS->AllocatePool( EfiBootServicesData,
                                 PrimaryHeader->NumberOfPartitionEntries * PrimaryHeader->SizeOfPartitionEntry,
-                                (void **)&EntryPtr );
+                                &EntryPtr );
 
     if (EFI_ERROR(Status) ||EntryPtr == NULL)
     {
@@ -1338,7 +1296,7 @@ TcgMeasureGptTable (
     NumberOfPartition = 0;
     for (Index = 0; Index < PrimaryHeader->NumberOfPartitionEntries; Index++)
     {
-        if (CompareMem(&PartitionEntry->PartitionTypeGUID, &gEfiPartTypeUnusedGuid, sizeof(EFI_GUID)))
+        if (CompareMem(&PartitionEntry->PartitionTypeGUID, &NullGuid, sizeof(EFI_GUID)))
         {
             NumberOfPartition++;
         }
@@ -1353,7 +1311,7 @@ TcgMeasureGptTable (
                                 sizeof(TCG_PCR_EVENT_HDR) + \
                                 (UINT32)(sizeof (EFI_PARTITION_TABLE_HEADER) + sizeof(UINTN)\
                                          + (NumberOfPartition * PrimaryHeader->SizeOfPartitionEntry)),
-                                         (void **)&TcgEvent );
+                                &TcgEvent );
 
     if(EFI_ERROR(Status) || TcgEvent == NULL){
         gBS->FreePool (PrimaryHeader);
@@ -1369,7 +1327,7 @@ TcgMeasureGptTable (
 
     Status = gBS->AllocatePool( EfiBootServicesData,
                                 TcgEvent->EventSize,
-                                (void **)&GptData );
+                                &GptData );
     if (EFI_ERROR(Status) || GptData == NULL)
     {
         gBS->FreePool (TcgEvent);
@@ -1392,7 +1350,7 @@ TcgMeasureGptTable (
     GptIndex = 0;
     for (Index = 0; Index < PrimaryHeader->NumberOfPartitionEntries; Index++)
     {
-        if (CompareMem (&PartitionEntry->PartitionTypeGUID, &gEfiPartTypeUnusedGuid, sizeof(EFI_GUID)))
+        if (CompareMem (&PartitionEntry->PartitionTypeGUID, &NullGuid, sizeof(EFI_GUID)))
         {
             gBS->CopyMem (
                 (UINT8 *)&GptData->Partitions + (GptIndex * sizeof (EFI_PARTITION_ENTRY)),
@@ -1430,7 +1388,7 @@ TcgMeasureGptTable (
     gBS->FreePool (TcgEvent);
     gBS->FreePool (GptData);
 
-    DEBUG(( DEBUG_INFO,"GPT_EXIT"));
+    DEBUG(( -1,"GPT_EXIT"));
     return Status;
 }
 
@@ -1453,7 +1411,7 @@ TcgMeasureAction(
     Status = gBS->LocateProtocol (
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc);
+                 &tcgSvc);
 
     ASSERT(!EFI_ERROR(Status));
 
@@ -1461,7 +1419,7 @@ TcgMeasureAction(
     Status = gBS->AllocatePool (EfiBootServicesData,
                                 _TPM_STRUCT_PARTIAL_SIZE (TCG_PCR_EVENT, Event) +
                                 Len,
-                                (void **)&TcgEvent);
+                                &TcgEvent);
 
     ASSERT(!EFI_ERROR(Status));
     if(EFI_ERROR(Status) || TcgEvent == NULL){
@@ -1528,7 +1486,7 @@ EFI_STATUS EFIAPI TcmDxeEntry (
     IN EFI_HANDLE       ImageHandle,
     IN EFI_SYSTEM_TABLE *SystemTable);
 
-EFI_STATUS EFIAPI TpmDxeEntry(
+TpmDxeEntry(
     IN EFI_HANDLE ImageHandle,
     IN EFI_SYSTEM_TABLE          * SystemTable);
 
@@ -1565,6 +1523,7 @@ EFIAPI CommonTcgDxEntryPoint(
 {
     EFI_STATUS                      Status;
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
     BOOLEAN                         TpmInitError = FALSE;
 #if TCG_LEGACY == 1
     BOOLEAN                         TpmLegBin = TRUE;
@@ -1573,12 +1532,14 @@ EFIAPI CommonTcgDxEntryPoint(
 #endif
     TCG_CONFIGURATION               Config;
     EFI_TCG_PROTOCOL                *TcgProtocol;
+    EFI_GUID                        TcgFirstbootGuid = AMI_TCG_RESETVAR_HOB_GUID;
     void                            ** DummyPtr;
     BOOLEAN                         *ResetAllTcgVar = NULL;
     UINT8                           *TcgDeviceTypeHob = NULL;
+    EFI_GUID                        Tpm20Hobguid = TPM20_HOB_GUID;
     EFI_EVENT           			ReadyToBootEvent;
 
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status))
     {
         return Status;
@@ -1620,11 +1581,14 @@ EFIAPI CommonTcgDxEntryPoint(
         }
     }
 
+    ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
+    if(TpmInitError)
+    {
+        TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MINOR, AMI_SPECIFIC_TPM_ERR_1_2_NOT_DISCOVERED | EFI_SOFTWARE_DXE_BS_DRIVER);
+        return Status;
+    }
+
     Status = TcgDxeEntry( ImageHandle, SystemTable );
-	
-    gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
-    gBS-> CopyMem(&Config, &ProtocolInstance->ConfigFlags, sizeof(TCG_CONFIGURATION));
-	
     if(EFI_ERROR(Status))
     {
 
@@ -1636,15 +1600,15 @@ EFIAPI CommonTcgDxEntryPoint(
     else
     {
 
-        Status = gBS->LocateProtocol (&gEfiTcgProtocolGuid,  NULL, (void **)&TcgProtocol);
+        Status = gBS->LocateProtocol (&gEfiTcgProtocolGuid,  NULL, &TcgProtocol);
         if (EFI_ERROR (Status))
         {
             ResetAllTcgVar = (UINT8*)LocateATcgHob(
                                  gST->NumberOfTableEntries,
                                  gST->ConfigurationTable,
-                                 &AmiTcgResetVarHobGuid);
+                                 &TcgFirstbootGuid);
 
-            DummyPtr = (void **)&ResetAllTcgVar;
+            DummyPtr = &ResetAllTcgVar;
             if ( *DummyPtr != NULL )
             {
                 if ( *ResetAllTcgVar == TRUE )
@@ -1682,9 +1646,9 @@ EFIAPI CommonTcgDxEntryPoint(
                  &ImageHandle,
                  &gAmiTpmSupportTypeProtocolguid,
                  EFI_NATIVE_INTERFACE,
-                 &gAmiTpmSupportTypeProtocolguid);
-   
-   
+                 &mAmiTpmSupportTypeProtocol);
+
+
     Status = EfiCreateEventReadyToBootEx(TPL_CALLBACK,
     									TcgOnReadyToBoot,
                                         NULL,

@@ -74,16 +74,13 @@
 //<AMI_FHDR_END>
 //*************************************************************************
 #include <Efi.h>
-#include <AmiTcg/TcgTpm12.h>
-#include <AmiTcg/TpmLib.h>
-#include <Token.h>
-#include <AmiTcg/TcgCommon12.h>
-#include "Ppi/TcgService.h"
-#include "Ppi/TpmDevice.h"
-#include <Library/DebugLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-
-extern EFI_GUID gTcgPeiPolicyGuid;
+#include <AmiTcg\TcgTpm12.h>
+#include <AmiTcg\TpmLib.h>
+#include <token.h>
+#include <AmiTcg\TcgCommon12.h>
+#include "PPI\TcgService.h"
+#include "PPI\TpmDevice.h"
+#include <Library\DebugLib.h>
 
 #define _CR( Record, TYPE,\
              Field )((TYPE*) ((CHAR8*) (Record) - (CHAR8*) &(((TYPE*) 0)->Field)))
@@ -115,7 +112,7 @@ typedef struct _TPM_PEI_CALLBACK
 VOID    TpmPeiCallMPDriver(IN EFI_PEI_SERVICES **PeiServices, IN UINT8 CFuncID,
                            TPMTransmitEntryStruct *CData, UINT32* OUT CRetVal);
 
-
+EFI_GUID  gTpmCallbackguid = AMI_TPM_LEGACY_GUID;
 #endif
 
 
@@ -447,6 +444,8 @@ VOID TpmPeiCallMPDriver(
 {
     UINT32                 ReturnVal;
     FAR32LOCALS            CommonLegX;
+    EFI_GUID               guidMA = EFI_TCG_MADriver_HOB_GUID;
+    EFI_GUID               guidMP = EFI_TCG_MPDriver_HOB_GUID;
     ESPFUNCSTRUCT          EspStruct;
     VOID                   *Temp = &ReturnVal;
     MASTRUCT               MA;
@@ -462,13 +461,13 @@ VOID TpmPeiCallMPDriver(
 
     if (((UINT32)Temp & (UINT32)0xff000000) == (UINT32)0xff000000 )
     {
-        FillDriverLoc( &MA.Offset, PeiServices, &gEfiTcgMADriverHobGuid );
+        FillDriverLoc( &MA.Offset, PeiServices, &guidMA );
         MAStart             = MA.Offset - MA.Codep;
         CommonLegX.Offset   = MA.Offset;
         CommonLegX.Selector = SEL_flatCS;
         Temp                = &EspStruct;
 
-        if ( CommonLegX.Offset == 0 )
+        if ( CommonLegX.Offset == NULL )
         {
             return;
         }
@@ -497,7 +496,7 @@ VOID TpmPeiCallMPDriver(
     }
     else
     {
-        FillDriverLoc( &CommonLegX.Offset, PeiServices, &gEfiTcgMpDriverHobGuid );
+        FillDriverLoc( &CommonLegX.Offset, PeiServices, &guidMP );
         CommonLegX.Selector = SEL_flatCS;
 
         _asm
@@ -585,7 +584,7 @@ static EFI_PEI_PPI_DESCRIPTOR mPpiList[] =
 
 EFI_STATUS
 EFIAPI TpmPeiEntry(
-    IN EFI_PEI_FILE_HANDLE  FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices )
 {
     EFI_STATUS Status = EFI_SUCCESS;
@@ -594,7 +593,8 @@ EFIAPI TpmPeiEntry(
     TPM_PEI_CALLBACK    *Callback;
 #endif
     TCG_PLATFORM_SETUP_INTERFACE   *TcgPeiPolicy = NULL;
-
+    EFI_GUID                        gTcgPeiPolicyGuid =\
+            TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
     TCG_CONFIGURATION              ConfigFlags;
     BOOLEAN     CrbSupport;
 
@@ -603,11 +603,11 @@ EFIAPI TpmPeiEntry(
                  PeiServices,
                  &gTcgPeiPolicyGuid,
                  0, NULL,
-                 (void **)&TcgPeiPolicy);
+                 &TcgPeiPolicy);
 
     if(EFI_ERROR(Status) || TcgPeiPolicy == NULL )return Status;
 
-    DEBUG((DEBUG_INFO, "before getTcgPeiPolicy\n"));
+    DEBUG((-1, "before getTcgPeiPolicy\n"));
     Status = TcgPeiPolicy->getTcgPeiPolicy( (EFI_PEI_SERVICES    **)PeiServices, &ConfigFlags);
 
     if(ConfigFlags.DeviceType == 0)
@@ -617,7 +617,7 @@ EFIAPI TpmPeiEntry(
     else
     {
         CrbSupport = isTpm20CrbPresent();
-        DEBUG((DEBUG_INFO, "CrbSupport = %x \n", CrbSupport));
+        DEBUG((-1, "CrbSupport = %x \n", CrbSupport));
         if(!CrbSupport)
         {
             (*PeiServices)->InstallPpi( PeiServices, mPpiList );
@@ -628,8 +628,8 @@ EFIAPI TpmPeiEntry(
         }
     }
 
-    DEBUG((DEBUG_INFO, "TpmDevice Ppi Installed\n"));
-    DEBUG((DEBUG_INFO, "TpmPeientry ConfigFlags.DeviceType = %x\n", ConfigFlags.DeviceType));
+    DEBUG((-1, "TpmDevice Ppi Installed\n"));
+    DEBUG((-1, "TpmPeientry ConfigFlags.DeviceType = %x\n", ConfigFlags.DeviceType));
 #if TCG_LEGACY == 1
     Status = (**PeiServices).AllocatePool(
                  PeiServices,
@@ -641,7 +641,7 @@ EFIAPI TpmPeiEntry(
         Callback->NotifyDesc.Flags
             = (EFI_PEI_PPI_DESCRIPTOR_NOTIFY_CALLBACK
                | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST);
-        Callback->NotifyDesc.Guid   = &gAmiLegacyTpmguid;
+        Callback->NotifyDesc.Guid   = &gTpmCallbackguid;
         Callback->NotifyDesc.Notify = InitLegacyTpmEntry;
         Callback->FfsHeader         = FfsHeader;
 
@@ -656,9 +656,9 @@ EFIAPI TpmPeiEntry(
         Status = IsTpmPresent((TPM_1_2_REGISTERS_PTR)(
                                   UINTN ) mTpmPrivate.BaseAddr );
 
-        DEBUG((DEBUG_INFO, "IsTpmPresent results = %r\n", Status));
-        DEBUG((DEBUG_INFO, "IsTpmPresent base = %x\n",  mTpmPrivate.BaseAddr));
-        DEBUG((DEBUG_INFO, "IsTpmPresent Access reg = %x\n", *(UINT8 *)(UINTN) mTpmPrivate.BaseAddr));
+        DEBUG((-1, "IsTpmPresent results = %r\n", Status));
+        DEBUG((-1, "IsTpmPresent base = %x\n",  mTpmPrivate.BaseAddr));
+        DEBUG((-1, "IsTpmPresent Access reg = %x\n", *(UINT8 *)(UINTN) mTpmPrivate.BaseAddr));
         if ( !EFI_ERROR( Status ))
         {
             if(ConfigFlags.DeviceType != 0)

@@ -46,8 +46,8 @@
 //<AMI_FHDR_END>
 #include "TpmClearOnRollback.h"
 #include "TpmClearOnRollbackWrapperLib.h"
-#include <Protocol/FirmwareVolume2.h>
-#include <AmiDxeLib.h>
+#include <Protocol\FirmwareVolume2.h>
+#include <AmidxeLib.h>
 
 
 //<AMI_PHDR_START>
@@ -75,7 +75,7 @@ EFI_STATUS TpmRecoveryGetFidFromFv(
     UINTN FvCount;
     UINTN i;
     UINTN BufferSize;
-    UINT8 *Buffer;
+    VOID *Buffer;
     static EFI_GUID FidFileName = FID_FFS_FILE_NAME_GUID;
 
     Status = pBS->LocateHandleBuffer(ByProtocol, &gEfiFirmwareVolume2ProtocolGuid, NULL, &FvCount, &FvHandle);
@@ -86,18 +86,18 @@ EFI_STATUS TpmRecoveryGetFidFromFv(
     {
         EFI_FIRMWARE_VOLUME2_PROTOCOL *Fv;
         UINT32 AuthStatus;
-        Status = pBS->HandleProtocol(FvHandle[i], &gEfiFirmwareVolume2ProtocolGuid, (void **)&Fv);
+        Status = pBS->HandleProtocol(FvHandle[i], &gEfiFirmwareVolume2ProtocolGuid, &Fv);
         if (EFI_ERROR(Status))
             continue;
         Buffer = 0;
         BufferSize = 0;
-        Status = Fv->ReadSection(Fv, &FidFileName, EFI_SECTION_FREEFORM_SUBTYPE_GUID, 0, (void **)&Buffer, &BufferSize, &AuthStatus);
-//        DEBUG((DEBUG_INFO, "extracted section with guid %g\n", (EFI_GUID *)Buffer));
+        Status = Fv->ReadSection(Fv, &FidFileName, EFI_SECTION_FREEFORM_SUBTYPE_GUID, 0, &Buffer, &BufferSize, &AuthStatus);
+        DEBUG((DEBUG_INFO, "extracted section with guid %g\n", (EFI_GUID *)Buffer));
         if (!EFI_ERROR(Status))
         {
-            Buffer+= sizeof(EFI_GUID);
+            (UINT8 *)Buffer += sizeof(EFI_GUID);
             MemCpy(Fid, Buffer, sizeof(FW_VERSION));
-            Buffer -= sizeof(EFI_GUID);
+            (UINT8 *)Buffer -= sizeof(EFI_GUID);
             pBS->FreePool(FvHandle);
             pBS->FreePool(Buffer);
             return EFI_SUCCESS;
@@ -143,7 +143,7 @@ EFI_STATUS TpmGetFidFromBuffer(
         {
             if(!guidcmp(&FidSectionGuid, (EFI_GUID *)SearchPointer))
             {
-                SearchPointer += 16;
+                (UINT8 *)SearchPointer += sizeof(EFI_GUID);
                 MemCpy(Fid, SearchPointer, sizeof(FW_VERSION));
                 return EFI_SUCCESS;
             }

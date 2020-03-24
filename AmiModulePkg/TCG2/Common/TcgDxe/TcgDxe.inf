@@ -35,7 +35,6 @@ EMpCallBin.asm
 
 [LibraryClasses]
 UefiDriverEntryPoint
-UefiRuntimeServicesTableLib
 BaseLib
 BaseTisLib12
 ShaLib
@@ -45,7 +44,6 @@ UefiLib
 TcgAslLib
 BaseAmiTcmlib
 TpmReportStatusCodeWrapperLibDxe
-PcdLib
 
 [Protocols]
 gEfiTpmDeviceProtocolGuid
@@ -57,35 +55,16 @@ gEfiFirmwareVolume2ProtocolGuid
 gEfiAcpiSupportGuid
 gEfiDiskIoProtocolGuid
 gEfiTcgPlatformProtocolGuid
-gAmiTpmSupportTypeProtocolguid
-gEfiTcmMPProtocolGuid
 
 [Guids]
 gEfiImageSecurityDatabaseGuid
 gEfiSmbiosTableGuid
-gEfiTcgMpDriverHobGuid
-AmiValidBootImageCertTblGuid
-ExtendedDataGuid
-gEfiPartTypeUnusedGuid
-AmiTcgResetVarHobGuid
-gTpm20HobGuid
-gEfiPeiTcgLogHobGuid
-gEfiTcgMpDriverHobGuid
-
-[Protocols]
-gTcgPlatformSetupPolicyGuid
 
 [Packages]
- MdePkg/MdePkg.dec
- UefiCpuPkg/UefiCpuPkg.dec
- AmiCompatibilityPkg/AmiCompatibilityPkg.dec
- AmiModulePkg/AmiModulePkg.dec
- AmiTcgPkg/AmiTcgPkg.dec
- MdeModulePkg/MdeModulePkg.dec
- 
- [Pcd]
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemId             ## CONSUMES
-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId        ## CONSUMES
+MdePkg/MdePkg.dec
+UefiCpuPkg/UefiCpuPkg.dec
+AmiCompatibilityPkg/AmiCompatibilityPkg.dec
+AmiModulePkg/AmiModulePkg.dec
 
 [Depex]
   gTcgPlatformSetupPolicyGuid

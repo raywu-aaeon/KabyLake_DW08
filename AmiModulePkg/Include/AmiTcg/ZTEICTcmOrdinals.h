@@ -26,7 +26,7 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-/*#define TCM_ORD_ActivateIdentity                  ((UINT32) 0x0000807A)
+#define TCM_ORD_ActivateIdentity                  ((UINT32) 0x0000807A)
 #define TCM_ORD_AuthorizeMigrationKey             ((UINT32) 0x0000802B)
 #define TCM_ORD_CertifyKey                        ((UINT32) 0x00008032)
 #define TCM_ORD_CertifyKey2                       ((UINT32) 0x00008033)
@@ -149,7 +149,7 @@
 #define TCM_ORD_UnBind                            ((UINT32) 0x0000801E)
 #define TCM_ORD_Unseal                            ((UINT32) 0x00008018)
 #define TCM_TSC_ORD_PhysicalPresence                  ((UINT32) 0x4000800A)
-#define TCM_TSC_ORD_ResetEstablishmentBit             ((UINT32) 0x4000800B)*/
+#define TCM_TSC_ORD_ResetEstablishmentBit             ((UINT32) 0x4000800B)
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **

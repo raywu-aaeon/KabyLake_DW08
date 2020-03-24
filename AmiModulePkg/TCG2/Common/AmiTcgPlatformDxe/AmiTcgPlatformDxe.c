@@ -25,12 +25,11 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Token.h>
-#include "Protocol/TcgPlatformSetupPolicy.h"
-#include <AmiTcg/AmiTcgPlatformDxe.h>
-#include<AmiTcg/sha1.h>
+#include "protocol/TcgPlatformSetupPolicy.h"
+#include <AmiTcg\AmiTcgPlatformDxe.h>
+#include<AmiTcg\sha1.h>
 #include <IndustryStandard/PeImage.h>
-#include <Protocol/AmiTpmSupportTypeProtocol.h>
+#include <Protocol\AmiTpmSupportTypeProtocol.h>
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DevicePathLib.h>
@@ -38,29 +37,27 @@
 #include<Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <AmiTcg/AmiTcgPlatformDxeLib.h>
+#include <AmiTcg\AmiTcgPlatformDxeLib.h>
 #include "AmiTcgPlatformDxeStrDefs.h"
-#include <Protocol/AMIPostMgr.h>
-#include <Uefi/UefiSpec.h>
-#include <Library/UefiLib.h>
-#include<Library/HiiLib.h>
+#include <Protocol/AmiPostMgr.h>
+#include <Uefi\UefiSpec.h>
+#include <Library\UefiLib.h>
+#include<Library\HiiLib.h>
 #include <Protocol/HiiPackageList.h>
 #include <Protocol/HiiDatabase.h>
-#include <Acpi.h>
+#include <ACPI.h>
 #include <Library/TimerLib.h>
 #include <Protocol/AcpiSystemDescriptionTable.h>
 #include <Protocol/AcpiSupport.h>
-#include <Guid/MemoryOverwriteControl.h>
+#include <Guid\MemoryOverwriteControl.h>
 #include <Protocol/LegacyBiosExt.h>
 #include <Library/PrintLib.h>
 #include <IndustryStandard/SmBios.h>
-#include <Protocol/TcgPlatformSetupPolicy.h>
-
 #if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
 #include <Protocol/VariableLock.h>
 #endif
-#include <AmiTcg/AmiTpmStatusCodes.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
+#include <Token.h>
 
 
 #if (defined(TCGMeasureSecureBootVariables) && (TCGMeasureSecureBootVariables != 0))
@@ -71,7 +68,16 @@
 #define EFI_ACPI_TABLE_VERSION_X        (EFI_ACPI_TABLE_VERSION_2_0 | EFI_ACPI_TABLE_VERSION_3_0 | EFI_ACPI_TABLE_VERSION_4_0)
 #define EFI_ACPI_TABLE_VERSION_ALL      (EFI_ACPI_TABLE_VERSION_1_0B|EFI_ACPI_TABLE_VERSION_X)
 
-extern EFI_GUID gAmiTcgPlatformProtocolguid;
+#define BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID \
+        {0xdbc9fd21, 0xfad8, 0x45b0, 0x9e, 0x78, 0x27, 0x15, 0x88, 0x67, 0xcc, 0x93}
+
+EFI_GUID    gBdsAllDriversConnectedProtocolGuid = BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID;
+
+#if TPM_PASSWORD_AUTHENTICATION
+#define TCG_PASSWORD_AUTHENTICATION_GUID \
+        {0xB093BDD6, 0x2DE2, 0x4871,0x87,0x68, 0xEE,0x1D, 0xA5, 0x72, 0x49, 0xB4 }
+EFI_GUID    TcgPasswordAuthenticationGuid = TCG_PASSWORD_AUTHENTICATION_GUID;
+#endif
 
 extern MEASURE_PCI_OPTION_ROM_FUNC_PTR  MEASURE_PCI_OPTION_ROM_DXE_FUNCTION;
 MEASURE_PCI_OPTION_ROM_FUNC_PTR *MeasurePCIOpromsFuncPtr = MEASURE_PCI_OPTION_ROM_DXE_FUNCTION;
@@ -102,17 +108,17 @@ MEASURE_PLATFORM_CONFIG_FUNC_PTR *MeasureConfigurationInfoFuncPtr = MEASURE_PLAT
 EFI_STATUS TcgUpdateAslNameObject(ACPI_HDR *PDsdt, UINT8 *ObjName, UINT64 Value);
 EFI_STATUS TcgLibGetDsdt(EFI_PHYSICAL_ADDRESS *DsdtAddr, EFI_ACPI_TABLE_VERSION Version);
 
-extern EFI_GUID gEfiAcpiSupportGuid;
-extern EFI_GUID gAmiTsePasswordPromptExitGuid;
-extern EFI_GUID gAmiTseAdminPasswordValidGuid;
-extern EFI_GUID gTcgNvramHobGuid;
 //extern SKIP_PHYSICAL_PRESENCE_LOCK_PTR SKIP_PHYSICAL_PRESENCE_LOCK_FUNCTION;
 //SKIP_PHYSICAL_PRESENCE_LOCK_PTR *DummySkipPhysicalPresencePtr = SKIP_PHYSICAL_PRESENCE_LOCK_FUNCTION;
+extern EFI_GUID gInternalAcpiSupportGuid;
+
 
 static     TCG_PROTOCOL_NOTIFY     Ctx; //TODO: This might not be needed
 static     void     *OpromContext = NULL;
 typedef    UINT32   extended_request;
 AMI_POST_MANAGER_PROTOCOL *pAmiPostMgr = NULL;
+EFI_GUID                   gAmiPostManagerProtocolGuid = \
+        AMI_POST_MANAGER_PROTOCOL_GUID;
 EFI_HII_HANDLE            gHiiHandle;
 EFI_EVENT                 OpromEvent;
 VOID                     *ProcessOpRomRegistration;
@@ -126,6 +132,7 @@ EFI_HII_PROTOCOL          *Hii;
 #endif
 
 static      UINT8       ppi_request;
+static      EFI_HANDLE  gAmiTcgPlatformImageHandle;
 static      EFI_EVENT   ReadyToBootEvent;
 
 #if TPM_PASSWORD_AUTHENTICATION
@@ -136,6 +143,14 @@ BOOLEAN                   PasswordSupplied;
 VOID SignalProtocolEvent(IN EFI_GUID *TcgPasswordAuthenticationGuid);
 
 #endif
+
+EFI_GUID    gAMITcgPlatformProtocolguid   =  AMI_TCG_PLATFORM_PROTOCOL_GUID;
+#if (defined(TCGMeasureSecureBootVariables) && (TCGMeasureSecureBootVariables != 0))
+EFI_GUID    gEfiImageSecurityDatabaseguid =  EFI_IMAGE_SECURITY_DATABASE_GUID;
+#endif
+EFI_GUID    gTpmDeviceProtocolGuid        = EFI_TPM_DEVICE_PROTOCOL_GUID;
+EFI_GUID    gEfiTpmDxeDeviceProtocolGuid = EFI_TPM_DEVICE_PROTOCOL_GUID;
+EFI_GUID gSmBiosTablePublished = TCG_SMBIOS_EFI_TABLE_GROUP;
 
 static BOOLEAN IsRunPpiUIAlreadyDone = FALSE;
 
@@ -193,7 +208,7 @@ EFI_STATUS MeasureVariable(
     Status = gBS->LocateProtocol(
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc );
+                 &tcgSvc );
 
     ASSERT( !EFI_ERROR( Status ));
 
@@ -203,7 +218,7 @@ EFI_STATUS MeasureVariable(
                                        _TPM_STRUCT_PARTIAL_SIZE( TCG_PCR_EVENT,Event )
                                        + (UINT32)(sizeof(*VarLog) + VarNameLength
                                                * sizeof(*VarName) + VarSize - 3 ),
-                                               (void **)&TcgEvent );
+                                       &TcgEvent );
 
     if( EFI_ERROR( Status ) || TcgEvent == NULL )return Status;
 
@@ -212,7 +227,7 @@ EFI_STATUS MeasureVariable(
     TcgEvent->EventSize = (UINT32)( sizeof (*VarLog) + VarNameLength
                                     * sizeof (*VarName) + VarSize - 3 );
 
-    Status = gBS->AllocatePool( EfiBootServicesData, TcgEvent->EventSize, (void **)&VarLog );
+    Status = gBS->AllocatePool( EfiBootServicesData, TcgEvent->EventSize, &VarLog );
 
     if (EFI_ERROR( Status ) || VarLog == NULL )
     {
@@ -308,7 +323,7 @@ EFI_STATUS TcmMeasureVariable(
     Status = gBS->LocateProtocol(
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc );
+                 &tcgSvc );
 
     ASSERT( !EFI_ERROR( Status ));
 
@@ -318,7 +333,7 @@ EFI_STATUS TcmMeasureVariable(
                                        _TPM_STRUCT_PARTIAL_SIZE( TCM_PCR_EVENT,Event )
                                        + (UINT32)(sizeof(*VarLog) + VarNameLength
                                                * sizeof(*VarName) + VarSize - 3 ),
-                                               (void **)&TcgEvent );
+                                       &TcgEvent );
 
     if( EFI_ERROR( Status ) || TcgEvent == NULL )return Status;
 
@@ -327,8 +342,7 @@ EFI_STATUS TcmMeasureVariable(
     TcgEvent->EventSize = (UINT32)( sizeof (*VarLog) + VarNameLength
                                     * sizeof (*VarName) + VarSize - 3 );
 
-    Status = gBS->AllocatePool( EfiBootServicesData, TcgEvent->EventSize,(void **)
-            &VarLog );
+    Status = gBS->AllocatePool( EfiBootServicesData, TcgEvent->EventSize, &VarLog );
 
     if ( EFI_ERROR( Status )|| VarLog == NULL )
     {
@@ -406,12 +420,13 @@ UINT8 confirmUser( )
 {
     EFI_STATUS    Status = EFI_SUCCESS;
     EFI_INPUT_KEY key;
+    EFI_GUID      guid = AMI_OS_PPI_CONFIRMATION_OVERRIDE_GUID;
     AMI_CONFIRMATION_OVERRIDE_PROTOCOL *ConfirmOverride;
     EFI_TPL CurrentTpl = 0;
     UINT8   ReturnCode=0;
     UINTN   Count = 0;
 
-    Status = gBS->LocateProtocol( &gAmiOsPpiConfirmationOverrideGuid, NULL, (void **)&ConfirmOverride);
+    Status = gBS->LocateProtocol( &guid, NULL, &ConfirmOverride);
 
     if(!EFI_ERROR(Status))
     {
@@ -568,7 +583,7 @@ EFI_STATUS MeasureSeparatorEvent(
     Status = gBS->LocateProtocol(
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc );
+                 &tcgSvc );
 
     TcgEvent = (TCG_PCR_EVENT *)SeparatorInfo;
 
@@ -631,14 +646,14 @@ EFI_STATUS TcmMeasureSeparatorEvent(
     Status = gBS->LocateProtocol(
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc );
+                 &tcgSvc );
 
     ASSERT( !EFI_ERROR( Status ));
 
     Status = gBS->AllocatePool( EfiBootServicesData,
                                 _TPM_STRUCT_PARTIAL_SIZE( TCM_PCR_EVENT, Event )
                                 + sizeof (EventData),
-                                (void **)&TcgEvent );
+                                &TcgEvent );
 
     if( EFI_ERROR( Status ) || TcgEvent == NULL )return Status;
 
@@ -702,7 +717,7 @@ EFI_STATUS doCpuMicrocodeTcgEvent(
     EFI_TCG_PROTOCOL  *tcg;
 
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcg );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcg );
 
     if ( EFI_ERROR( Status ))
     {
@@ -756,7 +771,7 @@ EFI_STATUS doTcmCpuMicrocodeTcgEvent(
     EFI_TCM_PROTOCOL  *tcg;
 
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcg );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcg );
 
     if ( EFI_ERROR( Status ))
     {
@@ -820,11 +835,13 @@ EFI_STATUS MeasureCpuMicroCode( )
     UINT32                       gMicrocodeFlashSize =0;
     EFI_FV_FILETYPE                             FileType;
     AMI_TCG_DXE_FUNCTION_OVERRIDE_PROTOCOL      *POverride=NULL;
+    EFI_GUID                                    Overrideguid =\
+            AMI_MEASURE_CPU_MICROCODE_GUID;
 
     Status = gBS->LocateProtocol(
-                 &gAmiMeasureCPUMicrocodeGuid,
+                 &Overrideguid,
                  NULL,
-                 (void **)&POverride );
+                 &POverride );
 
     if(!EFI_ERROR(Status))
     {
@@ -848,7 +865,7 @@ EFI_STATUS MeasureCpuMicroCode( )
         Status = gBS->HandleProtocol(
                      Handles[NumHandles - 1],
                      &gEfiFirmwareVolumeProtocolGuid,
-                     (void **)&FwVol
+                     &FwVol
                  );
 
         if ( EFI_ERROR( Status ))
@@ -858,9 +875,9 @@ EFI_STATUS MeasureCpuMicroCode( )
 
         Status = gBS->AllocatePool( EfiBootServicesData,
                                     FwVol->KeySize,
-                                    (void **)&KeyBuffer );
+                                    &KeyBuffer );
 
-        if ( KeyBuffer == NULL || EFI_ERROR(Status) )
+        if ( KeyBuffer == NULL )
         {
             return EFI_OUT_OF_RESOURCES;
         }
@@ -894,7 +911,7 @@ EFI_STATUS MeasureCpuMicroCode( )
                              );
                 ASSERT( !EFI_ERROR( Status ));
 
-                DEBUG((DEBUG_INFO, "CPU Microcode found: %x size %x\n",
+                DEBUG((-1, "CPU Microcode found: %x size %x\n",
                        FileBuffer, FileSize));
 
                 if(IsTcmSupportType())
@@ -906,7 +923,7 @@ EFI_STATUS MeasureCpuMicroCode( )
                     Status = doCpuMicrocodeTcgEvent( FileBuffer, FileSize );
                 }
 
-                DEBUG((DEBUG_INFO, "\tMeasured: %x\n", Status));
+                DEBUG((-1, "\tMeasured: %x\n", Status));
                 gBS->FreePool( FileBuffer );
                 goto Exit;
             }
@@ -976,10 +993,10 @@ TPM_RESULT SendTpmCommand(
                                     (UINT8*)&result );
 
     tpmResult = (TPM_1_2_RET_HEADER*)result;
-    DEBUG((DEBUG_INFO, "TCG: TPM Result = (%x)\n",
+    DEBUG((-1, "TCG: TPM Result = (%x)\n",
            tpmResult->RetCode));
 
-    DEBUG((DEBUG_INFO, "TCG: TPM Status = (%r)\n",Status));
+    DEBUG((-1, "TCG: TPM Status = (%r)\n",Status));
 
     return tpmResult->RetCode;
 }
@@ -1006,20 +1023,21 @@ TPM_RESULT SendTpmCommand(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID  DoResetNow(
+EFI_STATUS DoResetNow(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
     EFI_RESET_TYPE resetType = *(EFI_RESET_TYPE*)ctx;
 
-    DEBUG((DEBUG_INFO, "TCG: DoResetNow resets the system: type(%d)\n",
+    DEBUG((-1, "TCG: DoResetNow resets the system: type(%d)\n",
            resetType));
 
-    DEBUG((DEBUG_INFO, "TCG: DoResetNow resets the system: type(%x)\n",
+    DEBUG((-1, "TCG: DoResetNow resets the system: type(%x)\n",
            (EFI_RESET_TYPE*)ctx));
 
     gRT->ResetSystem( resetType, 0, 0, NULL );
-    DEBUG((DEBUG_ERROR, "\tError: Reset failed???\n"));
+    DEBUG((-1, "\tError: Reset failed???\n"));
+    return EFI_SUCCESS;
 }
 
 
@@ -1086,6 +1104,8 @@ VOID ClearFastBootLastBootFailedFlag()
     EFI_STATUS Status;
     UINT32 LastBootFailed;
     UINTN Size = sizeof(UINT32);
+    EFI_GUID FastBootVariableGuid = FAST_BOOT_VARIABLE_GUID;
+
 
     Status = gRT->GetVariable(L"LastBootFailed", &FastBootVariableGuid, NULL, &Size, &LastBootFailed);
     if(!EFI_ERROR(Status))
@@ -1096,7 +1116,7 @@ VOID ClearFastBootLastBootFailedFlag()
                                   0,
                                   &LastBootFailed);
 
-        DEBUG((DEBUG_INFO, "Status : = %r\n", Status));
+        DEBUG((-1, "Status : = %r\n", Status));
 
     }
 }
@@ -1132,14 +1152,14 @@ void RequestSystemReset(
 
     ptype = type;
 
-    DEBUG((DEBUG_INFO, "TCG: Resets the system: type(%d)\n", type));
-    DEBUG((DEBUG_INFO, "TCG: Resets the system: typeaddress(%x)\n",
+    DEBUG((-1, "TCG: Resets the system: type(%d)\n", type));
+    DEBUG((-1, "TCG: Resets the system: typeaddress(%x)\n",
            &type));
 
     ClearFastBootLastBootFailedFlag();
 
     gRT->ResetSystem( type, 0, 0, NULL );
-    DEBUG((DEBUG_ERROR, "\tError: Reset failed???\n"));
+    DEBUG((-1, "\tError: Reset failed???\n"));
 
     Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
                                EFI_TPL_CALLBACK, DoResetNow, (void*)&ptype, &ev);
@@ -1147,7 +1167,7 @@ void RequestSystemReset(
     if(EFI_ERROR(Status))return;
     ASSERT( !EFI_ERROR( Status ));
     Status = gBS->RegisterProtocolNotify(&gEfiResetArchProtocolGuid, ev, &reg);
-    DEBUG((DEBUG_INFO,
+    DEBUG((-1,
            "\tRegister DoResetNow after Reset Architecture driver\n"));
     if(EFI_ERROR(Status))return;
 }
@@ -1173,12 +1193,13 @@ void RequestSystemReset(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-EFI_STATUS read_TPM_capabilities(
-    IN EFI_TCG_PROTOCOL* tcg, TPM_Capabilities_PermanentFlag *cap )
+TPM_Capabilities_PermanentFlag read_TPM_capabilities(
+    IN EFI_TCG_PROTOCOL* tcg )
 {
+    TPM_Capabilities_PermanentFlag * cap;
     EFI_STATUS                     Status;
     TPM_GetCapabilities_Input      cmdGetCap;
-    UINT8                          result[0x100];
+    static UINT8                   result[0x100];
 
     cmdGetCap.Tag         = TPM_H2NS( TPM_TAG_RQU_COMMAND );
     cmdGetCap.ParamSize   = TPM_H2NL( sizeof (cmdGetCap));
@@ -1186,18 +1207,18 @@ EFI_STATUS read_TPM_capabilities(
     if(IsTcmSupportType())
     {
         cmdGetCap.CommandCode = TPM_H2NL( TCM_ORD_GetCapability );
-        cmdGetCap.caparea     = TPM_H2NL( TCM_CAP_FLAG );
-        cmdGetCap.subCap      = TPM_H2NL( TCM_CAP_FLAG_PERMANENT );
+        cmdGetCap.CommandCode = TPM_H2NL( TCM_ORD_GetCapability );
+        cmdGetCap.caparea     = TPM_H2NL( TPM_CAP_FLAG );
     }
     else
     {
         cmdGetCap.CommandCode = TPM_H2NL( TPM_ORD_GetCapability );
+        cmdGetCap.CommandCode = TPM_H2NL( TPM_ORD_GetCapability );
         cmdGetCap.caparea     = TPM_H2NL( TPM_CAP_FLAG );
-        cmdGetCap.subCap      = TPM_H2NL( TPM_CAP_FLAG_PERMANENT );
     }
 
     cmdGetCap.subCapSize  = TPM_H2NL( 4 ); // subCap is always 32bit long
-
+    cmdGetCap.subCap      = TPM_H2NL( TPM_CAP_FLAG_PERMANENT );
 
     Status = tcg->PassThroughToTpm( tcg,
                                     sizeof (cmdGetCap),
@@ -1205,16 +1226,14 @@ EFI_STATUS read_TPM_capabilities(
                                     sizeof (result),
                                     result );
 
-    if(EFI_ERROR(Status))return Status;
-    
-    gBS->CopyMem(cap, result, sizeof(TPM_Capabilities_PermanentFlag));
+    cap = (TPM_Capabilities_PermanentFlag*)result;
 
-    DEBUG((DEBUG_INFO,
+    DEBUG((-1,
            "GetCapability: %r; size: %x; retCode:%x; tag:%x; bytes %08x\n", Status,
            TPM_H2NL(cap->ParamSize ), TPM_H2NL(cap->RetCode ),
            (UINT32) TPM_H2NS(cap->tag ), TPM_H2NL( *(UINT32*)&cap->disabled )));
 
-    return Status;
+    return *cap;
 }
 
 
@@ -1251,18 +1270,15 @@ UINT8 CheckTpmOwnership(
     if(IsTcmSupportType())
     {
         cmdGetCap.CommandCode = TPM_H2NL( TCM_ORD_GetCapability );
-        cmdGetCap.caparea     = TPM_H2NL( TCM_CAP_PROPERTY );
-        cmdGetCap.subCap      = TPM_H2NL( TCM_CAP_PROP_OWNER );
     }
     else
     {
         cmdGetCap.CommandCode = TPM_H2NL( TPM_ORD_GetCapability );
-        cmdGetCap.caparea     = TPM_H2NL( TPM_CAP_PROPERTY );
-        cmdGetCap.subCap      = TPM_H2NL( TPM_CAP_PROP_OWNER );
     }
 
+    cmdGetCap.caparea     =      TPM_H2NL( TPM_CAP_PROPERTY );
     cmdGetCap.subCapSize  =      TPM_H2NL( 4 ); // subCap is always 32bit long
-
+    cmdGetCap.subCap      =      TPM_H2NL( TPM_CAP_PROP_OWNER );
     Status                = tcg->PassThroughToTpm( tcg,
                             sizeof (cmdGetCap),
                             (UINT8*)&cmdGetCap,
@@ -1390,20 +1406,24 @@ EFI_STATUS EfiLibGetSystemConfigurationTable(
 //**********************************************************************
 EFI_STATUS MeasureHandoffTables()
 {
-    EFI_STATUS                     Status = EFI_SUCCESS;    
-#if (defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0))
+    EFI_STATUS                     Status;
     EFI_TCG_PROTOCOL               *tcgSvc;
     TCG_PCR_EVENT                  *ev = NULL;
+#if (defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0))
     TCG_EFI_HANDOFF_TABLE_POINTERS HandoffTables;
     SMBIOS_TABLE_ENTRY_POINT       *SmbiosTable;
+#endif
+#if ( defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0) )
     EFI_PHYSICAL_ADDRESS           Last;
     UINT32                         evNum;
+#endif
 
     Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid,
                                   NULL,
-                                  (void **)&tcgSvc );
+                                  &tcgSvc );
     ASSERT( !EFI_ERROR( Status ));
 
+#if ( defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0) )
     Status = EfiLibGetSystemConfigurationTable(
                  &gEfiSmbiosTableGuid,
                  &SmbiosTable
@@ -1413,9 +1433,7 @@ EFI_STATUS MeasureHandoffTables()
     {
         Status = gBS->AllocatePool( EfiBootServicesData,
                                     _TPM_STRUCT_PARTIAL_SIZE( TCG_PCR_EVENT, Event )
-                                    + sizeof (HandoffTables), (void **)&ev );
-        
-        if(EFI_ERROR(Status))return Status;
+                                    + sizeof (HandoffTables), &ev );
 
         ASSERT( !EFI_ERROR( Status ));
 
@@ -1440,12 +1458,13 @@ EFI_STATUS MeasureHandoffTables()
                      &evNum,
                      &Last );
     }
+#endif
 
     if ( ev != NULL )
     {
         gBS->FreePool( ev );
     }
-#endif
+
     return Status;
 }
 
@@ -1503,7 +1522,7 @@ TcgMeasureActionI (
     Status = gBS->LocateProtocol (
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc);
+                 &tcgSvc);
 
     ASSERT(!EFI_ERROR(Status));
 
@@ -1511,7 +1530,7 @@ TcgMeasureActionI (
     Status = gBS->AllocatePool (EfiBootServicesData,
                                 _TPM_STRUCT_PARTIAL_SIZE (TCG_PCR_EVENT, Event) +
                                 Len,
-                                (void **)&TcgEvent);
+                                &TcgEvent);
 
     if( EFI_ERROR( Status ) || TcgEvent == NULL )return Status;
 
@@ -1567,7 +1586,7 @@ TcmMeasureActionI (
     Status = gBS->LocateProtocol (
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc);
+                 &tcgSvc);
 
     ASSERT(!EFI_ERROR(Status));
 
@@ -1575,9 +1594,8 @@ TcmMeasureActionI (
     Status = gBS->AllocatePool (EfiBootServicesData,
                                 _TPM_STRUCT_PARTIAL_SIZE (TCM_PCR_EVENT, Event) +
                                 Len,
-                                (void **)&TcgEvent);
-    
-    if( EFI_ERROR( Status ) || TcgEvent == NULL )return Status;
+                                &TcgEvent);
+
     ASSERT(!EFI_ERROR(Status));
 
     TcgEvent->PCRIndex    = PCRIndex;
@@ -1652,9 +1670,9 @@ VOID* ReadVariable(
     }
 
 
-    Status   = gBS->AllocatePool( EfiBootServicesData, *VarSize, (void **)&VarData );
+    gBS->AllocatePool( EfiBootServicesData, *VarSize, &VarData );
 
-    if ( VarData != NULL && !EFI_ERROR(Status))
+    if ( VarData != NULL )
     {
         Status = gRT->GetVariable(
                      VarName,
@@ -1809,11 +1827,12 @@ EFI_STATUS MeasureSecurebootVariables(
 #endif
     EFI_IMAGE_EXECUTION_INFO_TABLE  *ImageExeInfoTable = NULL;
     static BOOLEAN        Skip = FALSE;
+    EFI_GUID              GlobalVariableGuid = EFI_GLOBAL_VARIABLE;
 
     Status = gBS->LocateProtocol(
                  &gEfiTcgProtocolGuid,
                  NULL,
-                 (void **)&tcgSvc );
+                 &tcgSvc );
 
     ASSERT( !EFI_ERROR( Status ));
 
@@ -1825,7 +1844,7 @@ EFI_STATUS MeasureSecurebootVariables(
         }
         else
         {
-            Varguid = gEfiGlobalVariableGuid;
+            Varguid = GlobalVariableGuid;
         }
 
         VarData = ReadVariable( SecurityVar[i], &Varguid, &VarSize );
@@ -1843,26 +1862,13 @@ EFI_STATUS MeasureSecurebootVariables(
         if( i == 0 && ((UINT8)(*VarData)) == 0) Skip = TRUE;
         if (Skip == TRUE) continue;
 #endif
-        // Add for TCM MeasureVariable, fix for some TCM platform hanging problem.
-        if(!IsTcmSupportType())
-        {
-            Status = MeasureVariable(PCRi_HOST_PLATFORM_MANUFACTURER_CONTROL,
+
+        Status = MeasureVariable(PCRi_HOST_PLATFORM_MANUFACTURER_CONTROL,
                                  Eventtypes[i],
                                  SecurityVar[i],
                                  &Varguid,
                                  VarData,
                                  VarSize);
-        }
-        else
-        {
-            Status = TcmMeasureVariable(
-                            PCRi_HOST_PLATFORM_MANUFACTURER_CONTROL,
-                            Eventtypes[i],
-                            SecurityVar[i],
-                            &Varguid,
-                            VarData,
-                            VarSize);
-        }
 
         TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_SECURE_BOOT_VARIABLES_MEASURED | EFI_SOFTWARE_DXE_BS_DRIVER);
         gBS->FreePool(VarData);
@@ -1908,7 +1914,7 @@ EFI_STATUS MeasureAllBootVariables(
                  BootVarName,
                  &gEfiGlobalVariableGuid,
                  &BootCount,
-                 (void **)&BootOrder
+                 &BootOrder
              );
 
     if ( Status == EFI_NOT_FOUND )
@@ -1938,7 +1944,7 @@ EFI_STATUS MeasureAllBootVariables(
                      BootVarName,
                      &gEfiGlobalVariableGuid,
                      &Size,
-                     (void **)&BootVarData
+                     &BootVarData
                  );
 
         if ( !EFI_ERROR( Status ))
@@ -1992,7 +1998,7 @@ EFI_STATUS GetPCIOPROMImage(
     status = gBS->LocateProtocol(
                  &gEfiLegacyBiosProtocolGuid,
                  NULL,
-                 (void **)&LgBP );
+                 &LgBP );
 
     if(EFI_ERROR(status))return status;
 
@@ -2043,14 +2049,14 @@ EFI_STATUS MeasurePciOptionRom(
     UINT64               digestLen;
     UINT8                *pDigest;
 
-    DEBUG((DEBUG_INFO, "Measuring image @ %x, image len = %x, pfa = %x  \n", pImage, len, pfa));
+    DEBUG((-1, "Measuring image @ %x, image len = %x, pfa = %x  \n", pImage, len, pfa));
 
     if(!IsTcmSupportType())
     {
         Status = gBS->LocateProtocol(
                      &gEfiTcgProtocolGuid,
                      NULL,
-                     (void **)&tcgSvc
+                     &tcgSvc
                  );
 
         if ( EFI_ERROR( Status ))
@@ -2095,7 +2101,7 @@ EFI_STATUS MeasurePciOptionRom(
         Status = gBS->LocateProtocol (
                      &gEfiTcgProtocolGuid,
                      NULL,
-                     (void **)&tcmSvc);
+                     &tcmSvc);
 
         if ( EFI_ERROR( Status ))
         {
@@ -2142,12 +2148,11 @@ EFI_STATUS MeasurePciOptionRom(
 EFI_STATUS ResetMorVariable()
 {
     EFI_STATUS      Status;
-
     UINT32 Attribs   = EFI_VARIABLE_NON_VOLATILE
                        | EFI_VARIABLE_BOOTSERVICE_ACCESS
                        | EFI_VARIABLE_RUNTIME_ACCESS;
 
-    UINT8 Temp       = 0;
+    UINT8 Temp       = 0xFE;
     UINTN TempSize = sizeof (UINT8);
 
 
@@ -2159,20 +2164,15 @@ EFI_STATUS ResetMorVariable()
                  &TempSize,
                  &Temp );
 
-    if ( EFI_ERROR( Status ) || Temp != 0 )
+    if ( EFI_ERROR( Status ) || ((Temp & 01)!= 0) )
     {
-        Temp = 0;
+        Temp &= 0xFE;
         Status = gRT->SetVariable(
                      L"MemoryOverwriteRequestControl",
                      &gEfiMemoryOverwriteControlDataGuid,
-                     EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS
-                     | EFI_VARIABLE_RUNTIME_ACCESS,
+                     Attribs,
                      sizeof (UINT8),
                      &Temp );
-        
-		if(EFI_ERROR(Status)){
-              DEBUG((DEBUG_INFO, "\n Set MemoryOverwriteRequestControl Status = %r \n", Status));
-        }
     }
     
     TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_MOR_BIT_CLEARED | EFI_SOFTWARE_DXE_BS_DRIVER);
@@ -2192,7 +2192,7 @@ EFI_STATUS MeasureWakeEvent()
         return Status;
     }
 
-    DEBUG((DEBUG_INFO, "TCG: GetTcgWakeEventType: Status=%r; WakeType=%x\n",
+    DEBUG((-1, "TCG: GetTcgWakeEventType: Status=%r; WakeType=%x\n",
            Status, nWake));
 
     WakeString[0xB] = nWake;
@@ -2307,6 +2307,7 @@ void tcgReadyToBoot(
 #if UNLOCK_PP_IN_MANUFACTURING_MODE
     BOOLEAN                        SkipPpLock = FALSE;
     BOOLEAN                       *ResetAllTcgVar = NULL;
+    EFI_GUID                      TcgManufacturingGuid = NVRAM_HOB_GUID;
     Manufac_HOB                   *TcgMfgModeVar = NULL;
     void                          **DummyPtr;
 #else
@@ -2314,17 +2315,21 @@ void tcgReadyToBoot(
 #endif
 
     AMI_TCG_DXE_FUNCTION_OVERRIDE_PROTOCOL      *Tpm12PPILockPOverride;
+    EFI_GUID                                    Tpm12PPILockOverrideguid =\
+            AMI_TPM12_LOCK_PHYSICAL_PRESENCE_GUID;
     AMI_TCG2_DXE_FUNCTION_OVERRIDE_PROTOCOL     *Tpm12MeasureConfigurationInfoFunc;
+    EFI_GUID                                    Tpm12MeasureConfigurationInfoFuncGuid =\
+            AMI_TPM12_MEASURE_CONFIGURATION_INFO_GUID;
 
 //    PERF_START(0,L"TcgReadyToboot",NULL,0);
 
-    DEBUG((DEBUG_INFO, "TcgReady to boot entry\n"));
+    DEBUG((-1, "TcgReady to boot entry\n"));
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcg );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcg );
 
     Support = IsTcmSupportType();
 
-    Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid, NULL, (void **)&TpmDevice );
+    Status = gBS->LocateProtocol( &gEfiTpmDxeDeviceProtocolGuid, NULL, &TpmDevice );
 
     if ( EFI_ERROR( Status ))
     {
@@ -2353,7 +2358,7 @@ void tcgReadyToBoot(
         Status = gBS->LocateProtocol(
                      &Tpm12MeasureConfigurationInfoFuncGuid,
                      NULL,
-                     (void **)&Tpm12MeasureConfigurationInfoFunc );
+                     &Tpm12MeasureConfigurationInfoFunc );
         if(!EFI_ERROR(Status))
         {
             Tpm12MeasureConfigurationInfoFunc->Function();
@@ -2390,7 +2395,7 @@ void tcgReadyToBoot(
 
         if ( EFI_ERROR( Status ))
         {
-            DEBUG((DEBUG_INFO, "Boot Variables not Measured. Error!\n"));
+            DEBUG((-1, "Boot Variables not Measured. Error!\n"));
         }
 #endif
 
@@ -2434,48 +2439,45 @@ void tcgReadyToBoot(
     {
 #if SET_LIFETIME_PPLOCK == 1
 
-        Status = read_TPM_capabilities( tcg, &cap);
+        cap = read_TPM_capabilities( tcg );
 
-        if(!EFI_ERROR(Status))
+        if ( cap.physicalPresenceLifetimeLock == 0)
         {
-            if ( cap.physicalPresenceLifetimeLock == 0)
+            if(IsTcmSupportType())
             {
-                if(IsTcmSupportType())
+                physical_presence = TPM_H2NS(TPM_PHYSICAL_PRESENCE_CMD_ENABLE );
+                if(cap.physicalPresenceCMDEnable == 0 && cap.physicalPresenceHWEnable == 0)
                 {
-                    physical_presence = TPM_H2NS(TPM_PHYSICAL_PRESENCE_CMD_ENABLE );
-                    if(cap.physicalPresenceCMDEnable == 0 && cap.physicalPresenceHWEnable == 0)
-                    {
-                        SendTpmCommand( tcg,  TCM_TSC_ORD_PhysicalPresence,
-                                        sizeof(physical_presence), &physical_presence );
-    
-                    }
-                    physical_presence = TPM_H2NS( TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK );
-                    SendTpmCommand( tcg, TCM_TSC_ORD_PhysicalPresence,
+                    SendTpmCommand( tcg,  TCM_TSC_ORD_PhysicalPresence,
                                     sizeof(physical_presence), &physical_presence );
+
                 }
-                else
-                {
-                    physical_presence = TPM_H2NS(TPM_PHYSICAL_PRESENCE_CMD_ENABLE );
-                    if(cap.physicalPresenceCMDEnable == 0 && cap.physicalPresenceHWEnable == 0)
-                    {
-                        SendTpmCommand( tcg,  TSC_ORD_PhysicalPresence,
-                                        sizeof(physical_presence), &physical_presence );
-    
-                    }
-                    physical_presence = TPM_H2NS( TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK );
-                    SendTpmCommand( tcg, TSC_ORD_PhysicalPresence,
-                                    sizeof(physical_presence), &physical_presence );
-                }
-    
-    
+                physical_presence = TPM_H2NS( TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK );
+                SendTpmCommand( tcg, TCM_TSC_ORD_PhysicalPresence,
+                                sizeof(physical_presence), &physical_presence );
             }
+            else
+            {
+                physical_presence = TPM_H2NS(TPM_PHYSICAL_PRESENCE_CMD_ENABLE );
+                if(cap.physicalPresenceCMDEnable == 0 && cap.physicalPresenceHWEnable == 0)
+                {
+                    SendTpmCommand( tcg,  TSC_ORD_PhysicalPresence,
+                                    sizeof(physical_presence), &physical_presence );
+
+                }
+                physical_presence = TPM_H2NS( TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK );
+                SendTpmCommand( tcg, TSC_ORD_PhysicalPresence,
+                                sizeof(physical_presence), &physical_presence );
+            }
+
+
         }
 #endif
 
         Status = gBS->LocateProtocol(
                      &Tpm12PPILockOverrideguid,
                      NULL,
-                     (void **)&Tpm12PPILockPOverride );
+                     &Tpm12PPILockPOverride );
         if(!EFI_ERROR(Status))
         {
             Tpm12PPILockPOverride->Function();
@@ -2487,7 +2489,7 @@ void tcgReadyToBoot(
             TcgMfgModeVar  = (Manufac_HOB *)LocateATcgHob(
                                  gST->NumberOfTableEntries,
                                  gST->ConfigurationTable,
-                                 &gTcgNvramHobGuid);
+                                 &TcgManufacturingGuid);
 
             if(*DummyPtr != NULL)
             {
@@ -2549,20 +2551,32 @@ EFIAPI SetTcgReadyToBoot()
 {
     EFI_STATUS Status;
     AMI_TCG_DXE_FUNCTION_OVERRIDE_PROTOCOL      *POverride;
+    EFI_GUID                                    Overrideguid =\
+            AMI_SET_TCG_READYTOBOOT_GUID;
 
-    Status = gBS->LocateProtocol(&AmiSetTcgReadytobootGuid,
+    Status = gBS->LocateProtocol(&Overrideguid,
                                  NULL,
-                                 (void **) &POverride );
+                                 &POverride );
 
     if(!EFI_ERROR(Status))
     {
         return (POverride->Function());
     }
 
+#if defined(EFI_EVENT_SIGNAL_READY_TO_BOOT)\
+        && EFI_SPECIFICATION_VERSION < 0x20000
+
+    Status = gBS->CreateEvent( EFI_EVENT_SIGNAL_READY_TO_BOOT,
+                               EFI_TPL_CALLBACK,
+                               tcgReadyToBoot, NULL, &ReadyToBootEvent );
+
+#else
     Status = EfiCreateEventReadyToBootEx( EFI_TPL_CALLBACK,
                                           tcgReadyToBoot,
                                           NULL,
                                           &ReadyToBootEvent );
+#endif
+
     return Status;
 }
 
@@ -2590,7 +2604,7 @@ EFIAPI SetTcgReadyToBoot()
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID OnPciIOInstalled(
+EFI_STATUS OnPciIOInstalled(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
@@ -2601,7 +2615,7 @@ VOID OnPciIOInstalled(
     EFI_HANDLE                   handles;
     CSM_PLATFORM_POLICY_DATA    *OpRomStartEndProtocol=NULL;
 
-    DEBUG((DEBUG_INFO, "OnPciIOInstalled\n"));
+    DEBUG((-1, "OnPciIOInstalled\n"));
 
     Status = gBS->LocateHandle(ByRegisterNotify,
                                NULL,
@@ -2609,42 +2623,42 @@ VOID OnPciIOInstalled(
                                &handlesSize,
                                &handles );
 
-    DEBUG((DEBUG_INFO, "OnPciIOInstalled LocateHandle = %r \n", Status));
+    DEBUG((-1, "OnPciIOInstalled LocateHandle = %r \n", Status));
 
-    Status = gBS->HandleProtocol(handles, &gOpromStartEndProtocolGuid,  (void **)&OpRomStartEndProtocol);
+    Status = gBS->HandleProtocol(handles, &gOpromStartEndProtocolGuid, &OpRomStartEndProtocol);
 
-    DEBUG((DEBUG_INFO, "OnPciIOInstalled HandleProtocol = %r \n", Status));
+    DEBUG((-1, "OnPciIOInstalled HandleProtocol = %r \n", Status));
 
     if (EFI_ERROR(Status))
     {
-        return;
+        return Status;
     }
 
-    DEBUG((DEBUG_INFO, "OpRomStartEndProtocol located \n"));
+    DEBUG((-1, "OpRomStartEndProtocol located \n"));
 
     if((OpRomStartEndProtocol == NULL))
     {
-        return ;
+        return Status;
     }
 
     if(OpRomStartEndProtocol->PciIo == NULL)
     {
-        return;
+        return Status;
     }
 
-    DEBUG((DEBUG_INFO, "OpRomStartEndProtocol->PciIo->RomImage = %x \n", OpRomStartEndProtocol->PciIo->RomImage));
-    DEBUG((DEBUG_INFO, "OpRomStartEndProtocol->PciIo->RomSize = %x \n", OpRomStartEndProtocol->PciIo->RomSize));
+    DEBUG((-1, "OpRomStartEndProtocol->PciIo->RomImage = %x \n", OpRomStartEndProtocol->PciIo->RomImage));
+    DEBUG((-1, "OpRomStartEndProtocol->PciIo->RomSize = %x \n", OpRomStartEndProtocol->PciIo->RomSize));
 
 
-    DEBUG((DEBUG_INFO, "Measuring legacy image \n"));
+    DEBUG((-1, "Measuring legacy image \n"));
 
     Status = MeasurePciOptionRom(OpRomStartEndProtocol->PciIo->RomImage,
                                  (UINT32) OpRomStartEndProtocol->PciIo->RomSize,
                                  GET_PFA(OpRomStartEndProtocol->PciIo ));
 
-    return;
+    return Status;
 #else
-    return;
+    return EFI_SUCCESS;
 #endif
 
 }
@@ -2670,15 +2684,18 @@ VOID OnPciIOInstalled(
 //<AMI_PHDR_END>
 //**********************************************************************
 EFI_STATUS
-MeasurePCIOproms()
+EFIAPI MeasurePCIOproms()
 {
     EFI_STATUS Status;
     AMI_TCG_DXE_FUNCTION_OVERRIDE_PROTOCOL      *POverride;
+    EFI_GUID                                    Overrideguid =\
+            AMI_MEASURE_PCIOPROM_GUID;
+
 
     Status = gBS->LocateProtocol(
-                 &AmiMeasurePciopromGuid,
+                 &Overrideguid,
                  NULL,
-                 (void **)&POverride );
+                 &POverride );
 
     if(!EFI_ERROR(Status))
     {
@@ -2820,21 +2837,21 @@ TPM_RESULT execute_request(
 
     erqst = extend_request( rqst );
 
-    DEBUG((DEBUG_INFO, "erqst: %x\n",erqst));
+    DEBUG((-1, "erqst: %x\n",erqst));
 
-    Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid,
-                                  NULL, (void **)&TpmDevice );
+    Status = gBS->LocateProtocol( &gEfiTpmDxeDeviceProtocolGuid,
+                                  NULL, &TpmDevice );
 
     if ( EFI_ERROR( Status ))
     {
         return TCPA_PPI_BIOSFAIL;
     }
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcg );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcg );
 
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_ERROR, "Error: failed to locate TCG protocol: %r\n"));
+        DEBUG((-1, "Error: failed to locate TCG protocol: %r\n"));
         return TCPA_PPI_BIOSFAIL;
     }
 
@@ -2843,7 +2860,7 @@ TPM_RESULT execute_request(
         TpmDevice->Init( TpmDevice );
     }
 
-    //Status  = read_TPM_capabilities( tcg );
+    read_TPM_capabilities( tcg );
 
     if(!IsTcmSupportType())
     {
@@ -2945,7 +2962,7 @@ TPM_RESULT execute_request(
                 {
                     Temp = TCPA_PPIOP_OWNER_ON | (rqst << 04);
 
-                    Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                    Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                               EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                               sizeof (UINT32), &Temp );
 
@@ -3031,7 +3048,7 @@ TPM_RESULT execute_request(
 
                 Temp = TCPA_PPIOP_CLEAR | (rqst << 04);
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -3069,7 +3086,7 @@ TPM_RESULT execute_request(
                 // tcg flags to be updated
                 Temp = TCPA_PPIOP_ENABLE_ACTV | (rqst << 04);
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -3142,17 +3159,13 @@ TPM_RESULT execute_request(
                 if(!tpmStatus)
                 {
                     tpmStatus = SendTpmCommand( tcg,TCM_ORD_PhysicalSetDeactivated, 1,&zero );
-                    if(tpmStatus)
-                    {
-                       DEBUG((DEBUG_ERROR, "TCM send command error %x in %a, line %d \n", tpmStatus, __FUNCTION__, __LINE__));
-                    }
                 }
                 tpmStatus = SendTpmCommand( tcg, TCM_ORD_SetOwnerInstall,1, &one );
                 if((TPM_H2NL( tpmStatus ) & TCG_DEACTIVED_ERROR) == TCG_DEACTIVED_ERROR )
                 {
                     Temp = TCPA_PPIOP_OWNER_ON | (rqst << 04);
 
-                    Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                    Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                               EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                               sizeof (UINT32), &Temp );
 
@@ -3204,7 +3217,7 @@ TPM_RESULT execute_request(
 
                 Temp = TCPA_PPIOP_CLEAR | (rqst << 04);
 
-                TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                                                 EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                                                 sizeof (UINT32), &Temp );
 
@@ -3232,11 +3245,11 @@ TPM_RESULT execute_request(
                 // tcg flags to be updated
                 Temp = TCPA_PPIOP_ENABLE_ACTV | (rqst << 04);
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
-                DEBUG((DEBUG_INFO, "TcgSetVariableWithNewAttributes Status: %r\n",Status));
+                DEBUG((-1, "TcgSetVariableWithNewAttributes Status: %r\n",Status));
                 if(!IsTcmSupportType())
                 {
                     TpmDevice->Close( TpmDevice );
@@ -3259,6 +3272,27 @@ TPM_RESULT execute_request(
 }
 
 
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
+AcpiOnVariableLockProtocolGuid (
+    IN      EFI_EVENT                 Event,
+    IN      VOID                      *Context
+)
+{
+    EDKII_VARIABLE_LOCK_PROTOCOL    *LockProtocol;
+    EFI_GUID  FlagsStatusguid       = AMI_TCG_CONFIRMATION_FLAGS_GUID;
+    EFI_STATUS                      Status;
+
+    DEBUG((-1, "Tpm20OnVariableLockProtocolGuid callback entry\n"));
+
+    Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, &LockProtocol);
+    if(!EFI_ERROR(Status))
+    {
+        Status = LockProtocol->RequestToLock(LockProtocol, L"TpmServFlags", &FlagsStatusguid);
+        ASSERT_EFI_ERROR(Status);
+    }
+}
+#endif
+
 
 UINT8 SupportInfo = 0;
 
@@ -3270,42 +3304,43 @@ VOID UpdateAslCallback(
     ACPI_HDR                        *dsdt;
     EFI_STATUS                      Status;
     UINTN                           Value=0;
-    UINT8                           TpmfName[5] = CONVERT_TO_STRING(TPMFNAME);
-    UINT8                           TpmmName[5] = CONVERT_TO_STRING(TPMMNAME);
-    UINT8                           TtdpName[5] = CONVERT_TO_STRING(TTDPNAME);
-    UINT8                           TtpfName[5] = CONVERT_TO_STRING(TTPFNAME);
-    UINT8                           TcmfName[5] = CONVERT_TO_STRING(TCMFNAME);
-    UINT8                           PpivName[5] = CONVERT_TO_STRING(PPIVNAME);
+    AMI_ASL_PPI_NV_VAR              *MemoryAddress;
+    EFI_GUID  FlagsStatusguid       = AMI_TCG_CONFIRMATION_FLAGS_GUID;
+    EFI_PHYSICAL_ADDRESS             VarLoc;
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
+    EDKII_VARIABLE_LOCK_PROTOCOL    *LockProtocol;
+    EFI_EVENT                       VarLockEvent;
+static VOID                         *VarLockreg;
+#endif
 
-    DEBUG((DEBUG_INFO, "\n UpdateAslCallback \n"));
+    DEBUG((-1, "\n UpdateAslCallback \n"));
     Status = TcgLibGetDsdt(&dsdtAddress, EFI_ACPI_TABLE_VERSION_ALL);
     if (!EFI_ERROR(Status))
     {
         dsdt = (ACPI_HDR*)dsdtAddress;
-        Status=TcgUpdateAslNameObject(dsdt, TpmfName, (UINT64)SupportInfo);
+        Status=TcgUpdateAslNameObject(dsdt, "TPMF", (UINT64)SupportInfo);
         if(EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "\n Failure updating TPMF flag \n"));
+            DEBUG((-1, "\n Failure updating TPMF flag \n"));
         }
 
         // Update the TPMM Base Addr
-        Status=TcgUpdateAslNameObject(dsdt, TpmmName, (UINT64)PORT_TPM_IOMEMBASE);
+        Status=TcgUpdateAslNameObject(dsdt, "TPMM", (UINT64)PORT_TPM_IOMEMBASE);
         if(EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "\n Failure updating TPMM flag \n"));
+            DEBUG((-1, "\n Failure updating TPMM flag \n"));
         }
 
-        Status=TcgUpdateAslNameObject(dsdt, TtdpName, (UINT64)Value);
+        Status=TcgUpdateAslNameObject(dsdt, "TTDP", (UINT64)Value);
         if(EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "\n Failure updating TTDP flag \n"));
+            DEBUG((-1, "\n Failure updating TTDP flag \n"));
         }
 
-        // TTPF means TPM interface. Set it to TIS.
-        Status=TcgUpdateAslNameObject(dsdt, TtpfName, 1);
+        Status=TcgUpdateAslNameObject(dsdt, "TTPF", (UINT64)Value);
         if (EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "TrEEUpdateTpmDeviceASL::Failure setting ASL value %r \n", Status));
+            DEBUG((-1, "TrEEUpdateTpmDeviceASL::Failure setting ASL value %r \n", Status));
         }
 
         if(IsTcmSupportType())
@@ -3317,16 +3352,74 @@ VOID UpdateAslCallback(
             Value=0;
         }
 
-        Status=TcgUpdateAslNameObject(dsdt, TcmfName, (UINT64)Value);
+        Status=TcgUpdateAslNameObject(dsdt, "TCMF", (UINT64)Value);
         if (EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "\n Failure updating TCMF flag \n"));
+            DEBUG((-1, "\n Failure updating TCMF flag \n"));
         }
 
-        Status=TcgUpdateAslNameObject(dsdt, PpivName, 0);
+        Status=TcgUpdateAslNameObject(dsdt, "PPIV", 0);
+
+        Status = gBS->AllocatePool (EfiACPIMemoryNVS, sizeof(AMI_ASL_PPI_NV_VAR), &MemoryAddress);
+        if(!EFI_ERROR(Status))
+        {
+            ZeroMem (MemoryAddress, sizeof(AMI_ASL_PPI_NV_VAR));
+
+            Status=TcgUpdateAslNameObject(dsdt, "PPIM", (UINT32)MemoryAddress);
+            ASSERT_EFI_ERROR (Status);
+            Status=TcgUpdateAslNameObject(dsdt, "PPIL", (UINT32)(sizeof(AMI_ASL_PPI_NV_VAR)));
+            ASSERT_EFI_ERROR (Status);
+
+            VarLoc = (EFI_PHYSICAL_ADDRESS)MemoryAddress;
+//gEdkiiVariableLockProtocolGuid is defined from core ver 5.11 so we need to use CORE_BUILD_NUMBER > 0xA .
+//Variable Lock Protocol is implemented from NVRAM label 7 so we need to use NVRAM_VERSION > 6
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
+
+            Status = gRT->SetVariable(L"TpmServFlags",
+                                      &FlagsStatusguid,
+                                      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                                      EFI_VARIABLE_NON_VOLATILE |
+                                      EFI_VARIABLE_RUNTIME_ACCESS,
+                                      sizeof (EFI_PHYSICAL_ADDRESS),
+                                      &VarLoc );
+
+            //Lock the service flags variable as well
+              Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, &LockProtocol);
+              if(!EFI_ERROR(Status)){
+                  Status = LockProtocol->RequestToLock(LockProtocol, L"TpmServFlags", &FlagsStatusguid);
+                  ASSERT_EFI_ERROR(Status);
+              }else{
+                  //setcallback
+                  Status = gBS->CreateEvent (EFI_EVENT_NOTIFY_SIGNAL,
+                                             EFI_TPL_CALLBACK,
+                                             AcpiOnVariableLockProtocolGuid,
+                                             NULL,
+                                             &VarLockEvent);
+                  if(!EFI_ERROR(Status))
+                  {
+                      Status = gBS->RegisterProtocolNotify(
+                                    &gEdkiiVariableLockProtocolGuid,
+                                    VarLockEvent,
+                                    &VarLockreg );
+                  }
+              }
+
+              ASSERT_EFI_ERROR (Status);
+#else
+              Status = gRT->SetVariable(L"TpmServFlags",
+                                     &FlagsStatusguid,
+                                     EFI_VARIABLE_BOOTSERVICE_ACCESS |
+                                     EFI_VARIABLE_NON_VOLATILE,
+                                     sizeof (EFI_PHYSICAL_ADDRESS),
+                                     &VarLoc );
+
+              ASSERT_EFI_ERROR (Status);
+#endif
+        }else{
+            //use defaults form SDL token.
+            DEBUG ((DEBUG_ERROR, "Allocate PPI Memory failed Status = %r\n", Status));
+        }
     }
-    
-    if(ev != NULL) gBS->CloseEvent(ev);
 
 }
 
@@ -3364,13 +3457,15 @@ EFIAPI ProcessTcgSetup()
     ACPI_HDR                        *dsdt;
     EFI_EVENT                       Event;
     static VOID                     *Dsdtreg;
-#if (defined(CONFIRM_SETUP_CHANGE) && (CONFIRM_SETUP_CHANGE == 1))
+#if CONFIRM_SETUP_CHANGE
     EFI_EVENT                       ev;
+#endif
     void                            *SimpleIn = NULL;
     static void                     *reg;
-    BOOLEAN             NvRamFlag = FALSE;
-#endif
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
+    EFI_GUID                        EfiGlobalVariableGuid =\
+            TCG_VARIABLE_GUID;
 
     UINT32  TpmOldVarAttributes      = EFI_VARIABLE_BOOTSERVICE_ACCESS|\
                                        EFI_VARIABLE_NON_VOLATILE;
@@ -3379,45 +3474,47 @@ EFIAPI ProcessTcgSetup()
     TCG_CONFIGURATION               Config;
     UINT8                           TpmOldVar = 0;
     AMI_TCG_DXE_FUNCTION_OVERRIDE_PROTOCOL      *POverride;
+    EFI_GUID                                    Overrideguid =\
+            AMI_PROCESS_TCG_SETUP_GUID;
 
-    Status = gBS->LocateProtocol(&AmiProcessTcgSetupGuid,
+    Status = gBS->LocateProtocol(&Overrideguid,
                                  NULL,
-                                 (void **)&POverride );
+                                 &POverride );
 
     if(!EFI_ERROR(Status))
     {
         return (POverride->Function());
     }
 
-    Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid, NULL, (void **)&TpmDevice );
+    Status = gBS->LocateProtocol( &gTpmDeviceProtocolGuid, NULL, &TpmDevice );
 
     if ( EFI_ERROR( Status ))
     {
         return Status;
     }
 
-    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcg );
+    Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcg );
 
     if ( EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_ERROR, "Error: failed to locate TCG protocol: %r\n"));
+        DEBUG((-1, "Error: failed to locate TCG protocol: %r\n"));
         return Status;
     }
 
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status))
     {
         return Status;
     }
 
-    Status = read_TPM_capabilities( tcg, &cap );
+    cap = read_TPM_capabilities( tcg );
     TpmOwner = CheckTpmOwnership( tcg );
 
     gBS->CopyMem(&Config, &ProtocolInstance->ConfigFlags, sizeof(TCG_CONFIGURATION));
 
 #if (defined(EXPOSE_FORCE_TPM_ENABLE) && (EXPOSE_FORCE_TPM_ENABLE == 1))
-    DEBUG((DEBUG_INFO, "\n cap.disabled = %x, cap.deactivated=%x \n",cap.disabled ,cap.deactivated));
-    DEBUG((DEBUG_INFO, "\n Config.Reserved4= % x \n",Config.Reserved4));
+    DEBUG((-1, "\n cap.disabled = %x, cap.deactivated=%x \n",cap.disabled ,cap.deactivated));
+    DEBUG((-1, "\n Config.Reserved4= % x \n",Config.Reserved4));
     if(Config.Reserved4)
     {
         if(cap.disabled != 1 && cap.deactivated != 1)
@@ -3426,13 +3523,13 @@ EFIAPI ProcessTcgSetup()
             {
                 //Do nothing but update setup to display TPM ERROR on execution of
                 //setup command and continue to boot
-                DEBUG((DEBUG_ERROR, "\n Error enabling TPM \n"));
+                DEBUG((-1, "\n Error enabling TPM \n"));
                 Config.TpmError    = AMI_TPM_HARDWARE_SETUP_REQUEST_ERROR;
                 ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
             }
             else
             {
-                DEBUG((DEBUG_INFO, "\n TPM enabled \n"));
+                DEBUG((-1, "\n TPM enabled \n"));
                 Config.Reserved4   = 0;
                 Config.TpmEnable   = 1;
 
@@ -3441,7 +3538,7 @@ EFIAPI ProcessTcgSetup()
                 //set variable
                 Status = gRT->SetVariable (
                              L"TpmOldvar",
-                             &gTcgEfiGlobalVariableGuid,
+                             &TcgEfiGlobalVariableGuid,
                              TpmOldVarAttributes,
                              Size,
                              &TpmOldVar);
@@ -3467,7 +3564,7 @@ EFIAPI ProcessTcgSetup()
 
     Status = gRT->GetVariable (
                  L"TpmOldvar",
-                 &gTcgEfiGlobalVariableGuid,
+                 &TcgEfiGlobalVariableGuid,
                  &TpmOldVarAttributes,
                  &Size,
                  &TpmOldVar);
@@ -3478,14 +3575,10 @@ EFIAPI ProcessTcgSetup()
         //set variable
         Status = gRT->SetVariable (
                      L"TpmOldvar",
-                     &gTcgEfiGlobalVariableGuid,
+                     &TcgEfiGlobalVariableGuid,
                      TpmOldVarAttributes,
                      Size,
                      &TpmOldVar);
-        
-        if(EFI_ERROR(Status)){
-            DEBUG((DEBUG_INFO, "\n Set Old TpmOldvar Status = %r \n", Status));
-        }
     }
     else
     {
@@ -3499,33 +3592,25 @@ EFIAPI ProcessTcgSetup()
         else
         {
             TpmOldVar = Config.TpmEnable;
-            Status =  TcgSetVariableWithNewAttributes(L"TpmOldvar", &gTcgEfiGlobalVariableGuid, \
+            Status =  TcgSetVariableWithNewAttributes(L"TpmOldvar", &TcgEfiGlobalVariableGuid, \
                       TpmOldVarAttributes,\
                       Size, &TpmOldVar );
-            
-            if(EFI_ERROR(Status)){
-                DEBUG((DEBUG_INFO, "\n Set Old TpmOldvar Status = %r \n", Status));
-            }
         }
     }
 
     if(Config.PpiSetupSyncFlag != 0)
     {
         //ppi request happened so sync setup variables
-        DEBUG((DEBUG_INFO, "\n Setup and PPi request sync \n"));
+        DEBUG((-1, "\n Setup and PPi request sync \n"));
         Config.TpmEnable = (~( cap.disabled | cap.deactivated )& BIT00);
         Config.TpmOperation = 0;
         Config.PpiSetupSyncFlag = 0;
 
         TpmOldVar = Config.TpmEnable;
 
-        Status =  TcgSetVariableWithNewAttributes(L"TpmOldvar", &gTcgEfiGlobalVariableGuid, \
+        Status =  TcgSetVariableWithNewAttributes(L"TpmOldvar", &TcgEfiGlobalVariableGuid, \
                   TpmOldVarAttributes,\
                   Size, &TpmOldVar );
-        
-        if(EFI_ERROR(Status)){
-            DEBUG((DEBUG_INFO, "\n Set Old TpmOldvar Status = %r \n", Status));
-        }
 
     }
 
@@ -3542,18 +3627,90 @@ EFIAPI ProcessTcgSetup()
     }
     else
     {
-        Status = gBS->CreateEventEx( EFI_EVENT_NOTIFY_SIGNAL,
-                                   EFI_TPL_CALLBACK, UpdateAslCallback, NULL, &gEfiAcpiTableGuid, &Event );
+        Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
+                                   EFI_TPL_CALLBACK, UpdateAslCallback, &Dsdtreg, &Event );
+        if(!EFI_ERROR(Status))
+        {
+            Status = gBS->RegisterProtocolNotify( &gInternalAcpiSupportGuid, Event, &Dsdtreg );
+        }
     }
 
     ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
 
-#if (defined(CONFIRM_SETUP_CHANGE) && (CONFIRM_SETUP_CHANGE == 0))
-    
     if(Config.TpmEnable != (~( cap.disabled | cap.deactivated )& BIT00))
     {
-        DEBUG((DEBUG_INFO, "\n TMP_ENABLE != Setup in setup \n"));
-        
+        DEBUG((-1, "\n TMP_ENABLE != Setup in setup \n"));
+
+#if CONFIRM_SETUP_CHANGE
+
+        if ( Config.TpmEnable )
+        {
+            ppi_request = TCPA_PPIOP_ENABLE_ACTV;
+            Status      = gBS->LocateProtocol( &gEfiSimpleTextInProtocolGuid,
+                                               NULL,
+                                               &SimpleIn );
+
+            Config.Reserved5 = TRUE;
+            ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
+            if ( !EFI_ERROR( Status ))
+            {
+                run_PPI_UI( NULL, NULL );
+                return Status;
+            }
+            else
+            {
+
+                Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
+                                           EFI_TPL_CALLBACK,
+                                           run_PPI_UI,
+                                           0,
+                                           &ev );
+                ASSERT( !EFI_ERROR( Status ));
+
+                Status = gBS->RegisterProtocolNotify(
+                             &gBdsAllDriversConnectedProtocolGuid,
+                             ev,
+                             &reg );
+                ASSERT( !EFI_ERROR( Status ));
+                return Status;
+            }
+
+        }
+        else if ( !Config.TpmEnable )
+        {
+            ppi_request = TCPA_PPIOP_DEACT_DSBL;
+            Status      = gBS->LocateProtocol( &gEfiSimpleTextInProtocolGuid,
+                                               NULL,
+                                               &SimpleIn );
+
+            Config.Reserved5 = TRUE;
+            ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
+            if ( !EFI_ERROR( Status ))
+            {
+                run_PPI_UI( NULL, NULL );
+                return Status;
+            }
+            else
+            {
+                Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
+                                           EFI_TPL_CALLBACK,
+                                           run_PPI_UI,
+                                           0,
+                                           &ev );
+
+                ASSERT( !EFI_ERROR( Status ));
+
+                Status = gBS->RegisterProtocolNotify(
+                             &gBdsAllDriversConnectedProtocolGuid,
+                             ev,
+                             &reg );
+                ASSERT( !EFI_ERROR( Status ));
+                return Status;
+            }
+        }
+
+#else
+
         if ( execute_request( Config.TpmEnable ? TCPA_PPIOP_ENABLE_ACTV :
                               TCPA_PPIOP_DEACT_DSBL ) != 0 )
         {
@@ -3561,17 +3718,51 @@ EFIAPI ProcessTcgSetup()
             //setup command and continue to boot
             Config.TpmError    = AMI_TPM_HARDWARE_SETUP_REQUEST_ERROR;
             ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
-            return EFI_SUCCESS;
         }
         else
         {
             ProtocolInstance->UpdateStatusFlags(&Config, TRUE);
             RequestSystemReset( EfiResetCold );
         }
+
+#endif
+
     }
     else if ( Config.TpmOperation )
     {
-        DEBUG((DEBUG_INFO, "\n ENABLE == Setup in setup \n"));
+
+#if CONFIRM_SETUP_CHANGE
+        ppi_request = Config.TpmOperation;
+        Status  = gBS->LocateProtocol( &gEfiSimpleTextInProtocolGuid,
+                                       NULL,
+                                       &SimpleIn );
+
+        Config.Reserved5 = TRUE;
+        ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
+        if ( !EFI_ERROR( Status ))
+        {
+            run_PPI_UI( NULL, NULL );
+            return Status;
+        }
+        else
+        {
+            Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
+                                       EFI_TPL_CALLBACK,
+                                       run_PPI_UI,
+                                       0,
+                                       &ev );
+
+            ASSERT( !EFI_ERROR( Status ));
+
+            Status = gBS->RegisterProtocolNotify(
+                         &gBdsAllDriversConnectedProtocolGuid,
+                         ev,
+                         &reg );
+            ASSERT( !EFI_ERROR( Status ));
+            return Status;
+        }
+#else
+        DEBUG((-1, "\n ENABLE == Setup in setup \n"));
 
         if ( execute_request( Config.TpmOperation ) != 0 )
         {
@@ -3582,77 +3773,29 @@ EFIAPI ProcessTcgSetup()
             Config.TpmError    = AMI_TPM_HARDWARE_SETUP_REQUEST_ERROR;
             Config.TpmOperation = 0;
             ProtocolInstance->UpdateStatusFlags(&Config, FALSE);
-            return EFI_SUCCESS;
+            if(EFI_ERROR(Status))return Status;
+
         }
         else
         {
             //reset to update setup
-//After clear TPM, cap.disabled and cap.deactivate would be 1, then Config.TpmEnable would be updated above (next boot).
-//So, this code is redundant.
-            //if(Config.TpmOperation == TCPA_PPIOP_CLEAR)
-            //{
-            //    Config.TpmEnable = 0;
-            //}
+            if(Config.TpmOperation == TCPA_PPIOP_CLEAR)
+            {
+                Config.TpmEnable = 0;
+            }
             Config.TpmOperation = 0;
             ProtocolInstance->UpdateStatusFlags(&Config, TRUE);
             RequestSystemReset( EfiResetCold );
         }
-    }
-#else
-
-    Status = gBS->LocateProtocol(&gEfiSimpleTextInProtocolGuid,NULL,(void **)&SimpleIn );
-
-    if(Config.TpmEnable != (~( cap.disabled | cap.deactivated )& BIT00)) {
-        
-        DEBUG((DEBUG_INFO, "\n TMP_ENABLE != Setup in setup \n"));
-        if ( Config.TpmEnable )
-        {
-            ppi_request = TCPA_PPIOP_ENABLE_ACTV;
-        }
-        else if ( !Config.TpmEnable )
-        {
-            ppi_request = TCPA_PPIOP_DEACT_DSBL;
-        }
-    } else if ( Config.TpmOperation ) {
-        
-       DEBUG((DEBUG_INFO, "\n ENABLE == Setup in setup \n"));
-     
-       ppi_request = Config.TpmOperation;
-
-       Config.TpmOperation = 0;
-    }
-   
-    DEBUG((DEBUG_INFO, "ppi_request %x \n",ppi_request));
-    
-    if(ppi_request > 0  && ppi_request <= TCPA_PPIOP_ENABLE_ACTV_CLEAR_ENABLE_ACTV)
-    {
-      Config.Reserved5 = TRUE;
-      ProtocolInstance->UpdateStatusFlags(&Config, NvRamFlag);
-    
-    if (SimpleIn != NULL) {
-        
-      run_PPI_UI( NULL, NULL );
-      
-    } else {
-        
-      Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
-                             EFI_TPL_CALLBACK,
-                             run_PPI_UI,
-                             0,
-                             &ev );
-      ASSERT( !EFI_ERROR( Status ));
-
-      Status = gBS->RegisterProtocolNotify(
-                             &gBdsAllDriversConnectedProtocolGuid,
-                             ev,
-                             &reg );
-        ASSERT( !EFI_ERROR( Status ));
-      }
-    }  
 #endif
-    
+    }
+
     return Status;
+
 }
+
+
+
 
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -3776,7 +3919,6 @@ void displOperations(
     CHAR16 * strDelim = L", ";
     UINT32 r;
     CHAR16 *String;
-    EFI_STATUS Status;
 
     if ( count == 2 )
     {
@@ -3787,10 +3929,8 @@ void displOperations(
     {
         if ( r & PPI_FEATURE_CHANGE )
         {
-            Status = GetStringFromToken( ppi_op_names[(i* 2) + ((r & PPI_FEATURE_ON) ? 0 : 1)],
+            GetStringFromToken( ppi_op_names[(i* 2) + ((r & PPI_FEATURE_ON) ? 0 : 1)],
                                 &String );
-            
-            if(EFI_ERROR(Status))continue;
 
             StrCat( DesStr + StrLen( DesStr ), String );
             j++;
@@ -3914,6 +4054,7 @@ void prompt_operation(
     UINTN            CurX, CurY;
     AMITSESETUP      TSEVar;
     UINTN            Size;
+    EFI_GUID         AmiTseSetupguid = AMITSESETUP_GUID;
 
     extended_request erqst;
 
@@ -3937,7 +4078,7 @@ void prompt_operation(
 
     Status = gBS->LocateProtocol( &gAmiPostManagerProtocolGuid,
                                   NULL,
-                                  (void **)&pAmiPostMgr );
+                                  &pAmiPostMgr );
 
     if ( EFI_ERROR( Status ))
     {
@@ -3948,7 +4089,7 @@ void prompt_operation(
     //
 
 #if EFI_SPECIFICATION_VERSION<0x2000A
-    Status = gBS->LocateProtocol (&gEfiHiiProtocolGuid, NULL, (void **)&Hii);
+    Status = gBS->LocateProtocol (&gEfiHiiProtocolGuid, NULL, &Hii);
     ASSERT(!EFI_ERROR(Status));
 #endif
 
@@ -3957,7 +4098,7 @@ void prompt_operation(
     Size = sizeof (AMITSESETUP);
 
     Status = gRT->GetVariable(L"AMITSESetup", \
-                              &AmiTseSetupGuid, \
+                              &AmiTseSetupguid, \
                               NULL, \
                               &Size, \
                               &TSEVar );
@@ -3972,7 +4113,7 @@ void prompt_operation(
             count++;
         }
     }
-    DEBUG((DEBUG_INFO, "PPI operations count: %d\n", count));
+    DEBUG((-1, "PPI operations count: %d\n", count));
 
     //
     // Display the string
@@ -4257,16 +4398,16 @@ BOOLEAN AdminUserActionRequired()
 
     if(EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_INFO, "AdminUserActionRequire return FALSE\n"));
+        DEBUG((-1, "AdminUserActionRequire return FALSE\n"));
         return FALSE;
     }
     if(AdminPsswdInstallVar & AMI_PASSWORD_ADMIN)
     {
-        DEBUG((DEBUG_INFO, "AdminUserActionRequire return TRUE\n"));
+        DEBUG((-1, "AdminUserActionRequire return TRUE\n"));
         return TRUE;
     }
 
-    DEBUG((DEBUG_INFO, "AdminUserActionRequire return FALSE\n"));
+    DEBUG((-1, "AdminUserActionRequire return FALSE\n"));
     return FALSE;
 }
 #endif
@@ -4280,10 +4421,12 @@ void run_PPI_UI(
 {
 
     static UINT8     RequestConfirmed  = FALSE;
+    EFI_GUID  Oempolicyguid = AMI_BIOSPPI_FLAGS_MANAGEMENT_GUID;
     PERSISTENT_BIOS_TPM_MANAGEMENT_FLAGS_PROTOCOL *OemTpmBiosPolicy;
     PERSISTENT_BIOS_TPM_FLAGS  TpmNvflags;
     EFI_STATUS Status = EFI_NOT_FOUND;
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
     TCG_CONFIGURATION               Config;
 #if TPM_PASSWORD_AUTHENTICATION
     UINT32     GlobalVariable;
@@ -4324,7 +4467,7 @@ void run_PPI_UI(
     {
         Status = gBS->LocateProtocol( &gAmiPostManagerProtocolGuid,
                                       NULL,
-                                      (void **)&pAmiPostMgr );
+                                      &pAmiPostMgr );
 
         if (EFI_ERROR(Status))
         {
@@ -4336,15 +4479,11 @@ void run_PPI_UI(
     //
     // Calling GetPostStatus() to check current TSE_POST_STATUS
     //
-    if (PcdGetBool(PcdPostStatusCheck))
-    {
-        DEBUG((DEBUG_INFO, "\n PostStatus Check is True \n"));
-        if(pAmiPostMgr->GetPostStatus() < TSE_POST_STATUS_IN_POST_SCREEN) return;
-    }
+    if(pAmiPostMgr->GetPostStatus() < TSE_POST_STATUS_IN_POST_SCREEN) return;
 
     IsRunPpiUIAlreadyDone = TRUE;
 
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status))
     {
         return;
@@ -4357,7 +4496,7 @@ void run_PPI_UI(
 
     ProtocolInstance->UpdateStatusFlags(&Config, TRUE);
 
-    Status = gBS->LocateProtocol( &AmiBiosPpiFlagsManagementGuid, NULL, (void **)&OemTpmBiosPolicy);
+    Status = gBS->LocateProtocol( &Oempolicyguid, NULL, &OemTpmBiosPolicy);
     if(!EFI_ERROR(Status))
     {
         Status = OemTpmBiosPolicy->ReadBiosTpmflags(&TpmNvflags);
@@ -4495,7 +4634,7 @@ void run_PPI_UI(
         }
     }
 
-#if (defined(CONFIRM_SETUP_CHANGE) && (CONFIRM_SETUP_CHANGE == 1))
+#if CONFIRM_SETUP_CHANGE
     if(Config.Reserved5 == TRUE)
     {
         Config.Reserved5 = FALSE;
@@ -4521,7 +4660,7 @@ void run_PPI_UI(
         GlobalVariable = 0x58494d41; // "AMIX"
         Status         = gRT->SetVariable(
                              L"AskPassword",
-                             &gTcgEfiGlobalVariableGuid,
+                             &TcgEfiGlobalVariableGuid,
                              EFI_VARIABLE_BOOTSERVICE_ACCESS,
                              sizeof (UINT32),
                              &GlobalVariable
@@ -4531,7 +4670,7 @@ void run_PPI_UI(
         {
             Status = gRT->GetVariable(
                          L"AskPassword",
-                         &gTcgEfiGlobalVariableGuid,
+                         &TcgEfiGlobalVariableGuid,
                          NULL,
                          &Size,
                          &GlobalVariable
@@ -4539,7 +4678,7 @@ void run_PPI_UI(
             GlobalVariable = 0x58494d41; // "AMIX"
             Status         = gRT->SetVariable(
                                  L"AskPassword",
-                                 &gTcgEfiGlobalVariableGuid,
+                                 &TcgEfiGlobalVariableGuid,
                                  EFI_VARIABLE_BOOTSERVICE_ACCESS,
                                  Size,
                                  &GlobalVariable
@@ -4552,7 +4691,7 @@ void run_PPI_UI(
 
     if(AdminUserActionRequired())
     {
-        DEBUG((DEBUG_INFO, "Admin password is set"));
+        DEBUG((-1, "Admin password is set"));
         return;
     }
     else if(check_authenticate_set( ) == TRUE && RequestConfirmed == TRUE)
@@ -4565,8 +4704,8 @@ CheckConfirm:
 
     if ( !RequestConfirmed )
     {
-        DEBUG((DEBUG_INFO, "\tPPI request was turned down: user cancel\n"));
-        DEBUG((DEBUG_INFO, "Another key pressed for PPI setup, Write_result"));
+        DEBUG((-1, "\tPPI request was turned down: user cancel\n"));
+        DEBUG((-1, "Another key pressed for PPI setup, Write_result"));
         WritePpiResult( ppi_request, TCPA_PPI_USERABORT );
         return;
     }
@@ -4578,7 +4717,7 @@ CheckConfirm:
         GlobalVariable = 0;
         Status         = gRT->SetVariable(
                              L"AskPassword",
-                             &gTcgEfiGlobalVariableGuid,
+                             &TcgEfiGlobalVariableGuid,
                              EFI_VARIABLE_BOOTSERVICE_ACCESS,
                              sizeof (UINT32),
                              &GlobalVariable
@@ -4588,7 +4727,7 @@ CheckConfirm:
         {
             Status = gRT->GetVariable(
                          L"AskPassword",
-                         &gTcgEfiGlobalVariableGuid,
+                         &TcgEfiGlobalVariableGuid,
                          NULL,
                          &Size,
                          &GlobalVariable
@@ -4596,7 +4735,7 @@ CheckConfirm:
             GlobalVariable = 0;
             Status         = gRT->SetVariable(
                                  L"AskPassword",
-                                 &gTcgEfiGlobalVariableGuid,
+                                 &TcgEfiGlobalVariableGuid,
                                  EFI_VARIABLE_BOOTSERVICE_ACCESS,
                                  Size,
                                  &GlobalVariable
@@ -4613,7 +4752,7 @@ CheckConfirm:
 
 AuthCheckEnabledNoAdmin:
 #endif
-    DEBUG((DEBUG_INFO, "F10 pressed for PPI setup, execute request"));
+    DEBUG((-1, "F10 pressed for PPI setup, execute request"));
 
     //verify and do TPM related Ppi over here
     if(ppi_request >= TCPA_PPIOP_SETNOPPIPROVISION_FALSE &&
@@ -4829,11 +4968,12 @@ SignalProtocolEvent (
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID OnAdminPasswordValid(
+EFI_STATUS OnAdminPasswordValid(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
     AdminPasswordValid = TRUE;
+    return EFI_SUCCESS;
 }
 
 
@@ -4858,14 +4998,14 @@ VOID OnAdminPasswordValid(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID OnPasswordSupplied(
+EFI_STATUS OnPasswordSupplied(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
-    DEBUG((DEBUG_INFO, "OnPasswordSupplied Entry\n"));
+    DEBUG((-1, "OnPasswordSupplied Entry\n"));
     PasswordSupplied = TRUE;
     run_PPI_UI( ev, ctx);
-    return;
+    return EFI_SUCCESS;
 }
 
 
@@ -4971,7 +5111,7 @@ EFI_STATUS PasswordAuthHelperFunction( )
                                    &reg,
                                    &ev );
         ASSERT( !EFI_ERROR( Status ));
-        Status = gBS->RegisterProtocolNotify( &gAmiTseAdminPasswordValidGuid,
+        Status = gBS->RegisterProtocolNotify( &gAmitseAdminPasswordValidGuid,
                                               ev,
                                               &reg );
     }
@@ -4983,14 +5123,14 @@ EFI_STATUS PasswordAuthHelperFunction( )
                                    &reg,
                                    &ev );
         ASSERT( !EFI_ERROR( Status ));
-        Status = gBS->RegisterProtocolNotify( &gAmiTsePasswordPromptExitGuid,
+        Status = gBS->RegisterProtocolNotify( &gAmitsePasswordPromptExitGuid,
                                               ev,
                                               &reg );
     }
 
     Status = gRT->SetVariable(
                  L"AskPassword",
-                 &gTcgEfiGlobalVariableGuid,
+                 &TcgEfiGlobalVariableGuid,
                  EFI_VARIABLE_BOOTSERVICE_ACCESS,
                  sizeof (UINT32),
                  &GlobalVariable );
@@ -5024,6 +5164,7 @@ EFI_STATUS PasswordAuthHelperFunction( )
 void ResetOSTcgVar( )
 {
     EFI_STATUS Status;
+    EFI_GUID AmitcgefiOsVariableGuid = AMI_TCG_EFI_OS_VARIABLE_GUID;
     AMI_PPI_NV_VAR Temp;
     UINT32 Attribs = EFI_VARIABLE_NON_VOLATILE
                      | EFI_VARIABLE_BOOTSERVICE_ACCESS
@@ -5062,7 +5203,7 @@ void ResetOSTcgVar( )
                   sizeof (AMI_PPI_NV_VAR), &Temp);
 #endif
 
-        DEBUG((DEBUG_INFO, "ResetOSTcgVar::TcgSetVariableWithNewAttributes Status =%r",Status));
+        DEBUG((-1, "ResetOSTcgVar::TcgSetVariableWithNewAttributes Status =%r",Status));
     }
 }
 
@@ -5072,7 +5213,7 @@ void ResetOSTcgVar( )
 //**********************************************************************
 //<AMI_PHDR_START>
 //
-// Procedure:   Tpm12OnVariableLockProtocolGuid
+// Procedure:   Tpm20OnVariableLockProtocolGuid
 //
 // Description: Lock Tcg Nvram Variable
 //
@@ -5089,17 +5230,19 @@ void ResetOSTcgVar( )
 //**********************************************************************
 VOID
 EFIAPI
-Tpm12OnVariableLockProtocolGuid (
+Tpm20OnVariableLockProtocolGuid (
     IN      EFI_EVENT                 Event,
     IN      VOID                      *Context
 )
 {
     EDKII_VARIABLE_LOCK_PROTOCOL    *LockProtocol;
+    EFI_GUID  FlagsStatusguid         = AMI_TCG_CONFIRMATION_FLAGS_GUID;
+    EFI_GUID  AmitcgefiOsVariableGuid = AMI_TCG_EFI_OS_VARIABLE_GUID;
     EFI_STATUS                      Status;
 
-    DEBUG((DEBUG_INFO, "Tpm12OnVariableLockProtocolGuid callback entry\n"));
+    DEBUG((-1, "Tpm20OnVariableLockProtocolGuid callback entry\n"));
 
-    Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, (void **)&LockProtocol);
+    Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, &LockProtocol);
     if(!EFI_ERROR(Status))
     {
         Status = LockProtocol->RequestToLock(LockProtocol, L"TPMPERBIOSFLAGS", &FlagsStatusguid);
@@ -5107,8 +5250,6 @@ Tpm12OnVariableLockProtocolGuid (
         Status = LockProtocol->RequestToLock(LockProtocol, L"AMITCGPPIVAR", &AmitcgefiOsVariableGuid);
     }
     ASSERT_EFI_ERROR(Status);
-    
-    gBS->CloseEvent(Event);
 }
 #endif
 
@@ -5143,8 +5284,13 @@ EFIAPI ProcessTcgPpiRequest()
                                           | EFI_VARIABLE_RUNTIME_ACCESS;
     UINTN                       TempSize = sizeof (UINT32);
     AMI_TCG_DXE_FUNCTION_OVERRIDE_PROTOCOL      *POverride;
+    EFI_GUID                                    Overrideguid =\
+            AMI_PROCESS_TCG_PPI_REQUEST_GUID;
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
     TCG_CONFIGURATION               Config;
+    EFI_GUID  Oempolicyguid   = AMI_BIOSPPI_FLAGS_MANAGEMENT_GUID;
+    EFI_GUID  FlagsStatusguid = AMI_TCG_CONFIRMATION_FLAGS_GUID;
     PERSISTENT_BIOS_TPM_MANAGEMENT_FLAGS_PROTOCOL *OemTpmBiosPolicy;
     PERSISTENT_BIOS_TPM_FLAGS  TpmNvflags;
     EFI_TCG_PROTOCOL            *tcg;
@@ -5160,23 +5306,23 @@ EFIAPI ProcessTcgPpiRequest()
 
 
 
-    Status = gBS->LocateProtocol(&AmiProcessTcgPpiRequestGuid,
+    Status = gBS->LocateProtocol(&Overrideguid,
                                  NULL,
-                                 (void **)&POverride );
+                                 &POverride );
 
     if(!EFI_ERROR(Status))
     {
         return (POverride->Function());
     }
 
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status))
     {
         return Status;
     }
 
     //copy NV confirmation flags for O.S. request
-    Status = gBS->LocateProtocol( &AmiBiosPpiFlagsManagementGuid, NULL, (void **)&OemTpmBiosPolicy);
+    Status = gBS->LocateProtocol( &Oempolicyguid, NULL, &OemTpmBiosPolicy);
     if(!EFI_ERROR(Status))
     {
         Status = OemTpmBiosPolicy->ReadBiosTpmflags(&TpmNvflags);
@@ -5217,7 +5363,7 @@ EFIAPI ProcessTcgPpiRequest()
 
     Status = gRT->GetVariable(
                  L"TcgINTPPI",
-                 &gTcgEfiGlobalVariableGuid,
+                 &TcgEfiGlobalVariableGuid,
                  &Attribs,
                  &TempSize,
                  &Temp );
@@ -5230,7 +5376,7 @@ EFIAPI ProcessTcgPpiRequest()
     }
 
 
-    DEBUG((DEBUG_INFO, "\n PPI_request is:  %x \n", ppi_request));
+    DEBUG((-1, "\n PPI_request is:  %x \n", ppi_request));
 
     if (Temp != 0)
     {
@@ -5240,13 +5386,13 @@ EFIAPI ProcessTcgPpiRequest()
 
         ProtocolInstance->UpdateStatusFlags(&Config, TRUE);
 
-        Status = gBS->LocateProtocol( &gEfiTpmDeviceProtocolGuid,NULL, (void **)&TpmDevice);
+        Status = gBS->LocateProtocol( &gEfiTpmDxeDeviceProtocolGuid,NULL, &TpmDevice);
         if ( EFI_ERROR( Status ))
         {
             return Status;
         }
 
-        Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, (void **)&tcg );
+        Status = gBS->LocateProtocol( &gEfiTcgProtocolGuid, NULL, &tcg );
 
         if ( EFI_ERROR( Status ))
         {
@@ -5268,7 +5414,7 @@ EFIAPI ProcessTcgPpiRequest()
                 }
                 Temp = 0;
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -5286,7 +5432,7 @@ EFIAPI ProcessTcgPpiRequest()
                 }
                 Temp = 0;
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -5312,7 +5458,7 @@ EFIAPI ProcessTcgPpiRequest()
                 }
                 Temp = 0;
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -5332,7 +5478,7 @@ EFIAPI ProcessTcgPpiRequest()
                 }
                 Temp = 0;
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -5350,7 +5496,7 @@ EFIAPI ProcessTcgPpiRequest()
                 }
                 Temp = 0;
 
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -5375,7 +5521,7 @@ EFIAPI ProcessTcgPpiRequest()
                     TpmDevice->Close( TpmDevice );
                 }
                 Temp = 0;
-                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &gTcgEfiGlobalVariableGuid, \
+                Status =  TcgSetVariableWithNewAttributes(L"TcgINTPPI", &TcgEfiGlobalVariableGuid, \
                           EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS,\
                           sizeof (UINT32), &Temp );
 
@@ -5390,7 +5536,7 @@ EFIAPI ProcessTcgPpiRequest()
 #if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
         Status = gBS->CreateEvent (EFI_EVENT_NOTIFY_SIGNAL,
                                    EFI_TPL_CALLBACK,
-                                   Tpm12OnVariableLockProtocolGuid,
+                                   Tpm20OnVariableLockProtocolGuid,
                                    NULL,
                                    &VarLockEvent);
 
@@ -5442,7 +5588,7 @@ EFIAPI ProcessTcgPpiRequest()
 #if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
         Status = gBS->CreateEvent (EFI_EVENT_NOTIFY_SIGNAL,
                                    EFI_TPL_CALLBACK,
-                                   Tpm12OnVariableLockProtocolGuid,
+                                   Tpm20OnVariableLockProtocolGuid,
                                    NULL,
                                    &VarLockEvent);
 
@@ -5461,23 +5607,23 @@ EFIAPI ProcessTcgPpiRequest()
 }
 
 VOID OnLegacyBoot(
-    IN EFI_EVENT    Event,
-    IN VOID       *Context
+	IN EFI_EVENT    Event,
+	IN VOID       *Context
 )
 {
-    BOOLEAN                        Support = FALSE;
-    EFI_STATUS      Status;
-    //
-    // Measure handoff tables
-    //
-    Support = IsTcmSupportType();
+	BOOLEAN                        Support = FALSE;
+	EFI_STATUS		Status;
+	//
+	// Measure handoff tables
+	//
+	Support = IsTcmSupportType();
 
-    if(Support){
-       Status = TcmMeasureHandoffTables( );
-    }else{
-       Status = MeasureHandoffTablesFuncPtr( );
-    }
-    return;
+	if(Support){
+	   Status = TcmMeasureHandoffTables( );
+	}else{
+	   Status = MeasureHandoffTablesFuncPtr( );
+	}
+	return;
 }
 AMI_TCG_PLATFORM_PROTOCOL   AmiTcgPlatformProtocol =
 {
@@ -5511,18 +5657,18 @@ EFI_STATUS AmiTcgPlatformLoadStrings(
              );
     if (EFI_ERROR (Status))
     {
-        DEBUG((DEBUG_INFO,"gEfiHiiPackageListProtocolGuid protocol is not found\n"));
+        DEBUG((-1,"gEfiHiiPackageListProtocolGuid protocol is not found\n"));
         return Status;
     }
 
     Status = gBS->LocateProtocol (
                  &gEfiHiiDatabaseProtocolGuid,
                  NULL,
-                 (void **)&HiiDatabase
+                 &HiiDatabase
              );
     if (EFI_ERROR (Status))
     {
-        DEBUG((DEBUG_INFO,"gEfiHiiDatabaseProtocolGuid protocol is not found\n"));
+        DEBUG((-1,"gEfiHiiDatabaseProtocolGuid protocol is not found\n"));
         return Status;
     }
 
@@ -5536,7 +5682,7 @@ EFI_STATUS AmiTcgPlatformLoadStrings(
                  NULL,
                  pHiiHandle
              );
-    DEBUG((DEBUG_INFO,"NewPackageList status: %r\n",Status));
+    DEBUG((-1,"NewPackageList status: %r\n",Status));
     return Status;
 }
 
@@ -5547,38 +5693,37 @@ EFIAPI AmiTcgPlatformDXE_Entry(
     IN EFI_SYSTEM_TABLE *SystemTable )
 {
     EFI_STATUS Status;
-    
+
+    gAmiTcgPlatformImageHandle = ImageHandle;
+
     Status = gBS->InstallProtocolInterface(
                  &ImageHandle,
-                 &gAmiTcgPlatformProtocolguid,
+                 &gAMITcgPlatformProtocolguid,
                  EFI_NATIVE_INTERFACE,
                  &AmiTcgPlatformProtocol);
 
-    
     Status = EfiCreateEventLegacyBootEx (EFI_TPL_NOTIFY,
-                       OnLegacyBoot,
-                       NULL,
-                       &gLegacyBootEvent );
-
-   
-    ASSERT_EFI_ERROR(Status);
-
-    Status = AmiTcgPlatformLoadStrings( ImageHandle, &gHiiHandle );
+				       OnLegacyBoot,
+				       NULL,
+				       &gLegacyBootEvent );
 
     ASSERT_EFI_ERROR(Status);
-       
+
+    AmiTcgPlatformLoadStrings( ImageHandle, &gHiiHandle );
+
 #if (defined(TCGMeasureSecureBootVariables) && (TCGMeasureSecureBootVariables != 0))
         Status = MeasureSecurebootVariablesFuncPtr ();
 
         if ( EFI_ERROR( Status ))
         {
-            DEBUG((DEBUG_ERROR, "Error Measuring Secure Vars\n"));
+            DEBUG((-1, "Error Measuring Secure Vars\n"));
         }
 
-        Status = MeasureSeparatorEvent(7);
+        MeasureSeparatorEvent(7);
 #endif
 
-      return EFI_SUCCESS;
+
+    return Status;
 }
 
 //**********************************************************************

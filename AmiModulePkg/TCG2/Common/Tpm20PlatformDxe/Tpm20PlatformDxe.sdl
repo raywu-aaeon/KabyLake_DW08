@@ -8,21 +8,9 @@ TOKEN
     Master    = Yes
 End
 
-
-TOKEN
-    Name  = "TCG_AMI_MODULE_PKG_VERSION"
-    Value  = "1"
-    Help  = "Token to determine if NVME libary in AmiModulePkg is supported"
-    TokenType = Boolean
-    TargetEQU = Yes
-    TargetMAK = Yes
-    TargetH = Yes
-    Token = "AMI_MODULE_PKG_VERSION" ">=" "39"
-End
-
 TOKEN
 	Name  = "TPM20_Measure_PCI_Oproms"
-	Value  = "1"
+	Value  = "0"
 	Help  = "token to determine if PCI Oproms are measured"
 	TokenType = Boolean
 	TargetEQU = Yes
@@ -105,7 +93,6 @@ MODULE
     Help  = "Includes Tpm20PlatformDxe.mak to Project"
     File  = "Tpm20PlatformDxe.mak"
 End
-
 INFComponent
     Name  = "Tpm20PlatformDxe"
     File  = "../../../../Build/Tpm20PlatformDxe.inf"

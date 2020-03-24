@@ -56,35 +56,18 @@ PerformanceLib
 TpmReportStatusCodeWrapperLibPei
 
 [Ppis]
- gAmiTcgPlatformPpiAfterMem
- gEfiPeiReadOnlyVariable2PpiGuid
- gEfiEndOfPeiSignalPpiGuid
- gAmiTcgPlatformPpiBeforeMem
- gTcgPeiPolicyGuid
-#amiFVhoblistguid
+gAmiTcgPlatformPpiAfterMem
+gEfiPeiReadOnlyVariable2PpiGuid
+gEfiEndOfPeiSignalPpiGuid
 
-[Guids]
-  gAmiTcmSignalguid
-  gAmiLegacyTpmguid
-  gEfiTcgMpDriverHobGuid
-  gEfiPeiTcgLogHobGuid
-  gEfiTcgWakeEventDataHobGuid
-  AmiMemoryPresentFunctionOverrideGuid
-  AmiSetPhysicalPresenceGuid
-  AmiVerifyTcgVariablesGuid
-  amiFVhoblistguid
-  gMpTpmFileGuid
-  gMpTcmFileGuid
-  ExtendedDataGuid
-  
 [Packages]
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
   MdePkg/MdePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [Depex]
   gPeiTcgPpiGuid AND
+  gPeiTpmPpiGuid AND
   gEfiPeiMemoryDiscoveredPpiGuid
 
 

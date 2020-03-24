@@ -1,3 +1,6 @@
+#*_*_IA32_CC_FLAGS              =  /GL- /Od /wd4002 /wd4267 /wd4090 /wd4334  -DPEI_BUILD -DDEBUG_TRACE
+
+
 [Defines]
 INF_VERSION = 0x00010015
 VERSION_STRING = 1.0
@@ -17,26 +20,22 @@ sha512.c
 sha512.h
 commonheader.h
 
-[Sources.IA32]
-  Aullshr.asm | MSFT
-  Allshl.asm  | MSFT
-  Aulldiv.asm | MSFT
-  Allmul.asm | MSFT
+[Sources.Ia32]
+IA32math.c
 
 [LibraryClasses]
 BaseLib
 BaseMemoryLib
-MemoryAllocationLib
 DebugLib
+TcgHashIntrinsicLib
 
 [Packages]
 MdePkg/MdePkg.dec
 AmiModulePkg/AmiModulePkg.dec
 MdeModulePkg/MdeModulePkg.dec
 
-
-[BuildOptions.AARCH64]
-DEBUG_GCC_AARCH64_CC_FLAGS   = -DDEBUG_TRACE=1 -D_MSC_VER -D LTM_FAST
-RELEASE_GCC_AARCH64_CC_FLAGS = -D_MSC_VER  -D LTM_FAST
+[BuildOptions.IA32]
+DEBUG_MYTOOLS_IA32_CC_FLAGS   =  /GL- /Od /wd4002 /wd4267 /wd4090 /wd4334 -DPEI_BUILD -DDEBUG_TRACE
+RELEASE_MYTOOLS_IA32_CC_FLAGS =  /GL- /Od /wd4002 /wd4267 /wd4090 /wd4334 -DPEI_BUILD
 
 

@@ -45,11 +45,11 @@
 //---------------------------------------------------------------------------
 //<AMI_FHDR_END>
 #include "TpmClearOnRollback.h"
-#include <Protocol/AMIPostMgr.h>
-#include <Ppi/FwVersion.h>
+#include <Protocol/AmiPostMgr.h>
+#include <PPI/FwVersion.h>
 #include <Hob.h>
 #include <Token.h>
-#include <Guid/HobList.h>
+#include <Guid\HobList.h>
 #include <AmiHobs.h>
 #include<Library/TimerLib.h>
 #include <AmiDxeLib.h>
@@ -100,17 +100,17 @@ VOID RecoveryClearTpmBeforeFlash (VOID)
     AMI_POST_MANAGER_PROTOCOL   *TpmClearAmiPostMgr = NULL;
     FW_VERSION                  Fid;
     EFI_EVENT                   MyEvent;
-    FW_VERSION                  RecoveryFid={0};
+    FW_VERSION                  RecoveryFid;
     EFI_HOB_HANDOFF_INFO_TABLE  *TpmpHit;
+    EFI_GUID                    myGuidHob = HOB_LIST_GUID;
     EFI_GUID                    TpmRecoveryHobGuid = AMI_RECOVERY_IMAGE_HOB_GUID;
-    UINT32                      ProjectVersion, NewProjectVersion,ProjectVersionfloat, NewProjectVersionfloat;
-    BOOLEAN                     Rollback=FALSE;
+    UINT32                      ProjectVersion, NewProjectVersion;
     EFI_GUID                   gAmiPostManagerProtocolGuid = \
             AMI_POST_MANAGER_PROTOCOL_GUID;
     EFI_STATUS                  Status;
 
-    TpmpHit = GetEfiConfigurationTable(pST, &gEfiHobListGuid);
-    if(TpmpHit != NULL && !EFI_ERROR(FindNextHobByGuid(&TpmRecoveryHobGuid, (void **)&TpmpHit)))
+    TpmpHit = TcgGetEfiConfigurationTable(pST, &myGuidHob);
+    if(TpmpHit != NULL && !EFI_ERROR(FindNextHobByGuid(&TpmRecoveryHobGuid, &TpmpHit)))
     {
 
         TpmGetFidFromBuffer(&RecoveryFid, (VOID *)(UINTN)((RECOVERY_IMAGE_HOB*)TpmpHit)->Address);
@@ -118,30 +118,20 @@ VOID RecoveryClearTpmBeforeFlash (VOID)
 
     TpmRecoveryGetFidFromFv(&Fid);
 
-    ProjectVersion = (Fid.ProjectMajorVersion[0] - '0') * 10 + (Fid.ProjectMajorVersion[1] - '0');
+    ProjectVersion = Fid.ProjectMajorVersion[0] + Fid.ProjectMajorVersion[1] + Fid.ProjectMajorVersion[2];
     ProjectVersion <<= 16;
-    ProjectVersionfloat = (Fid.ProjectMinorVersion[0] - '0') * 10 + (Fid.ProjectMinorVersion[1] - '0');
+    ProjectVersion += Fid.ProjectMinorVersion[0] + Fid.ProjectMinorVersion[1] + Fid.ProjectMinorVersion[2];
 
-    NewProjectVersion = (RecoveryFid.ProjectMajorVersion[0] - '0') * 10 + (RecoveryFid.ProjectMajorVersion[1] - '0');
+    NewProjectVersion = RecoveryFid.ProjectMajorVersion[0] + RecoveryFid.ProjectMajorVersion[1] + RecoveryFid.ProjectMajorVersion[2];
     NewProjectVersion <<= 16;
-    NewProjectVersionfloat = (RecoveryFid.ProjectMinorVersion[0] - '0') * 10 + (RecoveryFid.ProjectMinorVersion[1] - '0');
-    
-    if(NewProjectVersion < ProjectVersion){
-        Rollback= TRUE;
-    }
-    
-    if(NewProjectVersion == ProjectVersion){
-        if(NewProjectVersionfloat < ProjectVersionfloat){
-            Rollback=TRUE;
-        }
-    }
+    NewProjectVersion += RecoveryFid.ProjectMinorVersion[0] + RecoveryFid.ProjectMinorVersion[1] + RecoveryFid.ProjectMinorVersion[2];
 
-    if(Rollback == TRUE)
+    if(NewProjectVersion < ProjectVersion)
     {
         ClearResults = ClearTpmBeforeFlash();
         if(ClearResults == TPM_CLEAR_RESET_REQUIRED)
         {
-            Status = pBS->LocateProtocol(&gAmiPostManagerProtocolGuid, NULL, (void **)&TpmClearAmiPostMgr);
+            Status = pBS->LocateProtocol(&gAmiPostManagerProtocolGuid, NULL, &TpmClearAmiPostMgr);
             if(EFI_ERROR(Status))return;
 
             if(TpmClearAmiPostMgr != NULL)

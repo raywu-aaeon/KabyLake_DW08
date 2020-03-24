@@ -31,7 +31,6 @@ TcgLegacy.h
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
   IntelFrameworkPkg/IntelFrameworkPkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint
@@ -44,20 +43,13 @@ TcgLegacy.h
   gEfiLegacyBiosProtocolGuid
   gEfiFirmwareVolume2ProtocolGuid
   gEfiLegacyRegion2ProtocolGuid
-  gEfiTrEEProtocolGuid
-  
-[Guids]
-  gTcgLegX16FileGuid
-  gTpm32FileGuid
-  gMpTpmFileGuid
-  gTcmLegX16FileGuid
-  gTcm32FileGuid  
-  gEfiTcgMpDriverHobGuid
-  gEfiHobListGuid
 	
 [Depex]
   gEfiTcgProtocolGuid AND
   gEfiLegacyBiosProtocolGuid
+
+[BuildOptions.X64]
+*_*_X64_CC_FLAGS = /D EFIx64 
 
 #*************************************************************************
 #**                                                                     **

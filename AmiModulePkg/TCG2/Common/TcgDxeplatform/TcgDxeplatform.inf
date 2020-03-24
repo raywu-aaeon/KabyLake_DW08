@@ -30,7 +30,6 @@ TcgDxeplatform.h
   MdePkg/MdePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint
@@ -41,12 +40,12 @@ TcgDxeplatform.h
 [Protocols]
    gAmiTcgPlatformProtocolguid
    gEfiFirmwareVolume2ProtocolGuid
-   
-[Guids]   
-   AmiTcgResetVarHobGuid
-   
+
 [Depex]
    gAmiTcgPlatformProtocolguid
+
+[BuildOptions.X64]
+  *_*_X64_CC_FLAGS = /D EFIx64 
 
 #*************************************************************************
 #**                                                                     **

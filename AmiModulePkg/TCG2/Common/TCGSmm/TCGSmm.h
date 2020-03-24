@@ -32,21 +32,21 @@
 
 //#include <AmiDxeLib.h>
 //#include <Protocol\SmmThunk.h>
-#include <Protocol/SmmBase2.h>
-#include <Protocol/DevicePath.h>
-#include <Protocol/LoadedImage.h>
-#include <Protocol/SmmSwDispatch.h>
-#include <Protocol/SmmSwDispatch2.h>
+#include <Protocol\SmmBase2.h>
+#include <Protocol\DevicePath.h>
+#include <Protocol\LoadedImage.h>
+#include <Protocol\SmmSwDispatch.h>
+#include <Protocol\SmmSwDispatch2.h>
 #include <Token.h>
 //#include <AmiDxeLib.h>
-#include <Hob.h>
-#include <AmiTcg/TCGMisc.h>
-#include <AmiTcg/tcg.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include <HOB.h>
+#include <AmiTcg\TCGMisc.h>
+#include <AmiTcg\tcg.h>
 
 
+EFI_GUID        SmmtcgefiOsVariableGuid    = AMI_TCG_EFI_OS_VARIABLE_GUID;
+EFI_GUID        SmmFlagsStatusguid         = AMI_TCG_CONFIRMATION_FLAGS_GUID;
 
-extern EFI_GUID SmmRsTableGuid;
 
 //
 // The return code for Sumbit TPM Request to Pre-OS Environment

@@ -7,7 +7,7 @@ End
 
 PATH
     Name  = "AmiTcmlib_DIR"
-    Path  = "AmiModulePkg/TCG/AmiTcmlib"
+    Path  = "AmiModulePkg\TCG\AmiTcmlib"
 End
 
 INFComponent

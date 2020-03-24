@@ -85,32 +85,34 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include "AmiTcg/TcgCommon20.h"
-#include "Token.h"
-#include "AmiTcg/sha.h"
-#include <AmiTcg/Tpm20.h>
-#include <AmiTcg/TCGMisc.h>
+#include "AmiTcg\TcgCommon20.h"
+#include "token.h"
+#include "AmiTcg\Sha.h"
+#include <AmiTcg\Tpm20.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <Guid/HobList.h>
+
+#define TCG_EFI_HOB_LIST_GUID \
+    { 0x7739f24c, 0x93d7, 0x11d4, 0x9a, 0x3a, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d}
 
 UINT16
-EFIAPI Tpm20TcgCommonH2NS(
+__stdcall TcgCommonH2NS(
     IN UINT16 Val )
 {
     return TPM_H2NS( Val );
 }
 
 UINT32
-EFIAPI Tpm20TcgCommonH2NL(
+__stdcall TcgCommonH2NL(
     IN UINT32 Val )
 {
     return TPM_H2NL( Val );
 }
 
+
+
 VOID
-EFIAPI Tpm20TcgCommonCopyMem(
+__stdcall TcgCommonCopyMem(
     IN VOID  *CallbackContext,
     OUT VOID *Dest,
     IN VOID  *Src,
@@ -140,7 +142,7 @@ EFIAPI Tpm20TcgCommonCopyMem(
 }
 
 // The patch is for Legacy back to UEFI, we need to re-calucate TcgEventCount and LastEventEntry
-UINTN Tpm20GetLogEventCount(TCG_PCR_EVENT_HDR   *TcgLog)
+UINTN GetLogEventCount(TCG_PCR_EVENT_HDR   *TcgLog)
 {
     TCG_PCR_EVENT_HDR *TcgLogNext = TcgLog;
     UINTN   NextLoc =0;
@@ -165,7 +167,7 @@ UINTN Tpm20GetLogEventCount(TCG_PCR_EVENT_HDR   *TcgLog)
 
 
 
-UINTN Tpm20FindNextLogLocation(TCG_PCR_EVENT_HDR   *TcgLog, UINTN EventNum)
+UINTN FindNextLogLocation(TCG_PCR_EVENT_HDR   *TcgLog, UINTN EventNum)
 {
     TCG_PCR_EVENT_HDR *TcgLogNext = TcgLog;
     UINTN   NextLoc =0;
@@ -188,7 +190,7 @@ UINTN Tpm20FindNextLogLocation(TCG_PCR_EVENT_HDR   *TcgLog, UINTN EventNum)
 
 
 EFI_STATUS
-EFIAPI Tpm20TcgCommonLogEvent(
+__stdcall TcgCommonLogEvent(
     IN VOID          *CallbackContext,
     IN TCG_PCR_EVENT *EvtLog,
     IN OUT UINT32    *TableSize,
@@ -205,15 +207,15 @@ EFIAPI Tpm20TcgCommonLogEvent(
     }
 
     TempSize = sizeof(TCG_PCR_EVENT)-sizeof(NewEntry->Digest) - sizeof(UINT32)-1;
-    Tpm20TcgCommonCopyMem( CallbackContext, EvtLog, NewEntry, TempSize );
+    TcgCommonCopyMem( CallbackContext, EvtLog, NewEntry, TempSize );
 
     if(HashAlgorithm == 0)
     {
-        Tpm20TcgCommonCopyMem( CallbackContext, (((UINT8 *)EvtLog) + TempSize), (UINT8 *)&NewEntry->Digest.digest, sizeof(NewEntry->Digest.digest) );
+        TcgCommonCopyMem( CallbackContext, (((UINT8 *)EvtLog) + TempSize), (UINT8 *)&NewEntry->Digest.digest, sizeof(NewEntry->Digest.digest) );
         TempSize+=sizeof(NewEntry->Digest.digest);
-        Tpm20TcgCommonCopyMem( CallbackContext, (((UINT8 *)EvtLog) + TempSize), (UINT8 *)&NewEntry->EventSize, sizeof(UINT32));
+        TcgCommonCopyMem( CallbackContext, (((UINT8 *)EvtLog) + TempSize), (UINT8 *)&NewEntry->EventSize, sizeof(UINT32));
         TempSize+=sizeof(UINT32);
-        Tpm20TcgCommonCopyMem( CallbackContext, (((UINT8 *)EvtLog) + TempSize), NewEntry->Event, NewEntry->EventSize);
+        TcgCommonCopyMem( CallbackContext, (((UINT8 *)EvtLog) + TempSize), NewEntry->Event, NewEntry->EventSize);
     }
 
     *TableSize += (TempSize + NewEntry->EventSize);
@@ -222,7 +224,7 @@ EFIAPI Tpm20TcgCommonLogEvent(
 
 
 EFI_STATUS
-EFIAPI Tpm20SHA1HashAll(
+__stdcall SHA1HashAll(
     IN VOID            *CallbackContext,
     IN VOID            *HashData,
     IN UINTN           HashDataLen,
@@ -238,7 +240,7 @@ EFIAPI Tpm20SHA1HashAll(
 
     SHA1Final( DigestArray, &Sha1Ctx );
 
-    Tpm20TcgCommonCopyMem(
+    TcgCommonCopyMem(
         CallbackContext,
         Digest,
         DigestArray,
@@ -250,7 +252,7 @@ EFIAPI Tpm20SHA1HashAll(
 
 
 EFI_STATUS
-EFIAPI SHA2HashAll(
+__stdcall SHA2HashAll(
     IN  VOID            *CallbackContext,
     IN  VOID            *HashData,
     IN  UINTN           HashDataLen,
@@ -266,7 +268,7 @@ EFIAPI SHA2HashAll(
 
     sha256_done( &Sha2Ctx, DigestArray );
 
-    Tpm20TcgCommonCopyMem(
+    TcgCommonCopyMem(
         CallbackContext,
         Digest,
         DigestArray,
@@ -277,7 +279,7 @@ EFIAPI SHA2HashAll(
 
 
 EFI_STATUS
-EFIAPI SHA384HashAll(
+__stdcall SHA384HashAll(
     IN  VOID            *HashData,
     IN  UINTN           HashDataLen,
     OUT UINT8           *Digest
@@ -285,34 +287,25 @@ EFIAPI SHA384HashAll(
 {
     unsigned char    DigestArray[48];
     VOID            *CallbackContext=NULL;
-    const unsigned char   *Addr[1];
-    UINTN           Len[1];
 
-    Addr[0] = (unsigned char*)HashData;
-    Len[0]  = HashDataLen;
-    sha384_vector(1, Addr, Len, DigestArray);
-    Tpm20TcgCommonCopyMem(CallbackContext, Digest, DigestArray, sizeof (DigestArray));
+    sha384_vector(1, HashData, &HashDataLen, DigestArray);
+    TcgCommonCopyMem(CallbackContext, Digest, DigestArray, sizeof (DigestArray));
     return EFI_SUCCESS;
 }
 
 
 EFI_STATUS
-EFIAPI SHA512HashAll(
+__stdcall SHA512HashAll(
     IN  VOID            *HashData,
     IN  UINTN           HashDataLen,
     OUT UINT8           *Digest
 )
 {
-    unsigned char   DigestArray[64];
-    VOID            *CallbackContext=NULL;
-    const unsigned char   *Addr[1];
-    UINTN           Len[1];
+    unsigned char    DigestArray[64];
+    VOID             *CallbackContext=NULL;
 
-    Addr[0] = (unsigned char*)HashData;
-    Len[0]  = HashDataLen;
-
-    sha384_vector(1, Addr, Len, DigestArray);
-    Tpm20TcgCommonCopyMem(CallbackContext, Digest, DigestArray, sizeof (DigestArray));
+    sha384_vector(1, HashData, &HashDataLen, DigestArray);
+    TcgCommonCopyMem(CallbackContext, Digest, DigestArray, sizeof (DigestArray));
 
     return EFI_SUCCESS;
 }
@@ -339,7 +332,7 @@ EFIAPI SHA512HashAll(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID* Tpm20GetHob(
+VOID* GetHob(
     IN UINT16 Type,
     IN VOID   *HobStart  )
 {
@@ -400,7 +393,7 @@ VOID* Tpm20GetHob(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-EFI_STATUS Tpm20TcgGetNextGuidHob(
+EFI_STATUS TcgGetNextGuidHob(
     IN OUT VOID          **HobStart,
     IN EFI_GUID          * Guid,
     OUT VOID             **Buffer,
@@ -423,7 +416,7 @@ EFI_STATUS Tpm20TcgGetNextGuidHob(
             return EFI_NOT_FOUND;
         }
 
-        GuidHob.Raw = Tpm20GetHob( EFI_HOB_TYPE_GUID_EXTENSION, *HobStart );
+        GuidHob.Raw = GetHob( EFI_HOB_TYPE_GUID_EXTENSION, *HobStart );
 
         if ( GuidHob.Header->HobType == EFI_HOB_TYPE_GUID_EXTENSION )
         {
@@ -503,7 +496,8 @@ EFI_STATUS Tpm20TcgGetNextGuidHob(
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID* Tpm20LocateATcgHob(
+EFI_GUID gEfiAmiTHobListGuid = TCG_EFI_HOB_LIST_GUID;
+VOID* LocateATcgHob(
     UINTN                   NoTableEntries,
     EFI_CONFIGURATION_TABLE *ConfigTable,
     EFI_GUID                *HOB_guid )
@@ -517,13 +511,13 @@ VOID* Tpm20LocateATcgHob(
 
         if ((!CompareMem(
                     &ConfigTable[NoTableEntries].VendorGuid,
-                    &gEfiHobListGuid, sizeof(EFI_GUID)
+                    &gEfiAmiTHobListGuid, sizeof(EFI_GUID)
                 )))
         {
             HobStart = ConfigTable[NoTableEntries].VendorTable;
 
             if ( !EFI_ERROR(
-                    Tpm20TcgGetNextGuidHob( &HobStart, HOB_guid, &PtrHob, NULL )
+                        TcgGetNextGuidHob( &HobStart, HOB_guid, &PtrHob, NULL )
                     ))
             {
                 return PtrHob;

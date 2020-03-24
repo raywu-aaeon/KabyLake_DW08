@@ -34,7 +34,7 @@
 #ifndef TREE_PROTOCOL_H
 
 #define TREE_PROTOCOL_H
-#include <AmiTcg/Tpm20.h>
+#include <AmiTcg\Tpm20.h>
 
 #define EFI_TREE_SERVICE_BINDING_PROTOCOL_GUID \
 {0x4cf01d0a, 0xc48c, 0x4271, 0xa2, 0x2a, 0xad, 0x8e, 0x55, 0x97,\

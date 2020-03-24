@@ -31,38 +31,45 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Efi.h>
-#include <AmiTcg/TcgCommon12.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Ppi/AmiTcgPlatformPpi.h>
-#include "Ppi/TcgService.h"
-#include "Ppi/TpmDevice.h"
-#include "Ppi/CpuIo.h"
-#include "Ppi/LoadFile.h"
-#include "Ppi/TcgPlatformSetupPeiPolicy.h"
-#include <AmiTcg/Tpm20.h>
-#include <Library/DebugLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <Guid/HobList.h>
-#include <AmiTpm12PeiPlatformHooks.h>
+#include <EFI.h>
+#include <AmiTcg\TcgCommon12.h>
+#include <AmiTcg\TcgMisc.h>
+#include <ppi\AmiTcgPlatformPpi.h>
+#include "PPI\TcgService.h"
+#include "PPI\TpmDevice.h"
+#include "PPI\CpuIo.h"
+#include "PPI\LoadFile.h"
+#include "PPI\TcgPlatformSetupPeiPolicy.h"
+#include <AmiTcg\Tpm20.h>
+#include <Library\DebugLib.h>
 
-extern EFI_GUID gTcgPeiPolicyGuid;
-extern EFI_GUID gAmiPlatformSecurityChipGuid;
-extern EFI_GUID gAmiGlobalVariableGuid;
+
+EFI_GUID        gTcgPpiGuid = PEI_TCG_PPI_GUID;
+EFI_GUID        gPlatformGuid = AMI_TCG_PLATFORM_PPI_GUID;
+
+#define AMI_GLOBAL_VARIABLE_GUID \
+    {0x1368881,0xc4ad,0x4b1d,0xb6,0x31,0xd5,0x7a,0x8e,0xc8,0xdb,0x6b}
+
 
 EFI_STATUS
 EFIAPI TpmPeiEntry (
-    IN       EFI_PEI_FILE_HANDLE  FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices );
 
 EFI_STATUS
+EFIAPI TcmPeiEntry (
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
+    IN CONST EFI_PEI_SERVICES    **PeiServices );
+
+
+EFI_STATUS
 EFIAPI TcgPeiEntry (
-    IN       EFI_PEI_FILE_HANDLE  FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices );
 
 EFI_STATUS
 EFIAPI TcgTcmPeiEntry (
-    IN EFI_PEI_FILE_HANDLE *FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices );
 
 EFI_STATUS TcgPeiBuildHobGuid(
@@ -73,7 +80,7 @@ EFI_STATUS TcgPeiBuildHobGuid(
 
 EFI_STATUS
 EFIAPI Tpm20CrbEntry(
-    IN EFI_PEI_FILE_HANDLE *FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices );
 
 UINT8 GetPlatformSupportType()
@@ -92,30 +99,10 @@ static EFI_PEI_PPI_DESCRIPTOR mPlatformPpiList[] =
     {
         EFI_PEI_PPI_DESCRIPTOR_PPI
         | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
-        &gAmiPlatformSecurityChipGuid,
+        &gPlatformGuid,
         &PlatformTypePpi
     }
 };
-
-
-/**
-  SkipTpm12Initialization is used to determine whether TPM 1.2 flow should skip,
-  TPM Pei initialization. This hooks is mainly for platforms that need to do 
-  Pre-memory initialization where the TPM address space should be left untouched for
-  that period is required. 
-  
-  @retval TRUE              SKIP TPM 1.2 Initialization.
-  @retval Other values      Do TPM 1.2 Initialization.
-**/
-BOOLEAN SkipTpm12InitializationHook(VOID)
-{
-    UINTN i;
-    BOOLEAN Result = FALSE;
-    for(i=0; SkipTpm12InitializationHookList[i] && Result == FALSE; i++) 
-        Result = SkipTpm12InitializationHookList [i]();
-    return Result;
-}
-
 
 
 //**********************************************************************
@@ -140,18 +127,21 @@ BOOLEAN SkipTpm12InitializationHook(VOID)
 //**********************************************************************
 EFI_STATUS
 CommonTcgPeiEntryPoint(
-    IN   IN       EFI_PEI_FILE_HANDLE  FileHandle,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices )
 {
     EFI_STATUS                     Status;
     TCG_PLATFORM_SETUP_INTERFACE   *TcgPeiPolicy = NULL;
+    EFI_GUID                        gTcgPeiPolicyGuid =\
+            TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
     TCG_CONFIGURATION              ConfigFlags;
     CHAR16                         Monotonic[] = L"MonotonicCounter";
 #if defined(CORE_COMBINED_VERSION) && (CORE_COMBINED_VERSION > 262797)
-    EFI_GUID                       Guid        = gAmiGlobalVariableGuid;
+    EFI_GUID                       Guid        = AMI_GLOBAL_VARIABLE_GUID;
 #else
-    EFI_GUID                       Guid        = gEfiGlobalVariableGuid;
+    EFI_GUID                       Guid        = EFI_GLOBAL_VARIABLE;
 #endif
+    EFI_GUID                       TcgGuid     = AMI_TCG_RESETVAR_HOB_GUID;
     UINTN                          Size        = sizeof(UINT32);
     UINT32                         Counter;
     EFI_PEI_READ_ONLY_VARIABLE2_PPI  *ReadOnlyVariable;
@@ -169,7 +159,7 @@ CommonTcgPeiEntryPoint(
                  PeiServices,
                  &gTcgPeiPolicyGuid,
                  0, NULL,
-                 (void **)&TcgPeiPolicy);
+                 &TcgPeiPolicy);
 
     if(EFI_ERROR(Status) || TcgPeiPolicy == NULL )return Status;
 
@@ -182,7 +172,7 @@ CommonTcgPeiEntryPoint(
                  PeiServices,
                  &gEfiPeiReadOnlyVariable2PpiGuid,
                  0, NULL,
-                 (void **)&ReadOnlyVariable
+                 &ReadOnlyVariable
              );
 
     if(EFI_ERROR(Status) || ReadOnlyVariable == NULL )return Status;
@@ -197,23 +187,26 @@ CommonTcgPeiEntryPoint(
         ResetAllTcgVar = TRUE;
         Status         = TcgPeiBuildHobGuid(
                              PeiServices,
-                             &AmiTcgResetVarHobGuid,
+                             &TcgGuid,
                              sizeof (BOOLEAN),
-                             (void **)&Hob );
+                             &Hob );
 
-        if(!EFI_ERROR(Status))
-        {
-            Hob++;
-            (*PeiServices)->CopyMem( Hob, &ResetAllTcgVar, sizeof (ResetAllTcgVar));
-        }
+        Hob++;
+        (*PeiServices)->CopyMem( Hob, &ResetAllTcgVar, sizeof (ResetAllTcgVar));
     }
-    
-    if(SkipTpm12InitializationHook())return EFI_SUCCESS;
 
     if(!IsTcmSupportType())
     {
-        Status = TpmPeiEntry( FileHandle, PeiServices );
-        DEBUG((DEBUG_INFO, "TpmPeiEntry results = %r \n", Status));
+        Status = TpmPeiEntry( FfsHeader, PeiServices );
+        DEBUG((-1, "TpmPeiEntry results = %r \n", Status));
+        if ( EFI_ERROR( Status ))
+        {
+            return Status;
+        }
+    }
+    else
+    {
+        Status = TcmPeiEntry( FfsHeader, PeiServices );
         if ( EFI_ERROR( Status ))
         {
             return Status;
@@ -222,19 +215,19 @@ CommonTcgPeiEntryPoint(
 
     if ( ConfigFlags.TpmSupport == 0x00  || EFI_ERROR( Status ))
     {
-        DEBUG((DEBUG_ERROR, "ConfigFlags.TpmSupport == 0x00  || EFI_ERROR( Status )\n"));
+        DEBUG((-1, "ConfigFlags.TpmSupport == 0x00  || EFI_ERROR( Status )\n"));
         return EFI_SUCCESS;
     }
 
 
-    DEBUG((DEBUG_INFO,  "TcgPeiEntry processing\n"));
+    DEBUG((-1,  "TcgPeiEntry processing\n"));
     if(!IsTcmSupportType())
     {
-        Status = TcgPeiEntry( FileHandle, PeiServices );
+        Status = TcgPeiEntry( FfsHeader, PeiServices );
     }
     else
     {
-        Status = TcgTcmPeiEntry( FileHandle, PeiServices );
+        Status = TcgTcmPeiEntry( FfsHeader, PeiServices );
     }
 
     return Status;

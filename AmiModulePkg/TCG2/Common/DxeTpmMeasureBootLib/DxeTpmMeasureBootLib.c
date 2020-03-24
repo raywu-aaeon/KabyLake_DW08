@@ -36,11 +36,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/AmiImageTypeLib.h>
 #endif
 
-
 //
 // Flag to check GPT partition. It only need be measured once.
 //
 BOOLEAN                        mMeasureGptTableFlag = FALSE;
+EFI_GUID                        mZeroGuid = {0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}};
 UINTN                             mMeasureGptCount = 0;
 EFI_EVENT       ReadyToBootEvent;
 static BOOLEAN          ReadytoBootSignaled = FALSE;
@@ -176,57 +176,42 @@ DxeTpmMeasureBootPEHandler (
       }
   }
   
-  ZeroMem (&ImageContext, sizeof (ImageContext));
-  ImageContext.Handle    = (VOID *) FileBuffer;
-  ImageContext.ImageRead = (PE_COFF_LOADER_READ_FILE) ImageRead;
-
-  //
-  // Get information about the image being loaded
-  //
-  Status = PeCoffLoaderGetImageInfo (&ImageContext);
-
-  DEBUG ((DEBUG_INFO, "ImageContext.ImageCodeMemoryType %x.\n", ImageContext.ImageCodeMemoryType));
-  DEBUG ((DEBUG_INFO, "ImageContext.ImageDataMemoryType %x.\n", ImageContext.ImageDataMemoryType));
-  DEBUG ((DEBUG_INFO, "ImageContext.EntryPoint %x.\n", ImageContext.EntryPoint));
-  DEBUG ((DEBUG_INFO, "ImageContext.DestinationAddress %x.\n", ImageContext.DestinationAddress));
-  DEBUG ((DEBUG_INFO, "ImageContext.ImageCodeMemoryType %x.\n", ImageContext.ImageCodeMemoryType));
-  DEBUG ((DEBUG_INFO, "ImageContext.ImageType %x.\n", ImageContext.ImageType));
-  DEBUG ((DEBUG_INFO, "ImageContext.Handle %x\n", ImageContext.Handle));
-  DEBUG ((DEBUG_INFO, "ImageContext.IsTeImage %x.\n", ImageContext.IsTeImage));
-   
 #if AMI_MODULE_PKG_VERSION >= 28
   isFlashImage = AmiGetImageType(File, FileBuffer, FileSize, BootPolicy);
 #else
   isFlashImage = TcgAmiGetImageType(File, FileBuffer, FileSize, BootPolicy);
 #endif
       
-  if(isFlashImage == AMI_IMAGE_FROM_FV && 
-          ImageContext.ImageType != EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION)
+  if(isFlashImage == AMI_IMAGE_FROM_FV)
   {
-      goto Finish;
-  }
-  
-  if(isFlashImage == AMI_IMAGE_FROM_FV && 
-          ImageContext.ImageType == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION)
-  {
-#if (defined(MEASURE_EMBEDDED_BOOT_IMAGES) && (MEASURE_EMBEDDED_BOOT_IMAGES != 0))
-      DEBUG ((DEBUG_INFO, "Embedded Boot Image \n"));
-      Status = TcgPlatform->MeasurePeImage (
-                    FALSE,
-                    (EFI_PHYSICAL_ADDRESS) (UINTN) FileBuffer, 
-                    FileSize, 
-                    (UINTN) ImageContext.ImageAddress, 
-                    ImageContext.ImageType,
-                    Handle,
-                    DevicePathNode);
-#endif
       goto Finish;
   }
   
   ApplicationRequired = FALSE;
   OrigDevicePathNode = DuplicateDevicePath (File);
 
-    
+
+  //
+  // Check whether this device path support FV2 protocol.
+  //
+  DevicePathNode = OrigDevicePathNode;
+  Status = gBS->LocateDevicePath (&gEfiFirmwareVolume2ProtocolGuid, &DevicePathNode, &Handle);
+  if (!EFI_ERROR (Status)) {
+    //
+    // Don't check FV image, and directly return EFI_SUCCESS.
+    // It can be extended to the specific FV authentication according to the different requirement.
+    //
+    if (IsDevicePathEnd (DevicePathNode)) {
+      return EFI_SUCCESS;
+    }
+    //
+    // The image from Firmware image will not be mearsured.
+    // Current policy doesn't measure PeImage from Firmware if it is driver
+    // If the got PeImage is application, it will be still be measured.
+    //
+    //ApplicationRequired = TRUE;
+  }
+  
   //
   // File is not found.
   //
@@ -235,17 +220,42 @@ DxeTpmMeasureBootPEHandler (
     goto Finish;
   }
 
-  
   //
   // Measure PE Image
   //
   DevicePathNode = OrigDevicePathNode;
+  ZeroMem (&ImageContext, sizeof (ImageContext));
+  ImageContext.Handle    = (VOID *) FileBuffer;
+  ImageContext.ImageRead = (PE_COFF_LOADER_READ_FILE) ImageRead;
+
+  //
+  // Get information about the image being loaded
+  //
+  Status = PeCoffLoaderGetImageInfo (&ImageContext);
+  
+  DEBUG ((-1, "ImageContext.ImageCodeMemoryType %x.\n", ImageContext.ImageCodeMemoryType));
+  DEBUG ((-1, "ImageContext.ImageDataMemoryType %x.\n", ImageContext.ImageDataMemoryType));
+  DEBUG ((-1, "ImageContext.EntryPoint %x.\n", ImageContext.EntryPoint));
+  DEBUG ((-1, "ImageContext.DestinationAddress %x.\n", ImageContext.DestinationAddress));
+  DEBUG ((-1, "ImageContext.ImageCodeMemoryType %x.\n", ImageContext.ImageCodeMemoryType));
+  DEBUG ((-1, "ImageContext.ImageType %x.\n", ImageContext.ImageType));
+  DEBUG ((-1, "ImageContext.Handle %x\n", ImageContext.Handle));
+  DEBUG ((-1, "ImageContext.IsTeImage %x.\n", ImageContext.IsTeImage));
+
+  if (EFI_ERROR (Status)) {
+    //
+    // The information can't be got from the invalid PeImage
+    //
+    DEBUG ((-1, "PeCoffLoaderGetImageInfo Error  %r.\n", Status));
+    goto Finish;
+  }
   
   //
   // Measure only application if Application flag is set
   // Measure drivers and applications if Application flag is not set
   //
-  if (!ApplicationRequired) {  
+  if ((!ApplicationRequired) || 
+        (ApplicationRequired && ImageContext.ImageType == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION)) {  
     //
     // Print the image path to be measured.
     //    
@@ -272,11 +282,11 @@ DxeTpmMeasureBootPEHandler (
     //
     // Measure PE image into TPM log.
     //
-    DEBUG ((DEBUG_INFO, "ImageContext.ImageAddress %x \n", ImageContext.ImageAddress));
+    DEBUG ((-1, "ImageContext.ImageAddress %x \n", ImageContext.ImageAddress));
        
     //else hash any loaded image
     
-    DEBUG ((DEBUG_INFO, "calling measure PE image \n"));
+    DEBUG ((-1, "calling measure PE image \n"));
     
     Status = TcgPlatform->MeasurePeImage (
                FALSE,
@@ -382,8 +392,6 @@ DxeTpmMeasureBootHandler (
   OrigDevicePathNode = DuplicateDevicePath (File);
   ASSERT (OrigDevicePathNode != NULL);
   
-  if(OrigDevicePathNode == NULL)return EFI_SUCCESS;
-  
   //
   // 1. Check whether this device path support BlockIo protocol.
   // Is so, this device path may be a GPT device path.
@@ -432,8 +440,10 @@ DxeTpmMeasureBootHandler (
             }
           }
 
-          FreePool (OrigDevicePathNode);
-		  
+          if(OrigDevicePathNode!=NULL){
+              FreePool (OrigDevicePathNode);
+          }
+          
           OrigDevicePathNode = DuplicateDevicePath (File);
           ASSERT (OrigDevicePathNode != NULL);
           break;
@@ -452,7 +462,7 @@ DxeTpmMeasureBootHandler (
 
 
 
-VOID EFIAPI RegisterTpmMeasurementCallback(
+EFI_STATUS RegisterTpmMeasurementCallback(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
@@ -466,7 +476,7 @@ VOID EFIAPI RegisterTpmMeasurementCallback(
                       );
 
      DEBUG ((DEBUG_INFO, "DxeTpmMeasureBootLibConstructor Callback.return Status = %r \n", Status));
-     return;
+     return Status;
 }
 
 
@@ -534,7 +544,6 @@ DxeTpmMeasureBootLibConstructor (
 
 **/
 EFI_STATUS
-EFIAPI
 DxeTpmMeasureBootLibDestructor (
   IN EFI_HANDLE         ImageHandle,
   IN EFI_SYSTEM_TABLE   *SystemTable

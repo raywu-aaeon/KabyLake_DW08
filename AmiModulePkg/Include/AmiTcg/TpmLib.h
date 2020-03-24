@@ -40,28 +40,28 @@
 #ifndef _TPMLIB_H_
 #define _TPMLIB_H_
 
-#include "AmiTcg/TcgPc.h"
+#include "AmiTcg\TcgPc.h"
 
 #define TisCompleteCommand          TisPrepareSendCommand
 
 extern
 EFI_STATUS
-EFIAPI TisRequestLocality (
+__stdcall TisRequestLocality (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 extern
 EFI_STATUS
-EFIAPI TisReleaseLocality (
+__stdcall TisReleaseLocality (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 extern
 EFI_STATUS
-EFIAPI TisPrepareSendCommand (
+__stdcall TisPrepareSendCommand (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 extern
 EFI_STATUS
-EFIAPI TisSendCommand (
+__stdcall TisSendCommand (
     IN TPM_1_2_REGISTERS_PTR TpmReg,
     IN const VOID            *CmdStream,
     IN UINTN                 Size,
@@ -69,24 +69,24 @@ EFIAPI TisSendCommand (
 
 extern
 EFI_STATUS
-EFIAPI TisWaitForResponse (
+__stdcall TisWaitForResponse (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 extern
 EFI_STATUS
-EFIAPI TisReceiveResponse (
+__stdcall TisReceiveResponse (
     IN TPM_1_2_REGISTERS_PTR TpmReg,
     OUT VOID                 *Buffer,
     OUT UINTN                *Size );
 
 extern
 EFI_STATUS
-EFIAPI IsTpmPresent (
+__stdcall IsTpmPresent (
     IN TPM_1_2_REGISTERS_PTR TpmReg );
 
 extern
 EFI_STATUS
-EFIAPI TpmLibPassThrough (
+__stdcall TpmLibPassThrough (
     IN TPM_1_2_REGISTERS_PTR   TpmReg,
     IN UINTN                   NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -95,43 +95,7 @@ EFIAPI TpmLibPassThrough (
 
 extern
 EFI_STATUS
-EFIAPI TpmLibStartup (
+__stdcall TpmLibStartup (
     IN UINT16 StartupType );
-
-
-extern
-EFI_STATUS
-EFIAPI Tpm20TisRequestLocality (
-    IN TPM_1_2_REGISTERS_PTR TpmReg );
-
-extern
-EFI_STATUS
-EFIAPI Tpm20TisReleaseLocality (
-    IN TPM_1_2_REGISTERS_PTR TpmReg );
-
-extern
-EFI_STATUS
-EFIAPI
-Tpm20TpmLibPassThrough (
-  IN      TPM_1_2_REGISTERS_PTR     TpmReg,
-  IN      UINTN                     NoInputBuffers,
-  IN      TPM_TRANSMIT_BUFFER       *InputBuffers,
-  IN      UINTN                     NoOutputBuffers,
-  IN OUT  TPM_TRANSMIT_BUFFER       *OutputBuffers
-  );
-
-extern
-EFI_STATUS
-EFIAPI
-Tpm20TisWaitForResponse (
-  IN      TPM_1_2_REGISTERS_PTR     TpmReg
-  );
-
-extern 
-EFI_STATUS
-EFIAPI
-Tpm20IsTpmPresent (
-  IN      TPM_1_2_REGISTERS_PTR     TpmReg
-  );
 
 #endif

@@ -30,40 +30,49 @@
 //<AMI_FHDR_END>
 //*************************************************************************
 
-#include <Token.h>
-#include <Efi.h>
+#include "token.h"
+#include <EFI.h>
 #include <Protocol/SimpleTextIn.h>
-#include <Protocol/EfiOemBadging.h>
+#include <Protocol/EfiOEMBadging.h>
 #include <Setup.h>
 #include "AMITSEStrTokens.h"
 #include "commonoem.h"
-#include <Protocol/AMIPostMgr.h>
+#include "Protocol\AMIPostMgr.h"
 #include "LogoLib.h"
-#include "mem.h"
+#include "Mem.h"
 #include "HiiLib.h"
 #include "PwdLib.h"
-#include "Keymon.h"
+#include "KeyMon.h"
 #include "bootflow.h"
 #include "commonoem.h"
-//#include "Core/EM/AMITSE/Inc/Variable.h"
+#include "Core\EM\AMITSE\Inc\Variable.h"
 #include <AmiDxeLib.h>
-//#include <Library/DebugLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
 
 #if EFI_SPECIFICATION_VERSION>0x20000 && !defined(GUID_VARIABLE_DEFINITION)
-#include "Include/UefiHii.h"
+#include "Include\UefiHii.h"
 #include "Protocol/HiiDatabase.h"
 #include "Protocol/HiiString.h"
 #else
 #include "Protocol/HII.h"
 #endif
 
+#if TPM_PASSWORD_AUTHENTICATION
 
+#define TCG_PASSWORD_AUTHENTICATION_GUID \
+        {0xB093BDD6, 0x2DE2, 0x4871,0x87,0x68, 0xEE,0x1D, 0xA5, 0x72, 0x49, 0xB4 }
+EFI_GUID    TcgPasswordAuthenticationGuid = TCG_PASSWORD_AUTHENTICATION_GUID;
+#endif
 extern EFI_BOOT_SERVICES    *gBS;
 extern EFI_SYSTEM_TABLE     *gST;
 extern EFI_RUNTIME_SERVICES *gRT;
 
+#define TCG_EFI_GLOBAL_VARIABLE_GUID \
+    { \
+        0x135902e7, 0x9709, 0x4b41, 0x8f, 0xd2, 0x40, 0x69, 0xda, 0xf0, 0x54,\
+        0x6a \
+    }
 
+EFI_GUID             TcgEfiGlobalVariableGuid = TCG_EFI_GLOBAL_VARIABLE_GUID;
 
 
 typedef struct
@@ -111,7 +120,7 @@ VOID IsAdminPasswordVar(
     PasswdChkInstalled = PasswordCheckInstalled();
     if( PasswdChkInstalled & AMI_PASSWORD_ADMIN)
     {
-        //DEBUG((DEBUG_INFO, "Setting  PasswdChkInstalled var = %x \n", PasswdChkInstalled));
+        DEBUG((-1, "Setting  PasswdChkInstalled var = %x \n", PasswdChkInstalled));
         Status = gRT->SetVariable(L"AmiTcgAdminPasswdIsInstalled",
                                   &TcgPasswordAuthenticationGuid,
                                   EFI_VARIABLE_BOOTSERVICE_ACCESS,
@@ -121,7 +130,7 @@ VOID IsAdminPasswordVar(
     else
     {
         PasswdChkInstalled = 0;
-        //DEBUG((DEBUG_INFO, "Setting  PasswdChkInstalled var = %x \n", PasswdChkInstalled));
+        DEBUG((-1, "Setting  PasswdChkInstalled var = %x \n", PasswdChkInstalled));
         Status = gRT->SetVariable(L"AmiTcgAdminPasswdIsInstalled",
                                   &TcgPasswordAuthenticationGuid,
                                   EFI_VARIABLE_BOOTSERVICE_ACCESS,
@@ -180,13 +189,13 @@ BOOLEAN TCGProcessConInAvailability(
     if ( text != NULL )
     {
         PostManagerDisplayPostMessage( text );
-		MemFreePointer((VOID**)&text );
+		MemFreePointer((VOID**)text );
     }
 #endif
 
     Status = gRT->GetVariable(
                  L"AskPassword",
-                 &gTcgEfiGlobalVariableGuid,
+                 &TcgEfiGlobalVariableGuid,
                  NULL,
                  &VariableSize,
                  &VariableData
@@ -212,7 +221,7 @@ BOOLEAN TCGProcessConInAvailability(
     PasswordInstalled = PasswordCheckInstalled( );
     NoOfRetries       = 3;
 
-    //DEBUG((DEBUG_INFO, "PasswordInstalled = %x \n", PasswordInstalled));
+    DEBUG((-1, "PasswordInstalled = %x \n", PasswordInstalled));
 
     IsAdminPasswordVar(NULL, NULL);
     if(!(PasswordInstalled & AMI_PASSWORD_ADMIN))
@@ -271,7 +280,7 @@ BOOLEAN TCGProcessConInAvailability(
 //**********************************************************************
 extern
 BOOLEAN
-EFIAPI IsTcmSupportType ()
+__stdcall IsTcmSupportType ()
 {
 #if TCG_LEGACY == 0
     UINTN i=0;
@@ -313,7 +322,7 @@ VOID PasswordAuthentication( VOID )
 
     Status = gBS->CreateEvent (
                  EVT_NOTIFY_SIGNAL,
-                 TPL_NOTIFY,
+                 TPL_CALLBACK,
                  TCGProcessConInAvailability,
                  NULL,
                  &Event

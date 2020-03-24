@@ -58,8 +58,8 @@
 #ifndef _TCG_PLATFORM_SETUP_PEI_POLICY_H_
 #define _TCG_PLATFORM_SETUP_PEI_POLICY_H_
 
-#include <Uefi.h>
-#include <Ppi/ReadOnlyVariable2.h>
+#include <UEFI.h>
+#include <Ppi\ReadOnlyVariable2.h>
 
 
 
@@ -132,13 +132,6 @@ typedef struct
     UINT8   InterfaceSel;
     UINT32  PcrBanks;
 } TCG_CONFIGURATION;
-
-
-typedef struct _AMI_TCG_PEI_POLICY_HOB
-{
-    EFI_HOB_GUID_TYPE EfiHobGuidType;
-    TCG_CONFIGURATION ConfigInfo;
-} AMI_TCG_PEI_POLICY_HOB;
 
 #pragma pack()
 

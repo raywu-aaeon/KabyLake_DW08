@@ -33,12 +33,12 @@ typedef unsigned long long u64;
 
 #define LTC_ARGCHK(x)   if (!(x)) return CRYPT_INVALID_ARG;
 
-typedef struct
+typedef struct hash_state
 {
     u64  length, state[8];
     unsigned long curlen;
     unsigned char buf[128];
-}hash_state;
+};
 
 /*
 const struct ltc_hash_descriptor sha512_desc =
@@ -132,9 +132,9 @@ static const u64 K[80] =
 
 /* compress 1024-bits */
 #ifdef LTC_CLEAN_STACK
-static int _sha512_compress(hash_state * md, unsigned char *buf)
+static int _sha512_compress(struct hash_state * md, unsigned char *buf)
 #else
-static int  sha512_compress(hash_state * md, unsigned char *buf)
+static int  sha512_compress(struct hash_state * md, unsigned char *buf)
 #endif
 {
     u64 S[8], W[80], t0, t1;
@@ -143,8 +143,7 @@ static int  sha512_compress(hash_state * md, unsigned char *buf)
     /* copy state into S */
     for (i = 0; i < 8; i++)
     {
-        //S[i] = md->state[i];
-        os_memcpy(&S[i], &md->state[i], sizeof(u64));
+        S[i] = md->state[i];
     }
 
     /* copy the state into 1024-bits into W[0..15] */
@@ -207,7 +206,7 @@ static int  sha512_compress(hash_state * md, unsigned char *buf)
 
 /* compress 1024-bits */
 #ifdef LTC_CLEAN_STACK
-static int sha512_compress(hash_state * md, unsigned char *buf)
+static int sha512_compress(struct hash_state * md, unsigned char *buf)
 {
     int err;
     err = _sha512_compress(md, buf);
@@ -221,7 +220,7 @@ static int sha512_compress(hash_state * md, unsigned char *buf)
    @param md   The hash state you wish to initialize
    @return CRYPT_OK if successful
 */
-int sha512_init(hash_state * md)
+int sha512_init(struct hash_state * md)
 {
     LTC_ARGCHK(md != NULL);
     md->curlen = 0;
@@ -243,7 +242,7 @@ int sha512_init(hash_state * md)
 #endif
 
 #define HASH_PROCESS(func_name, compress_name, state_var, block_size)                       \
-int func_name (hash_state * md, const unsigned char *in, unsigned long inlen)               \
+int func_name (struct hash_state * md, const unsigned char *in, unsigned long inlen)               \
 {                                                                                           \
     unsigned long n;                                                                        \
     int           err;                                                                      \
@@ -293,7 +292,7 @@ HASH_PROCESS(sha512_process, sha512_compress, sha512, 128)
    @param out [out] The destination of the hash (64 bytes)
    @return CRYPT_OK if successful
 */
-int sha512_done(hash_state * md, unsigned char *out)
+int sha512_done(struct hash_state * md, unsigned char *out)
 {
     int i;
 
@@ -353,7 +352,7 @@ void sha512_vector(size_t num_elem, const u8 *addr[], const size_t *len,
                    u8 *mac)
 {
     size_t i;
-    hash_state md;
+    struct hash_state md;
 
     sha512_init(&md);
     for (i = 0; i < num_elem; i++)
@@ -408,7 +407,7 @@ int  sha512_test(void)
 
     int i;
     unsigned char tmp[64];
-    hash_state md;
+    struct hash_state md;
 
     for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++)
     {

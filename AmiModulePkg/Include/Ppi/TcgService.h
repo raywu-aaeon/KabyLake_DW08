@@ -38,11 +38,9 @@
 #ifndef _TCG_SERVICE_H_
 #define _TCG_SERVICE_H_
 
-#include <Efi.h>
-#include <Pei.h>
-#include <AmiTcg/TcgEfiTpm.h>
-#include <AmiTcg/TCGMisc.h>
-#include <Token.h>
+#include <AmiTcg\TcgEfiTpm.h>
+#include <AmiTcg\TCGMisc.h>
+#include <token.h>
 
 struct _PEI_TCG_PPI;
 

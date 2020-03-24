@@ -29,23 +29,23 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include <Efi.h>
-#include <AmiTcg/TcgCommon12.h>
-#include "AmiTcg/sha.h"
-#include <AmiTcg/TCGMisc.h>
-#include <AmiTcg/TpmLib.h>
-#include <Token.h>
-#include "Ppi/TcgService.h"
-#include "Ppi/TpmDevice.h"
+#include <efi.h>
+#include <AmiTcg\TcgCommon12.h>
+#include "AmiTcg\Sha.h"
+#include <AmiTcg\TcgMisc.h>
+#include <AmiTcg\TpmLib.h>
+#include <token.h>
+#include "PPI\TcgService.h"
+#include "PPI\TpmDevice.h"
 #include <Library/DebugLib.h>
-#include <Ppi/ReadOnlyVariable2.h>
-#include <Ppi/AmiTcgPlatformPpi.h>
-#include <AmiTcg/AmiTcgPlatformPei.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+#include <Ppi\ReadOnlyVariable2.h>
+#include <Ppi\AmiTcgPlatformPpi.h>
+#include <AmiTcg\AmiTcgPlatformPei.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 
-extern EFI_GUID gAmiTcgPlatformPpiBeforeMem;
 
+EFI_GUID  gAMITcgPlatformPpiBeforeMemguid =  AMI_TCG_PLATFORM_PPI_BEFORE_MEM_GUID;
+EFI_GUID  gTpmInitializedguid = PEI_TPM_INITIALIZED_PPI_GUID;
 
 EFI_STATUS 
 EFIAPI
@@ -56,7 +56,7 @@ static EFI_PEI_PPI_DESCRIPTOR Tpm_Initialized[] =
 {
     {
         EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
-        &gPeiTpmInitializedPpiGuid, NULL
+        &gTpmInitializedguid, NULL
     }
 };
 
@@ -89,14 +89,21 @@ MemoryAbsentEntry(
     EFI_BOOT_MODE           BootMode;
     void                    *TcgDrvBuffer = NULL;
     UINTN                   Pages         = 0;
+    EFI_GUID                guid          = EFI_TCG_MADriver_GUID;
+    EFI_HOB_GUID_TYPE       *MAHobType;
+    MASTRUCT                MAHob;
+    FAR32LOCALS             CommonLegX;
+    EFI_GUID                gEfiTcgMADriverHobGuid = EFI_TCG_MADriver_HOB_GUID;
     AMI_TCG_PEI_FUNCTION_OVERRIDE_PPI       *PpiOverride;
+    EFI_GUID                Overrideguid = AMI_MEMORY_ABSENT_OVERRIDE_GUID;
+    EFI_GUID                SkipTpmStartupGuid = AMI_SKIP_TPM_STARTUP_GUID;
     BOOLEAN                 SkipTpmStartup = FALSE;
 
     Status = (*PeiServices)->LocatePpi(
-                  (CONST EFI_PEI_SERVICES    **)PeiServices,
-                 &gSkipTpmStartupGuid,
+                 PeiServices,
+                 &SkipTpmStartupGuid,
                  0, NULL,
-                 (void **)&PpiOverride);
+                 &PpiOverride);
 
     if(!EFI_ERROR(Status))
     {
@@ -105,17 +112,17 @@ MemoryAbsentEntry(
     }
 
     Status = (*PeiServices)->LocatePpi(
-                 (CONST EFI_PEI_SERVICES    **)PeiServices,
-                 &AmiMemoryAbsentOverrideGuid,
+                 PeiServices,
+                 &Overrideguid,
                  0, NULL,
-                 (void **)&PpiOverride);
+                 &PpiOverride);
 
     if(!EFI_ERROR(Status))
     {
         return (PpiOverride->Function(PeiServices));
     }
 
-    Status = (*PeiServices)->GetBootMode( (CONST EFI_PEI_SERVICES    **)PeiServices, &BootMode );
+    Status = (*PeiServices)->GetBootMode( PeiServices, &BootMode );
     ASSERT_EFI_ERROR(  Status );
 
 #if (StartupCmd_SelfTest_State == 1)
@@ -124,7 +131,7 @@ MemoryAbsentEntry(
         if (!SkipTpmStartup)
         {
             Status = TcgPeiTpmStartup( PeiServices, BootMode );
-            DEBUG((DEBUG_INFO, "TcgPeiTpmStartup Status = %r \n", Status));
+            DEBUG((-1, "TcgPeiTpmStartup Status = %r \n", Status));
             if(EFI_ERROR(Status)){
                 TpmPeiReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_1_2_STARTUP_ERROR | EFI_SOFTWARE_PEI_MODULE);   
                 return Status;
@@ -132,7 +139,7 @@ MemoryAbsentEntry(
             TpmPeiReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_TPM_1_2_STARTUP_CMD_SENT | EFI_SOFTWARE_PEI_MODULE);
         }
 
-        DEBUG((DEBUG_INFO, "Continue SelfTest = %r \n", Status));
+        DEBUG((-1, "Continue SelfTest = %r \n", Status));
         Status = ContinueTPMSelfTest( PeiServices );
         if(!EFI_ERROR(Status)){
             TpmPeiReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_TPM_1_2_SELFTEST_CMD_SENT | EFI_SOFTWARE_PEI_MODULE);   
@@ -155,6 +162,32 @@ MemoryAbsentEntry(
     }
 #endif
 
+    if(IsTcmSupportType())
+    {
+        Status = FillDriverLocByFile(&CommonLegX.Offset,PeiServices,&guid,&TcgDrvBuffer,&Pages);
+        if(EFI_ERROR(Status))return EFI_NOT_FOUND;
+        if ( CommonLegX.Offset == 0 )
+        {
+            return EFI_NOT_FOUND;
+        }
+
+        MAHob.Offset   = CommonLegX.Offset;
+        MAHob.Selector = SEL_flatCS;
+        MAHob.Codep    = ((MPDRIVER_LEGHEADER*)((UINT8*)(TcgDrvBuffer)))->CodeP;
+
+        Status = TcgPeiBuildHobGuid(
+                     PeiServices,
+                     &gEfiTcgMADriverHobGuid,
+                     sizeof (MASTRUCT),
+                     &MAHobType );
+
+        ASSERT_EFI_ERROR(  Status );
+        MAHobType++;
+
+        (*PeiServices)->CopyMem( MAHobType, &MAHob, sizeof (MASTRUCT));
+        return Status;
+    }
+
     return EFI_SUCCESS;
 }
 
@@ -172,7 +205,7 @@ static EFI_PEI_PPI_DESCRIPTOR mAmiTcgPlatformPPIListBeforeMem[] =
     {
         EFI_PEI_PPI_DESCRIPTOR_PPI
         | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
-        & gAmiTcgPlatformPpiBeforeMem ,
+        & gAMITcgPlatformPpiBeforeMemguid ,
         &mAmiTcgPlatformPPI
     }
 };
@@ -202,7 +235,7 @@ static EFI_PEI_PPI_DESCRIPTOR mAmiTcgPlatformPPIListBeforeMem[] =
 //**********************************************************************
 EFI_STATUS
 EFIAPI AmiTcgPlatformPEI_EntryBeforeMem(
-    IN EFI_PEI_FILE_HANDLE FfsHeader,
+    IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN CONST EFI_PEI_SERVICES    **PeiServices
 )
 {

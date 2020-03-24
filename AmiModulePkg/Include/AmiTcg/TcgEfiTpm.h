@@ -41,12 +41,12 @@
 #ifndef _EFI_TPM_H_
 #define _EFI_TPM_H_
 
-#include <Uefi.h>
+#include <EFI.h>
 
 //
 // The start of TPM return codes
 //
-#include "AmiTcg/TcgTpm12.h"
+#include "AmiTcg\TcgTpm12.h"
 
 //
 // Standard event types

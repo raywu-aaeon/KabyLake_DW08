@@ -28,99 +28,165 @@
 //---------------------------------------------------------------------------
 //<AMI_FHDR_END>
 #include <Setup.h>
-#include <Ppi/ReadOnlyVariable2.h>
-#include <Ppi/TcgPlatformSetupPeiPolicy.h>
-#include <Library/DebugLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <Library/HobLib.h>
-#include <Hob.h>
-#include <Library/BaseMemoryLib.h>
-#include <AmiTcg/TCGMisc.h>
+#include <Ppi\ReadOnlyVariable2.h>
+#include <Ppi\TcgPlatformSetupPeiPolicy.h>
+#include <Library\DebugLib.h>
 
 
-extern EFI_GUID gTcgPeiPolicyGuid;
+EFI_GUID  gTcgPlatformSetupPolicyGuid = TCG_PLATFORM_SETUP_PEI_POLICY_GUID;
+EFI_GUID  gTcgPeiInternalflagsGuid = PEI_TCG_INTERNAL_FLAGS_GUID;
+EFI_GUID  gTcgInternalPeiSyncflagGuid = TCG_PPI_SYNC_FLAG_GUID;
 
-EFI_STATUS TcgPeiFindNextHobByType(IN UINT16   Type, IN OUT VOID **Hob)
-{
-    EFI_HOB_GENERIC_HEADER *ThisHob;
-    if (Hob == NULL) return EFI_INVALID_PARAMETER;
-    ThisHob = *Hob;
-    while(ThisHob->HobType != EFI_HOB_TYPE_END_OF_HOB_LIST) {
-        ThisHob=NextHob(ThisHob,EFI_HOB_GENERIC_HEADER);
-        if (ThisHob->HobType==Type) {
-            *Hob=ThisHob;
-            return EFI_SUCCESS;
-        }
-    }
-    return EFI_NOT_FOUND;
-}
 
 EFI_STATUS
  getTcgPeiPolicy (IN EFI_PEI_SERVICES     **PeiServices ,
                   IN TCG_CONFIGURATION    *ConfigFlags)
+
 {
   EFI_STATUS              Status;
+  EFI_PEI_READ_ONLY_VARIABLE2_PPI *ReadOnlyVariable;
   UINTN                   VariableSize = sizeof(SETUP_DATA);
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
+  SETUP_DATA              SetupData;
+  EFI_GUID                gSetupGuid = SETUP_GUID;
   UINT8                   DisallowTpmFlag=0;
-#endif
   UINT8                   SyncVar = 0;
   UINTN                   SyncVarSize = sizeof(UINT8);
-  VOID                          *pHobList;
-  AMI_TCG_PEI_POLICY_HOB        *TcgPolicyHob=NULL;
-  //
-  //
-  
-  Status = (*PeiServices)->GetHobList((CONST EFI_PEI_SERVICES    **)PeiServices, (VOID**)&pHobList);
 
-  TcgPolicyHob = (AMI_TCG_PEI_POLICY_HOB*)pHobList;
-  while (!EFI_ERROR(Status = TcgPeiFindNextHobByType(EFI_HOB_TYPE_GUID_EXTENSION,  (void **)&TcgPolicyHob)))
-  {
-     if (CompareMem(&TcgPolicyHob->EfiHobGuidType.Name, &TcgPeiPolicyHobGuid, sizeof(EFI_GUID)) == 0)
-     {
-         break;
-     }
-  }
-  
-  if (EFI_ERROR(Status))
-  {
-     ConfigFlags->TpmSupport           = 0;
-     ConfigFlags->TcmSupportEnabled    = 0; 
-     ConfigFlags->TpmEnable            = 0;
-     ConfigFlags->TpmAuthenticate      = 0;
-     ConfigFlags->TpmOperation         = 0;
-     ConfigFlags->Tpm20Device          = 0;
-     ConfigFlags->EndorsementHierarchy   = 0;
-     ConfigFlags->StorageHierarchy       = 0;
-     ConfigFlags->PlatformHierarchy      = 0;
-     ConfigFlags->InterfaceSel = 0;
-     ConfigFlags->DeviceType = 0;
-     ConfigFlags->DisallowTpm = 0;
-     ConfigFlags->PpiSetupSyncFlag  = 0;
-     ConfigFlags->PcrBanks  = 0;
-  }else {
-      ConfigFlags->TpmSupport           = TcgPolicyHob->ConfigInfo.TpmSupport;
-      ConfigFlags->TpmEnable            = TcgPolicyHob->ConfigInfo.TpmEnable ;
-      ConfigFlags->TpmAuthenticate      = TcgPolicyHob->ConfigInfo.TpmAuthenticate;
-      ConfigFlags->TpmOperation         = TcgPolicyHob->ConfigInfo.TpmOperation;
-      ConfigFlags->Tpm20Device          = TcgPolicyHob->ConfigInfo.Tpm20Device;
-      ConfigFlags->Tcg2SpecVersion            = TcgPolicyHob->ConfigInfo.Tcg2SpecVersion;
-      ConfigFlags->EndorsementHierarchy = TcgPolicyHob->ConfigInfo.EndorsementHierarchy;
-      ConfigFlags->StorageHierarchy       = TcgPolicyHob->ConfigInfo.StorageHierarchy;
-      ConfigFlags->PlatformHierarchy      = TcgPolicyHob->ConfigInfo.PlatformHierarchy;
-      ConfigFlags->InterfaceSel           = TcgPolicyHob->ConfigInfo.InterfaceSel;
-      ConfigFlags->DeviceType             = TcgPolicyHob->ConfigInfo.DeviceType;
-      ConfigFlags->TcmSupportEnabled      = TcgPolicyHob->ConfigInfo.TcmSupportEnabled;
-      ConfigFlags->TcgSupportEnabled      = TcgPolicyHob->ConfigInfo.TcgSupportEnabled;
-      ConfigFlags->PcrBanks               = TcgPolicyHob->ConfigInfo.PcrBanks;
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
-      ConfigFlags->DisallowTpm = TcgPolicyHob->ConfigInfo.DisallowTpm;
-#else
-      ConfigFlags->DisallowTpm = 0;
+  //
+  //
+  //
+  Status = (*PeiServices)->LocatePpi(
+                  PeiServices,
+                &gEfiPeiReadOnlyVariable2PpiGuid,
+                0, NULL,
+                &ReadOnlyVariable);
+
+ DEBUG((-1, "gPeiReadOnlyVariablePpiGuid Status = %r \n", Status)); 
+
+  if(!EFI_ERROR(Status)){
+
+    Status = ReadOnlyVariable->GetVariable(ReadOnlyVariable,
+								L"Setup",
+								&gSetupGuid,
+								NULL,
+								&VariableSize,
+								&SetupData);
+
+    DEBUG((-1,  "gSetupGuid Status = %r \n", Status));
+
+    if (EFI_ERROR(Status)) {
+        ConfigFlags->TpmSupport           = 0;
+
+        ConfigFlags->TcmSupportEnabled    = 0; 
+        ConfigFlags->TpmEnable            = 0;
+        ConfigFlags->TpmAuthenticate      = 0;
+        ConfigFlags->TpmOperation         = 0;
+        ConfigFlags->Tpm20Device          = 0;
+        ConfigFlags->EndorsementHierarchy   = 0;
+        ConfigFlags->StorageHierarchy       = 0;
+        ConfigFlags->PlatformHierarchy      = 0;
+        ConfigFlags->InterfaceSel = 0;
+        ConfigFlags->DeviceType = 0;
+    } else {
+        ConfigFlags->TpmSupport           = SetupData.TpmSupport;
+
+        ConfigFlags->TpmEnable            = SetupData.TpmEnable ;
+        ConfigFlags->TpmAuthenticate      = SetupData.TpmAuthenticate;
+        ConfigFlags->TpmOperation         = SetupData.TpmOperation;
+        ConfigFlags->Tpm20Device          = SetupData.Tpm20Device;
+        ConfigFlags->Tcg2SpecVersion            = SetupData.Tcg2SpecVersion;
+        ConfigFlags->EndorsementHierarchy = SetupData.EndorsementHierarchy;
+        ConfigFlags->StorageHierarchy       = SetupData.StorageHierarchy;
+        ConfigFlags->PlatformHierarchy      = SetupData.PlatformHierarchy;
+        ConfigFlags->InterfaceSel           = SetupData.InterfaceSel;
+        ConfigFlags->DeviceType             = SetupData.DeviceType;
+        ConfigFlags->TcmSupportEnabled      = SetupData.TcmSupportEnabled;
+        ConfigFlags->TcgSupportEnabled      = SetupData.TcgSupportEnabled;
+        ConfigFlags->PcrBanks               = SetupData.Sha1 | SetupData.Sha256 | SetupData.Sha384 |\
+                                                SetupData.Sha512 | ((SetupData.SM3)<<4);
+#if (defined(TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION) && (TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION == 1))            
+        ConfigFlags->Reserved3              = SetupData.PhRandomization;
 #endif
-      ConfigFlags->PpiSetupSyncFlag  = TcgPolicyHob->ConfigInfo.PpiSetupSyncFlag;
+#if (defined(EXPOSE_FORCE_TPM_ENABLE) && (EXPOSE_FORCE_TPM_ENABLE == 1))            
+        ConfigFlags->Reserved4              = SetupData.ForceTpmEnable;
+#endif
+    }
+    
+   
+    VariableSize = sizeof(UINT8);
+    Status = ReadOnlyVariable->GetVariable(ReadOnlyVariable,
+								L"InternalDisallowTpmFlag",
+								&gTcgPeiInternalflagsGuid,
+								NULL,
+								&VariableSize,
+								&DisallowTpmFlag);
+    
+    if(EFI_ERROR(Status)){
+        Status = EFI_SUCCESS;
+        DisallowTpmFlag = 0;
+    }
+
+    Status = ReadOnlyVariable->GetVariable(ReadOnlyVariable,
+                            L"TcgInternalSyncFlag",
+                            &gTcgInternalPeiSyncflagGuid,
+                            NULL,
+                            &SyncVarSize,
+                            &SyncVar);
+
+    DEBUG((-1, "gTcgInternalPeiSyncflagGuid Status = %r \n", Status));
+
+    if(EFI_ERROR(Status)){
+     SyncVar = 0;
+     Status = EFI_SUCCESS;
+    }  
+
+    ConfigFlags->DisallowTpm              = DisallowTpmFlag;
+    ConfigFlags->TpmHardware              = 0;
+    ConfigFlags->TpmEnaDisable            = 0;
+    ConfigFlags->TpmActDeact              = 0;
+    ConfigFlags->TpmOwnedUnowned          = 0;
+    ConfigFlags->TcgSupportEnabled        = 0;
+    ConfigFlags->TpmError                 = 0;
+    ConfigFlags->PpiSetupSyncFlag         = SyncVar;
+
+#if (TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION == 0)
+    ConfigFlags->Reserved3                = 0;
+#endif    
+
+#if (EXPOSE_FORCE_TPM_ENABLE == 0)
+    ConfigFlags->Reserved4              = 0;
+#endif
+    ConfigFlags->Reserved5              = 0;    
+  }else{
+    ConfigFlags->TpmSupport               = 0;
+
+    ConfigFlags->TpmEnable                = 0 ;
+    ConfigFlags->TpmAuthenticate          = 0;
+    ConfigFlags->TpmOperation             = 0;
+    ConfigFlags->DisallowTpm              = 0;
+    ConfigFlags->Tcg2SpecVersion               = 0;
+
+    ConfigFlags->TpmHardware              = 0;
+    ConfigFlags->TpmEnaDisable            = 0;
+    ConfigFlags->TpmActDeact              = 0;
+    ConfigFlags->TpmOwnedUnowned          = 0;
+    ConfigFlags->TcgSupportEnabled        = 0;
+    ConfigFlags->TcmSupportEnabled        = 0;
+    ConfigFlags->TpmError                 = 0;
+    ConfigFlags->PpiSetupSyncFlag         = 0;
+    ConfigFlags->Reserved3                = 0;  //in_use in Tpm20PlatformDxe
+
+    ConfigFlags->Reserved4              = 0;  //in_use for forceTpmEnable
+    ConfigFlags->Reserved5              = 0;
+    
+    ConfigFlags->EndorsementHierarchy   = 0;
+    ConfigFlags->StorageHierarchy       = 0;
+    ConfigFlags->PlatformHierarchy      = 0;
+    ConfigFlags->InterfaceSel           = 0;
   }
+
   return Status;
+
 }
 
 
@@ -134,7 +200,7 @@ static EFI_PEI_PPI_DESCRIPTOR TcgPlatformSetupPeiPolicyDesc[] = {
     {
         EFI_PEI_PPI_DESCRIPTOR_PPI
         | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
-        &gTcgPeiPolicyGuid,
+        &gTcgPlatformSetupPolicyGuid,
         &TcgPlatformSetupInstance
     }
 };
@@ -163,7 +229,7 @@ static EFI_PEI_PPI_DESCRIPTOR TcgPlatformSetupPeiPolicyDesc[] = {
 EFI_STATUS
 EFIAPI
 TcgPlatformSetupPeiPolicyEntryPoint (
-  IN EFI_PEI_FILE_HANDLE FileHandle,
+  IN EFI_FFS_FILE_HEADER *FfsHeader,
   IN CONST EFI_PEI_SERVICES    **PeiServices
 )
 {
@@ -171,103 +237,25 @@ TcgPlatformSetupPeiPolicyEntryPoint (
   EFI_PEI_READ_ONLY_VARIABLE2_PPI  *ReadOnlyVariable;
   UINTN                          VariableSize = sizeof(SETUP_DATA);
   SETUP_DATA                     SetupData;
-  AMI_TCG_PEI_POLICY_HOB         *TcgPolicyHob=NULL;
-  UINT8                         SyncVar = 0;
-  UINTN                         SyncVarSize = sizeof(UINT8);
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
-  UINT8                         DisallowTpmFlag=0;
-#endif
-    
-  //check if ReadOnlyVar is available
+  EFI_GUID                       gSetupGuid = SETUP_GUID;
+
+
   Status = (*PeiServices)->LocatePpi(
                 PeiServices,
                 &gEfiPeiReadOnlyVariable2PpiGuid,
                 0, NULL,
-                (void **)&ReadOnlyVariable);
+                &ReadOnlyVariable);
 
   if (EFI_ERROR(Status))
     return EFI_SUCCESS;
-  
 
-  //Use Hob to store the policy, it can be updated via Hob
-  Status = (*PeiServices)->CreateHob(PeiServices,
-                                      EFI_HOB_TYPE_GUID_EXTENSION,
-                                      sizeof(AMI_TCG_PEI_POLICY_HOB),
-                                      (void **)&TcgPolicyHob);
- 
-  if (EFI_ERROR(Status))return EFI_SUCCESS;
+    Status = ReadOnlyVariable->GetVariable(ReadOnlyVariable,
+								L"Setup",
+								&gSetupGuid,
+								NULL,
+								&VariableSize,
+								&SetupData);
 
-  Status = ReadOnlyVariable->GetVariable(ReadOnlyVariable,
-                              L"Setup",
-                              &gSetupVariableGuid,
-                              NULL,
-                              &VariableSize,
-                              &SetupData);
-  
-  ASSERT_EFI_ERROR(Status);
-  
-  //initialize Hob
-  if (TcgPolicyHob != NULL && !EFI_ERROR(Status))
-  {
-      (*PeiServices)->SetMem((VOID *)&(TcgPolicyHob->ConfigInfo), (sizeof(AMI_TCG_PEI_POLICY_HOB) - sizeof(EFI_HOB_GUID_TYPE)), 0);
-
-      TcgPolicyHob->EfiHobGuidType.Name = TcgPeiPolicyHobGuid;
-      TcgPolicyHob->ConfigInfo.TpmSupport           = SetupData.TpmSupport;
-
-      TcgPolicyHob->ConfigInfo.TpmEnable            = SetupData.TpmEnable ;
-      TcgPolicyHob->ConfigInfo.TpmAuthenticate      = SetupData.TpmAuthenticate;
-      TcgPolicyHob->ConfigInfo.TpmOperation         = SetupData.TpmOperation;
-      TcgPolicyHob->ConfigInfo.Tpm20Device          = SetupData.Tpm20Device;
-      TcgPolicyHob->ConfigInfo.Tcg2SpecVersion            = SetupData.Tcg2SpecVersion;
-      TcgPolicyHob->ConfigInfo.EndorsementHierarchy = SetupData.EndorsementHierarchy;
-      TcgPolicyHob->ConfigInfo.StorageHierarchy       = SetupData.StorageHierarchy;
-      TcgPolicyHob->ConfigInfo.PlatformHierarchy      = SetupData.PlatformHierarchy;
-      TcgPolicyHob->ConfigInfo.InterfaceSel           = SetupData.InterfaceSel;
-      TcgPolicyHob->ConfigInfo.DeviceType             = SetupData.DeviceType;
-      TcgPolicyHob->ConfigInfo.TcmSupportEnabled      = SetupData.TcmSupportEnabled;
-      TcgPolicyHob->ConfigInfo.TcgSupportEnabled      = SetupData.TcgSupportEnabled;
-      TcgPolicyHob->ConfigInfo.PcrBanks               = SetupData.Sha1 | SetupData.Sha256 | SetupData.Sha384 |\
-                                                         SetupData.Sha512 | ((SetupData.SM3)<<4);
-#if (defined(TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION) && (TPM2_DISABLE_PLATFORM_HIERARCHY_RANDOMIZATION == 1))            
-      TcgPolicyHob->ConfigInfo.Reserved3              = SetupData.PhRandomization;
-#endif
-#if (defined(EXPOSE_FORCE_TPM_ENABLE) && (EXPOSE_FORCE_TPM_ENABLE == 1))            
-      TcgPolicyHob->ConfigInfo.Reserved4              = SetupData.ForceTpmEnable;
-#endif
-      
-#if defined (DisableDisAllowTPMSupport) && (DisableDisAllowTPMSupport == 0)
-      VariableSize = sizeof(UINT8);
-      Status = ReadOnlyVariable->GetVariable(ReadOnlyVariable,
-                                  L"InternalDisallowTpmFlag",
-                                  &gTcgInternalflagGuid,
-                                  NULL,
-                                  &VariableSize,
-                                  &DisallowTpmFlag);
-      
-      if(EFI_ERROR(Status)){
-          Status = EFI_SUCCESS;
-          DisallowTpmFlag = 0;
-      }
-
-      Status = ReadOnlyVariable->GetVariable(ReadOnlyVariable,
-                              L"TcgInternalSyncFlag",
-                              &gTcgPpiSyncFlagGuid,
-                              NULL,
-                              &SyncVarSize,
-                              &SyncVar);
-
-      DEBUG((-1, "gTcgPpiSyncFlagGuid Status = %r \n", Status));
-
-      if(EFI_ERROR(Status)){
-       SyncVar = 0;
-       Status = EFI_SUCCESS;
-      }  
-          
-      TcgPolicyHob->ConfigInfo.DisallowTpm              = DisallowTpmFlag;
-      TcgPolicyHob->ConfigInfo.PpiSetupSyncFlag         = SyncVar;
-#endif
-  }
-    
   Status = (**PeiServices).InstallPpi (PeiServices, TcgPlatformSetupPeiPolicyDesc);
  
   return Status;

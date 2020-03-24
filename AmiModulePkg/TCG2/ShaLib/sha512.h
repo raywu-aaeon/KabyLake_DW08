@@ -11,8 +11,8 @@
 
 #include <commonheader.h>
 
-//int sha512_init(struct hash_state * md);
+int sha512_init(struct hash_state * md);
 void sha512_vector(size_t num_elem, const u8 *addr[], const size_t *len,
                    u8 *mac);
-//int sha512_done(struct hash_state * md, unsigned char *out);
+int sha512_done(struct hash_state * md, unsigned char *out);
 #endif  // SHA512_H

@@ -44,123 +44,29 @@
 #include "Tpm20CRBLib.h"
 #include <Library/BaseLib.h>
 #include<Library/IoLib.h>
-#include <Token.h>
-#include <AmiTcg/Tpm20.h>
+#include <token.h>
+#include <AmiTcg\Tpm20.h>
 #include<Library/TimerLib.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 
 
 #define CRB_TIMEOUT_A   (750 * 1000)       //microseconds
-#define CRB_TIMEOUT_B   (60 * 1000 * 1000)  
+#define CRB_TIMEOUT_B   (2 * 1000 * 1000)  
 #define CRB_TIMEOUT_C   (30 * 1000)
 #define CRB_TIMEOUT_D   (200 * 1000)
 
 //Porting, Use correct GUID
 #if defined(PTT_SX_HANG_WRKARND) && (PTT_SX_HANG_WRKARND == 1)
-
-#define B_CRB_LOCALITY_STATE_LOCALITY_ASSIGNED  0x00000002 ///< BIT1
-#define V_CRB_LOCALITY_STATE_ACTIVE_LOC_MASK    0x0000001C /// Bits [4:2]
-
-typedef struct
-{
-    EFI_HOB_GUID_TYPE     EfiHobGuidType;
-    UINT64                PttBufferAddress;
-    UINT32                LocalityState;
-} ME_DATA_HOB;
-
-EFI_GUID gMeDataHobGuid = gTcgMeDataHobGuid;
-
 VOID *
 EFIAPI
 GetFirstGuidHob (
     IN CONST EFI_GUID         *Guid
 );
 
-#if !defined(INTEL_SX_FUNC)
-#define INTEL_SX_FUNC   SkyKbySxFunc
-#endif
-
-EFI_STATUS
-EFIAPI
-SkyKbySxFunc(
-    IN  UINTN       StageIndicate,
-    IN  VOID        *Context,
-    OUT BOOLEAN     *ReturnStsFlg
-)
-{
-    EFI_STATUS              Status;
-    ME_DATA_HOB             *MeDataHob;
-    UINT32                  LocalityState = 0;
-    TPM_CRB_ACCESS_REG_PTR  dCrbAccessRegPtr;
-
-    Status = EFI_SUCCESS;
-
-    dCrbAccessRegPtr = (TPM_CRB_ACCESS_REG_PTR)Context;
-
-    do
-    {
-        // Initial the
-        *ReturnStsFlg = FALSE;
-
-        //check if ME has populated the locality structure
-        //if not then we have to request the locality ourselves
-        MeDataHob       = NULL;
-        MeDataHob       = GetFirstGuidHob (&gMeDataHobGuid);
-
-        if ( NULL == MeDataHob )
-        {
-            Status = EFI_NOT_FOUND;
-            break;
-        }
-
-        LocalityState = MeDataHob->LocalityState;
-
-        if( 0 == StageIndicate || 2 == StageIndicate )
-        {
-            if((((LocalityState & V_CRB_LOCALITY_STATE_ACTIVE_LOC_MASK) >> 2) == 0) &&
-                    ((LocalityState & B_CRB_LOCALITY_STATE_LOCALITY_ASSIGNED) != 0))
-            {
-                DEBUG ((DEBUG_INFO, "PTT Locality already assigned\n"));
-                *ReturnStsFlg = TRUE;
-                break;
-            }
-        }
-
-        if( 1 == StageIndicate )
-        {
-            // We need to sync the ME Hob, when the Locality have already been taken.
-            // For Intel PTT, when the locality have been assign, we should not release the locality.
-            MeDataHob->LocalityState = dCrbAccessRegPtr->TpmlocState;
-        }
-    } while( FALSE );
-
-
-    return Status;
-
-}
+EFI_GUID gMeDataHobGuid = {0x1e94f097, 0x5acd, 0x4089, {0xb2, 0xe3, 0xb9, 0xa5, 0xc8, 0x79, 0xa7, 0x0c}};
 #endif
 //Porting end
-#if defined(PTT_SX_HANG_WRKARND) && (PTT_SX_HANG_WRKARND == 2)
-/**
- * Function for Intel PTT SX WorkAround Override By CRB/Chipset Porting.
- *
- * @param   unStageIndicate,    Indicate the current stage
- * @param   Context,            pointer to the TPM_CRB_ACCESS_REG_PTR
- * @param   bReturnStsFlg,      TRUE:   Return the Status exit the func block,
- *                              FALSE:  Keep Process the other function.
- *
- * @return  EFI_STATUS
- *
- */
-EFI_STATUS
-EFIAPI
-INTEL_SX_FUNC(
-    IN  UINTN       unStageIndicate,
-    IN  VOID        *Context,
-    OUT BOOLEAN     *bReturnStsFlg
-);
-#endif
 
 
 //Forward declare functions
@@ -252,20 +158,16 @@ CrbMmioWriteBuffer8 (
 
 BOOLEAN IsPTP()
 {
-    TPM_CRB_ACCESS_REG_PTR dCrbAccessRegPtr = (TPM_CRB_ACCESS_REG_PTR)(( UINTN ) (PORT_TPM_IOMEMBASE));
-    UINT32 PTPSupport = dCrbAccessRegPtr->TpmCrbIntfId[0];
-    
-    if( (PTPSupport == 0xFFFFFFFF) || (PTPSupport == 0x0)) return 0;
+    UINT32 PTPSupport = *((UINT32 *)(PORT_TPM_IOMEMBASE + 0x30));
+    if(PTPSupport == 0xFFFFFFFF)return 0;
     else return 1;
 }
 
 UINT8 GetCurrentInterfaceType()
 {
-    TPM_CRB_ACCESS_REG_PTR dCrbAccessRegPtr = (TPM_CRB_ACCESS_REG_PTR)(( UINTN ) (PORT_TPM_IOMEMBASE));
     //0 = Tis Interface
     //1 = CRB Interface
-
-    UINT8  CurrInterface = (UINT8) (dCrbAccessRegPtr->TpmCrbIntfId[0] & 0x0F);
+    UINT8  CurrInterface = *((UINT8 *)(PORT_TPM_IOMEMBASE + 0x30));
     UINT8 Data = 0;
 #if FTpmPlatformProfile == 1
     UINTN  Info;
@@ -393,18 +295,28 @@ BOOLEAN dTPMCrbLocality0Granted(TPM_CRB_ACCESS_REG_PTR dCrbAccessRegPtr)
 
 EFI_STATUS dTPMCrbSetLocality(TPM_CRB_ACCESS_REG_PTR dCrbAccessRegPtr)
 {
-    EFI_STATUS  Status = EFI_SUCCESS;
     UINTN       DelayTime = CRB_DELAY_TIMEOUT;
     UINTN       Timeout   = CRB_TIMEOUT_A / CRB_COUNT_TIMEOUT, Count =0;
 #if FTpmPlatformProfile == 0
-#if defined(PTT_SX_HANG_WRKARND) && ( (PTT_SX_HANG_WRKARND == 1) || (PTT_SX_HANG_WRKARND == 2) )
+#if defined(PTT_SX_HANG_WRKARND) && (PTT_SX_HANG_WRKARND == 1)
+    ME_DATA_HOB   *MeDataHob;
+    UINT32        LocalityState = 0; 
+
+    //check if ME has populated the locality structure
+    //if not then we have to request the locality ourselves
+    MeDataHob       = NULL;
+    MeDataHob       = GetFirstGuidHob (&gMeDataHobGuid);
+
+    if (MeDataHob != NULL)
     {
-        BOOLEAN     StopFuncProc = FALSE;
-        Status = INTEL_SX_FUNC( 0, (VOID*)dCrbAccessRegPtr, &StopFuncProc );
-        if( !EFI_ERROR(Status) && StopFuncProc )
-        {
-            return Status;
-        }
+        LocalityState = MeDataHob->LocalityState;                        
+    }
+
+    if((((LocalityState & V_CRB_LOCALITY_STATE_ACTIVE_LOC_MASK) >> 2) == 0) &&
+            ((LocalityState & B_CRB_LOCALITY_STATE_LOCALITY_ASSIGNED) != 0))
+    {
+        DEBUG ((DEBUG_INFO, "PTT Locality already assigned\n"));
+        return EFI_SUCCESS;
     }
 #endif
 #endif
@@ -419,14 +331,12 @@ EFI_STATUS dTPMCrbSetLocality(TPM_CRB_ACCESS_REG_PTR dCrbAccessRegPtr)
     }
     
 #if FTpmPlatformProfile == 0
-#if defined(PTT_SX_HANG_WRKARND) && ( (PTT_SX_HANG_WRKARND == 1) || (PTT_SX_HANG_WRKARND == 2) )
+#if defined(PTT_SX_HANG_WRKARND) && (PTT_SX_HANG_WRKARND == 1)
+    if( NULL != MeDataHob )
     {
-        BOOLEAN     StopFuncProc = FALSE;
-        Status = INTEL_SX_FUNC( 1, (VOID*)dCrbAccessRegPtr, &StopFuncProc );
-        if( !EFI_ERROR(Status) && StopFuncProc )
-        {
-            return Status;
-        }
+		// We need to sync the ME Hob, when the Locality have already been taken.
+        // For Intel PTT, when the locality have been assign, we should not release the locality.
+        MeDataHob->LocalityState = dCrbAccessRegPtr->TpmlocState;
     }
 #endif
 #endif
@@ -495,17 +405,28 @@ EFI_STATUS dTPMCrbSetReqIdleState(TPM_CRB_ACCESS_REG_PTR dCrbAccessRegPtr)
     UINTN       DelayTime = CRB_DELAY_TIMEOUT;
     UINTN       Timeout   = CRB_TIMEOUT_A / CRB_COUNT_TIMEOUT, Count =0; //We should be in Timeout_C but 
                                                                          //some TPM's need more time.
-    EFI_STATUS  Status = EFI_SUCCESS;
     
 #if FTpmPlatformProfile == 0
-#if defined(PTT_SX_HANG_WRKARND) && ( (PTT_SX_HANG_WRKARND == 1) || (PTT_SX_HANG_WRKARND == 2) )
-    {
-        BOOLEAN     StopFuncProc = FALSE;
-        Status = INTEL_SX_FUNC( 2, (VOID*)dCrbAccessRegPtr, &StopFuncProc );
-        if( !EFI_ERROR(Status) && StopFuncProc )
-        {
-            return Status;
-        }
+#if defined(PTT_SX_HANG_WRKARND) && (PTT_SX_HANG_WRKARND == 1)
+    ME_DATA_HOB   *MeDataHob;
+    UINT32        LocalityState = 0;
+
+    //check if ME has populated the locality structure
+    //if not then we have to request the locality ourselves
+    MeDataHob       = NULL;
+    MeDataHob       = GetFirstGuidHob (&gMeDataHobGuid);
+
+    if (MeDataHob != NULL) {
+      LocalityState = MeDataHob->LocalityState;
+    }
+
+    // Here, for Intel Skylake PTT spec, when PTT have been take locality, and ready status
+    // we will not need to set TPM into idle mode.
+
+    if((((LocalityState & V_CRB_LOCALITY_STATE_ACTIVE_LOC_MASK) >> 2) == 0) &&
+        ((LocalityState & B_CRB_LOCALITY_STATE_LOCALITY_ASSIGNED) != 0)){
+      DEBUG ((DEBUG_INFO, "PTT Locality already assigned\n"));
+      return EFI_SUCCESS;
     }
 #endif
 #endif

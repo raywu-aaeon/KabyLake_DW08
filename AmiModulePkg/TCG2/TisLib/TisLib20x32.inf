@@ -44,12 +44,8 @@ FILE_GUID       = 8B4E53DC-A6BF-46ff-A09D-42874795C816
  ShaLib
 TimerLib
 
-[Guids]
- gEfiHobListGuid     
-
 [Packages]
-AmiCompatibilityPkg/AmiCompatibilityPkg.dec
-MdePkg/MdePkg.dec
-AmiModulePkg/AmiModulePkg.dec
- AmiTcgPkg/AmiTcgPkg.dec
+AmiCompatibilityPkg\AmiCompatibilityPkg.dec
+MdePkg\MdePkg.dec
+AmiModulePkg\AmiModulePkg.dec
 

@@ -1,10 +1,12 @@
 #ifndef TPM_2_0_PEI_H
 #define TPM_2_0_PEI_H
 
-#include <Ppi/AmiTreePpi.h>
+#include <AmiTcg\Tpm20.h>
+#include "PPI\AmiTreePpi.h"
+#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER <= 0xb)
+#include <AmiTcg\Tpm20.h>
+#endif
 #include <PiPei.h>
-#include <AmiTcg/Tpm20.h>
-#include <AmiTcg/TcgCommon20.h>
 
 #pragma pack(push, 1)
 
@@ -17,6 +19,13 @@ typedef struct
     BYTE  sha512[SHA512_DIGEST_SIZE];
 } TPM2_HALG;
 
+typedef struct
+{
+    TCG_PCRINDEX         PCRIndex;
+    TCG_EVENTTYPE        EventType;
+    TPML_DIGEST_VALUES   Digests;
+    UINT32               EventSize; // UINT32 aligned
+} TCG_PCR_EVENT2_HDR;
 
 typedef struct _TPM2_Startup
 {

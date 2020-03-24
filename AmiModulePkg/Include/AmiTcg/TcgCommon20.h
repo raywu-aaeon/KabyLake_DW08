@@ -39,13 +39,13 @@
 #ifndef _TCG_COMMON_H_
 #define _TCG_COMMON_H_
 
-#include <Uefi.h>
-#include "AmiTcg/TcgPc.h"
-#include "AmiTcg/TcgEfiTpm.h"
-#include "AmiTcg/sha.h"
-#include "AmiTcg/Tpm20.h"
-#include <Hob.h>
-#include "TCGMisc.h"
+#include <UEFI.h>
+#include "AmiTcg\TcgPc.h"
+#include "AmiTcg\TcgEfiTpm.h"
+#include "AmiTcg\Sha.h"
+#include "AmiTcg\Tpm20.h"
+#include <HOB.h>
+#include "TcgMisc.h"
 
 #define TcgCommonN2HS( v16 ) TcgCommonH2NS( v16 )
 #define TcgCommonN2HL( v32 ) TcgCommonH2NL( v32 )
@@ -54,7 +54,7 @@
 #define EFI_TPL_CALLBACK            8
 #define EFI_TPL_NOTIFY              16
 #define EFI_TPL_HIGH_LEVEL          31
-
+#define STRING_TOKEN( x ) x
 
 
 #define TCGGET_HOB_TYPE( Hob )     ((Hob).Header->HobType)
@@ -65,12 +65,12 @@
 
 extern
 UINT16
-EFIAPI TcgCommonH2NS (
+__stdcall TcgCommonH2NS (
     IN UINT16 Val );
 
 extern
 UINT32
-EFIAPI TcgCommonH2NL (
+__stdcall TcgCommonH2NL (
     IN UINT32 Val );
 
 VOID* GetHob (
@@ -85,7 +85,7 @@ EFI_STATUS TcgGetNextGuidHob(
 
 extern
 VOID
-EFIAPI Tpm20TcgCommonCopyMem (
+__stdcall TcgCommonCopyMem (
     IN VOID  *CallbackContext,
     OUT VOID *Dest,
     IN VOID  *Src,
@@ -93,7 +93,7 @@ EFIAPI Tpm20TcgCommonCopyMem (
 
 extern
 EFI_STATUS
-EFIAPI Tpm20SHA1HashAll (
+__stdcall SHA1HashAll (
     IN VOID            *CallbackContext,
     IN VOID            *HashData,
     IN UINTN           HashDataLen,
@@ -106,7 +106,7 @@ EFI_STATUS EfiLibGetSystemConfigurationTable(
 
 extern
 BOOLEAN
-EFIAPI IsTcmSupportType (
+__stdcall IsTcmSupportType (
 );
 
 #pragma pack(push,1)
@@ -137,57 +137,14 @@ typedef struct
     TPMS_AUTH_RESPONSE  pwapAuth;
 } TPM2_PCRExtend_res_t;
 
-
-typedef struct
-{
-    TPM_ST tag;
-    UINT32 paramSize;
-    TPM_CC commandCode;
-} INT_TPM2_COMMAND_HEADER;
-
-typedef struct
-{
-    TPM_ST tag;
-    UINT32 paramSize;
-    TPM_RC responseCode;
-} INT_TPM2_RESPONSE_HEADER;
-
-typedef struct
-{
-    INT_TPM2_COMMAND_HEADER       Header;
-    TPMI_RH_HIERARCHY             AuthHandle;
-    UINT32                        AuthorizationSize;
-    TPMS_AUTH_COMMAND             AuthSession;
-    TPMI_RH_HIERARCHY             Hierarchy;
-    TPMI_YES_NO                   State;
-} AMI_TPM2_HIERARCHY_CONTROL_COMMAND;
-
-typedef struct
-{
-    INT_TPM2_RESPONSE_HEADER      Header;
-    UINT32                        ParameterSize;
-    TPMS_AUTH_RESPONSE            AuthSession;
-} AMI_TPM2_HIERARCHY_CONTROL_RESPONSE;
-
 EFI_STATUS
-EFIAPI SHA2HashAll(
+__stdcall SHA2HashAll(
     IN  VOID            *CallbackContext,
     IN  VOID            *HashData,
     IN  UINTN           HashDataLen,
     OUT UINT8           *Digest
 );
 
-typedef UINT32        TCG_PCRINDEX;
-
-#if MDE_PKG_VERSION <15
-typedef struct  
-{
-    TCG_PCRINDEX         PCRIndex;
-    UINT32               EventType;
-    TPML_DIGEST_VALUES   Digests;
-    UINT32               EventSize;
-} TCG_PCR_EVENT2_HDR;
-#endif
 
 #pragma pack(pop)
 

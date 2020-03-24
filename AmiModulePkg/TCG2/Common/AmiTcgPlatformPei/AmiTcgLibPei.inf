@@ -43,22 +43,14 @@ AmiTcgPlatformPeiLib.c
 gPeiTcgPpiGuid
 gPeiTpmPpiGuid
 gEfiPeiReadOnlyVariable2PpiGuid
-gTcgPeiPolicyGuid
-gPeiTcmPpiGuid
-
-[Guids]
-gSkipTpmStartupGuid
-AmiPeiTcmInterfaceGuid
 
 [LibraryClasses]
 BaseTisLib12x32
-BaseAmiTcmlib
 AmiPeiLib
 TpmReportStatusCodeWrapperLibPei
 
 [Packages]
-AmiCompatibilityPkg/AmiCompatibilityPkg.dec
-MdePkg/MdePkg.dec
-AmiModulePkg/AmiModulePkg.dec
-AmiTcgPkg/AmiTcgPkg.dec
+AmiCompatibilityPkg\AmiCompatibilityPkg.dec
+MdePkg\MdePkg.dec
+AmiModulePkg\AmiModulePkg.dec
 

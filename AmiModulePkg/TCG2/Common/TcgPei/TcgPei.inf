@@ -31,7 +31,7 @@
 [Sources]
 xTcgPei.c
 TcgTcmPei.c
-#EMpTcmPei.c
+EMpTcmPei.c
 TcgTisPei.c
 TisPei.c
 
@@ -39,7 +39,6 @@ TisPei.c
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
   MdePkg/MdePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
   PeimEntryPoint
@@ -58,17 +57,6 @@ TisPei.c
   gPeiTcgPpiGuid
   gPeiTpmPpiGuid
   gAmiPlatformSecurityChipGuid
-  gTcgPeiPolicyGuid
-    
-[Guids]
-  gAmiGlobalVariableGuid  
-  gEfiGlobalVariableGuid
-  AmiTcgResetVarHobGuid
-  gAmiLegacyTpmguid
-  gEfiTcgMpDriverHobGuid
-  gEfiTcgMADriverHobGuid
-  gEfiPeiTcgLogHobGuid
-  gAmiTcmSignalguid
 
 [Depex]
   gEfiPeiReadOnlyVariable2PpiGuid AND

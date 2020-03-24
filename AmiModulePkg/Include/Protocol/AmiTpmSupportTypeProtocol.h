@@ -23,7 +23,7 @@
 #ifndef _AMI_TPM_SUPPORT_TYPE_PROTOCOL_H_
 #define _AMI_TPM_SUPPORT_TYPE_PROTOCOL_H_
 
-#include <Token.h>
+#include <token.h>
 #define AMI_TPM_SUPPORT_TYPE_PROTOCOL_GUID \
     {0x320bdc39, 0x3fa0, 0x4ba9, 0xbf, 0x2d, 0xb3, 0x3f, 0x72, 0xba, 0x9c, 0xa1}
 

@@ -154,7 +154,7 @@
 //------------------------------------------------------------------------------
 #ifndef  _TCGMISC_H   //To Avoid this header get compiled twice
 #define  _TCGMISC_H
-#include <Uefi.h>
+#include <UEFI.h>
 #include <Token.h>
 
 #define EV_SPECIFICATION_IDENTIFIER        (UINT32)0x000000012
@@ -162,15 +162,103 @@
 #define TCG_BIOS_VENDOR           "AMI"
 #define TCG_OEM_ID               "ALASKA"
 //-----------------------------------------------------------------------------
+#define EFI_TCG_WAKE_EVENT_DATA_HOB_GUID \
+    {0xBBB810BB, 0x5EF0, 0x4E8F, 0xB2, 0x98, 0xAD, 0x74, 0xAA, 0x50, 0xEF, 0x0A}
+
+#define AMI_PPI_GUID \
+    {0x1bb13967, 0x8b24, 0x411b, 0x98, 0x28, 0x18, 0xd2, 0x85, 0xa9, 0xcc, 0x4d}
+
+#define TCG_EFI_HOB_LIST_GUID \
+    { 0x7739f24c, 0x93d7, 0x11d4, 0x9a, 0x3a, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d}
+
+#define EFI_TCG_LOG_HOB_GUID \
+    {0x5f7d4e0e, 0x3d6d, 0x42bc, 0xa9, 0x42, 0xe, 0x91, 0xe8, 0x3e, 0x3c, 0x31}
+
+#define EFI_TCG_TREE_LOG_HOB_GUID \
+    {0x711e7d64, 0x1131, 0x494b, 0xa2, 0xd1, 0x84, 0x80, 0x6c, 0xd7, 0x2d, 0x53}
+
+#define AMI_TCG_EFI_OS_VARIABLE_GUID \
+    {0xa8a2093b, 0xfefa, 0x43c1, 0x8e, 0x62, 0xce, 0x52, 0x68, 0x47, 0x26, 0x5e}
+
+#define AMI_TCG_RESETVAR_HOB_GUID \
+    {0xa8a2093b, 0xfefa, 0x43c1, 0x8e, 0x62, 0xce, 0x52, 0x68, 0x47, 0x26, 0x5e}
 
 #define AMI_TCG_MANUFACTURING_MODE_HOB_GUID \
     {0x5d7f83ee, 0x88e5, 0x4ea8, 0xbe, 0xe8, 0x23, 0x79, 0xa6, 0x3c, 0xff, 0x8}
 
+#define AMI_TCG_CONFIRMATION_FLAGS_GUID \
+    {0x7d3dceee, 0xcbce, 0x4ea7, 0x87, 0x09, 0x6e, 0x55, 0x2f, 0x1e, 0xdb, 0xde}
 
-#define ___INTERNAL_CONVERT_TO_STRING___(a) #a
-#define CONVERT_TO_STRING(a) ___INTERNAL_CONVERT_TO_STRING___(a)
-#define ___INTERNAL_CONVERT_TO_WSTRING___(a) L###a
-#define CONVERT_TO_WSTRING(a) ___INTERNAL_CONVERT_TO_WSTRING___(a)
+#define AMI_TCG_PERM_FLAGS_GUID \
+    {0x2325f2fc, 0x5683, 0x4648, 0x97, 0xc4, 0x9a, 0x52, 0x0d, 0xfb, 0xe3, 0x25}
+
+#define EFI_NULL_GUID \
+	{0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+
+#define TCG_EFI_GLOBAL_VARIABLE_GUID \
+    { \
+        0x135902e7, 0x9709, 0x4b41, 0x8f, 0xd2, 0x40, 0x69, 0xda, 0xf0, 0x54,\
+        0x6a \
+    }
+#define TCG_VARIABLE_GUID \
+    {0x9868b77b, 0x607e, 0x4cb7, 0xa6, 0xce, 0xe1, 0xd5, 0x29, 0xd4, 0x41, 0x64}
+
+#define EFI_TCM_MPDriver_GUID \
+    { 0x3EB9F0D3, 0x40D0, 0x435b, 0xB6, 0x92, 0x80, 0x91, 0x51, 0x80, 0x7F,\
+      0xF4}
+
+#define EFI_TCM_MADriver_GUID \
+    { 0xca0d6ff6, 0x62a7, 0x4b1f, 0xbb, 0x90, 0x52, 0xee, 0xca, 0x1,  0xa9,\
+      0x9f}
+
+#define AMI_TCM_CALLBACK_GUID \
+    { 0x91c74e50, 0x361d, 0x4cda, 0xa1, 0x6b, 0xc9, 0x2b, 0xe4, 0xbf, 0x16,\
+      0xee}
+
+#define AMI_TPM_LEGACY_GUID \
+    { 0xa1c85085, 0x3053, 0x4c4b, 0xa9, 0xf6, 0x72, 0x4d, 0x22, 0xa7, 0x6e,\
+      0xf9}
+
+#define PEI_TPM_INITIALIZED_PPI_GUID \
+  { \
+    0xe9db0d58, 0xd48d, 0x47f6, 0x9c, 0x6e, 0x6f, 0x40, 0xe8, 0x6c, 0x7b, 0x41 \
+  }
+
+#define TPM20_HOB_GUID \
+  { \
+    0x7cea4f7e, 0x2052, 0x46ed, 0xbe, 0xfd, 0xe2, 0x2a, 0x44, 0xdc, 0x65, 0xe7 \
+  }
+
+#define FAST_BOOT_VARIABLE_GUID \
+    { 0xb540a530, 0x6978, 0x4da7, 0x91, 0xcb, 0x72, 0x7, 0xd7, 0x64, 0xd2, 0x62 }
+
+#define AMI_PROTOCOL_INTERNAL_HLXE_GUID \
+    { 0x78092548, 0x48cf, 0x449b, 0x9b, 0xdb, 0xf6, 0x38, 0x49, 0x85, 0x64,\
+      0x60}
+
+#define AMI_DXE_HASH_INTERFACE_PROTOCOL_GUID \
+    { 0x9c98c00a, 0x2e9b, 0x4896, 0x95, 0xc8, 0xac, 0x64, 0x35, 0x82, 0x84,\
+      0xe5}
+
+#define AMI_PEI_HASH_INTERFACE_PROTOCOL_GUID \
+    { 0xd52d8ad2, 0xea9a, 0x470c, 0x9e, 0x33, 0x82, 0x8f, 0xa5, 0x91, 0xab,\
+      0x8d}
+
+#define NVRAM_HOB_GUID \
+    { 0xc0ec00fd, 0xc2f8, 0x4e47, { 0x90, 0xef, 0x9c, 0x81, 0x55, 0x28, 0x5b, 0xec } }
+
+#define AMI_HASH_LOG_EXTEX_GUID \
+    { 0xdf66196c, 0x958f, 0x472f, { 0x93, 0x93, 0x71, 0x7d, 0x82, 0x11, 0xa, 0xf6 } }
+
+// {3A35EE58-8286-4f00-9A5B-1B6AB7680815}
+#define AMI_FV_HOB_LIST_GUID \
+    { 0x3a35ee58, 0x8286, 0x4f00, 0x9a, 0x5b, 0x1b, 0x6a, 0xb7, 0x68, 0x8, 0x15 }
+
+#define AMI_TPM12_MEASURE_CONFIGURATION_INFO_GUID \
+    { 0x6da670e8, 0x3d73, 0x4eb2, 0xa7, 0x21, 0xa2, 0xdd, 0xf6, 0x82, 0xfd, 0xd8 }
+
+#define AMI_TPM20_MEASURE_CONFIGURATION_INFO_GUID \
+    { 0x47144f62, 0xb423, 0x4524, 0xac, 0x6a, 0x90, 0x10, 0x6b, 0xaa, 0x89, 0xfb }
 
 #define NVRAM_MODE_MANUFACTORING 1
 
@@ -197,9 +285,6 @@ typedef struct {
    UINT8 Tpm20DeviceState;
    UINT8 InterfaceType;
    UINT8 Reserved;
-   UINT32 Tpm2FWersion1;
-   UINT32 Tpm2manufacturer;
-   UINT32 Tpm2FWersion2;   
 } Tpm20DeviceHob;
 
 typedef struct
@@ -282,9 +367,7 @@ typedef struct
 {
     UINT32 SupportedPcrBitMap;
     UINT32 ActivePcrBitMap;
-    UINT32 Reserved;
-    UINT32 TpmFwVersion;
-    UINT32 TpmManufacturer;
+    UINTN Reserved;
 }AMITCGSETUPINFOFLAGS;
 #pragma pack()
 
@@ -341,6 +424,43 @@ typedef struct
 #define INTERNAL_SHA_ARRAY_LENGTH            0x500 //500 bytes per SHA update or extend
 
 //-----------------------------------------------------------------------------
+
+#define EFI_TCG_CAP_HOB_GUID \
+    { 0xd05f8ff9, 0x8498, 0x4673, 0x84, 0x17, 0x7b, 0x9c, 0xce, 0x3d, 0xdb,\
+      0x9b}
+
+#define EFI_TCG_MPDriver_HOB_GUID \
+    { 0xbaaead09, 0x2a0,  0x4131, 0x9e, 0xd,  0xbc, 0x52, 0x9e, 0xf0, 0xff,\
+      0x2a}
+
+#define EFI_TCG_MADriver_HOB_GUID \
+    { 0xb58a69fe, 0x163e, 0x4cc0, 0xa4, 0x87, 0x30, 0x4d, 0x34, 0xd5, 0x48,\
+      0x9f}
+
+#define EFI_TCG_MPDriver_GUID \
+    { 0x0515BC05, 0x2959, 0x4e91, 0x89, 0xC6, 0x6B, 0x3A, 0x3F, 0x1F, 0xCB,\
+      0x65}
+
+#define EFI_TCG_MADriver_GUID \
+    { 0x92ba9255, 0x2819, 0x4479, 0x86, 0x7a, 0x1c, 0x58, 0xf0, 0x72, 0xc5,\
+      0xb2}
+
+#define EFI_TCM_MPDriver_GUID \
+    { 0x3EB9F0D3, 0x40D0, 0x435b, 0xB6, 0x92, 0x80, 0x91, 0x51, 0x80, 0x7F,\
+      0xF4}
+
+#define EFI_TCM_MADriver_GUID \
+    { 0xca0d6ff6, 0x62a7, 0x4b1f, 0xbb, 0x90, 0x52, 0xee, 0xca, 0x1,  0xa9,\
+      0x9f}
+
+
+#define  EFI_TCG_PEI_READ_ONLY_VARIABLE_PPI_GUID\
+   {0x3cdc90c6, 0x13fb, 0x4a75, 0x9e, 0x79, 0x59, 0xe9, 0xdd, 0x78, 0xb9, 0xfa}
+
+#define AMI_TCG_FV_HOB_GUID \
+    { 0x69275410, 0x9be7, 0x4df2, 0xb7, 0xbb, 0x54, 0x50, 0x65, 0xb6, 0x70,\
+      0xa4}
+
 //-----------------------------------------------------------------------------
 // Internal Tcg Capabilities Headers and Struct
 //-----------------------------------------------------------------------------
@@ -348,12 +468,6 @@ VOID* LocateATcgHob (
     UINTN                   NoTableEntries,
     EFI_CONFIGURATION_TABLE *ConfigTable,
     EFI_GUID                *HOB_guid );
-
-VOID* Tpm20LocateATcgHob (
-    UINTN                   NoTableEntries,
-    EFI_CONFIGURATION_TABLE *ConfigTable,
-    EFI_GUID                *HOB_guid );
-
 
 #pragma pack (1)
 typedef struct
@@ -507,7 +621,18 @@ typedef struct _TPMTransmitEntryStruct
 #define ACPI_FUNCTION_GET_USER_CONFIRMATION_STATUS_FOR_REQUEST     8
 #define ACPI_FUNCTION_SET_MOR_VALUE_FLAG						   9
 
-
+typedef struct
+{
+    UINT16 Signature;   // 0xaa55
+    UINT16 InitializationSize;
+    UINT32 EfiSignature; // 0x0EF1
+    UINT16 EfiSubsystem;
+    UINT16 EfiMachineType;
+    UINT16 CompressionType;
+    UINT8  Reserved[8];
+    UINT16 EfiImageHeaderOffset;
+    UINT16 PcirOffset;
+} EFI_PCI_EXPANSION_ROM_HEADER;
 
 /*
 #define SCAN_F1         EFI_SCAN_F1
@@ -527,16 +652,15 @@ typedef struct _TPMTransmitEntryStruct
 
 typedef struct _TCG_LOG_HOB_
 {
-    UINT32  TableMaxSize;
-    UINT32  TableSize;
-    UINT32  EventNum;
+    UINT32 TableMaxSize;
+    UINT32 TableSize;
+    UINT32 EventNum;
 //    UINT32 Reserved;
-    UINT32  Tcg2SpecVersion;
-    UINT64  LastEntry;
-    UINT64  LastEventPtr;
-    UINT32  ActPcrBanks; // Activate PCR Banks BIOS Setting
-    BOOLEAN IEventLogTruncated;
-    UINT8   Reserved[3];    // 64 Align
+    UINT32 Tcg2SpecVersion;
+    UINT64 LastEntry;
+    UINT64 LastEventPtr;
+    UINT32 ActPcrBanks; // Activate PCR Banks BIOS Setting
+    UINT32 Reserved;    // 64 Align
 } TCG_LOG_HOB;
 
 #pragma pack()
@@ -547,7 +671,18 @@ typedef struct _TCG_LOG_HOB_
 //--------------------------------------------------------------------------
 //USED PE/COFF image headers
 //--------------------------------------------------------------------------
+typedef struct
+{
+    UINTN   Signature;
+    BOOLEAN FreeBuffer;
+    VOID    *Source;
+    UINTN   SourceSize;
+} IMAGE_FILE_HANDLE;
 
+
+#define EFI_IMAGE_ERROR_SUCCESS                      0
+#define EFI_IMAGE_ERROR_IMAGE_READ                   1
+#define EFI_IMAGE_ERROR_INVALID_PE_HEADER_SIGNATURE  2
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 //
@@ -625,9 +760,11 @@ typedef struct
    UINT16 PpRequiredForClear    :1;
    UINT16 PpRequiredForChangeEPS :1;
    UINT16 PpRequiredForChangePCRS :1;
-   UINT16 PpRequiredForEnable_BlockSIDFunc :1;
-   UINT16 PpRequiredForDisable_BlockSIDFunc :1;
-   UINT16 Reserved :9;
+   UINT16 SetPPRequiredForEnable_BlockSIDFunc_True :1;
+   UINT16 SetPPRequiredForEnable_BlockSIDFunc_False :1;
+   UINT16 SetPPRequiredForDisable_BlockSIDFunc_True :1;
+   UINT16 SetPPRequiredForDisable_BlockSIDFunc_False :1;
+   UINT16 Reserved :7;
 }PPI1_3_FLAGS;
 
 

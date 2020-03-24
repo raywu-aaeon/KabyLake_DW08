@@ -8,7 +8,7 @@
 "TrEEPei.inf"
 [files]
 "TcgPei.sdl"	
-"AmiTpm12PeiPlatformHooksTemplate.h"	
 [parts]
+"TcgPeiAfterMem"
 "TcgPlatformSetupPeiPolicy"
 <endComponent>

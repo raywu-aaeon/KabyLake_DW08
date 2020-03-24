@@ -55,8 +55,8 @@
 //
 //<AMI_FHDR_END>
 //*************************************************************************
-#include<Efi.h>
-#include "AmiTcg/AmiTcgPlatformDxe.h"
+#include<EFI.h>
+#include "AmiTcg\AmiTcgPlatformDxe.h"
 #include<Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DevicePathLib.h>
@@ -64,7 +64,9 @@
 #include<Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Guid/AmiTcgGuidIncludes.h>
+
+
+//EFI_GUID gAmiTcgPlatformProtocolguid     = AMI_TCG_PLATFORM_PROTOCOL_GUID;
 
 
 //**********************************************************************
@@ -95,20 +97,21 @@ EFIAPI TcgDxeplatformEntry(
     AMI_TCG_PLATFORM_PROTOCOL  *AmiTcgPlatformProtocol = NULL;
     EFI_STATUS                 Status;
     BOOLEAN                    *ResetAllTcgVar = NULL;
+    EFI_GUID                   legTcgGuid = AMI_TCG_RESETVAR_HOB_GUID;
     void                       ** DummyPtr;
 
 //    InitAmiLib( ImageHandle, SystemTable );
 
-    DummyPtr       = (void **)&ResetAllTcgVar;
+    DummyPtr       = &ResetAllTcgVar;
     ResetAllTcgVar = (UINT8*)LocateATcgHob(
                          gST->NumberOfTableEntries,
                          gST->ConfigurationTable,
-                         &AmiTcgResetVarHobGuid );
+                         &legTcgGuid );
 
     Status = gBS->LocateProtocol( &gAmiTcgPlatformProtocolguid, NULL,
-                    (void **)&AmiTcgPlatformProtocol);
+                                  &AmiTcgPlatformProtocol);
 
-    DummyPtr = (void **)&ResetAllTcgVar;
+    DummyPtr = &ResetAllTcgVar;
 
     if ( *DummyPtr != NULL )
     {
@@ -128,33 +131,33 @@ EFIAPI TcgDxeplatformEntry(
     Status = AmiTcgPlatformProtocol->ProcessTcgPpiRequest();
     if(EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "\n Possible ERROR Processing Ppi Request from O.S.\n"));
+        DEBUG((-1, "\n Possible ERROR Processing Ppi Request from O.S.\n"));
     }
 
     Status = AmiTcgPlatformProtocol->ProcessTcgSetup();
     if(EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "\n Possible ERROR Processing Tcg Setup\n"));
+        DEBUG((-1, "\n Possible ERROR Processing Tcg Setup\n"));
     }
 
 #if (defined(MeasureCPUMicrocodeToken) && (MeasureCPUMicrocodeToken == 1))
     Status = AmiTcgPlatformProtocol->MeasureCpuMicroCode();
     if(EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "\n Possible ERROR Measuring CPU Microde\n"));
+        DEBUG((-1, "\n Possible ERROR Measuring CPU Microde\n"));
     }
 #endif
 
     Status = AmiTcgPlatformProtocol->MeasurePCIOproms();
     if(EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "\n Possible ERROR Measuring PCI Option Roms\n"));
+        DEBUG((-1, "\n Possible ERROR Measuring PCI Option Roms\n"));
     }
 
     Status = AmiTcgPlatformProtocol->SetTcgReadyToBoot();
     if(EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "\n Possible ERROR process Tcg Ready to boot Callback\n"));
+        DEBUG((-1, "\n Possible ERROR process Tcg Ready to boot Callback\n"));
     }
 
     return Status;

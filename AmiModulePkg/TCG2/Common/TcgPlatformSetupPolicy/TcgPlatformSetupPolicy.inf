@@ -45,20 +45,11 @@ UefiLib
 
 [Protocols]
 gTcgPlatformSetupPolicyGuid
-gBdsAllDriversConnectedProtocolGuid
-
-[Guids]
-gSetupVariableGuid
-gTcgPpiSyncFlagGuid
-gTcgInternalflagGuid
-gEfiEndOfDxeEventGroupGuid
 
 [Packages]
 MdePkg\MdePkg.dec
-MdeModulePkg\MdeModulePkg.dec
 AmiCompatibilityPkg\AmiCompatibilityPkg.dec
 AmiModulePkg\AmiModulePkg.dec
-AmiTcgPkg\AmiTcgPkg.dec
 $(AdditionalTcgSetupPolicyPackages)
 
 [Depex]

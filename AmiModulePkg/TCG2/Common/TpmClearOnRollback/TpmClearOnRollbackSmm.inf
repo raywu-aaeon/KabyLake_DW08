@@ -32,7 +32,6 @@ TpmClearOnRollbackSmiFlash.c
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint
@@ -46,14 +45,14 @@ TpmClearOnRollbackSmiFlash.c
 [Protocols]
   gEfiSmmBase2ProtocolGuid
   gEfiSmmSwDispatch2ProtocolGuid
-  
-[Guids]
-  gAmiTpmRollbackSmmProtocolGuid
 
 [Depex]
   gEfiSmmBase2ProtocolGuid AND
   gEfiSmmSwDispatch2ProtocolGuid
   
+[BuildOptions.X64]
+  *_*_X64_CC_FLAGS = /D EFIx64 
+
 #*************************************************************************
 #**                                                                     **
 #**        (C)Copyright 1985-2012, American Megatrends, Inc.            **

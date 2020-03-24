@@ -39,7 +39,7 @@ End
 
 TOKEN
     Name   = "NO_PPI_CLEAR_DEFAULT"
-    Value  = "001h"
+    Value  = "000h"
     Help   = "default for TPM NoPpiclear flag"
     TokenType = Integer
     TargetEQU = Yes
@@ -63,35 +63,6 @@ TOKEN
     TargetEQU = Yes
     TargetH = Yes
 End
-
-TOKEN
-    Name   = "PPI_REQUIRED_FOR_CHANGE_EPS_DEFAULT"
-    Value  = "001h"
-    Help   = "default for TPM Ppi required for Change pcr flag"
-    TokenType = Integer
-    TargetEQU = Yes
-    TargetH = Yes
-End
-
-TOKEN
-    Name   = "PPI_REQUIRED_FOR_ENABLE_BLOCK_SID_DEFAULT"
-    Value  = "001h"
-    Help   = "default for TPM Ppi required for Change pcr flag"
-    TokenType = Integer
-    TargetEQU = Yes
-    TargetH = Yes
-End
-
-
-TOKEN
-    Name   = "PPI_REQUIRED_FOR_DISABLE_BLOCK_SID_DEFAULT"
-    Value  = "001h"
-    Help   = "default for TPM Ppi required for Change pcr flag"
-    TokenType = Integer
-    TargetEQU = Yes
-    TargetH = Yes
-End
-
 
 PATH
     Name  = "AMI_TCG_NVFLAG_SAMPLE_DIR"

@@ -95,11 +95,11 @@ Abstract:
 //<AMI_FHDR_END>
 //*************************************************************************
 #include <Efi.h>
-#include "AmiTcg/TpmLib.h"
+#include "AmiTcg\TpmLib.h"
 #include <Library/BaseLib.h>
 #include<Library/IoLib.h>
 #include<Library/TimerLib.h>
-#include <Token.h>
+#include <token.h>
 
 extern EFI_STATUS CountTime ( IN UINTN	DelayTime,  IN	UINT16	BaseAddr); // only needs to be 16 bit for I/O address)
 #define Wait  TPM_DRIVER_WAIT 
@@ -115,7 +115,7 @@ extern EFI_STATUS CountTime ( IN UINTN	DelayTime,  IN	UINT16	BaseAddr); // only 
 #define TIS_TIMEOUT_D   ACCESS_WAITCOUNT
 
 
-EFI_STATUS Tpm20TcgCountTime (
+EFI_STATUS TcgCountTime (
       IN  UINTN   DelayTime
   )
 {
@@ -147,13 +147,13 @@ EFI_STATUS Tpm20TcgCountTime (
 //**********************************************************************
 
 void
-EFIAPI
-Tpm20FixedDelay(UINT32 dCount)
+__stdcall
+FixedDelay(UINT32 dCount)
 {
   UINTN  MicroSDelay = DELAY_AMOUNT;
 
   while(dCount) {
-      Tpm20TcgCountTime(MicroSDelay);  
+      TcgCountTime(MicroSDelay);  
       dCount--;
   }
 }
@@ -161,7 +161,7 @@ Tpm20FixedDelay(UINT32 dCount)
 
 static
 UINT8
-EFIAPI
+__stdcall
 CheckAccessBit (
   IN      volatile UINT8    *Access,
   IN      UINT8             Bit,
@@ -181,7 +181,7 @@ Returns:
     UINT32  AccessCount = Timeout;
 
     do {
-        Tpm20FixedDelay((UINT32)Wait);
+        FixedDelay((UINT32)Wait);
         if((*Access & Bit) && (*Access & TPM_STS_VALID) ){ return *Access & Bit; }  // Improvement for ST TPM Hardware protocol.
         AccessCount--;
     } while (AccessCount);
@@ -193,7 +193,7 @@ Returns:
 
 static
 UINT8
-EFIAPI
+__stdcall
 CheckStsBit (
   IN      volatile UINT8            *Sts,
   IN      UINT8                     Bit
@@ -211,7 +211,7 @@ Returns:
   UINT32  AccessCount =  TIS_TIMEOUT_B;
 
   do {
-      Tpm20FixedDelay((UINT32)Wait);
+      FixedDelay((UINT32)Wait);
       AccessCount-=1;
       if(AccessCount == 0)return 0;
   }while (!(*Sts & TPM_STS_VALID));
@@ -224,7 +224,7 @@ Returns:
 
 static
 UINT16
-EFIAPI
+__stdcall
 ReadBurstCount (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
 )
@@ -250,7 +250,7 @@ Returns:
     //
     // burstCount is little-endian bit ordering
     //
-      Tpm20FixedDelay((UINT32)Wait);
+    FixedDelay((UINT32)Wait);
     Deadline--;
     burstCount = TpmReg->BurstCount;
   }while (!burstCount && (Deadline > 0));
@@ -261,8 +261,8 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
-Tpm20TisRequestLocality (
+__stdcall
+TisRequestLocality (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
 /*++
@@ -289,8 +289,8 @@ Returns:
 
 #pragma optimize("",off)
 EFI_STATUS
-EFIAPI
-Tpm20TisReleaseLocality (
+__stdcall
+TisReleaseLocality (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
 /*++
@@ -310,7 +310,7 @@ Returns:
   TpmReg->Access = TPM_ACC_ACTIVE_LOCALITY;
   if (CheckStsBit(&TpmReg->Access, TPM_ACC_ACTIVE_LOCALITY)) {
     do{/*give locality time to be released*/
-        Tpm20FixedDelay((UINT32)Wait); 
+     FixedDelay((UINT32)Wait); 
        AccessCount--;
     }while(((CheckStsBit(&TpmReg->Access, TPM_ACC_ACTIVE_LOCALITY)) && AccessCount));
     if(CheckStsBit(&TpmReg->Access, TPM_ACC_ACTIVE_LOCALITY)){return EFI_DEVICE_ERROR;}
@@ -325,8 +325,8 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
-Tpm20TisPrepareSendCommand (
+__stdcall
+TisPrepareSendCommand (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
 /*++
@@ -354,7 +354,7 @@ Returns:
         TpmReg->Sts = TPM_STS_READY;
         do {
           --AccessCount;
-          Tpm20FixedDelay((UINT32)Wait);
+          FixedDelay((UINT32)Wait);
         } while ( !(TpmReg->Sts & TPM_STS_READY) && AccessCount );
 
         if( AccessCount > 0 )
@@ -372,8 +372,8 @@ Returns:
 }
 
 EFI_STATUS
-EFIAPI
-Tpm20TisSendCommand (
+__stdcall
+TisSendCommand (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg,
   IN      const VOID                *CmdStream,
   IN      UINTN                     Size,
@@ -443,8 +443,8 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
-Tpm20TisWaitForResponse (
+__stdcall
+TisWaitForResponse (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
 /*++
@@ -466,8 +466,8 @@ Returns:
 
 
 EFI_STATUS
-EFIAPI
-Tpm20TisReceiveResponse (
+__stdcall
+TisReceiveResponse (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg,
   OUT     VOID                      *Buffer,
   OUT     UINTN                     *Size
@@ -512,8 +512,8 @@ Returns:
 
 
 VOID
-EFIAPI
-Tpm20TisResendResponse (
+__stdcall
+TisResendResponse (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
 /*++
@@ -529,12 +529,12 @@ Returns:
 }
 
 EFI_STATUS
-EFIAPI
-Tpm20IsTpmPresent (
+__stdcall
+IsTpmPresent (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg
   )
 {
-  if ((TpmReg->Access == 0xff) || (TpmReg->Access == 0x00)) {
+  if (TpmReg->Access == 0xff) {
     return EFI_NOT_FOUND;
   }
 
@@ -544,8 +544,8 @@ Tpm20IsTpmPresent (
 
 
 EFI_STATUS
-EFIAPI
-Tpm20TpmLibPassThrough (
+__stdcall
+TpmLibPassThrough (
   IN      TPM_1_2_REGISTERS_PTR     TpmReg,
   IN      UINTN                     NoInputBuffers,
   IN      TPM_TRANSMIT_BUFFER       *InputBuffers,
@@ -576,7 +576,7 @@ Returns:
     return EFI_INVALID_PARAMETER;
   }
 
-  Status = Tpm20TisPrepareSendCommand (TpmReg);
+  Status = TisPrepareSendCommand (TpmReg);
   if (EFI_ERROR (Status)){
     return EFI_DEVICE_ERROR;
   }
@@ -585,14 +585,14 @@ Returns:
   {
      ///------------------- Send DATA -------------------------------
      if((count - 1) == 0){
-         Status = Tpm20TisSendCommand(
+         Status = TisSendCommand(
                  TpmReg,
                  InputBuffers[i].Buffer,
                  InputBuffers[i].Size,
                  TRUE
                  );
      }else{
-         Status = Tpm20TisSendCommand(
+         Status = TisSendCommand(
                              TpmReg,
                              InputBuffers[i].Buffer,
                              InputBuffers[i].Size,
@@ -603,7 +603,7 @@ Returns:
   }
 
   if (!EFI_ERROR (Status)) {
-    Status = Tpm20TisWaitForResponse (TpmReg);
+    Status = TisWaitForResponse (TpmReg);
   }
 
   if (EFI_ERROR (Status)) {
@@ -612,13 +612,14 @@ Returns:
 
   Status = EFI_BUFFER_TOO_SMALL;
   for (i = 0; Status == EFI_BUFFER_TOO_SMALL && i < NoOutputBuffers; i++) {
-    Status = Tpm20TisReceiveResponse (
+    Status = TisReceiveResponse (
       TpmReg,
       OutputBuffers[i].Buffer,
       &OutputBuffers[i].Size
       );
   }
-  TpmReg->Sts = TPM_STS_READY;
+
 Exit:
+    TpmReg->Sts = TPM_STS_READY;
   return Status;
 }

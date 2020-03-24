@@ -40,9 +40,10 @@
 #ifndef _TPMPC_H_
 #define _TPMPC_H_
 
+#include "AmiTcg\TcgEfi12.h"
+#include "AmiTcg\INTTcgAcpi.h"
+#include "AmiTcg\TcmPc.h"
 #include "Token.h"
-#include "AmiTcg/TcgEFI12.h"
-#include "AmiTcg/INTTcgAcpi.h"
 
 #pragma pack (push)
 #pragma pack (1)
@@ -75,13 +76,8 @@ typedef struct _TPM_1_2_REGISTERS
 typedef struct _TCG_ACPI_TABLE
 {
 	TCG_EFI_ACPI_DESCRIPTION_HEADER Header;
-	UINT16                      PlatformClass;
-#if TCG_PLATFORM_CLASS == 1
     UINT16                      Reserved;
-    UINT64                      LogMaxLength;
-#else
     UINT32                      LogMaxLength;
-#endif
     EFI_PHYSICAL_ADDRESS        LogStart;
     UINT16                      TcgSpecRev;
     UINT8                       DeviceFlags;
@@ -152,6 +148,11 @@ typedef volatile TPM_1_2_REGISTERS*TPM_1_2_REGISTERS_PTR;
 #define PCRi_IPL_CONFIG_AND_DATA                 5
 #define PCRi_STATE_TRANSITION                    6
 #define PCRi_HOST_PLATFORM_MANUFACTURER_CONTROL  7
+
+//
+// TCG Event Logs
+//
+#define TPM_LOG_AREA_MAX_LEN        0x10000
 
 //
 // TCG Event Types

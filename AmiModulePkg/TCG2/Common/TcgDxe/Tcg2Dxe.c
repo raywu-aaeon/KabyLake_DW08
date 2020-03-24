@@ -19,20 +19,20 @@
 // ----------------
 // $Log:
 #include <Uefi.h>
-#include "AmiTcg/TcgCommon20.h"
-#include <AmiTcg/TCGMisc.h>
+#include "AmiTcg\TcgCommon20.h"
+#include <AmiTcg\TcgMisc.h>
 #include <Token.h>
-#include <AmiTcg/Tpm20.h>
-#include <AmiTcg/TrEEProtocol.h>
-#include "Protocol/TpmDevice.h"
-#include <Protocol/ComponentName.h>
-#include <Protocol/ComponentName2.h>
-#include <Protocol/DriverBinding.h>
-#include <Protocol/AcpiSupport.h>
-#include "Protocol/TcgPlatformSetupPolicy.h"
-#include <IndustryStandard/Acpi30.h>
+#include <AmiTcg\Tpm20.h>
+#include <AmiTcg\TrEEProtocol.h>
+#include "protocol\TpmDevice.h"
+#include <Protocol\ComponentName.h>
+#include <Protocol\ComponentName2.h>
+#include <Protocol\DriverBinding.h>
+#include <Protocol\AcpiSupport.h>
+#include "Protocol\TcgPlatformSetupPolicy.h"
+#include <industrystandard\Acpi30.h>
 #include <Acpi.h>
-#include "../../CRB_lib/Tpm20CRBLib.h"
+#include "../../CRB_Lib/Tpm20CRBLib.h"
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DevicePathLib.h>
@@ -48,24 +48,16 @@
 #include <Library/IoLib.h>
 #include <ImageAuthentication.h>
 #include <Protocol/FirmwareVolume2.h>
-#include <Guid/MemoryOverwriteControl.h>
+#include <Guid\MemoryOverwriteControl.h>
 #include <Library/UefiLib.h>
-#include <Protocol/Reset.h>
+#include <Protocol\Reset.h>
 #include <IndustryStandard/SmBios.h>
-#include <AmiTcg/AmiTpmStatusCodes.h>
-#include <AmiTcg/AmiTcg2InfoProtocol.h>
+#include <AmiTcg\AmiTpmStatusCodes.h>
 #include <AmiProtocol.h>
-#include <AmiTcg/Tcmdxe.h>
-#include <Protocol/AmiTcgProtocols.h>
-#include <Guid/AmiTcgGuidIncludes.h>
-#include <Library/PeCoffLib.h>
 #ifdef AMI_MODULE_PKG_VERSION
 #if AMI_MODULE_PKG_VERSION > 27
 #include <Guid/AmiResetSystemEvent.h>
 #endif
-#endif
-#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
-#include <Protocol/VariableLock.h>
 #endif
 
 #if defined (ALLOCATE_PCR_AFTER_SMM_INIT) && (ALLOCATE_PCR_AFTER_SMM_INIT == 1)
@@ -93,27 +85,6 @@
 #endif
 #endif
 
-EFI_STATUS
-EFIAPI
-InternalSubmitCommand (
-    IN  UINT32              InputParameterBlockSize,
-    IN  UINT8               *InputParameterBlock,
-    IN  UINT32              OutputParameterBlockSize,
-    IN  UINT8               *OutputParameterBlock
-);
-
-EFI_STATUS
-EFIAPI
-MeasurePeImage (
-    IN  EFI_PHYSICAL_ADDRESS      ImageAddress,
-    IN  UINTN                     ImageSize,
-    IN  UINTN                     Tcg2SpecVersion,
-    IN  UINT32                    PcrBanks,
-    OUT TPM2_HALG                 *TpmDigest,
-    OUT UINTN                     *HashCount
-);
-
-
 /*
   locates the TPM20 hob from Pei. If found we are processing TPM 20 devic
   need to install the TreeProtocol and do TPM20 binding measurements
@@ -122,19 +93,24 @@ MeasurePeImage (
 #define EFI_ACPI_TABLE_VERSION_ALL      (EFI_ACPI_TABLE_VERSION_1_0B|EFI_ACPI_TABLE_VERSION_X)
 
 #define TCPA_PPIOP_SET_PCR_BANKS                         23
-AMI_ASL_PPI_NV_VAR              *MemoryAddress = NULL;
 
-extern EFI_GUID gTcgPlatformSetupPolicyGuid;
-extern EFI_GUID gBdsAllDriversConnectedProtocolGuid;
-extern EFI_GUID gEfiAcpiSupportGuid;
+#define BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID \
+        {0xdbc9fd21, 0xfad8, 0x45b0, 0x9e, 0x78, 0x27, 0x15, 0x88, 0x67, 0xcc, 0x93}
+
+EFI_GUID    gBdsAllDriversConnectedProtocolGuid = BDS_ALL_DRIVERS_CONNECTED_PROTOCOL_GUID;
+extern EFI_GUID gInternalAcpiSupportGuid;
+
 #ifdef AMI_MODULE_PKG_VERSION
 #if AMI_MODULE_PKG_VERSION < 28
+#define AMI_RESET_SYSTEN_EVENT_GUID { 0x62da6a56, 0x13fb, 0x485a, 0xa8, 0xda, 0xa3, 0xdd, 0x79, 0x12, 0xcb, 0x6b }
 EFI_GUID gAmiResetSystemEventGuid = AMI_RESET_SYSTEN_EVENT_GUID;
 #endif
 #endif
 
 EFI_EVENT                   Event;
 static VOID                 *reg;
+
+#define     MAX_LOG_AREA_SIZE (64 * 1024) // 64KB
 
 static EFI_PHYSICAL_ADDRESS TreeEventLogLocation;
 static EFI_PHYSICAL_ADDRESS LastEntry = 0;
@@ -151,11 +127,6 @@ EFI_STATUS TcgLibGetDsdt(EFI_PHYSICAL_ADDRESS *DsdtAddr, EFI_ACPI_TABLE_VERSION 
 EFI_STATUS TcgUpdateAslNameObject(ACPI_HDR *PDsdt, UINT8 *ObjName, UINT64 Value);
 BOOLEAN IsPTP();
 
-TCG_PLATFORM_SETUP_PROTOCOL       *AmiProtocolInstance;
-AMI_INTERNAL_HLXE_PROTOCOL        *InternalHLXE = NULL;
-UINTN                   InternalTcg2DxeImageSize = 0;
-
-
 EFI_STATUS GetAllDigestValues(UINT32 PcrBitMap,
                               TPML_DIGEST_VALUES *HashValues,
                               VOID            *HashData,
@@ -163,14 +134,17 @@ EFI_STATUS GetAllDigestValues(UINT32 PcrBitMap,
                               UINTN           *TotalHashDigestLen);
 
 
+#define EFI_TCG_PLATFORM_PROTOCOL_GUID  \
+  { 0x8c4c9a41, 0xbf56, 0x4627, 0x9e, 0xa, 0xc8, 0x38, 0x6d, 0x66, 0x11, 0x5c }
+
+#define AMI_VALID_BOOT_IMAGE_CERT_TBL_GUID \
+    { 0x6683D10C, 0xCF6E, 0x4914, 0xB5, 0xB4, 0xAB, 0x8E, 0xD7, 0x37, 0x0E, 0xD7 }
+EFI_GUID gEfiImageSecurityDatabaseguid =  EFI_IMAGE_SECURITY_DATABASE_GUID;
 EFI_HANDLE PlatformProtocolHandle;
 
 UINT32                  ActiveBankBitMap=0;
 UINT32                  TcgSupportedBankBitMap=0;
 UINT32                  gNumberOfPcrBanks = 0;
-
-UINT32                  Tpm20FwVersion=0;
-UINT32                  Tpm20Manufacturer=0;
 
 //
 //
@@ -202,7 +176,6 @@ CopyAuthSessionCommand (
 );
 
 EFI_STATUS
-EFIAPI
 TrEEDxeGetDigestNonBIOSAlg(
     IN  UINT8                    *DataToHash,
     IN  UINTN                    DataSize,
@@ -212,14 +185,14 @@ TrEEDxeGetDigestNonBIOSAlg(
 
 
 EFI_STATUS
-EFIAPI SHA384HashAll(
+__stdcall SHA384HashAll(
     IN  VOID            *HashData,
     IN  UINTN           HashDataLen,
     OUT UINT8           *Digest
 );
 
 EFI_STATUS
-EFIAPI SHA512HashAll(
+__stdcall SHA512HashAll(
     IN  VOID            *HashData,
     IN  UINTN           HashDataLen,
     OUT UINT8           *Digest
@@ -245,8 +218,8 @@ Tpm2SequenceComplete (
 
 
 EFI_STATUS
-EFIAPI
-Tpm20TpmLibPassThrough (
+__stdcall
+TpmLibPassThrough (
     IN      TPM_1_2_REGISTERS_PTR     TpmReg,
     IN      UINTN                     NoInputBuffers,
     IN      TPM_TRANSMIT_BUFFER       *InputBuffers,
@@ -255,20 +228,19 @@ Tpm20TpmLibPassThrough (
 );
 
 EFI_STATUS
-EFIAPI
-Tpm20TisRequestLocality (
+__stdcall
+TisRequestLocality (
     IN      TPM_1_2_REGISTERS_PTR     TpmReg
 );
 
 EFI_STATUS
-EFIAPI
-Tpm20TisReleaseLocality (
+__stdcall
+TisReleaseLocality (
     IN      TPM_1_2_REGISTERS_PTR     TpmReg
 );
 
 
 EFI_STATUS
-EFIAPI
 TreeSubmitCommand (
     IN  EFI_TREE_PROTOCOL   *This,
     IN  UINT32              InputParameterBlockSize,
@@ -289,27 +261,26 @@ void printbuffer(UINT8 *Buffer, UINTN BufferSize)
     UINTN i=0;
     UINTN j=0;
 
-    DEBUG((DEBUG_INFO,"\n**********PrintBuffer Entry********"));
+    DEBUG((-1,"\n**********PrintBuffer Entry********"));
 
     for(i=0; i<BufferSize; i++)
     {
 
         if(i%16 == 0)
         {
-            DEBUG((DEBUG_INFO,"\n"));
-            DEBUG((DEBUG_INFO,"%04x :", j));
+            DEBUG((-1,"\n"));
+            DEBUG((-1,"%04x :", j));
             j+=1;
         }
 
-        DEBUG((DEBUG_INFO,"%02x ", Buffer[i]));
+        DEBUG((-1,"%02x ", Buffer[i]));
     }
-    DEBUG((DEBUG_INFO,"\n"));
+    DEBUG((-1,"\n"));
 }
 
 
 
 EFI_STATUS
-EFIAPI
 TrEEDxeGetDigestNonBIOSAlg(
     IN  UINT8                    *DataToHash,
     IN  UINTN                    DataSize,
@@ -323,11 +294,12 @@ TrEEDxeGetDigestNonBIOSAlg(
     UINT8                 *Buffer;
     TPM2B_DIGEST          Result;
     EFI_TREE_PROTOCOL                 *pTreeProtocol  =  NULL;
+    EFI_GUID  gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
 
     Status = gBS->LocateProtocol(
                  &gEfiTrEEProtocolGuid,
                  NULL,
-                 (void **)&pTreeProtocol);
+                 &pTreeProtocol);
 
     if(EFI_ERROR(Status))return Status;
 
@@ -383,7 +355,7 @@ EFI_STATUS GetAllDigestValues(UINT32 PcrBitMap,
     if((PcrBitMap & 1) == 1)
     {
         //sha1
-        Tpm20SHA1HashAll(NULL, HashData, HashDataLen, (UINT8 *)&HashValues->digests[Count].digest.sha1);
+        SHA1HashAll(NULL, HashData, HashDataLen, (UINT8 *)&HashValues->digests[Count].digest.sha1);
         HashValues->digests[Count].hashAlg = TPM2_ALG_SHA1;
         TotalSize += SHA1_DIGEST_SIZE;
         Count+=1;
@@ -425,7 +397,7 @@ EFI_STATUS GetAllDigestValues(UINT32 PcrBitMap,
         Count+=1;
     }
 
-    DEBUG(( DEBUG_INFO," TotalSize = %x \n", TotalSize));
+    DEBUG(( -1," TotalSize = %x \n", TotalSize));
 
     HashValues->count = Count;
     *Digestsize = TotalSize;
@@ -437,8 +409,9 @@ UINT8  GetTcgSpecVersion()
 {
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
     EFI_STATUS                      Status;
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
 
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status))
     {
         return 0;
@@ -449,15 +422,14 @@ UINT8  GetTcgSpecVersion()
 
 BOOLEAN IsTpm20Device()
 {
+    EFI_GUID gTpm20Supporthobguid = TPM20_HOB_GUID;
 
-    TpmSupport = Tpm20LocateATcgHob( gST->NumberOfTableEntries,
+    TpmSupport = LocateATcgHob( gST->NumberOfTableEntries,
                                 gST->ConfigurationTable,
-                                &gTpm20HobGuid);
+                                &gTpm20Supporthobguid);
 
     if(TpmSupport != NULL)
     {
-        Tpm20FwVersion = TpmSupport->Tpm2FWersion1;
-        Tpm20Manufacturer = TpmSupport->Tpm2manufacturer;
         if(TpmSupport->Tpm20DeviceState == 1)
         {
             return TRUE;
@@ -493,7 +465,7 @@ BOOLEAN IsTpm20Device()
 //<AMI_PHDR_END>
 //**********************************************************************
 EFI_STATUS
-EFIAPI TcmCommonPassThrough(
+__stdcall TcmCommonPassThrough(
     IN VOID                    *Context,
     IN UINT32                  NoInputBuffers,
     IN TPM_TRANSMIT_BUFFER     *InputBuffers,
@@ -509,8 +481,9 @@ UINT8  GetInterfacePolicy()
 {
     TCG_PLATFORM_SETUP_PROTOCOL     *ProtocolInstance;
     EFI_STATUS                      Status;
+    EFI_GUID                        Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
 
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL,   (void  **)&ProtocolInstance);
+    Status = gBS->LocateProtocol (&Policyguid,  NULL, &ProtocolInstance);
     if (EFI_ERROR (Status))
     {
         return 0;
@@ -535,6 +508,14 @@ Tpm2GetCapability (
     UINT32                            SendBufferSize;
     UINT32                            RecvBufferSize;
     EFI_TREE_PROTOCOL                 *pTreeProtocol  =  NULL;
+    EFI_GUID  gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
+
+    Status = gBS->LocateProtocol(
+                 &gEfiTrEEProtocolGuid,
+                 NULL,
+                 &pTreeProtocol);
+
+    if(EFI_ERROR(Status))return Status;
 
     //
     // Construct command
@@ -553,7 +534,7 @@ Tpm2GetCapability (
     // send Tpm command
     //
     RecvBufferSize = sizeof (RecvBuffer);
-    Status = InternalSubmitCommand (SendBufferSize, (UINT8 *)&SendBuffer, RecvBufferSize, (UINT8 *)&RecvBuffer );
+    Status = TreeSubmitCommand (pTreeProtocol, SendBufferSize, (UINT8 *)&SendBuffer, RecvBufferSize, (UINT8 *)&RecvBuffer );
     if (EFI_ERROR (Status))
     {
         return Status;
@@ -567,7 +548,7 @@ Tpm2GetCapability (
     //
     if (SwapBytes32(RecvBuffer.Header.responseCode) != TPM_RC_SUCCESS)
     {
-        DEBUG((DEBUG_ERROR, "Tpm2GetCapability: Response Code error! 0x%08x\r\n", SwapBytes32(RecvBuffer.Header.responseCode)));
+        DEBUG((-1, "Tpm2GetCapability: Response Code error! 0x%08x\r\n", SwapBytes32(RecvBuffer.Header.responseCode)));
         return EFI_DEVICE_ERROR;
     }
     // Return the response
@@ -884,9 +865,6 @@ EFI_STATUS OverwriteSystemMemory(
                  (VOID**)&MemoryMap
              );
     ASSERT_EFI_ERROR (Status);
-    if(EFI_ERROR(Status)){
-        return Status;
-    }
 
     //
     // Get System MemoryMap
@@ -899,10 +877,6 @@ EFI_STATUS OverwriteSystemMemory(
                  &DescriptorVersion
              );
     ASSERT_EFI_ERROR (Status);
-    if(EFI_ERROR(Status)){
-    	gBS->FreePool (MemoryMap);
-        return Status;
-    }
 
     MemoryMapPtr = MemoryMap;
     //
@@ -927,13 +901,13 @@ EFI_STATUS OverwriteSystemMemory(
             case EfiLoaderData:
             case EfiMaxMemoryType:
                 Size = MemoryMap->NumberOfPages <<  EFI_PAGE_SHIFT;
-                DEBUG((DEBUG_INFO,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
-                DEBUG((DEBUG_INFO," Left Alone \n"));
+                DEBUG((-1,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
+                DEBUG((-1," Left Alone \n"));
                 break;
             default:
                 Size = MemoryMap->NumberOfPages <<  EFI_PAGE_SHIFT;
-                DEBUG((DEBUG_INFO,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
-                DEBUG((DEBUG_INFO," Cleaned \n"));
+                DEBUG((-1,"MOR: Start = %x Len = %x", MemoryMap->PhysicalStart, Size));
+                DEBUG((-1," Cleaned \n"));
                 Size = MemoryMap->NumberOfPages <<  EFI_PAGE_SHIFT;
                 SetMem((VOID*)MemoryMap->PhysicalStart, (UINTN)Size, 0);
         }
@@ -969,12 +943,14 @@ EFI_STATUS OverwriteSystemMemory(
 //**********************************************************************
 VOID ReadMORValue( )
 {
+    CHAR16     UefiMor[]   = L"MemoryOverwriteRequestControl";
+    EFI_GUID   MorUefiGuid = MEMORY_ONLY_RESET_CONTROL_GUID;
     UINT8      mor         = 0;
     UINTN      size        = sizeof(mor);
     EFI_STATUS Status;
 
 
-    Status = gRT->GetVariable( L"MemoryOverwriteRequestControl", &gEfiMemoryOverwriteControlDataGuid,
+    Status = gRT->GetVariable( UefiMor, &MorUefiGuid,
                                NULL, &size, &mor );
 
     if(EFI_ERROR(Status))return;
@@ -983,18 +959,18 @@ VOID ReadMORValue( )
     {
 
         //clear memory
-        DEBUG((DEBUG_INFO,"MOR: before Clear memory"));
+        DEBUG((-1,"MOR: before Clear memory"));
 #if !(defined(TCG_SKIP_MOR_FULL) && TCG_SKIP_MOR_FULL == 1)
         Status = OverwriteSystemMemory();
         if(EFI_ERROR(Status))
         {
             TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_ERR_MOR_REQUEST_FAIL | EFI_SOFTWARE_DXE_BS_DRIVER);
-            DEBUG((DEBUG_INFO,"OverwriteSystemMemory Failed"));
+            DEBUG((-1,"OverwriteSystemMemory Failed"));
         }else{
             TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_MOR_REQUEST_ACK_EXECUTED | EFI_SOFTWARE_DXE_BS_DRIVER);
         }
 #endif
-        DEBUG((DEBUG_INFO,"MOR: After Clear memory"));
+        DEBUG((-1,"MOR: After Clear memory"));
     }
 }
 
@@ -1010,6 +986,7 @@ Tpm2GetCapabilityCapPCRS ()
     UINT8                   *Buffer;
     UINTN                   size = 0, i=0, j=0;
     UINT32                  SupportedBankBitMap=0;
+    EFI_GUID                gTcgInternalflagGuid = TCG_INTERNAL_FLAGS_GUID;
     AMITCGSETUPINFOFLAGS    Info;
     UINT16                  hash;
 
@@ -1028,8 +1005,8 @@ Tpm2GetCapabilityCapPCRS ()
         Info.ActivePcrBitMap  = 1;
         Info.Reserved = 0;
 
-        DEBUG(( DEBUG_INFO," SupportedPcrBitMap = %x \n", Info.SupportedPcrBitMap));
-        DEBUG(( DEBUG_INFO," ActivePcrBitMap = %x \n", Info.ActivePcrBitMap));
+        DEBUG(( -1," SupportedPcrBitMap = %x \n", Info.SupportedPcrBitMap));
+        DEBUG(( -1," ActivePcrBitMap = %x \n", Info.ActivePcrBitMap));
 
         Status = gRT->SetVariable( L"PCRBitmap", \
                                    &gTcgInternalflagGuid, \
@@ -1045,15 +1022,15 @@ Tpm2GetCapabilityCapPCRS ()
     PcrSelect = (TPMS_PCR_SELECTION *)(Buffer + (sizeof(UINT32)*2));
     size = SwapBytes32(*(UINT32 *)(Buffer + sizeof(UINT32)));
 
-    DEBUG(( DEBUG_INFO," size = %x \n", size));
+    DEBUG(( -1," size = %x \n", size));
 
     //ActiveBankBitMap
     for(i=0; i<size; i++,PcrSelect++)
     {
 
         //printbuffer((UINT8 *)PcrSelect, 0x30);
-        DEBUG(( DEBUG_INFO," PcrSelect->hash = %x \n", PcrSelect->hash));
-        DEBUG(( DEBUG_INFO," PcrSelect->sizeofSelect = %x \n", PcrSelect->sizeofSelect));
+        DEBUG(( -1," PcrSelect->hash = %x \n", PcrSelect->hash));
+        DEBUG(( -1," PcrSelect->sizeofSelect = %x \n", PcrSelect->sizeofSelect));
         hash = SwapBytes16(PcrSelect->hash);
         switch(hash)
         {
@@ -1131,11 +1108,9 @@ Tpm2GetCapabilityCapPCRS ()
     Info.SupportedPcrBitMap = SupportedBankBitMap;
     Info.ActivePcrBitMap  = ActiveBankBitMap;
     Info.Reserved = 0;
-    Info.TpmFwVersion = Tpm20FwVersion;
-    Info.TpmManufacturer = Tpm20Manufacturer;
 
-    DEBUG(( DEBUG_INFO," SupportedPcrBitMap = %x \n", Info.SupportedPcrBitMap));
-    DEBUG(( DEBUG_INFO," ActivePcrBitMap = %x \n", Info.ActivePcrBitMap));
+    DEBUG(( -1," SupportedPcrBitMap = %x \n", Info.SupportedPcrBitMap));
+    DEBUG(( -1," ActivePcrBitMap = %x \n", Info.ActivePcrBitMap));
 
     Status = gRT->SetVariable( L"PCRBitmap", \
                                &gTcgInternalflagGuid, \
@@ -1162,7 +1137,7 @@ Tpm2Shutdown (
   Status = gBS->LocateProtocol(
                   &gEfiTrEEProtocolGuid,
                   NULL,
-                  (void **)&pTreeProtocol);
+                  &pTreeProtocol);
 
   if(EFI_ERROR(Status))return Status;
 
@@ -1177,48 +1152,31 @@ Tpm2Shutdown (
   return Status;
 }
 
-VOID
-EFIAPI
+EFI_STATUS
 TPM2ResetSystemWorkAround(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
-    EFI_STATUS                                  Status;
-    AMI_TCG2_DXE_FUNCTION_OVERRIDE_PROTOCOL     *Tpm20ShutdownCmdProtocol = NULL;
-
-    Status = gBS->LocateProtocol(
-                 &gTpm20ShutdownOverrideguid,
-                 NULL,
-                 (void **)&Tpm20ShutdownCmdProtocol );
-    if(!EFI_ERROR(Status))
-    {
-        Status = Tpm20ShutdownCmdProtocol->Function();
-    }
-    else
-    {
-    DEBUG((DEBUG_INFO, "\tResetSystem, Tpm2Shutdown(TPM_SU_CLEAR)\n"));
+    DEBUG((-1, "\tResetSystem, Tpm2Shutdown(TPM_SU_CLEAR)\n"));
     // Before ResetSystem/ReBoot, we need to execute TPM2_Shutdown(ST_CLEAR) to Reflash the TPM
     // Internal NVRAM, make the PCR changed command work.
     // For NTZ TPM, we need the patch.
-        Status = Tpm2Shutdown(TPM_SU_CLEAR);
-    }
+    Tpm2Shutdown(TPM_SU_CLEAR);
+    return EFI_SUCCESS;
 }
 
-VOID
-EFIAPI
+EFI_STATUS
 DoResetNow(
     IN EFI_EVENT ev,
     IN VOID      *ctx )
 {
     gRT->ResetSystem( EfiResetCold, 0, 0, NULL );
-    DEBUG((DEBUG_INFO, "\tError: Reset failed???\n"));
-    return;
+    DEBUG((-1, "\tError: Reset failed???\n"));
+    return EFI_SUCCESS;
 }
 
 
-EFI_STATUS 
-EFIAPI
-Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, UINT32 *TpmErrorCode)
+EFI_STATUS Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, UINT32 *TpmErrorCode)
 {
     EFI_STATUS                 Status;
     TPM2_ALLOCATE_PCR_COMMAND  Tpm2Alloccmd;
@@ -1229,6 +1187,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     UINT32                     CmdSize = 0;
     UINT32                     RecvBufferSize=0;
     EFI_TREE_PROTOCOL                 *pTreeProtocol  =  NULL;
+    EFI_GUID  gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
     TPMI_YES_NO                *AllocPass;
     UINT8                       i=0, Count=0;
     BOOLEAN                     AllocateFail = FALSE;
@@ -1238,7 +1197,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     Status = gBS->LocateProtocol(
                  &gEfiTrEEProtocolGuid,
                  NULL,
-                 (void **) &pTreeProtocol);
+                 &pTreeProtocol);
 
     if(EFI_ERROR(Status))return Status;
 
@@ -1278,15 +1237,15 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
 
     *AuthsizeOffset = SwapBytes32((UINT32)(Buffer - (UINT8 *)AuthsizeOffset - sizeof(UINT32)));
 
-    DEBUG((DEBUG_INFO," Tpm2AllocatePCR::Supported = %x \n", Supported));
-    DEBUG((DEBUG_INFO," Tpm2AllocatePCR::RequestedBank = %x \n", RequestedBank));
-    DEBUG((DEBUG_INFO," Tpm2AllocatePCR::ActivePCRBanks = %x \n", ActivePCRBanks));
+    DEBUG((-1," Tpm2AllocatePCR::Supported = %x \n", Supported));
+    DEBUG((-1," Tpm2AllocatePCR::RequestedBank = %x \n", RequestedBank));
+    DEBUG((-1," Tpm2AllocatePCR::ActivePCRBanks = %x \n", ActivePCRBanks));
 
     if(((Supported & TREE_BOOT_HASH_ALG_SHA1)!=0) && \
             (RequestedBank & TREE_BOOT_HASH_ALG_SHA1) == TREE_BOOT_HASH_ALG_SHA1)
     {
 
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::Allocate Sha-1 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::Allocate Sha-1 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA1);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0xFF);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0xFF);
@@ -1300,7 +1259,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if((Supported & TREE_BOOT_HASH_ALG_SHA256) && \
             (RequestedBank & TREE_BOOT_HASH_ALG_SHA256) == TREE_BOOT_HASH_ALG_SHA256 && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::Allocate Sha-2 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::Allocate Sha-2 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA256);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0xFF);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0xFF);
@@ -1314,7 +1273,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((Supported & TREE_BOOT_HASH_ALG_SHA384)!=0) && \
             (RequestedBank & TREE_BOOT_HASH_ALG_SHA384) == TREE_BOOT_HASH_ALG_SHA384 && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::Allocate Sha-3 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::Allocate Sha-3 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA384);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0xFF);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0xFF);
@@ -1328,7 +1287,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((Supported & TREE_BOOT_HASH_ALG_SHA512)!=0) && \
             (RequestedBank & TREE_BOOT_HASH_ALG_SHA512) == TREE_BOOT_HASH_ALG_SHA512 && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::Allocate Sha-512 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::Allocate Sha-512 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA512);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0xFF);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0xFF);
@@ -1342,7 +1301,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((Supported & TREE_BOOT_HASH_ALG_SM3)!=0) && \
             (RequestedBank & TREE_BOOT_HASH_ALG_SM3) == TREE_BOOT_HASH_ALG_SM3 && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::Allocate SM3 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::Allocate SM3 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SM3_256);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0xFF);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0xFF);
@@ -1356,7 +1315,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((ActivePCRBanks & TREE_BOOT_HASH_ALG_SHA1)!=0) && \
             ((RequestedBank & TREE_BOOT_HASH_ALG_SHA1) == 0) && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::deAllocate Sha-1 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::deAllocate Sha-1 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA1);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0x0);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0x0);
@@ -1369,7 +1328,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((ActivePCRBanks & TREE_BOOT_HASH_ALG_SHA256)!=0) && \
             ((RequestedBank & TREE_BOOT_HASH_ALG_SHA256) == 0) && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::deAllocate Sha-2 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::deAllocate Sha-2 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA256);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0x0);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0x0);
@@ -1383,7 +1342,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((ActivePCRBanks & TREE_BOOT_HASH_ALG_SHA384)!=0) && \
             ((RequestedBank & TREE_BOOT_HASH_ALG_SHA384) == 0) && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::deAllocate Sha-3 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::deAllocate Sha-3 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA384);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0x0);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0x0);
@@ -1397,7 +1356,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((ActivePCRBanks & TREE_BOOT_HASH_ALG_SHA512)!=0) && \
             ((RequestedBank & TREE_BOOT_HASH_ALG_SHA512) == 0) && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::deAllocate Sha-512 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::deAllocate Sha-512 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SHA512);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0x0);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0x0);
@@ -1410,7 +1369,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
     if(((ActivePCRBanks & TREE_BOOT_HASH_ALG_SM3)!=0) && \
             ((RequestedBank & TREE_BOOT_HASH_ALG_SM3) == 0) && i < HASH_COUNT)
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR::deAllocate SM3 \n", Count));
+        DEBUG((-1," Tpm2AllocatePCR::deAllocate SM3 \n", Count));
         pcrAllocation.pcrSelections[i].hash = SwapBytes16(TPM2_ALG_SM3_256);
         pcrAllocation.pcrSelections[i].pcrSelect[0] = (0x0);
         pcrAllocation.pcrSelections[i].pcrSelect[1] = (0x0);
@@ -1420,6 +1379,7 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
         Count++;
     }
 
+    if(Count > HASH_COUNT)Count=HASH_COUNT; // Using the TPM20.h Structure Default define Count.
     pcrAllocation.count = SwapBytes32(Count);
 
     CopyMem(Buffer, &pcrAllocation.count, sizeof(UINT32));
@@ -1437,26 +1397,26 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
                                 sizeof(TPM2_ALLOCATE_PCR_RESPONSE), (UINT8 *)&Tpm2AllocResponse );
     if (EFI_ERROR (Status))
     {
-        DEBUG((DEBUG_INFO," Tpm2AllocatePCR:: TreeSubmitCommand returned error \n"));
+        DEBUG((-1," Tpm2AllocatePCR:: TreeSubmitCommand returned error \n"));
         AllocateFail = TRUE;
         goto FAIL_RETURN;
     }
 
     RecvBufferSize = SwapBytes32(Tpm2AllocResponse.Header.paramSize);
 
-    DEBUG((DEBUG_INFO," Tpm2AllocatePCR:: RecvBufferSize = %x \n", RecvBufferSize));
+    DEBUG((-1," Tpm2AllocatePCR:: RecvBufferSize = %x \n", RecvBufferSize));
 
     *TpmErrorCode = SwapBytes32(Tpm2AllocResponse.Header.responseCode);
     if(SwapBytes32(Tpm2AllocResponse.Header.responseCode))
     {
-        DEBUG((DEBUG_ERROR," Tpm2AllocResponse.Header.responseCode = %x \n", SwapBytes32(Tpm2AllocResponse.Header.responseCode)));
+        DEBUG((-1," Tpm2AllocResponse.Header.responseCode = %x \n", SwapBytes32(Tpm2AllocResponse.Header.responseCode)));
         AllocateFail = TRUE;
         goto FAIL_RETURN;
     }
 
     if (RecvBufferSize <= sizeof (TPM2_RESPONSE_HEADER) + sizeof (UINT8))
     {
-        DEBUG((DEBUG_ERROR," Tpm2AllocatePCR:: RecvBufferSize <= sizeof (TPM2_RESPONSE_HEADER) + sizeof (UINT8) \n"));
+        DEBUG((-1," Tpm2AllocatePCR:: RecvBufferSize <= sizeof (TPM2_RESPONSE_HEADER) + sizeof (UINT8) \n"));
         AllocateFail = TRUE;
         goto FAIL_RETURN;
     }
@@ -1466,12 +1426,12 @@ Tpm2AllocatePCR(UINT32 RequestedBank, UINT32 ActivePCRBanks, UINT32 Supported, U
 
     if(*AllocPass != 1)
     {
-        DEBUG((DEBUG_ERROR," Tpm2AllocatePCR:: TPM Alloca failed \n"));
+        DEBUG((-1," Tpm2AllocatePCR:: TPM Alloca failed \n"));
         AllocateFail = TRUE;
         goto FAIL_RETURN;
     }
 
-    DEBUG((DEBUG_INFO," Tpm2AllocatePCR:: Allocation success \n"));
+    DEBUG((-1," Tpm2AllocatePCR:: Allocation success \n"));
     return EFI_SUCCESS;
 
 FAIL_RETURN:
@@ -1500,30 +1460,30 @@ FAIL_RETURN:
 
 
 #if defined (ALLOCATE_PCR_AFTER_SMM_INIT) && (ALLOCATE_PCR_AFTER_SMM_INIT == 1)
-VOID
-EFIAPI
-Tpm2AllocatePCRCallback (IN EFI_EVENT ev,
+EFI_STATUS Tpm2AllocatePCRCallback (IN EFI_EVENT ev,
                                     IN VOID      *ctx)
 {
     EFI_STATUS Status;
+    EFI_GUID   gPolicyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
     TCG_PLATFORM_SETUP_PROTOCOL     *PolicyInstance;
     static              EFI_EVENT      Resetev;
     static      void    * Resetreg;
     UINT32              TpmError;
     EFI_SMM_BASE2_PROTOCOL  *SmmBase2 = NULL;
+    EFI_GUID                gTcgInternalflagGuid = TCG_INTERNAL_FLAGS_GUID;
     UINT8               ResetVal=0;
 
-    DEBUG((DEBUG_INFO, "Tpm2AllocatePCRCallback Entry\n"));
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&PolicyInstance);
+    DEBUG((-1, "Tpm2AllocatePCRCallback Entry\n"));
+    Status = gBS->LocateProtocol (&gPolicyguid,  NULL, &PolicyInstance);
     if (EFI_ERROR (Status))
     {
-        return;
+        return Status;
     }
 
 
     //smm should be ready now
-    Status = gBS->LocateProtocol( &gEfiSmmBase2ProtocolGuid, NULL, (void **)&SmmBase2 );
-    if ( EFI_ERROR(Status) || SmmBase2 == NULL) return;
+    Status = gBS->LocateProtocol( &gEfiSmmBase2ProtocolGuid, NULL, &SmmBase2 );
+    if ( EFI_ERROR(Status) || SmmBase2 == NULL) return EFI_NOT_READY;
 
     Status = Tpm2AllocatePCR(PolicyInstance->ConfigFlags.PcrBanks , ActiveBankBitMap, TcgSupportedBankBitMap, &TpmError);
     if( !EFI_ERROR(Status))
@@ -1538,22 +1498,23 @@ Tpm2AllocatePCRCallback (IN EFI_EVENT ev,
         if(!EFI_ERROR(Status))
         {
             gRT->ResetSystem (EfiResetCold, EFI_SUCCESS, 0, NULL);
-            DEBUG((DEBUG_ERROR, "\tError: Reset failed???\n"));
+            DEBUG((-1, "\tError: Reset failed???\n"));
 
             Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
                                        EFI_TPL_CALLBACK, DoResetNow, NULL, &Resetev);
 
             ASSERT( !EFI_ERROR( Status ));
             Status = gBS->RegisterProtocolNotify(&gEfiResetArchProtocolGuid, Resetev, &Resetreg);
-            DEBUG((DEBUG_ERROR, "\tRegister DoResetNow after Reset Architecture driver\n"));
+            DEBUG((-1, "\tRegister DoResetNow after Reset Architecture driver\n"));
         }
     }
+
+    return  Status;
 }
 #endif
 
 
 EFI_STATUS
-EFIAPI
 EfiTreeGetActivePcrs(
     EFI_TREE_PROTOCOL    *This,
     UINT32               *ActivatePcrBanks
@@ -1564,7 +1525,7 @@ EfiTreeGetActivePcrs(
         return EFI_INVALID_PARAMETER;
     }
 
-    DEBUG(( DEBUG_INFO, " EfiTreeGetActivePcrs ActiveBankBitMap[0x%x]\n", ActiveBankBitMap));
+    DEBUG(( -1, " EfiTreeGetActivePcrs ActiveBankBitMap[0x%x]\n", ActiveBankBitMap));
     *ActivatePcrBanks = ActiveBankBitMap;
     return EFI_SUCCESS;
 }
@@ -1577,6 +1538,7 @@ EfiTreeGetResultOfSetActivePcrs(
 )
 {
     EFI_STATUS  Status = EFI_INVALID_PARAMETER;
+    EFI_GUID AmitcgefiOsVariableGuid       = AMI_TCG_EFI_OS_VARIABLE_GUID;
     UINTN               Size = sizeof(AMI_PPI_NV_VAR);
     AMI_PPI_NV_VAR      Temp;
 
@@ -1585,7 +1547,7 @@ EfiTreeGetResultOfSetActivePcrs(
         return EFI_INVALID_PARAMETER;
     }
 
-    DEBUG(( DEBUG_INFO, "[%s] [%d]:EfiTreeGetResultOfSetActivePcrs \n", __FILE__, __LINE__));
+    DEBUG(( -1, "[%s] [%d]:EfiTreeGetResultOfSetActivePcrs \n", __FILE__, __LINE__));
 
     Status = gRT->GetVariable( L"AMITCGPPIVAR", \
                                &AmitcgefiOsVariableGuid, \
@@ -1595,7 +1557,7 @@ EfiTreeGetResultOfSetActivePcrs(
 
     if(EFI_ERROR(Status))
     {
-        DEBUG(( DEBUG_ERROR, "[%s] [%d]: Status Error(...)\n", __FILE__, __LINE__));
+        DEBUG(( -1, "[%s] [%d]: Status Error(...)\n", __FILE__, __LINE__));
         return Status;
     }
 
@@ -1603,7 +1565,7 @@ EfiTreeGetResultOfSetActivePcrs(
     {
         *OperationPresent = 1;
         *Response = Temp.ERROR;
-        DEBUG(( DEBUG_ERROR, "Temp.ERROR = %x \n", Temp.ERROR));
+        DEBUG(( -1, "Temp.ERROR = %x \n", Temp.ERROR));
         if(*Response != EFI_SUCCESS)
         {
             return EFI_UNSUPPORTED;
@@ -1615,7 +1577,6 @@ EfiTreeGetResultOfSetActivePcrs(
 
 
 EFI_STATUS
-EFIAPI
 EfiTreeSetActivePcrs(
     EFI_TREE_PROTOCOL    *This,
     UINT32               ActivatePcrBanks
@@ -1624,12 +1585,13 @@ EfiTreeSetActivePcrs(
     EFI_STATUS  Status = EFI_INVALID_PARAMETER;
     UINTN               VariableSize  =  sizeof(AMI_PPI_NV_VAR);
     AMI_PPI_NV_VAR      Variable;
+    EFI_GUID            AmitcgefiOsVariableGuid  = AMI_TCG_EFI_OS_VARIABLE_GUID;
     UINT32              VariableAttributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE;
 
-    DEBUG(( DEBUG_INFO, "[%d]: Enter EfiTreeSetActivePcrs(...)\n", __LINE__));
-    DEBUG(( DEBUG_INFO, "EfiTreeSetActivePcrs ActivatePcrBanks[0x%x]\n", ActivatePcrBanks));
-    DEBUG(( DEBUG_INFO, "EfiTreeSetActivePcrs ActiveBankBitMap[0x%x]\n", ActiveBankBitMap));
-    DEBUG(( DEBUG_INFO, "EfiTreeSetActivePcrs TcgSupportedBankBitMap[0x%x]\n", TcgSupportedBankBitMap));
+    DEBUG(( -1, "[%d]: Enter EfiTreeSetActivePcrs(...)\n", __LINE__));
+    DEBUG(( -1, "EfiTreeSetActivePcrs ActivatePcrBanks[0x%x]\n", ActivatePcrBanks));
+    DEBUG(( -1, "EfiTreeSetActivePcrs ActiveBankBitMap[0x%x]\n", ActiveBankBitMap));
+    DEBUG(( -1, "EfiTreeSetActivePcrs TcgSupportedBankBitMap[0x%x]\n", TcgSupportedBankBitMap));
 
     TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_TPM_PROTOCOL_SET_ACTIVE_PCRS_REQUEST | EFI_SOFTWARE_DXE_BS_DRIVER);
 
@@ -1662,7 +1624,7 @@ EfiTreeSetActivePcrs(
                                    VariableSize,
                                    &Variable);
 
-        DEBUG(( DEBUG_INFO, "EfiTreeSetActivePcrs SetVariable[0x%r]\n", Status));
+        DEBUG(( -1, "EfiTreeSetActivePcrs SetVariable[0x%r]\n", Status));
     }
 
 
@@ -1692,7 +1654,6 @@ EfiTreeSetActivePcrs(
 //**********************************************************************
 #pragma optimize("",off)
 EFI_STATUS
-EFIAPI
 TreeGetCapability (
     IN EFI_TREE_PROTOCOL                *This,
     IN OUT TREE_BOOT_SERVICE_CAPABILITY *ProtocolCapability
@@ -1703,6 +1664,7 @@ TreeGetCapability (
     static UINT32     ManufactureID = 0xFFFFFFFF;
     static UINT32     MaxResponseSize = 0xFFFFFFFF;
     static UINT32     MaxCommandSize  = 0xFFFFFFFF;
+    TPML_ALG_PROPERTY  AlgList;
     BOOLEAN           Fillsize=FALSE;
     UINTN             Size;
     TREE_BOOT_SERVICE_CAPABILITY Capability;
@@ -1710,7 +1672,7 @@ TreeGetCapability (
 
     TPM_CRB_ACCESS_REG_PTR dCrbAccessRegPtr = (TPM_CRB_ACCESS_REG_PTR)(( UINTN ) (PORT_TPM_IOMEMBASE));
 
-    DEBUG(( DEBUG_INFO, "TreeGetCapability Entry\n"));
+    DEBUG(( -1, "TreeGetCapability Entry\n"));
     TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_TPM_PROTOCOL_GET_CAPABILITY_REQUEST | EFI_SOFTWARE_DXE_BS_DRIVER);
     if((ProtocolCapability == NULL) || (This == NULL))
     {
@@ -1751,7 +1713,7 @@ TreeGetCapability (
 
         if( TCG2_PROTOCOL_SPEC_TCG_1_2 == Tcg2SpecVersion )
         {
-            DEBUG(( DEBUG_INFO, "TCG2_PROTOCOL_SPEC_TCG_1_2\n"));
+            DEBUG(( -1, "TCG2_PROTOCOL_SPEC_TCG_1_2\n"));
             if(ProtocolCapability->Size < sizeof(TREE_BOOT_SERVICE_CAPABILITY_SHA1) )
             {
                 ProtocolCapability->Size = sizeof(TREE_BOOT_SERVICE_CAPABILITY_SHA1);
@@ -1760,7 +1722,7 @@ TreeGetCapability (
         }
         else if( TCG2_PROTOCOL_SPEC_TCG_2 == Tcg2SpecVersion )
         {
-            DEBUG(( DEBUG_INFO, "TCG2_PROTOCOL_SPEC_TCG_2\n"));
+            DEBUG(( -1, "TCG2_PROTOCOL_SPEC_TCG_2\n"));
             if(ProtocolCapability->Size < sizeof(TREE_BOOT_SERVICE_CAPABILITY))
             {
                 ProtocolCapability->Size = sizeof(TREE_BOOT_SERVICE_CAPABILITY);
@@ -1774,11 +1736,46 @@ TreeGetCapability (
         }
 
 
-        DEBUG(( DEBUG_INFO, "SpecVersion Status = %r \n",Status ));
+        DEBUG(( -1, "SpecVersion Status = %r \n",Status ));
 
         if( !EFI_ERROR(Status) || Fillsize == TRUE)
-        { 
-        	 Capability.HashAlgorithmBitmap = TcgSupportedBankBitMap;
+        {
+            Status = Tpm2GetCapabilitySupportedAlg(&AlgList);
+            Capability.HashAlgorithmBitmap = TREE_BOOT_HASH_ALG_SHA1;
+            if(!EFI_ERROR(Status))
+            {
+                for(; i<AlgList.count; i++)
+                {
+                    if(AlgList.algProperties[i].alg == TPM2_ALG_SHA1 )
+                    {
+                        Capability.HashAlgorithmBitmap |= TREE_BOOT_HASH_ALG_SHA1;
+                    }
+
+                    if(AlgList.algProperties[i].alg == TPM2_ALG_SHA256)
+                    {
+                        Capability.HashAlgorithmBitmap |= TREE_BOOT_HASH_ALG_SHA256;
+                    }
+
+                    if(AlgList.algProperties[i].alg == TPM2_ALG_SHA384)
+                    {
+                        Capability.HashAlgorithmBitmap |= TREE_BOOT_HASH_ALG_SHA384;
+                    }
+
+                    if(AlgList.algProperties[i].alg == TPM2_ALG_SHA512)
+                    {
+                        Capability.HashAlgorithmBitmap |= TREE_BOOT_HASH_ALG_SHA512;
+                    }
+                    // Add for SM3 Support
+                    if(AlgList.algProperties[i].alg == TPM2_ALG_SM3_256)
+                    {
+                        Capability.HashAlgorithmBitmap |= TREE_BOOT_HASH_ALG_SM3;
+                    }
+                }
+            }
+            else
+            {
+                Status = EFI_SUCCESS;
+            }
 
             if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2 )
             {
@@ -1791,7 +1788,8 @@ TreeGetCapability (
             }
             else if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
             {
-                DEBUG(( DEBUG_INFO, "TreeGetCap ActiveBankBitMap: %x \n", ActiveBankBitMap));
+
+                DEBUG(( -1, "TreeGetCap ActiveBankBitMap: %x \n", ActiveBankBitMap));
 
                 if((ActiveBankBitMap & TREE_BOOT_HASH_ALG_SHA1) != 0)
                 {
@@ -1802,7 +1800,7 @@ TreeGetCapability (
                     Capability.SupportedEventLogs  =  TREE_EVENT_LOG_FORMAT_TCG_2 ;
                 }
 
-                DEBUG(( DEBUG_INFO, "TreeGetCap SupportedEventLogs: %x \n", Capability.SupportedEventLogs));
+                DEBUG(( -1, "TreeGetCap SupportedEventLogs: %x \n", Capability.SupportedEventLogs));
 
                 Capability.StructureVersion.Major = 1;
                 Capability.ProtocolVersion.Major = 1;
@@ -1847,7 +1845,7 @@ TreeGetCapability (
                 CopyMem (ProtocolCapability, &Capability, sizeof(TREE_BOOT_SERVICE_CAPABILITY_SHA1));
             }
 
-            DEBUG(( DEBUG_INFO, "TreeGetCap ProtocolCapability:\n"));
+            DEBUG(( -1, "TreeGetCap ProtocolCapability:\n"));
             //printbuffer( (UINT8*)ProtocolCapability,ProtocolCapability->Size );
         }
     }
@@ -1881,7 +1879,6 @@ TreeGetCapability (
 //**********************************************************************
 
 EFI_STATUS
-EFIAPI
 TreeGetEventLog (
     IN  EFI_TREE_PROTOCOL     *This,
     IN  TREE_EVENTLOGTYPE     EventLogFormat,
@@ -1894,8 +1891,8 @@ TreeGetEventLog (
     UINT8    Tcg2SpecVersion = GetTcgSpecVersion();
     UINTN    _LastEvtPtr;
 
-    DEBUG(( DEBUG_INFO, "Tcg2SpecVersion = %x\n", Tcg2SpecVersion));
-    DEBUG(( DEBUG_INFO, "EventLogFormat = %x\n", EventLogFormat));
+    DEBUG(( -1, "Tcg2SpecVersion = %x\n", Tcg2SpecVersion));
+    DEBUG(( -1, "EventLogFormat = %x\n", EventLogFormat));
     if(This == NULL || EventLogLocation == NULL || EventLogTruncated == NULL){
     	return EFI_INVALID_PARAMETER;
     }
@@ -1905,7 +1902,7 @@ TreeGetEventLog (
 
         if((ActiveBankBitMap & TREE_BOOT_HASH_ALG_SHA1) == 0 )
         {
-            DEBUG(( DEBUG_INFO, "ActiveBankBitMap & TREE_BOOT_HASH_ALG_SHA1) != 0\n"));
+            DEBUG(( -1, "ActiveBankBitMap & TREE_BOOT_HASH_ALG_SHA1) != 0\n"));
             Status = EFI_INVALID_PARAMETER;
             goto Done;
         }
@@ -1938,21 +1935,20 @@ TreeGetEventLog (
     }
 
 Done:
-    DEBUG(( DEBUG_INFO, "EventLogLocation = %x\n", *EventLogLocation));
-    DEBUG(( DEBUG_INFO, "EventLogLastEntry = %x\n", *EventLogLastEntry));
-    DEBUG(( DEBUG_INFO, "EventLogTruncated = %x\n", *EventLogTruncated));
+    DEBUG(( -1, "EventLogLocation = %x\n", *EventLogLocation));
+    DEBUG(( -1, "EventLogLastEntry = %x\n", *EventLogLastEntry));
+    DEBUG(( -1, "EventLogTruncated = %x\n", *EventLogTruncated));
 
-    DEBUG(( DEBUG_INFO, "TreeEventLogLocation = %x\n", TreeEventLogLocation));
-    DEBUG(( DEBUG_INFO, "TreeExtraTCPASha1LogLoc = %x\n", TreeExtraTCPASha1LogLoc));
-    DEBUG(( DEBUG_INFO, "LastEventPtr = %x\n", LastEventPtr));
-    DEBUG(( DEBUG_INFO, "EventLogTruncated = %x\n", IEventLogTruncated));
+    DEBUG(( -1, "TreeEventLogLocation = %x\n", TreeEventLogLocation));
+    DEBUG(( -1, "TreeExtraTCPASha1LogLoc = %x\n", TreeExtraTCPASha1LogLoc));
+    DEBUG(( -1, "LastEventPtr = %x\n", LastEventPtr));
+    DEBUG(( -1, "EventLogTruncated = %x\n", IEventLogTruncated));
 
-    DEBUG(( DEBUG_INFO, "EventLogFormat = %x\n", EventLogFormat));
+    DEBUG(( -1, "EventLogFormat = %x\n", EventLogFormat));
     return Status;
 }
 
 EFI_STATUS
-EFIAPI
 InternalTcg20CommonExtend(
     IN  EFI_TREE_PROTOCOL  *TrEEProtocol,
     IN  TPM_PCRINDEX PcrIndex,
@@ -1980,13 +1976,13 @@ InternalTcg20CommonExtend(
     Buffer += SessionInfoSize;
     Cmd.AuthorizationSize = SwapBytes32(SessionInfoSize);
 
-    DEBUG ((DEBUG_INFO, " InternalTcg20CommonExtend Cmd = %x \n", &Cmd));
+    DEBUG ((-1, " InternalTcg20CommonExtend Cmd = %x \n", &Cmd));
 
     //Digest count
     *(UINT32 *)Buffer = TPM_H2NL(Digest->count);
     Buffer += sizeof(UINT32);
 
-    DEBUG ((DEBUG_INFO, " Digest->count = %x \n", Digest->count));
+    DEBUG ((-1, " Digest->count = %x \n", Digest->count));
 
     for(i=0; i<Digest->count; i++)
     {
@@ -1994,7 +1990,7 @@ InternalTcg20CommonExtend(
         *(UINT16 *)Buffer = TPM_H2NS(Digest->digests[i].hashAlg);
         Buffer += sizeof(UINT16);
 
-        DEBUG ((DEBUG_INFO, " Digest->digests[i].hashAlg = %x \n", Digest->digests[i].hashAlg));
+        DEBUG ((-1, " Digest->digests[i].hashAlg = %x \n", Digest->digests[i].hashAlg));
         switch(Digest->digests[i].hashAlg)
         {
             case TPM2_ALG_SHA1:
@@ -2016,19 +2012,19 @@ InternalTcg20CommonExtend(
                 break;
         }
 
-        Tpm20TcgCommonCopyMem(NULL, Buffer, &Digest->digests[i].digest, DigestSize);
+        TcgCommonCopyMem(NULL, Buffer, &Digest->digests[i].digest, DigestSize);
         Buffer += DigestSize;
     }
 
-    DEBUG ((DEBUG_INFO, " InternalTcg20CommonExtend DigestSize = %x \n", DigestSize));
+    DEBUG ((-1, " InternalTcg20CommonExtend DigestSize = %x \n", DigestSize));
 
-    CmdSize = (UINT32)(UINTN)(Buffer - (UINTN)&Cmd);
+    CmdSize = (UINT32)(Buffer - (UINTN)&Cmd);
     Cmd.CommandSize = TPM_H2NL(CmdSize);
 
     ResultBuf     = (UINT8 *) &Tmpres;
     ResultBufSize = sizeof(Res);
 
-    DEBUG ((DEBUG_INFO, "InternalTcg20CommonExtend CmdSize = %x \n", CmdSize));
+    DEBUG ((-1, "InternalTcg20CommonExtend CmdSize = %x \n", CmdSize));
     //printbuffer((UINT8 *)&Cmd, CmdSize);
 
     Status  = TrEEProtocol->SubmitCommand(TrEEProtocol,CmdSize, (UINT8 *)&Cmd, ResultBufSize, ResultBuf);
@@ -2040,7 +2036,6 @@ InternalTcg20CommonExtend(
 
 
 EFI_STATUS
-EFIAPI
 TpmHashLogExtendEventI(
     IN  EFI_TREE_PROTOCOL         *This,
     IN  UINT8                     *DataToHash,
@@ -2055,6 +2050,7 @@ TpmHashLogExtendEventI(
     UINTN                    TempSize=0;
     UINTN                     RequiredSpace=0;
     TCG_PLATFORM_SETUP_PROTOCOL     *PolicyInstance;
+    EFI_GUID                          gPolicyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
     TCG_PCClient_PCR_Event2_Hdr       EventData;
     static UINT32                 PcrBanks = 0;
     UINT32                        Count=0;
@@ -2065,7 +2061,7 @@ TpmHashLogExtendEventI(
     static UINT8                  Events=0;
 
 
-    DEBUG(( DEBUG_INFO," TpmHashLogExtendEvent Entry \n"));
+    DEBUG(( -1," TpmHashLogExtendEvent Entry \n"));
 #if defined LOG_EV_EFI_ACTION && LOG_EV_EFI_ACTION == 0
     if(NewEventHdr->EventType == EV_EFI_ACTION && NewEventHdr->PCRIndex != 7)
     {
@@ -2075,7 +2071,7 @@ TpmHashLogExtendEventI(
 
     if(Tcg2SpecVersion == 0xFFFFFFFF)
     {
-        Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&PolicyInstance);
+        Status = gBS->LocateProtocol (&gPolicyguid,  NULL, &PolicyInstance);
         if (EFI_ERROR (Status))
         {
             Tcg2SpecVersion = TCG2_PROTOCOL_SPEC_TCG_1_2;
@@ -2092,8 +2088,8 @@ TpmHashLogExtendEventI(
         PcrBanks = 1;
     }
 
-    DEBUG(( DEBUG_INFO," Tcg2SpecVersion = %x \n", Tcg2SpecVersion));
-    DEBUG(( DEBUG_INFO," PcrBanks = %x \n", PcrBanks));
+    DEBUG(( -1," Tcg2SpecVersion = %x \n", Tcg2SpecVersion));
+    DEBUG(( -1," PcrBanks = %x \n", PcrBanks));
 
     //HashValue
     if(DataToHash != NULL && DataSize != 0)
@@ -2139,8 +2135,8 @@ TpmHashLogExtendEventI(
         NewEventHdr->Digests.count = Count;
     }
 
-    DEBUG(( DEBUG_INFO," HashSize = %x \n", HashSize));
-    DEBUG(( DEBUG_INFO," NewEventHdr->Digests.count = %x \n",NewEventHdr->Digests.count));
+    DEBUG(( -1," HashSize = %x \n", HashSize));
+    DEBUG(( -1," NewEventHdr->Digests.count = %x \n",NewEventHdr->Digests.count));
     //printbuffer((UINT8 *)&NewEventHdr->Digests, HashSize);
     RequiredSpace = sizeof(TCG_PCClient_PCR_Event2_Hdr) - sizeof(TPML_DIGEST_VALUES)\
                     + sizeof(UINT32) + NewEventHdr->EventSize;
@@ -2192,28 +2188,28 @@ TpmHashLogExtendEventI(
         }
     }
     
-    DEBUG(( DEBUG_INFO," InternalTcg20CommonExtend entry \n"));
-    DEBUG(( DEBUG_INFO," NewEventHdr->Digests.count = %x  \n", NewEventHdr->Digests.count));
+    DEBUG(( -1," InternalTcg20CommonExtend entry \n"));
+    DEBUG(( -1," NewEventHdr->Digests.count = %x  \n", NewEventHdr->Digests.count));
 
     if( NewEventHdr->EventType != EV_NO_ACTION)
     {
         Status = InternalTcg20CommonExtend(This,
                                            NewEventHdr->PCRIndex,
                                            &NewEventHdr->Digests);
-        DEBUG(( DEBUG_INFO," InternalTcg20CommonExtend Status=%r \n",Status));
+        DEBUG(( -1," InternalTcg20CommonExtend Status=%r \n",Status));
     }
 
-    DEBUG(( DEBUG_INFO," InternalTcg20CommonExtend exit \n"));
+    DEBUG(( -1," InternalTcg20CommonExtend exit \n"));
 
     if(IEventLogTruncated)return EFI_VOLUME_FULL;
     if( ((Flags & TREE_EXTEND_ONLY) ==  TREE_EXTEND_ONLY) && NewEventHdr->EventType != EV_NO_ACTION)
     {
         // Return InternalTcg20CommonExtend Status
-        DEBUG(( DEBUG_INFO," EFI_TCG2_EXTEND_ONLY on TCG2_HASH_LOG_EXTEND_EVENT(...)  \n"));
+        DEBUG(( -1," EFI_TCG2_EXTEND_ONLY on TCG2_HASH_LOG_EXTEND_EVENT(...)  \n"));
         return Status;
     }
 
-    DEBUG(( DEBUG_INFO," LastEntry = %x \n", LastEntry));
+    DEBUG(( -1," LastEntry = %x \n", LastEntry));
     if(LastEntry == 0) return EFI_ABORTED;
 
     LastEventPtr = LastEntry;
@@ -2312,18 +2308,18 @@ TpmHashLogExtendEventI(
 
     TempSize+=sizeof(UINT32);
 
-    DEBUG((DEBUG_INFO, "TempSize = %x \n", TempSize));
+    DEBUG((-1, "TempSize = %x \n", TempSize));
     CopyMem((VOID*)(UINTN)(LastEntry + TempSize) ,
             NewEventData,
             NewEventHdr->EventSize);
 
-    DEBUG((DEBUG_INFO, "NewEventHdr->EventType = %x \n", NewEventHdr->EventType));
+    DEBUG((-1, "NewEventHdr->EventType = %x \n", NewEventHdr->EventType));
 
     LastEntry = LastEventPtr + ((EFI_PHYSICAL_ADDRESS)(UINTN)(NewEventHdr->EventSize \
                                 + TempSize));
 
     Events+=1;
-    DEBUG((DEBUG_INFO, "Events Count = %x \n", Events));
+    DEBUG((-1, "Events Count = %x \n", Events));
 
     if(FinalsLastEntry != 0)
     {
@@ -2335,61 +2331,6 @@ TpmHashLogExtendEventI(
         ((EFI_TCG2_FINAL_EVENTS_TABLE *)pEfiTcg2FinalEventsTbl)->NumberOfEvents+=1;
     }
 
-    return EFI_SUCCESS;
-}
-
-
-
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:   TreeImageRead
-//
-// Description: Reads contents of a PE/COFF image in memory buffer.
-//
-//
-// Input: FileHandle, FileOffset, ReadSize
-//
-// Output: ReadSize, Buffer
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-
-EFI_STATUS
-EFIAPI
-TreeImageRead (
-   IN     VOID    *FileHandle,
-   IN     UINTN   FileOffset,
-   IN OUT UINTN   *ReadSize,
-   OUT    VOID    *Buffer
-)
-{
-    UINTN               EndPosition;
-    
-    if (FileHandle == NULL || ReadSize == NULL || Buffer == NULL) {
-      return EFI_INVALID_PARAMETER;
-    }
-    
-    if (MAX_ADDRESS - FileOffset < *ReadSize) {
-      return EFI_INVALID_PARAMETER;
-    }
-    
-    EndPosition = FileOffset + *ReadSize;
-    if (EndPosition > InternalTcg2DxeImageSize) {
-      *ReadSize = (UINT32)(InternalTcg2DxeImageSize - FileOffset);
-    }
-    
-    if (FileOffset >= InternalTcg2DxeImageSize) {
-      *ReadSize = 0;
-    }
-    
-    CopyMem (Buffer, (UINT8 *)((UINTN) FileHandle + FileOffset), *ReadSize);
     return EFI_SUCCESS;
 }
 
@@ -2416,7 +2357,6 @@ TreeImageRead (
 //**********************************************************************
 #pragma optimize ("",off)
 EFI_STATUS
-EFIAPI
 TreeHashLogExtendEvent (
     IN  EFI_TREE_PROTOCOL     *This,
     IN  UINT64                Flags,
@@ -2426,21 +2366,9 @@ TreeHashLogExtendEvent (
 )
 {
     EFI_STATUS            Status     = EFI_SUCCESS;
-    TCG_PCR_EVENT2_HDR    TcgEvent;
-    TPM2_HALG             TpmDigestResult;
-    UINTN                 HashCount;
-    UINT32                Tcg2SpecVersion;
-    UINT32                PcrBanks;
-    PE_COFF_LOADER_IMAGE_CONTEXT    ImageContext;
-    UINT8                          *EventData = NULL;
-    UINTN                   iter=0;
+    TCG_PCR_EVENT2_HDR     TcgEvent;
 
-    DEBUG(( DEBUG_INFO," TreeHashLogExtendEvent entry \n"));
-    
-    Tcg2SpecVersion = AmiProtocolInstance->ConfigFlags.Tcg2SpecVersion;
-    PcrBanks = AmiProtocolInstance->ConfigFlags.PcrBanks;
-
-    
+    DEBUG(( -1," TreeHashLogExtendEvent entry \n"));
     TpmDxeReportStatusCode(EFI_PROGRESS_CODE, AMI_SPECIFIC_TPM_PROTOCOL_HASH_LOG_EXTEND_REQUEST | EFI_SOFTWARE_DXE_BS_DRIVER);
     if((This == NULL ) || (DataToHash == 0) || (TreeEvent == NULL))
     {
@@ -2463,95 +2391,9 @@ TreeHashLogExtendEvent (
 
     if( PE_COFF_IMAGE == Flags )
     {
-        //Add Support for PE_COFF Measurement
-        //  
-        DEBUG ((DEBUG_INFO, "Measuring PE_COFF Image via HLX interface\n"));
-        
-        ZeroMem (&ImageContext, sizeof (ImageContext));
-        ImageContext.Handle    = (VOID *) DataToHash;
-        ImageContext.ImageRead = (PE_COFF_LOADER_READ_FILE) TreeImageRead;
-        InternalTcg2DxeImageSize = DataToHashLen;
-        
-        Status = PeCoffLoaderGetImageInfo (&ImageContext);
-        if(EFI_ERROR(Status)){
-            return Status;
-        }
-              
-        DEBUG ((DEBUG_INFO, "ImageContext.ImageCodeMemoryType %x.\n", ImageContext.ImageCodeMemoryType));
-        DEBUG ((DEBUG_INFO, "ImageContext.ImageDataMemoryType %x.\n", ImageContext.ImageDataMemoryType));
-        DEBUG ((DEBUG_INFO, "ImageContext.EntryPoint %x.\n", ImageContext.EntryPoint));
-        DEBUG ((DEBUG_INFO, "ImageContext.DestinationAddress %x.\n", ImageContext.DestinationAddress));
-        DEBUG ((DEBUG_INFO, "ImageContext.ImageCodeMemoryType %x.\n", ImageContext.ImageCodeMemoryType));
-        DEBUG ((DEBUG_INFO, "ImageContext.ImageType %x.\n", ImageContext.ImageType));
-        DEBUG ((DEBUG_INFO, "ImageContext.Handle %x\n", ImageContext.Handle));
-        DEBUG ((DEBUG_INFO, "ImageContext.IsTeImage %x.\n", ImageContext.IsTeImage));
-        
-        TcgEvent.EventSize  = (TreeEvent->Size  - sizeof(TrEE_EVENT_HEADER) - sizeof(UINT32));
-        
-        Status = MeasurePeImage(DataToHash, DataToHashLen, Tcg2SpecVersion, \
-                PcrBanks, &TpmDigestResult, &HashCount);
-        
-        if(EFI_ERROR(Status)){
-            return Status;
-        }
-        
-
-        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
-        {
-            gBS->CopyMem(&TcgEvent.Digests.digests[0].digest.sha1, TpmDigestResult.sha1, SHA1_DIGEST_SIZE);
-            TcgEvent.Digests.digests[0].hashAlg = TPM2_ALG_SHA1;
-            TcgEvent.Digests.count = 1;
-        }
-          
-        if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_2)
-        {
-          if( PcrBanks & TREE_BOOT_HASH_ALG_SHA1)
-          {
-              gBS->CopyMem(&TcgEvent.Digests.digests[iter].digest.sha1, &TpmDigestResult.sha1, SHA1_DIGEST_SIZE);
-              TcgEvent.Digests.digests[iter].hashAlg = TPM2_ALG_SHA1;
-              iter+=1;
-          }
-
-          if( PcrBanks & TREE_BOOT_HASH_ALG_SHA256)
-          {
-              gBS->CopyMem(&TcgEvent.Digests.digests[iter].digest.sha256, &TpmDigestResult.sha256, SHA256_DIGEST_SIZE);
-              TcgEvent.Digests.digests[iter].hashAlg = TPM2_ALG_SHA256;
-              iter+=1;
-          }
-
-          if( PcrBanks & TREE_BOOT_HASH_ALG_SHA384)
-          {
-              gBS->CopyMem(&TcgEvent.Digests.digests[iter].digest.sha384,  &TpmDigestResult.sha384, SHA384_DIGEST_SIZE);
-              TcgEvent.Digests.digests[iter].hashAlg = TPM2_ALG_SHA384;
-              iter+=1;
-          }
-
-          if( PcrBanks & TREE_BOOT_HASH_ALG_SHA512)
-          {
-              gBS->CopyMem(&TcgEvent.Digests.digests[iter].digest.sha512,  &TpmDigestResult.sha512, SHA512_DIGEST_SIZE);
-              TcgEvent.Digests.digests[iter].hashAlg = TPM2_ALG_SHA512;
-              iter+=1;
-          }
-
-          if( PcrBanks & TREE_BOOT_HASH_ALG_SM3)
-          {
-              gBS->CopyMem(&TcgEvent.Digests.digests[iter].digest.sm3_256,  &TpmDigestResult.sm3256, SM3_256_DIGEST_SIZE);
-              TcgEvent.Digests.digests[iter].hashAlg = TPM2_ALG_SM3_256;
-              iter+=1;
-          }
-
-          TcgEvent.Digests.count = (UINT32)HashCount;
-        }
-        
-        //
-        // HashLogExtendEvent
-        //
-        TcgEvent.PCRIndex  = TreeEvent->Header.PCRIndex;
-        TcgEvent.EventType = TreeEvent->Header.EventType;
-        
-        DEBUG ((DEBUG_INFO, "Logging and Extending \n"));
-        Status = InternalHLXE->AmiHashLogExtend2(TrEEProtocolInstance, NULL, Flags, 0, &TcgEvent, (UINT8 *)&TreeEvent->Event);
-        return Status;
+        //Current, we did not support the PE_COFF_IMAGE on TCG EFI Protocol.
+        //load image will measure UEFI images.
+        return EFI_UNSUPPORTED;
     }
 
     TcgEvent.PCRIndex  = TreeEvent->Header.PCRIndex;
@@ -2559,14 +2401,14 @@ TreeHashLogExtendEvent (
     TcgEvent.EventSize = TreeEvent->Size - sizeof(TrEE_EVENT_HEADER) \
                          -sizeof(UINT32);
 
-    DEBUG(( DEBUG_INFO," DataToHash = %x \n", DataToHash));
-    DEBUG(( DEBUG_INFO," DataToHashLen = %x \n", DataToHashLen));
-    DEBUG(( DEBUG_INFO," TreeEvent->Header.EventType = %x \n", TreeEvent->Header.EventType));
-    DEBUG(( DEBUG_INFO," TcgEvent.EventType = %x \n",  TcgEvent.EventType));
-    DEBUG(( DEBUG_INFO," TcgEvent.PCRIndex = %x \n", TcgEvent.PCRIndex));
-    DEBUG(( DEBUG_INFO," TreeEvent->Header.PCRIndex = %x \n",  TreeEvent->Header.PCRIndex));
-    DEBUG(( DEBUG_INFO," TcgEvent.EventSize = %x \n",  TcgEvent.EventSize));
-    DEBUG(( DEBUG_INFO," TreeEvent->Size = %x \n",  TreeEvent->Size));
+    DEBUG(( -1," DataToHash = %x \n", DataToHash));
+    DEBUG(( -1," DataToHashLen = %x \n", DataToHashLen));
+    DEBUG(( -1," TreeEvent->Header.EventType = %x \n", TreeEvent->Header.EventType));
+    DEBUG(( -1," TcgEvent.EventType = %x \n",  TcgEvent.EventType));
+    DEBUG(( -1," TcgEvent.PCRIndex = %x \n", TcgEvent.PCRIndex));
+    DEBUG(( -1," TreeEvent->Header.PCRIndex = %x \n",  TreeEvent->Header.PCRIndex));
+    DEBUG(( -1," TcgEvent.EventSize = %x \n",  TcgEvent.EventSize));
+    DEBUG(( -1," TreeEvent->Size = %x \n",  TreeEvent->Size));
 
 
     Status = TpmHashLogExtendEventI(This,
@@ -2578,90 +2420,9 @@ TreeHashLogExtendEvent (
                                    );
 
 Exit:
-    DEBUG(( DEBUG_INFO," TreeHashLogExtendEvent exit\n"));
+    DEBUG(( -1," TreeHashLogExtendEvent exit\n"));
     return Status;
 }
-
-
-
-//**********************************************************************
-//<AMI_PHDR_START>
-//
-// Procedure:   InternalSubmitCommand
-//
-// Description: Submit TPM 20 Command
-//
-//
-// Input:
-//
-// Output:
-//
-// Modified:
-//
-// Referrals:
-//
-// Notes:
-//<AMI_PHDR_END>
-//**********************************************************************
-#pragma optimize("",off)
-EFI_STATUS
-EFIAPI
-InternalSubmitCommand (
-    IN  UINT32              InputParameterBlockSize,
-    IN  UINT8               *InputParameterBlock,
-    IN  UINT32              OutputParameterBlockSize,
-    IN  UINT8               *OutputParameterBlock
-)
-{
-    EFI_STATUS            Status     = EFI_SUCCESS;
-    UINT32                Size = 0;
-    TPM_TRANSMIT_BUFFER   InBuffer[1], OutBuffer[1];
-    TPM_1_2_REGISTERS_PTR     TpmReg = (TPM_1_2_REGISTERS_PTR)(UINTN)PORT_TPM_IOMEMBASE;
-
-    if ( InputParameterBlock == NULL || OutputParameterBlock == NULL)
-    {
-        return EFI_INVALID_PARAMETER;
-    }
-
-    if(TpmSupport->InterfaceType == 1)
-    {
-
-        Tpm20TisRequestLocality ( TpmReg );
-
-        InBuffer[0].Buffer  = InputParameterBlock;
-        InBuffer[0].Size    = InputParameterBlockSize;
-        OutBuffer[0].Buffer = OutputParameterBlock;
-        OutBuffer[0].Size   = OutputParameterBlockSize;
-
-        Status = Tpm20TpmLibPassThrough(TpmReg,sizeof (InBuffer) / sizeof (*InBuffer),
-                          InBuffer,sizeof (OutBuffer) / sizeof (*OutBuffer),
-                          OutBuffer);
-
-        if(EFI_ERROR(Status)){
-            TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_ERR_COMMUNICATION_FAIL | EFI_SOFTWARE_DXE_BS_DRIVER);
-        }
-
-        Tpm20TisReleaseLocality ( TpmReg );
-
-    }
-    else
-    {
-
-        Size = OutputParameterBlockSize;
-        Status = CrbSubmitCmd(InputParameterBlock,
-                              InputParameterBlockSize,
-                              OutputParameterBlock,
-                              &Size);
-
-        if(EFI_ERROR(Status)){
-            TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_ERR_COMMUNICATION_FAIL | EFI_SOFTWARE_DXE_BS_DRIVER);
-        }
-
-    }
-
-    return Status;
-}
-
 
 
 //**********************************************************************
@@ -2685,7 +2446,6 @@ InternalSubmitCommand (
 //**********************************************************************
 #pragma optimize("",off)
 EFI_STATUS
-EFIAPI
 TreeSubmitCommand (
     IN  EFI_TREE_PROTOCOL   *This,
     IN  UINT32              InputParameterBlockSize,
@@ -2707,14 +2467,14 @@ TreeSubmitCommand (
     if(TpmSupport->InterfaceType == 1)
     {
 
-        Tpm20TisRequestLocality ( TpmReg );
+        TisRequestLocality ( TpmReg );
 
         InBuffer[0].Buffer  = InputParameterBlock;
         InBuffer[0].Size    = InputParameterBlockSize;
         OutBuffer[0].Buffer = OutputParameterBlock;
         OutBuffer[0].Size   = OutputParameterBlockSize;
 
-        Status = Tpm20TpmLibPassThrough(TpmReg,sizeof (InBuffer) / sizeof (*InBuffer),
+        Status = TpmLibPassThrough(TpmReg,sizeof (InBuffer) / sizeof (*InBuffer),
                           InBuffer,sizeof (OutBuffer) / sizeof (*OutBuffer),
                           OutBuffer);
 
@@ -2722,7 +2482,7 @@ TreeSubmitCommand (
             TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MAJOR, AMI_SPECIFIC_TPM_ERR_COMMUNICATION_FAIL | EFI_SOFTWARE_DXE_BS_DRIVER);
         }
 
-        Tpm20TisReleaseLocality ( TpmReg );
+        TisReleaseLocality ( TpmReg );
 
     }
     else
@@ -2763,31 +2523,30 @@ TreeSubmitCommand (
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-static EFI_STATUS 
-EFIAPI
-CopyTcgLog(
+static EFI_STATUS CopyTcgLog(
     void )
 {
     TCG_LOG_HOB     *TcgLog = NULL;
     void**          DummyPtr;
+    EFI_GUID        gEfiPeiLogHobGuid = EFI_TCG_TREE_LOG_HOB_GUID;
 
-    DEBUG(( DEBUG_INFO," CopyTcgLog Entry \n"));
+    DEBUG(( -1," CopyTcgLog Entry \n"));
 
-    TcgLog = (TCG_LOG_HOB*) Tpm20LocateATcgHob(
+    TcgLog = (TCG_LOG_HOB*)                   LocateATcgHob(
                  gST->NumberOfTableEntries,
                  gST->ConfigurationTable,
-                 &gEfiTcgTreeLogHobGuid );
+                 &gEfiPeiLogHobGuid );
 
-    DummyPtr = (void** )&TcgLog;
+    DummyPtr = &TcgLog;
 
     if ( *DummyPtr == NULL )
     {
-        DEBUG(( DEBUG_ERROR," gEfiPeiLogHobGuid Not found \n"));
+        DEBUG(( -1," gEfiPeiLogHobGuid Not found \n"));
         return EFI_NOT_FOUND;
     }
 
     TcgLog->TableMaxSize = MAX_LOG_AREA_SIZE;
-    DEBUG(( DEBUG_INFO," TcgLog->TableMaxSize \n", TcgLog->TableMaxSize));
+    DEBUG(( -1," TcgLog->TableMaxSize \n", TcgLog->TableMaxSize));
 
     gBS->CopyMem(
         (UINT8 *)(UINTN)TreeEventLogLocation,
@@ -2802,8 +2561,8 @@ CopyTcgLog(
     );
 
     LastEntry = TreeEventLogLocation  +  TcgLog->TableSize;
-    DEBUG(( DEBUG_INFO," CopyTcgLog TreeEventLogLocation = %x \n", TreeEventLogLocation));
-    DEBUG(( DEBUG_INFO," CopyTcgLog LastEntry = %x \n", LastEntry));
+    DEBUG(( -1," CopyTcgLog TreeEventLogLocation = %x \n", TreeEventLogLocation));
+    DEBUG(( -1," CopyTcgLog LastEntry = %x \n", LastEntry));
 
     //printbuffer((UINT8 *)(UINTN)TreeEventLogLocation, 0xA0);
     return EFI_SUCCESS;
@@ -2850,9 +2609,7 @@ AMI_INTERNAL_HLXE_PROTOCOL  InternalLogProtocol =
 // Notes:
 //<AMI_PHDR_END>
 //**********************************************************************
-VOID 
-EFIAPI
-TrEEUpdateTpmDeviceASL(
+VOID TrEEUpdateTpmDeviceASL(
     IN EFI_EVENT ev,
     IN VOID      *ctx)
 {
@@ -2863,50 +2620,45 @@ TrEEUpdateTpmDeviceASL(
     SETUP_DATA                  SetupDataBuffer;
     UINTN                       SetupVariableSize = sizeof(SETUP_DATA);
     UINT32                      SetupVariableAttributes=0;
-    UINT8                       TcmfName[5] = CONVERT_TO_STRING(TCMFNAME);
-    UINT8                       TtdpName[5] = CONVERT_TO_STRING(TTDPNAME);
-    UINT8                       PpivName[5] = CONVERT_TO_STRING(PPIVNAME);
-    UINT8                       TtpfName[5] = CONVERT_TO_STRING(TTPFNAME);
-    static BOOLEAN              CallbackInitialized=FALSE;
+    EFI_GUID                    gSetupGuid = SETUP_GUID;
 
-    DEBUG(( DEBUG_INFO, "TrEEUpdateTpmDeviceASL Entry \n"));
+    DEBUG(( -1, "TrEEUpdateTpmDeviceASL Entry \n"));
 
     //locate AcpiProtocol
     Status = TcgLibGetDsdt(&dsdtAddress, EFI_ACPI_TABLE_VERSION_ALL);
     if (EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_INFO, "TrEEUpdateTpmDeviceASL::DSDT not found\n"));
-        if(Status == EFI_NOT_AVAILABLE_YET && CallbackInitialized == FALSE)
+        DEBUG((-1, "TrEEUpdateTpmDeviceASL::DSDT not found\n"));
+        if(Status == EFI_NOT_AVAILABLE_YET)
         {
             //set callback
-            DEBUG((DEBUG_ERROR, "Setting callback for TrEEUpdateTpmDeviceASL\n"));
-            Status = gBS->CreateEventEx( EFI_EVENT_NOTIFY_SIGNAL,
-                                       EFI_TPL_CALLBACK, TrEEUpdateTpmDeviceASL, NULL, &gEfiAcpiTableGuid, &Event );
-            
+            Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
+                                       EFI_TPL_CALLBACK, TrEEUpdateTpmDeviceASL, &reg, &Event );
+
             if(EFI_ERROR(Status))
             {
-                DEBUG((DEBUG_ERROR, "Unable to create Event..Exit(1)\n"));
+                DEBUG((-1, "Unable to create Event..Exit(1)\n"));
                 return;
-            }    
-            CallbackInitialized = TRUE;
+            }
+            Status = gBS->RegisterProtocolNotify( &gInternalAcpiSupportGuid, Event, &reg );
         }
         return;
     }
 
-    DEBUG((DEBUG_INFO, "TrEEUpdateTpmDeviceASL::dsdtAddress %x \n", dsdtAddress));
+    DEBUG((-1, "TrEEUpdateTpmDeviceASL::dsdtAddress %x \n", dsdtAddress));
     dsdt = (ACPI_HDR*)dsdtAddress;
 
-    DEBUG((DEBUG_INFO, "dsdt->Signature =  %x \n", dsdt->Signature));
+    DEBUG((-1, "dsdt->Signature =  %x \n", dsdt->Signature));
 
     // Update for TCM Device
     if( IsTcmSupportType() )
     {
         Value = 1;
-        DEBUG(( DEBUG_INFO, "TrEEUpdateTpmDeviceASL::Set TCMF Device ID \n"));
-        Status=TcgUpdateAslNameObject(dsdt, TcmfName, (UINT64)Value);
+        DEBUG(( -1, "TrEEUpdateTpmDeviceASL::Set TCMF Device ID \n"));
+        Status=TcgUpdateAslNameObject(dsdt, "TCMF", (UINT64)Value);
         if (EFI_ERROR(Status))
         {
-            DEBUG((DEBUG_ERROR, "TrEEUpdateTpmDeviceASL::Failed set TCMF Device ID  %r \n", Status));
+            DEBUG((-1, "TrEEUpdateTpmDeviceASL::Failed set TCMF Device ID  %r \n", Status));
             return;
         }
     }
@@ -2920,11 +2672,11 @@ TrEEUpdateTpmDeviceASL(
         Value = 1;
     }
 
-    DEBUG((DEBUG_INFO, "TrEEUpdateTpmDeviceASL::Setting  TTDP to %x \n", Value));
-    Status=TcgUpdateAslNameObject(dsdt, TtdpName, (UINT64)Value);
+    DEBUG((-1, "TrEEUpdateTpmDeviceASL::Setting  TTDP to %x \n", Value));
+    Status=TcgUpdateAslNameObject(dsdt, "TTDP", (UINT64)Value);
     if (EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "TrEEUpdateTpmDeviceASL::Failure setting ASL TTDP %r \n", Status));
+        DEBUG((-1, "TrEEUpdateTpmDeviceASL::Failure setting ASL TTDP %r \n", Status));
         return;
     }
 
@@ -2937,34 +2689,20 @@ TrEEUpdateTpmDeviceASL(
         Value = 1;
     }
 
-    DEBUG((DEBUG_INFO, "TrEEUpdateTpmDeviceASL::Setting  TTPF to %x \n", Value));
-
-    Status=TcgUpdateAslNameObject(dsdt, TtpfName, (UINT64)Value);
-    if (EFI_ERROR(Status))
-    {
-        DEBUG((DEBUG_ERROR, "TrEEUpdateTpmDeviceASL::Failure setting ASL TTPF %r \n", Status));
-    }
-    
     Status = gRT->GetVariable (L"Setup",
-                                 &gSetupVariableGuid,
+                                 &gSetupGuid,
                                  &SetupVariableAttributes,
                                  &SetupVariableSize,
                                  &SetupDataBuffer);
-    if (EFI_ERROR(Status))
-    {
-        Value = 1;
-    }
-    else
-    {
-        Value = (UINT64)SetupDataBuffer.PpiSpecVersion;
-    }
-    
-    DEBUG((DEBUG_INFO, "TrEEUpdateTpmDeviceASL::Setting  PPIV to %x \n", Value));
 
-    Status=TcgUpdateAslNameObject(dsdt, PpivName, Value);
+    Status=TcgUpdateAslNameObject(dsdt, "PPIV", SetupDataBuffer.PpiSpecVersion);
+
+    DEBUG((-1, "TrEEUpdateTpmDeviceASL::Setting  TTPF to %x \n", Value));
+
+    Status=TcgUpdateAslNameObject(dsdt, "TTPF", (UINT64)Value);
     if (EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "TrEEUpdateTpmDeviceASL::Failure setting ASL PPIV %r \n", Status));
+        DEBUG((-1, "TrEEUpdateTpmDeviceASL::Failure setting ASL value %r \n", Status));
     }
 
     // Check the Event is been register, not the direct calling function. (NULL input)
@@ -3014,10 +2752,11 @@ MeasureCertificate(UINTN sizeOfCertificate,
     UINT64                    Flags = 0;
     UINT32                    EventSize = 0;
     UINT8                     *EventDataPtr = NULL;
+    EFI_GUID                  gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
 
     if(TrEEProtocolInstance == NULL)
     {
-        Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid, NULL, (void **)&TrEEProtocolInstance);
+        Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid, NULL, &TrEEProtocolInstance);
         if(EFI_ERROR(Status)){
             return EFI_NOT_FOUND;
         }
@@ -3029,7 +2768,7 @@ MeasureCertificate(UINTN sizeOfCertificate,
                           * sizeof (CHAR16) + sizeOfCertificate) - 3;
 
     Status = gBS->AllocatePool(EfiBootServicesData, (sizeof(TrEE_EVENT_HEADER) + \
-                                            sizeof(UINT32) + EventSize), (void **)&Tcg20Event);
+                                            sizeof(UINT32) + EventSize), &Tcg20Event);
 
     if(EFI_ERROR(Status) || Tcg20Event==NULL){
         return EFI_OUT_OF_RESOURCES;
@@ -3051,9 +2790,9 @@ MeasureCertificate(UINTN sizeOfCertificate,
     Tcg20Event->Header.PCRIndex    = 7;
     Tcg20Event->Header.EventType   = 0x800000E0;
 
-    Status = gBS->AllocatePool(EfiBootServicesData, EventSize, (void **)&VarLog);
+    Status = gBS->AllocatePool(EfiBootServicesData, EventSize, &VarLog);
 
-    if ( VarLog == NULL || EFI_ERROR(Status))
+    if ( VarLog == NULL )
     {
         gBS->FreePool(Tcg20Event);
         return EFI_OUT_OF_RESOURCES;
@@ -3150,6 +2889,7 @@ EFI_STATUS FindandMeasureSecureBootCertificate()
     EFI_STATUS      Status;
     UINTN           VarSize  = 0;
     UINT8           *SecureDBBuffer = NULL;
+    EFI_GUID        Certificateguid = AMI_VALID_BOOT_IMAGE_CERT_TBL_GUID;
     AMI_VALID_CERT_IN_SIG_DB    *CertInfo;
     UINT8           *CertOffsetPtr = NULL;
 
@@ -3166,9 +2906,9 @@ EFI_STATUS FindandMeasureSecureBootCertificate()
         return EFI_NOT_FOUND;
     }
 
-    Status = gBS->AllocatePool(EfiBootServicesData, VarSize, (void **)&SecureDBBuffer);
+    Status = gBS->AllocatePool(EfiBootServicesData, VarSize, &SecureDBBuffer);
 
-    if ( SecureDBBuffer != NULL && !EFI_ERROR(Status))
+    if ( SecureDBBuffer != NULL )
     {
         Status = gRT->GetVariable(L"db",
                                   &gEfiImageSecurityDatabaseGuid,
@@ -3190,11 +2930,8 @@ EFI_STATUS FindandMeasureSecureBootCertificate()
     //we need to find the pointer in the EFI system table and work from
     //there
     CertInfo = NULL;
-    Status = EfiGetSystemConfigurationTable(&AmiValidBootImageCertTblGuid, (void **)&CertInfo );
-    if (EFI_ERROR (Status)) {
-        return Status;
-    }
-    
+    EfiGetSystemConfigurationTable(&Certificateguid, &CertInfo );
+
     if(CertInfo == NULL)
 	{
         if(SecureDBBuffer!=NULL)
@@ -3246,7 +2983,6 @@ EFI_STATUS FindandMeasureSecureBootCertificate()
 //<AMI_PHDR_END>
 //**********************************************************************
 EFI_STATUS
-EFIAPI
 MeasureTeImage (
     IN  EFI_IMAGE_LOAD_EVENT     *ImageLoad,
     IN  UINTN                     Tcg2SpecVersion,
@@ -3273,7 +3009,9 @@ MeasureTeImage (
     UINTN                             count=0;
     EFI_STATUS                        Status;
     UINTN                             TempSize=0;
+    EFI_GUID                          gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
     UINT32                            mPcrBanks=PcrBanks;
+    EFI_GUID                            gEfiAmiDxeHashInterfaceguid =  AMI_DXE_HASH_INTERFACE_PROTOCOL_GUID;
     AMI_DXE_HASH_INTERFACE_PROTOCOL     *HashInterface = NULL;
 
     // 2. Initialize a SHA hash context.
@@ -3314,15 +3052,15 @@ MeasureTeImage (
                 Status = gBS->LocateProtocol(
                              &gEfiTrEEProtocolGuid,
                              NULL,
-                             (void **)&TrEEProtocolInstance);
+                             &TrEEProtocolInstance);
             }
 
             if( !EFI_ERROR(Status) )
             {
                 Status = gBS->LocateProtocol(
-                             &gAmiDxeHashInterfaceguid,
+                             &gEfiAmiDxeHashInterfaceguid,
                              NULL,
-                             (void **)&HashInterface);
+                             &HashInterface);
             }
 
             if( !EFI_ERROR(Status) )
@@ -3341,7 +3079,7 @@ MeasureTeImage (
         }
     }
 
-    DEBUG ((DEBUG_INFO, "Printing TE Image Buffer in Memory Image Location = %x, Image size = %x\n",
+    DEBUG ((-1, "Printing TE Image Buffer in Memory Image Location = %x, Image size = %x\n",
             (UINTN)ImageLoad->ImageLocationInMemory, ImageLoad->ImageLengthInMemory));
 
     //printbuffer((UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory, 1024);
@@ -3353,9 +3091,9 @@ MeasureTeImage (
     HashBase = (UINT8 *)(UINTN)ptrToTEHdr;
     HashSize = sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);
 
-    DEBUG ((DEBUG_INFO, "Printing Hashed TE Hdr and Section Header\n"));
+    DEBUG ((-1, "Printing Hashed TE Hdr and Section Header\n"));
 
-    DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+    DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
 
     //printbuffer(HashBase, HashSize);
 
@@ -3414,9 +3152,9 @@ MeasureTeImage (
     {
         HashBase += sizeof(EFI_TE_IMAGE_HEADER) + ( EFI_IMAGE_SIZEOF_SECTION_HEADER * ptrToTEHdr->NumberOfSections);
 
-        DEBUG ((DEBUG_INFO, "Printing Hashed TE Alignment Buffer\n"));
+        DEBUG ((-1, "Printing Hashed TE Alignment Buffer\n"));
 
-        DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
         //printbuffer(HashBase, HashSize);
 
         if(Tcg2SpecVersion == TCG2_PROTOCOL_SPEC_TCG_1_2)
@@ -3486,7 +3224,7 @@ MeasureTeImage (
                              + (UINTN)Section->PointerToRawData - ptrToTEHdr->StrippedSize + sizeof(EFI_TE_IMAGE_HEADER));
         HashSize = (UINTN) Section->SizeOfRawData;
 
-        DEBUG ((DEBUG_INFO, "Section Base = %x Section Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Section Base = %x Section Len = %x \n", HashBase, HashSize));
 
 //        printbuffer(HashBase, 1024);
 
@@ -3534,18 +3272,18 @@ MeasureTeImage (
         SectionHeaderOffset += EFI_IMAGE_SIZEOF_SECTION_HEADER;
     }
 
-    DEBUG ((DEBUG_INFO, "SumOfBytesHashed = %x \n", SumOfBytesHashed));
+    DEBUG ((-1, "SumOfBytesHashed = %x \n", SumOfBytesHashed));
 
     //verify size
     if ( ImageLoad->ImageLengthInMemory > SumOfBytesHashed)
     {
 
-        DEBUG ((DEBUG_INFO, "Hash rest of Data if true \n"));
+        DEBUG ((-1, "Hash rest of Data if true \n"));
 
         HashBase = (UINT8 *)(UINTN)ImageLoad->ImageLocationInMemory + SumOfBytesHashed;
         HashSize = (UINTN)(ImageLoad->ImageLengthInMemory - SumOfBytesHashed);
 
-        DEBUG ((DEBUG_INFO, "Base = %x Len = %x \n", HashBase, HashSize));
+        DEBUG ((-1, "Base = %x Len = %x \n", HashBase, HashSize));
 //      printbuffer(HashBase, 106);
 
 
@@ -3649,7 +3387,6 @@ MeasureTeImage (
 
 
 EFI_STATUS
-EFIAPI
 AmiDxeHashInitInterface (
     IN  EFI_TREE_PROTOCOL   *TrEEProtocolInstance,
     IN  UINT32               Alg,
@@ -3716,7 +3453,6 @@ AmiDxeHashInitInterface (
 
 
 EFI_STATUS
-EFIAPI
 AmiDxeHashUpdateInterface (
     IN  EFI_TREE_PROTOCOL  *TrEEProtocolInstance,
     IN  UINT8              *Data,
@@ -3762,7 +3498,7 @@ AmiDxeHashUpdateInterface (
             Datasize -= HashBuffer.size;
 
             Status = Tpm2SequenceUpdate(TrEEProtocolInstance,  *(TPMI_DH_OBJECT *)Context, &HashBuffer);
-            DEBUG(( DEBUG_INFO," Tpm2SequenceUpdate results = %r \n", Status));
+            DEBUG(( -1," Tpm2SequenceUpdate results = %r \n", Status));
             if (EFI_ERROR(Status))
             {
                 return EFI_DEVICE_ERROR;
@@ -3775,7 +3511,6 @@ AmiDxeHashUpdateInterface (
 
 
 EFI_STATUS
-EFIAPI
 AmiDxeHashCompleteInterface (
     IN  EFI_TREE_PROTOCOL  *TrEEProtocolInstance,
     IN  VOID               *Context,
@@ -3861,7 +3596,6 @@ AmiDxeHashCompleteInterface (
 
 
 EFI_STATUS
-EFIAPI
 AmiDxeHashAllInterface (
     IN  EFI_TREE_PROTOCOL        *TrEEProtocolInstance,
     IN  UINT8                    *DataToHash,
@@ -3921,6 +3655,8 @@ MeasurePeImage (
     UINTN                               TempSize=0;
     UINTN                               count=0;
     UINT32                              mPcrBanks=PcrBanks;
+    EFI_GUID                            gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
+    EFI_GUID                            gEfiAmiDxeHashInterfaceguid =  AMI_DXE_HASH_INTERFACE_PROTOCOL_GUID;
     AMI_DXE_HASH_INTERFACE_PROTOCOL     *HashInterface = NULL;
 
 
@@ -3989,15 +3725,15 @@ MeasurePeImage (
                 Status = gBS->LocateProtocol(
                              &gEfiTrEEProtocolGuid,
                              NULL,
-                             (void **)&TrEEProtocolInstance);
+                             &TrEEProtocolInstance);
             }
 
             if( !EFI_ERROR(Status) )
             {
                 Status = gBS->LocateProtocol(
-                             &gAmiDxeHashInterfaceguid,
+                             &gEfiAmiDxeHashInterfaceguid,
                              NULL,
-                             (void **)&HashInterface);
+                             &HashInterface);
             }
 
             if( !EFI_ERROR(Status) )
@@ -4546,18 +4282,22 @@ MeasureHandoffTables (
     EFI_STATUS                        Status = EFI_SUCCESS;
 #if ( defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0) )
     SMBIOS_TABLE_ENTRY_POINT          *SmbiosTable=NULL;
+#endif
     TrEE_EVENT                        *Tpm20Event=NULL;
+    EFI_GUID                          gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
 
     if(TrEEProtocolInstance == NULL)
     {
-        Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid, NULL, (void **)&TrEEProtocolInstance);
+        Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid, NULL, &TrEEProtocolInstance);
         if(EFI_ERROR(Status)){
             return EFI_NOT_FOUND;
         }
     }
 
+#if ( defined(Measure_Smbios_Tables) && (Measure_Smbios_Tables!= 0) )
+
     Status = gBS->AllocatePool(EfiBootServicesData, (sizeof(TrEE_EVENT_HEADER) + \
-                               sizeof(UINT32) + sizeof(EFI_HANDOFF_TABLE_POINTERS)), (void **)&Tpm20Event);
+                               sizeof(UINT32) + sizeof(EFI_HANDOFF_TABLE_POINTERS)), &Tpm20Event);
 
     if(EFI_ERROR(Status) || (Tpm20Event == NULL))return Status;
 
@@ -4594,6 +4334,9 @@ MeasureHandoffTables (
 }
 
 
+
+TCG_PLATFORM_SETUP_PROTOCOL       *AmiProtocolInstance;
+AMI_INTERNAL_HLXE_PROTOCOL        *InternalHLXE = NULL;
 //**********************************************************************
 //<AMI_PHDR_START>
 //
@@ -4635,17 +4378,23 @@ TreeMeasurePeImage (
     UINT32                            FullPathSize;
     EFI_IMAGE_DOS_HEADER              *DosHdr = NULL;
     UINT32                            PeCoffHeaderOffset;
+
+    EFI_GUID                          gEfiAmiHLXEGuid =  AMI_PROTOCOL_INTERNAL_HLXE_GUID;
+    EFI_GUID                          Policyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
+
     UINT32                            Tcg2SpecVersion;
     UINT32                            PcrBanks;
     UINTN                             iter=0;
     UINTN                             HashCount=0;
     TPM2_HALG                         TpmDigest;
+    EFI_GUID  gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
+    EFI_GUID                          ExtendedDataGuid = TCG_IMGEXTENDED_DATA_GUID;
 
-    DEBUG ((DEBUG_INFO, "TreeMeasurePeImage Entry\n"));
+    DEBUG ((-1, "TreeMeasurePeImage Entry\n"));
 
     if(AmiProtocolInstance==NULL)
     {
-        Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&AmiProtocolInstance);
+        Status = gBS->LocateProtocol (&Policyguid,  NULL, &AmiProtocolInstance);
         if (EFI_ERROR (Status))
         {
             return 0;
@@ -4660,7 +4409,7 @@ TreeMeasurePeImage (
 
     FullPathSize  = 0;
 
-//  DEBUG ((DEBUG_INFO, "TreeMeasurePeImage Entry\n")); // The repeat debug message.
+//  DEBUG ((-1, "TreeMeasurePeImage Entry\n")); // The repeat debug message.
 
     if (DeviceHandle != NULL)
     {
@@ -4670,7 +4419,7 @@ TreeMeasurePeImage (
         Status = gBS->HandleProtocol (
                      DeviceHandle,
                      &gEfiDevicePathProtocolGuid,
-                     (void **)&DevicePath
+                     &DevicePath
                  );
         if (EFI_ERROR (Status))
         {
@@ -4690,7 +4439,7 @@ TreeMeasurePeImage (
 
     //Allocate Event log memory
     Status = gBS ->AllocatePool(EfiBootServicesData, ((sizeof (*ImageLoad)
-                                - sizeof (ImageLoad->DevicePath)) + FullPathSize), (void **)&EventData);
+                                - sizeof (ImageLoad->DevicePath)) + FullPathSize), &EventData);
 
     if(EFI_ERROR(Status)){
         goto Done;
@@ -4727,9 +4476,9 @@ TreeMeasurePeImage (
             goto Done;
     }
 
-    Status = gBS ->AllocatePool(EfiBootServicesData,TcgEvent.EventSize, (void **)&ImageLoad);
+    Status = gBS ->AllocatePool(EfiBootServicesData,TcgEvent.EventSize, &ImageLoad);
 
-    if (ImageLoad == NULL || EFI_ERROR(Status))
+    if (ImageLoad == NULL)
     {
         Status = EFI_OUT_OF_RESOURCES;
         goto Done;
@@ -4870,14 +4619,14 @@ MeasurePeTeImageDone:
     //
     gBS->CopyMem(EventData, ImageLoad, TcgEvent.EventSize);
 
-    Status = gBS->LocateProtocol(&AmiProtocolInternalHlxeGuid, NULL, (void **)&InternalHLXE);
+    Status = gBS->LocateProtocol(&gEfiAmiHLXEGuid, NULL, &InternalHLXE);
     if(EFI_ERROR(Status)){
         goto Done;
     }
 
     if(TrEEProtocolInstance == NULL)
     {
-        Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid, NULL, (void **)&TrEEProtocolInstance);
+        Status = gBS->LocateProtocol(&gEfiTrEEProtocolGuid, NULL, &TrEEProtocolInstance);
         if(EFI_ERROR(Status)){
             goto Done;
         }
@@ -4934,25 +4683,6 @@ InternalMeasureGpt (
     return EFI_SUCCESS; //not supported;
 }
 
-EFI_STATUS
-EFIAPI
-getAmiTpmInfoStruct (
-    IN CONST AMI_TCG2_INFO_PROTOCOL       *This,
-    IN OUT AMI_TCG2_TPM_INFO_STRUCT       **info
-)
-{
-    if(This == NULL || info == NULL) return EFI_INVALID_PARAMETER;
-    *info = NULL;
-    return EFI_SUCCESS;
-}
-
-AMI_TCG2_INFO_PROTOCOL AmiTcg2InfoProtocol =
-{
-  0x1,
-  getAmiTpmInfoStruct
-};
-
-
 
 EFI_TCG_PLATFORM_PROTOCOL  mTcgPlatformProtocol =
 {
@@ -4972,77 +4702,6 @@ TrEEOnReadyToBoot (
 {
     ReadyToBootSignaled = TRUE;
 }
-
-
-#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
-VOID EFIAPI
-AcpiOnVariableLockProtocolGuid (
-IN      EFI_EVENT                 Event,
-IN      VOID                      *Context
-)
-{
-    EDKII_VARIABLE_LOCK_PROTOCOL    *LockProtocol;
-    EFI_STATUS                      Status;
-    
-    
-    DEBUG((DEBUG_INFO, "AcpiOnVariableLockProtocolGuid callback entry\n"));
-    
-    Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, (void **)&LockProtocol);
-    if(!EFI_ERROR(Status))
-    {
-    Status = LockProtocol->RequestToLock(LockProtocol, L"TpmServFlags", &FlagsStatusguid);
-    ASSERT_EFI_ERROR(Status);
-    }
-    
-    gBS->CloseEvent(Event);
-}
-#endif
-
-
-EFI_STATUS TcgSetVariableWithNewAttributes(
-    IN CHAR16 *Name, IN EFI_GUID *Guid, IN UINT32 Attributes,
-    IN UINTN DataSize, IN VOID *Data
-)
-{
-    EFI_STATUS Status;
-    Status = gRT->SetVariable(Name, Guid, Attributes, DataSize, Data);
-    if (!EFI_ERROR(Status) || Status != EFI_INVALID_PARAMETER){
-        if(Status == EFI_NOT_FOUND)//if not found; just set the variable
-        {
-            gRT->SetVariable(Name, Guid, Attributes, DataSize, Data);
-        }
-        return Status;
-    }
-
-    Status = gRT->SetVariable(Name, Guid, 0, 0, NULL);
-    if (EFI_ERROR(Status)) return Status;
-
-    return gRT->SetVariable(Name, Guid, Attributes, DataSize, Data);
-}
-
-
-VOID EFIAPI
-Tpm20DxeAcpiUpdate (IN EFI_EVENT ev,
-                    IN VOID *ctx)
-{
-    EFI_STATUS                      Status;
-    UINT8                           PpimName[5] = CONVERT_TO_STRING(PPIMNAME);
-    UINT8                           PpilName[5] = CONVERT_TO_STRING(PPILNAME);
-    ACPI_HDR                        *dsdt;
-    EFI_PHYSICAL_ADDRESS            dsdtAddress=0;
-    
-    Status = TcgLibGetDsdt(&dsdtAddress, EFI_ACPI_TABLE_VERSION_ALL);
-    if(EFI_ERROR(Status))return;
-    
-    dsdt = (ACPI_HDR*)dsdtAddress;
-    
-    Status=TcgUpdateAslNameObject(dsdt, PpimName, (UINT32)(UINTN)MemoryAddress);
-    if(EFI_ERROR(Status))return;
-    
-    Status=TcgUpdateAslNameObject(dsdt, PpilName, (UINT32)(sizeof(AMI_ASL_PPI_NV_VAR)));
-    ASSERT_EFI_ERROR (Status);
-}
-
 
 //**********************************************************************
 //<AMI_PHDR_START>
@@ -5070,9 +4729,14 @@ InstallTrEEProtocol(
 )
 {
     EFI_STATUS Status;
+    EFI_GUID  gEfiTrEEProtocolGuid =  EFI_TREE_PROTOCOL_GUID;
+    EFI_GUID  gEfiAmiHLXEGuid =  AMI_PROTOCOL_INTERNAL_HLXE_GUID;
+    EFI_GUID  gEfiAmiDxeHashInterfaceguid =  AMI_DXE_HASH_INTERFACE_PROTOCOL_GUID;
+    EFI_GUID  EfiTcg2FinalEventsTableGuid = EFI_TCG2_FINAL_EVENTS_TABLE_GUID;
+    EFI_GUID  gEfiTcgPrivateInterfaceGuid = EFI_TCG_PLATFORM_PROTOCOL_GUID;
 
 
-    DEBUG(( DEBUG_INFO," InstallTrEEProtocol \n"));
+    DEBUG(( -1," InstallTrEEProtocol \n"));
 
     Status = gBS->AllocatePages(AllocateAnyPages,
                                 EfiACPIMemoryNVS,
@@ -5096,9 +4760,9 @@ InstallTrEEProtocol(
 
     if(EFI_ERROR(Status))return Status;
 
-    DEBUG(( DEBUG_INFO," TreeExtraTCPASha1LogLoc = %x \n", TreeEventLogLocation));
-    DEBUG(( DEBUG_INFO," TreeEventLogLocation    = %x \n", TreeExtraTCPASha1LogLoc));
-    DEBUG(( DEBUG_INFO," pEfiTcg2FinalEventsTbl  = %x \n", pEfiTcg2FinalEventsTbl));
+    DEBUG(( -1," TreeExtraTCPASha1LogLoc = %x \n", TreeEventLogLocation));
+    DEBUG(( -1," TreeEventLogLocation    = %x \n", TreeExtraTCPASha1LogLoc));
+    DEBUG(( -1," pEfiTcg2FinalEventsTbl  = %x \n", pEfiTcg2FinalEventsTbl));
 
     gBS->SetMem(
         (VOID*)((UINTN)pEfiTcg2FinalEventsTbl),
@@ -5108,11 +4772,11 @@ InstallTrEEProtocol(
     ((EFI_TCG2_FINAL_EVENTS_TABLE *)pEfiTcg2FinalEventsTbl)->Version = EFI_TCG2_FINAL_EVENTS_TABLE_VERSION;
     ((EFI_TCG2_FINAL_EVENTS_TABLE *)pEfiTcg2FinalEventsTbl)->NumberOfEvents   = 0;
 
-    Status = gBS->InstallConfigurationTable(&gTcg2FinalEventsTableGuid, (VOID*)((UINTN)pEfiTcg2FinalEventsTbl));
+    Status = gBS->InstallConfigurationTable(&EfiTcg2FinalEventsTableGuid, (VOID*)((UINTN)pEfiTcg2FinalEventsTbl));
 
     if(EFI_ERROR(Status))
     {
-        DEBUG(( DEBUG_ERROR," TCG2 Finals Configuration table install failed\n"));
+        DEBUG(( -1," TCG2 Finals Configuration table install failed\n"));
     }
 
     gBS->SetMem(
@@ -5127,23 +4791,20 @@ InstallTrEEProtocol(
 
     //locate PEI hob and copy to the TreeLogArea
     Status = CopyTcgLog();
-    if(EFI_ERROR(Status)){
-        return Status; 
-    }
 
     //interface installation is
     Status = gBS->InstallMultipleProtocolInterfaces (
                     &Handle,
                     &gEfiTrEEProtocolGuid, &mTreeProtocol,
-                    &AmiProtocolInternalHlxeGuid,    &InternalLogProtocol,
-                    &gAmiDxeHashInterfaceguid,  &AmiHashAllInterface,
-                    &gEfiTcgPlatformProtocolGuid,  &mTcgPlatformProtocol,
+                    &gEfiAmiHLXEGuid,    &InternalLogProtocol,
+                    &gEfiAmiDxeHashInterfaceguid,  &AmiHashAllInterface,
+                    &gEfiTcgPrivateInterfaceGuid,  &mTcgPlatformProtocol,
                     NULL
                     );
 
     if(EFI_ERROR(Status))return Status;
 
-    DEBUG(( DEBUG_INFO," InstallTrEEProtocol Exit Status = %r \n", Status));
+    DEBUG(( -1," InstallTrEEProtocol Exit Status = %r \n", Status));
     return Status;
 }
 
@@ -5177,6 +4838,7 @@ EFIAPI TreeDxeEntry(
 {
     EFI_STATUS          Status;
     TCG_PLATFORM_SETUP_PROTOCOL     *PolicyInstance;
+    EFI_GUID            gPolicyguid = TCG_PLATFORM_SETUP_POLICY_GUID;
     EFI_EVENT           ReadyToBootEvent;
     static EFI_EVENT    gAmiSystemResetEvent;
     TCG_CONFIGURATION   Config;
@@ -5188,110 +4850,17 @@ EFIAPI TreeDxeEntry(
     static EFI_RESET_TYPE ptype;
     UINT8               ResetVal=0;
     UINTN               sizeofResetVal=sizeof(ResetVal);
-#if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
-    EDKII_VARIABLE_LOCK_PROTOCOL    *LockProtocol;
-    EFI_EVENT           VarLockEvent;
-static VOID             *VarLockreg;
-#endif
-    EFI_PHYSICAL_ADDRESS    VarLoc;
-    EFI_EVENT               ev;
-    static VOID             *reg;
-    SETUP_DATA          SetupDataBuffer;
-    UINTN               SetupVariableSize = sizeof(SETUP_DATA);
-    UINT32              SetupVariableAttributes;
+    EFI_GUID            gTcgInternalflagGuid = TCG_INTERNAL_FLAGS_GUID;
 
-
-    DEBUG(( DEBUG_INFO," TreeDxeEntry \n"));
-    Status = gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&PolicyInstance);
+    DEBUG(( -1," TreeDxeEntry \n"));
+    Status = gBS->LocateProtocol (&gPolicyguid,  NULL, &PolicyInstance);
     if (EFI_ERROR (Status))
     {
         return Status;
     }
 
+
     gBS-> CopyMem(&Config, &PolicyInstance->ConfigFlags, sizeof(TCG_CONFIGURATION));
-    
-    Status = gBS->AllocatePool (EfiACPIMemoryNVS, sizeof(AMI_ASL_PPI_NV_VAR), (void **)&MemoryAddress);
-    if(!EFI_ERROR(Status))
-    {
-        ZeroMem (MemoryAddress, sizeof(AMI_ASL_PPI_NV_VAR));
-
-        VarLoc = (EFI_PHYSICAL_ADDRESS)MemoryAddress;
-        
-        Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
-                                   TPL_CALLBACK,
-                                   Tpm20DxeAcpiUpdate,
-                                   0,
-                                   &ev );
-        if(EFI_ERROR(Status))
-        {
-            DEBUG(( DEBUG_INFO," Tpm20DxeAcpiUpdate CreateEvent failed\n"));
-            return Status;
-        }
-        
-        Status = gBS->RegisterProtocolNotify(
-                    &gBdsAllDriversConnectedProtocolGuid,
-                    ev,
-                    &reg );
-
-       if(EFI_ERROR(Status))
-       {
-           DEBUG(( DEBUG_INFO," Tpm20DxeAcpiUpdate CreateEvent failed\n"));
-           return Status;
-       }
-        
- #if NVRAM_VERSION > 6
-        Status = TcgSetVariableWithNewAttributes(L"TpmServFlags",
-                               &FlagsStatusguid,
-                               EFI_VARIABLE_BOOTSERVICE_ACCESS |
-                               EFI_VARIABLE_RUNTIME_ACCESS,
-                               sizeof (EFI_PHYSICAL_ADDRESS),
-                               &VarLoc );
-         ASSERT_EFI_ERROR (Status);
- #else
-        Status = TcgSetVariableWithNewAttributes(L"TpmServFlags",
-                               &FlagsStatusguid,
-                               EFI_VARIABLE_BOOTSERVICE_ACCESS |
-                               EFI_VARIABLE_NON_VOLATILE,
-                               sizeof (EFI_PHYSICAL_ADDRESS),
-                               &VarLoc );
-
-        ASSERT_EFI_ERROR (Status);
- #endif
-
- #if defined (CORE_BUILD_NUMBER) && (CORE_BUILD_NUMBER > 0xA) && NVRAM_VERSION > 6
-
-        //Lock the service flags variable as well
-        Status =  gBS->LocateProtocol(&gEdkiiVariableLockProtocolGuid, NULL, (void **)&LockProtocol);
-        if(!EFI_ERROR(Status)){
-            Status = LockProtocol->RequestToLock(LockProtocol, L"TpmServFlags", &FlagsStatusguid);
-            if(EFI_ERROR(Status)){
-                DEBUG((DEBUG_INFO, "\n TpmServFlags Flags Status = %r \n", Status));
-            }
-            ASSERT_EFI_ERROR(Status);
-        }else{
-            //setcallback
-            Status = gBS->CreateEvent (EFI_EVENT_NOTIFY_SIGNAL,
-                                       TPL_CALLBACK,
-                                       AcpiOnVariableLockProtocolGuid,
-                                       NULL,
-                                       &VarLockEvent);
-            if(!EFI_ERROR(Status))
-            {
-                Status = gBS->RegisterProtocolNotify(
-                              &gEdkiiVariableLockProtocolGuid,
-                              VarLockEvent,
-                              &VarLockreg );
-
-                if(EFI_ERROR(Status)){
-                    DEBUG((DEBUG_INFO, "\n VarlockEvent Status = %r \n", Status));
-                }
-            }
-        }
-
-        ASSERT_EFI_ERROR (Status);
- #endif
-     }
-    
 
     if(Config.DeviceType == 0)
     {
@@ -5302,10 +4871,6 @@ static VOID             *VarLockreg;
 
     if(!PolicyInstance->ConfigFlags.TpmSupport)
     {
-        //install when TPM Support disabled in Setup Guid
-        Status = gBS->InstallProtocolInterface (&ImageHandle,
-                                &gAmiTcg2InfoProtocolGuid, EFI_NATIVE_INTERFACE,
-                                &AmiTcg2InfoProtocol);
         return EFI_SUCCESS;
     }
 
@@ -5314,33 +4879,25 @@ static VOID             *VarLockreg;
         Config.Tpm20Device = 0;
 
         PolicyInstance->UpdateStatusFlags(&Config, FALSE);
-        DEBUG(( DEBUG_INFO," isTpm20CrbPresent returned false \n"));
+        DEBUG(( -1," isTpm20CrbPresent returned false \n"));
         TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MINOR, AMI_SPECIFIC_TPM_ERR_2_0_NOT_DISCOVERED | EFI_SOFTWARE_DXE_BS_DRIVER);
 
         if(*((UINT32 *)(UINTN)0xFED40000)== 0xFFFFFFFF){
             TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MINOR, AMI_SPECIFIC_TPM_ERR_NO_TPM_DEVICE | EFI_SOFTWARE_DXE_BS_DRIVER);
         }
-        return EFI_SUCCESS;
+        return EFI_UNSUPPORTED;
     }
 
     Config.Tpm20Device = 1;
     Config.InterfaceSel = TpmSupport->InterfaceType;
-   
-    // Update the flag instance.
-    PolicyInstance->UpdateStatusFlags(&Config, FALSE);
 
     ReadMORValue();
 
-    Tpm2GetCapabilityCapPCRS();
-    
     Status = InstallTrEEProtocol(ImageHandle);
     if(EFI_ERROR(Status)){
         TpmDxeReportStatusCode(EFI_ERROR_CODE|EFI_ERROR_MINOR, AMI_SPECIFIC_TPM_ERR_TCG_PROTOCOL_NOT_INSTALLED_TPM_2_0_DEVICE_FOUND | EFI_SOFTWARE_DXE_BS_DRIVER);
-        return EFI_SUCCESS;
+        return EFI_ABORTED;
     }
- 
-    gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&PolicyInstance);
-    gBS-> CopyMem(&Config, &PolicyInstance->ConfigFlags, sizeof(TCG_CONFIGURATION));
 
     // Here, if customer using the TCG2 protocol version 1.0 ( 0.99 Old version)
     // It only support the SHA1 Event Log, we must make sure the SHA1 PCR Bank is Enable
@@ -5354,35 +4911,14 @@ static VOID             *VarLockreg;
 
             Status = PolicyInstance->UpdateStatusFlags(&Config, TRUE);
             ASSERT( !EFI_ERROR( Status ));
-
-
-            Status = gRT->GetVariable (
-                         L"Setup",
-                         &gSetupVariableGuid,
-                         &SetupVariableAttributes,
-                         &SetupVariableSize,
-                         &SetupDataBuffer);
-
-            if (!EFI_ERROR (Status))
-            {
-                SetupDataBuffer.Sha1 = TREE_BOOT_HASH_ALG_SHA1;
-                Status = gRT->SetVariable (
-                             L"Setup",
-                             &gSetupVariableGuid,
-                             SetupVariableAttributes,
-                             SetupVariableSize,
-                             &SetupDataBuffer);
-                
-                if(EFI_ERROR(Status)){
-                    DEBUG((DEBUG_INFO, "\n Setup Variable Update Status = %r \n", Status));
-                }
-            }
         }
     }
-    
-    DEBUG(( DEBUG_INFO," ActiveBankBitMap = %x\n", ActiveBankBitMap));
-    DEBUG(( DEBUG_INFO," Config.PcrBanks = %x\n", Config.PcrBanks));
-    DEBUG(( DEBUG_INFO," gNumberOfPcrBanks = %x \n", gNumberOfPcrBanks));
+
+    Tpm2GetCapabilityCapPCRS();
+
+    DEBUG(( -1," ActiveBankBitMap = %x\n", ActiveBankBitMap));
+    DEBUG(( -1," Config.PcrBanks = %x\n", Config.PcrBanks));
+    DEBUG(( -1," gNumberOfPcrBanks = %x \n", gNumberOfPcrBanks));
 
     Status   = gRT->GetVariable(L"Tpm20PCRallocateReset",
                                 &gTcgInternalflagGuid,
@@ -5411,22 +4947,14 @@ static VOID             *VarLockreg;
                 if(!EFI_ERROR(Status))
                 {
                     gRT->ResetSystem (EfiResetCold, EFI_SUCCESS, 0, NULL);
-                    DEBUG((DEBUG_ERROR, "\tError: Reset failed???\n"));
+                    DEBUG((-1, "\tError: Reset failed???\n"));
 
                     Status = gBS->CreateEvent( EFI_EVENT_NOTIFY_SIGNAL,
                                                EFI_TPL_CALLBACK, DoResetNow, NULL, &Resetev);
 
-                    if ( EFI_ERROR( Status ))
-                    {
-                        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-                    }
-                    
+                    ASSERT( !EFI_ERROR( Status ));
                     Status = gBS->RegisterProtocolNotify(&gEfiResetArchProtocolGuid, Resetev, &Resetreg);
-                    DEBUG((DEBUG_INFO, "\tRegister DoResetNow after Reset Architecture driver\n"));
-                    if ( EFI_ERROR( Status ))
-                    {
-                        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-                    }
+                    DEBUG((-1, "\tRegister DoResetNow after Reset Architecture driver\n"));
                 }
             }
         }
@@ -5459,10 +4987,7 @@ static VOID             *VarLockreg;
                                    sizeof(UINT8), \
                                    &ResetVal);
 
-        if ( EFI_ERROR( Status ))
-        {
-            DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-        }
+        ASSERT( !EFI_ERROR( Status ));
     }
 
     Config.PcrBanks = ActiveBankBitMap;
@@ -5480,31 +5005,19 @@ InstallTPM20Protocol:
                  &gEfiComponentNameProtocolGuid, &gComponentName,
                  &gEfiComponentName2ProtocolGuid, &gComponentName2,
                  NULL);
-    
-    if ( EFI_ERROR( Status ))
-    {
-        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-    }
 
 
     TrEEUpdateTpmDeviceASL(Event, reg);
-    gBS->LocateProtocol (&gTcgPlatformSetupPolicyGuid,  NULL, (void **)&PolicyInstance);
-    gBS-> CopyMem(&Config, &PolicyInstance->ConfigFlags, sizeof(TCG_CONFIGURATION));
     Config.TcgSupportEnabled = 1;
     Config.TcmSupportEnabled = 0;
     Config.TpmHardware = 0; // Hardware Present
-    Status = PolicyInstance->UpdateStatusFlags(&Config, TRUE);
-    if ( EFI_ERROR( Status ))
-    {
-        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-    }
 
     Status = EfiCreateEventReadyToBootEx(TPL_CALLBACK,
                                          TrEEOnReadyToBoot,
                                          NULL,
                                          &ReadyToBootEvent);
 
-    if(EFI_ERROR(Status))return EFI_SUCCESS;
+    if(EFI_ERROR(Status))return Status;
 
     // on every gRT->ResetSystem, TCG need to execute the TPM2_Shutdown(...)
     Status = gBS->CreateEventEx(
@@ -5514,15 +5027,9 @@ InstallTPM20Protocol:
                      NULL,
                      &gAmiResetSystemEventGuid,
                      &gAmiSystemResetEvent );
-    
-    if ( EFI_ERROR( Status ))
-    {
-        DEBUG((DEBUG_ERROR, "Error: Failure %d %a Status = %r\n", __LINE__, __FUNCTION__, Status));
-    }
-
-
-    
-    return EFI_SUCCESS;
+    ASSERT_EFI_ERROR(Status);
+    Status = PolicyInstance->UpdateStatusFlags(&Config, FALSE);
+    return Status;
 }
 
 typedef VOID (*tdTpmtHaProc)( UINT8* pTpmtHa, VOID* CallBackContext );
@@ -5670,7 +5177,7 @@ UINTN  ExtractSingleTcpaEventFromTcgEVENT2( UINT8* pStart, UINT8** pNext, UINT8 
         Status = GetNextSMLEvent( (MiscPCR_EVENT_HDR*)pStart, (MiscPCR_EVENT_HDR**)pNext );
         if( EFI_ERROR(Status) )
         {
-            DEBUG(( DEBUG_ERROR, "Error[%d]: \n", __LINE__ ));
+            DEBUG(( -1, "Error[%d]: \n", __LINE__ ));
             return -1;
         }
 

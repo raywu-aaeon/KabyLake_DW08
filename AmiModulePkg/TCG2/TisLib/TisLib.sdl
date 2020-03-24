@@ -39,7 +39,7 @@ End
 
 TOKEN
     Name  = "DELAY_AMOUNT"
-    Value  = "030"
+    Value  = "020"
     Help  = "Delay amount for TPM wait loop. Default is 5us. Please dont change to less than 2 (2us)."
     TokenType = Integer
     TargetEQU = Yes
@@ -49,7 +49,7 @@ End
 
 INFComponent
     Name  = "TisLib12"
-    File  = "TisLib\TisLib12.inf"
+    File  = "TisLib12.inf"
     Package  = "AmiModulePkg"
 End
 
@@ -60,7 +60,7 @@ End
 
 INFComponent
     Name  = "TisLib20"
-    File  = "TisLib\TisLib20.inf"
+    File  = "TisLib20.inf"
     Package  = "AmiModulePkg"
 End
 
@@ -71,7 +71,7 @@ End
 
 INFComponent
     Name  = "TisLib12x32"
-    File  = "TisLib\TisLib12x32.inf"
+    File  = "TisLib12x32.inf"
     Package  = "AmiModulePkg"
 End
 
@@ -82,7 +82,7 @@ End
 
 INFComponent
     Name  = "TisLib20x32"
-    File  = "TisLib\TisLib20x32.inf"
+    File  = "TisLib20x32.inf"
     Package  = "AmiModulePkg"
 End
 

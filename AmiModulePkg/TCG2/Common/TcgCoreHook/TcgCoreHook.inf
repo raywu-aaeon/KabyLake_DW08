@@ -25,15 +25,16 @@
     TcgCoreHook.h
 
 [LibraryClasses]
+    BaseLib
+    BaseTisLib12
+    BaseTisLib20
     ShaLib
+    BaseCrbLibDxe
     MemoryAllocationLib
     UefiLib
+    BaseAmiTcmlib
     TpmReportStatusCodeWrapperLibDxe
-    BaseTisLib20
 
-[Ppis]
-    #amiFVhoblistguid
-    
 [Protocols]
     gEfiTpmDeviceProtocolGuid
     gAmiTpmSupportTypeProtocolguid
@@ -43,20 +44,12 @@
     gEfiTcgPlatformProtocolGuid
     gEfiTcgProtocolGuid
     gEfiTpmDeviceProtocolGuid
-    gEfiTrEEProtocolGuid
-    AmiProtocolInternalHlxeGuid
-    
-[Guids]
-    ExtendedDataGuid    
-    amiFVhoblistguid
 
 [Packages]
     MdePkg/MdePkg.dec
     UefiCpuPkg/UefiCpuPkg.dec
     AmiCompatibilityPkg/AmiCompatibilityPkg.dec
     AmiModulePkg/AmiModulePkg.dec
-    AmiTsePkg/AmiTsePkg.dec
-    AmiTcgPkg/AmiTcgPkg.dec
 
 #*************************************************************************
 #**                                                                     **

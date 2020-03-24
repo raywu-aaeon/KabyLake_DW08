@@ -38,8 +38,6 @@ AmiTcgPlatformDxeString.uni
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  AmiTsePkg/AmiTsePkg.dec
-  AmiTcgPkg/AmiTcgPkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint
@@ -47,34 +45,11 @@ AmiTcgPlatformDxeString.uni
   HiiLib
   UefiLib
   TcgAslLib
-  PcdLib
   TpmReportStatusCodeWrapperLibDxe
   
 [Guids]
-  gEfiGlobalVariableGuid
-  TcgPasswordAuthenticationGuid
-  gEfiImageSecurityDatabaseguid
-  FastBootVariableGuid
-  gTcgEfiGlobalVariableGuid
+  gEfiGlobalVariableGuid	# the BootXXXX need to using Library
   gEfiMemoryOverwriteControlDataGuid
-  FlagsStatusguid
-  AmiTseSetupGuid
-  AmitcgefiOsVariableGuid
-  gEfiAcpiTableGuid
-  gEfiSmbiosTableGuid
-  gAmiMeasureCPUMicrocodeGuid
-  Tpm12PPILockOverrideguid
-  Tpm12MeasureConfigurationInfoFuncGuid
-  AmiSetTcgReadytobootGuid
-  AmiMeasurePciopromGuid
-  AmiBiosPpiFlagsManagementGuid
-  AmiProcessTcgSetupGuid
-  gAmiOsPpiConfirmationOverrideGuid
-  AmiProcessTcgPpiRequestGuid
-  gMicrocodeGuid
-  gAmiTsePasswordPromptExitGuid
-  gAmiTseAdminPasswordValidGuid
-  gTcgNvramHobGuid
   
 [Protocols]
   gEfiTcgProtocolGuid
@@ -88,15 +63,7 @@ AmiTcgPlatformDxeString.uni
   gEfiHiiPackageListProtocolGuid
   gOpromStartEndProtocolGuid
   gEdkiiVariableLockProtocolGuid
-  gBdsAllDriversConnectedProtocolGuid
-  gEfiTpmDeviceProtocolGuid
-  gTcgPlatformSetupPolicyGuid
-  gEfiAcpiSupportGuid
-  gAmiPostManagerProtocolGuid
 
-[Pcd]
-  gAmiTcgPkgTokenSpaceGuid.PcdPostStatusCheck
-    
 [Depex]
   gEfiTcgProtocolGuid
 
