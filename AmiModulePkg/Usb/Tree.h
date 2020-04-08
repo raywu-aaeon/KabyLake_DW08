@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -21,38 +21,38 @@
 #define __TREE_H__
 
 typedef struct _TREENODE_T TREENODE_T;
-struct _TREENODE_T {
-    VOID        *data;
-    TREENODE_T  *right;
-    TREENODE_T  *left;
-    TREENODE_T  *child;
-    TREENODE_T  *parent;
+typedef struct _TREENODE_T{
+    VOID* data;
+    TREENODE_T* right;
+    TREENODE_T* left;
+    TREENODE_T* child;
+    TREENODE_T* parent;
 };
 
+typedef struct QUEUE_T;
 
+typedef int (*TREE_PREDICATE1_T)(VOID* n, VOID* context);
+typedef VOID (*TREE_CALLBACK_T)(VOID* n, VOID* context );
 
-typedef int (*TREE_PREDICATE1_T)(VOID *Node, VOID *Context);
-typedef VOID (*TREE_CALLBACK_T)(VOID *Node, VOID *Context);
+TREENODE_T* TreeCreate( TREENODE_T* n, VOID* d);
+VOID TreeAddChild( TREENODE_T* p, TREENODE_T* c );
+VOID TreeRemove( TREENODE_T* n );
+TREENODE_T* TreeSearchSibling(TREENODE_T* n, TREE_PREDICATE1_T pr, VOID* data );
+TREENODE_T* TreeSearchDeep(TREENODE_T* n, TREE_PREDICATE1_T pr, VOID* data );
+VOID TreeForEachSibling(TREENODE_T* n, TREE_CALLBACK_T pr, VOID* data );
 
-TREENODE_T* TreeCreate (TREENODE_T *Node, VOID *Data);
-VOID        TreeAddChild (TREENODE_T *Parent, TREENODE_T *Child);
-VOID        TreeRemove (TREENODE_T *Node);
-TREENODE_T* TreeSearchSibling (TREENODE_T *Node, TREE_PREDICATE1_T Predicate, VOID *Data);
-TREENODE_T* TreeSearchDeep (TREENODE_T *Node, TREE_PREDICATE1_T Predicate, VOID *Data);
-VOID        TreeForEachSibling (TREENODE_T *Node, TREE_CALLBACK_T Predicate, VOID *Data);
-
-VOID* QueueGet (QUEUE_T *Queue);
-int   QueueSize (QUEUE_T *Queue);
-VOID  QueuePut (QUEUE_T *Queue, VOID *Data);
-VOID* QueueRemoveMsg (QUEUE_T *Queue, int Size);
-VOID  QueuePutMsg (QUEUE_T *Queue, VOID *Data, int Size);
+VOID* QueueGet( QUEUE_T* q);
+int QueueSize(QUEUE_T* q);
+VOID QueuePut( QUEUE_T* q, VOID * d);
+VOID* QueueRemoveMsg( QUEUE_T* q, int sz);
+VOID QueuePutMsg( QUEUE_T* q, VOID * d, int sz );
 
 #endif //__TREE_H__
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

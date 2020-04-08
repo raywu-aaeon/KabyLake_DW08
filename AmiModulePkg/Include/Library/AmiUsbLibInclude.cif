@@ -5,6 +5,4 @@
 	RefName = "AmiUsbLibInclude"
 [files]
 "AmiUsbSmmGlobalDataValidationLib.h"	
-"DxeSmmUsbSbLib.h"	
-"AmiUsbHcdLib.h"	
 <endComponent>

@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,8 +17,8 @@
 
 **/
 
-#ifndef _AMI_USB_CCID_H
-#define _AMI_USB_CCID_H
+#ifndef _USB_CCID_H
+#define _USB_CCID_H
 
 #include <Efi.h>
 
@@ -104,7 +104,8 @@ EFI_STATUS
     OUT UINT8                            *ResponseBuffer
 );
 
-struct _AMI_CCID_IO_PROTOCOL {
+typedef struct _AMI_CCID_IO_PROTOCOL {
+
     AMI_CCID_SMARTCLASSDESCRIPTOR       USBCCIDAPISmartClassDescriptor;
     AMI_CCID_GET_ATR                    USBCCIDAPIGetAtr;
     AMI_CCID_POWERUP_SLOT               USBCCIDAPIPowerupSlot;    
@@ -125,12 +126,12 @@ typedef struct {
 } USB_ICC_DEV;
 
 #endif
-#endif // _AMI_USB_CCID_H
+#endif // _USB_CCID_H
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -20,26 +20,8 @@
     PEIM
 
 **/
-/**
-The module is used to implement Usb Io PPI interfaces.
-
-Copyright (c) 2006 - 2014, Intel Corporation. All rights reserved. <BR>
-  
-This program and the accompanying materials
-are licensed and made available under the terms and conditions
-of the BSD License which accompanies this distribution.  The
-full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
-**/
 
 #include "UsbPei.h"
-#include <Ppi/IoMmu.h>
-
-extern EDKII_IOMMU_PPI *gEdk2IoMmuPpi;
 
 #define PAGESIZE  4096
 
@@ -125,15 +107,13 @@ PeiUsbBulkTransfer(
     OUT UINT32          *UsbStatus
 )
 {
-    EFI_STATUS                  Status;
-    PEI_USB_DEVICE              *PeiUsbDev;
+    EFI_STATUS     Status;
+    PEI_USB_DEVICE *PeiUsbDev;
     PEI_USB_HOST_CONTROLLER_PPI *UsbHcPpi;
-    UINT16                      MaxPacketLength;
-    UINT8                       DataToggle;
-    UINT8                       OldToggle;
-    UINT8                       EndpointIndex;
-    EFI_PHYSICAL_ADDRESS        TempAddress;
-    VOID                        *Mapping = NULL;
+    UINT16         MaxPacketLength;
+    UINT8 DataToggle;
+    UINT8 OldToggle;
+    UINT8 EndpointIndex;
 
     PeiUsbDev = PEI_USB_DEVICE_FROM_THIS( This );
     UsbHcPpi = PeiUsbDev->UsbHcPpi;
@@ -151,34 +131,6 @@ PeiUsbBulkTransfer(
     }
 
     OldToggle = DataToggle;
-
-    if (gEdk2IoMmuPpi) {
-        // 0 = BulkIn, 1 = BulkOut
-        if (DeviceEndpoint & BIT7) {
-            Status = gEdk2IoMmuPpi->Map (
-                         gEdk2IoMmuPpi,
-                         EdkiiIoMmuOperationBusMasterWrite,
-                         Data,
-                         DataLength,
-                         (EFI_PHYSICAL_ADDRESS*)&TempAddress,
-                         &Mapping
-                         );
-        } else {
-            Status = gEdk2IoMmuPpi->Map (
-                         gEdk2IoMmuPpi,
-                         EdkiiIoMmuOperationBusMasterRead,
-                         Data,
-                         DataLength,
-                         (EFI_PHYSICAL_ADDRESS*)&TempAddress,
-                         &Mapping
-                         );
-        }
-        if (EFI_ERROR(Status)){
-            return Status;
-        }
-
-        Data = (VOID*)TempAddress;
-    }
 
     Status = UsbHcPpi->BulkTransfer(
         PeiServices,
@@ -198,10 +150,6 @@ PeiUsbBulkTransfer(
     if (OldToggle != DataToggle) {
         PeiUsbDev->DataToggle =
             (UINT8) ( PeiUsbDev->DataToggle ^ (1 << EndpointIndex) );
-    }
-
-    if (gEdk2IoMmuPpi && Mapping) {
-        gEdk2IoMmuPpi->Unmap(gEdk2IoMmuPpi, Mapping);
     }
 
     return Status;
@@ -360,7 +308,7 @@ PeiUsbPortReset(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

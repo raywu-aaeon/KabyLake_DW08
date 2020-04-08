@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2015, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -119,7 +119,7 @@
     #define EHCI_FORCEPORTRESUME        BIT6
     #define EHCI_SUSPEND                BIT7
     #define EHCI_PORTRESET              BIT8
-    #define EHCI_LINE_STATUS            (BIT10 | BIT11)
+	#define EHCI_LINE_STATUS            (BIT10 | BIT11)
     #define EHCI_DMINUSBIT              BIT10
     #define EHCI_DPLUSBIT               BIT11
     #define EHCI_PORTPOWER              BIT12
@@ -191,8 +191,8 @@
       dBufferPtr4 DWORD   Buffer pointer page 4
 
 **/
-typedef struct _EHCI_QTD  EHCI_QTD;  
-struct _EHCI_QTD {
+
+typedef struct {
     UINT32      dNextqTDPtr;
     UINT32      dAltNextqTDPtr;
     UINT32      dToken;
@@ -201,9 +201,11 @@ struct _EHCI_QTD {
     UINT32      dBufferPtr2;
     UINT32      dBufferPtr3;
     UINT32      dBufferPtr4;
+#if EHCI_64BIT_DATA_STRUCTURE
+// For 64bit data structure
     UINT32      dReserved[8];
-
-};
+#endif
+} EHCI_QTD;
 
 
 /**
@@ -226,8 +228,8 @@ struct _EHCI_QTD {
       dBufferPtr4 DWORD   Buffer pointer page 4
 
 **/
-typedef struct _EHCI_QH  EHCI_QH;  
-struct _EHCI_QH {
+
+typedef struct {
     UINT32      dLinkPointer;
     UINT32      dEndPntCharac;
     UINT32      dEndPntCap;
@@ -240,17 +242,20 @@ struct _EHCI_QH {
     UINT32      dBufferPtr2;
     UINT32      dBufferPtr3;
     UINT32      dBufferPtr4;
+#if EHCI_64BIT_DATA_STRUCTURE
+// For 64bit data structure
     UINT32      dReserved[8];
-    UINT8       CallBackIndex;
+#endif
+	UINT8		bCallBackIndex;
     EHCI_QTD    *fpFirstqTD;
     UINT8       bActive;
     UINT8       bErrorStatus;
-    UINTN       DevInfoIndex;
+    UINT8       *fpDevInfoPtr;
     UINT8       aDataBuffer[8];
-    UINT32      dTokenReload;
+    UINT32		dTokenReload;
     UINT16      Interval;
     UINT8       Pad[31-2*sizeof(void*)];    // sizeof(EHCI_QH)should be divisible by 32
-};                          // because of 32 bit pointers; the size of
+} EHCI_QH;                          // because of 32 bit pointers; the size of
                                     // the structure has to be aligned on a 32-Byte boundary
 /*
  * 
@@ -271,23 +276,15 @@ struct _EHCI_QH {
 
 // Isochronous transfer descriptor
 //-------------------------------------------------------------------------
-typedef struct _EHCI_ITD  EHCI_ITD;  
-struct _EHCI_ITD {
+typedef struct _EHCI_ITD {
     UINT32  NextLinkPointer;
     UINT32  ControlStatus[8];
-    UINT32  BufferPointer[7];   
+    UINT32  BufferPointer[7];
+#if EHCI_64BIT_DATA_STRUCTURE    
     UINT32  ExtBufferPointer[7];
     UINT32  Padding[9];
-
-} ;
-
-typedef struct _EHCI_ITD_DATA EHCI_ITD_DATA;
-struct _EHCI_ITD_DATA {
-    EFI_HANDLE      Controller;
-    UINT16          Vid;
-    UINT16          Did;
-    EHCI_ITD        *IsocTds;
-};
+#endif
+} EHCI_ITD;
 
 #pragma pack(pop)
 
@@ -347,19 +344,18 @@ struct _EHCI_ITD_DATA {
 //-------------------------------------------------------------------------
 // Descriptor structure used to store qTD and QH addresses
 //-------------------------------------------------------------------------
-typedef struct _EHCI_DESC_PTRS EHCI_DESC_PTRS;
-struct _EHCI_DESC_PTRS {
+typedef struct {
     EHCI_QH     *PeriodicQh;                
-    EHCI_QH     *fpQHRepeat;
-    EHCI_QTD    *fpqTDRepeat;
-};
+	EHCI_QH     *fpQHRepeat;
+	EHCI_QTD    *fpqTDRepeat;
+} EHCI_DESC_PTRS;
 
 #endif      // __EHCI_H
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2015, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

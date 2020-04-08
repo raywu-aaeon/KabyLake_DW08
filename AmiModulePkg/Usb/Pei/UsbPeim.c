@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -20,29 +20,12 @@
     PEIM
 
 **/
-/**
-The module to produce Usb Bus PPI.
 
-Copyright (c) 2006 - 2016, Intel Corporation. All rights reserved.<BR>
-  
-This program and the accompanying materials
-are licensed and made available under the terms and conditions
-of the BSD License which accompanies this distribution.  The
-full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
-**/
 #include "UsbPei.h"
 
 #include "Ppi/Stall.h"
 #include "Ppi/LoadFile.h"
 #include <Library/DebugLib.h>
-#include <Ppi/IoMmu.h>
-
-extern EDKII_IOMMU_PPI *gEdk2IoMmuPpi;
 
 #define PAGESIZE  4096
 
@@ -114,7 +97,7 @@ EFI_STATUS PeimInitializeUsb (
         // Get UsbHcPpi at first.
         //
         Status = (**PeiServices).LocatePpi( PeiServices,
-            &gAmiPeiUsbHostControllerPpiGuid, i, NULL, (VOID**)&UsbHcPpi );
+            &gAmiPeiUsbHostControllerPpiGuid, i, NULL, &UsbHcPpi );
 
         if ( EFI_ERROR( Status ) ) {
             break;
@@ -154,7 +137,7 @@ PeiHubEnumeration (
 
     UsbIoPpi = &PeiUsbDevice->UsbIoPpi;
     Status = (**PeiServices).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid,
-        0, NULL, (VOID**)&StallPpi);
+        0, NULL, &StallPpi);
 
     for (Port = 1; Port <= PeiUsbDevice->DownStreamPortNo; Port++) {
 
@@ -197,7 +180,7 @@ PeiHubEnumeration (
             // Begin to deal with the new device
             //
             Status = (*PeiServices)->AllocatePool( PeiServices,
-                    sizeof(PEI_USB_DEVICE), (VOID**)&AllocateAddress);
+                    sizeof(PEI_USB_DEVICE), &AllocateAddress);
             if (EFI_ERROR(Status)) {
                 return EFI_OUT_OF_RESOURCES;
             }
@@ -268,17 +251,9 @@ PeiHubEnumeration (
 
             Status = (**PeiServices).InstallPpi(PeiServices, 
                             &NewPeiUsbDevice->AmiUsbIoPpiList);
-            ASSERT(Status == EFI_SUCCESS);
-            if (EFI_ERROR(Status)) {
-                return Status;
-            }
 
             Status = (**PeiServices).InstallPpi(PeiServices,
                             &NewPeiUsbDevice->UsbIoPpiList);
-            ASSERT(Status == EFI_SUCCESS);
-            if (EFI_ERROR(Status)) {
-                return Status;
-            }
 
             // Initialize DeviceType
             if ((NewPeiUsbDevice->InterfaceDesc->InterfaceClass == BASE_CLASS_MASS_STORAGE)
@@ -330,7 +305,7 @@ EFI_STATUS PeiUsbEnumeration (
         &gEfiPeiStallPpiGuid,
         0,
         NULL,
-        (VOID**)&PeiStall
+        &PeiStall
     );
 
     UsbHcPpi->GetRootHubPortNumber(
@@ -387,22 +362,11 @@ EFI_STATUS PeiUsbEnumeration (
                 //
                 // Connect change happen
                 //
-
-                if (gEdk2IoMmuPpi) {
-                    Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                                gEdk2IoMmuPpi,
-                                                EfiRuntimeServicesData,
-                                                EFI_SIZE_TO_PAGES(sizeof(PEI_USB_DEVICE)),
-                                                (VOID**)&AllocateAddress,
-                                                EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                                );
-                } else {
-                    Status = (*PeiServices)->AllocatePool (
-                                                 PeiServices,
-                                                 sizeof(PEI_USB_DEVICE),
-                                                 (VOID**)&AllocateAddress
-                                                 );
-                }
+                Status = (*PeiServices)->AllocatePool(
+                    PeiServices,
+                    sizeof(PEI_USB_DEVICE),
+                    &AllocateAddress
+                         );
                 if ( EFI_ERROR( Status ) ) {
                     return EFI_OUT_OF_RESOURCES;
                 }
@@ -415,6 +379,7 @@ EFI_STATUS PeiUsbEnumeration (
                 PeiUsbDevice->DeviceAddress = 0;
                 PeiUsbDevice->MaxPacketSize0 = 8;
                 PeiUsbDevice->DataToggle = 0;
+                PeiUsbDevice->UsbIoPpi = gAmiUsbIoPpi;
                 PeiUsbDevice->UsbIoPpi = gAmiUsbIoPpi;
                 PeiUsbDevice->AmiUsbIoPpiList = gAmiUsbIoPpiList;
                 PeiUsbDevice->AmiUsbIoPpiList.Ppi = &PeiUsbDevice->UsbIoPpi;
@@ -478,17 +443,9 @@ EFI_STATUS PeiUsbEnumeration (
 
                 Status = (**PeiServices).InstallPpi(PeiServices, 
                             &PeiUsbDevice->AmiUsbIoPpiList);
-                ASSERT(Status == EFI_SUCCESS);
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
 
                 Status = (**PeiServices).InstallPpi(PeiServices,
                             &PeiUsbDevice->UsbIoPpiList);
-                ASSERT(Status == EFI_SUCCESS);
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
 
                 // Initialize DeviceType
                 if ( (PeiUsbDevice->InterfaceDesc->InterfaceClass == BASE_CLASS_MASS_STORAGE)
@@ -535,75 +492,51 @@ PeiConfigureUsbDevice (
     IN OUT UINT8        *DeviceAddress
 )
 {
-    EFI_USB_DEVICE_DESCRIPTOR    DeviceDescriptor;
-    EFI_STATUS                   Status;
-    PEI_USB_IO_PPI               *UsbIoPpi;
-    UINT8                        Index;
-    EFI_PEI_STALL_PPI            *StallPpi = NULL;
-    UINT8                        Retry = 2;
-    EFI_USB_DEVICE_DESCRIPTOR    *DeviceDescriptorPtr = &DeviceDescriptor;
-    UINTN                        Size;
-    EFI_PHYSICAL_ADDRESS         TempAddress;
-    VOID                         *Mapping = NULL;
+    EFI_USB_DEVICE_DESCRIPTOR DeviceDescriptor;
+    EFI_STATUS     Status;
+    PEI_USB_IO_PPI *UsbIoPpi;
+    UINT8 i;
+    EFI_PEI_STALL_PPI  *StallPpi = NULL;
+    UINT8 Retry = 2;
 
     ( **PeiServices ).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid,
-        0, NULL, (VOID**)&StallPpi );
+        0, NULL, &StallPpi );
 
     if (PeiUsbDevice->UsbHcPpi->PreConfigureDevice != NULL) {
         Status = PeiUsbDevice->UsbHcPpi->PreConfigureDevice( PeiServices,
             PeiUsbDevice, Port);
-        if (EFI_ERROR(Status)) {
-            DEBUG((DEBUG_ERROR, "Failed to initialize HC specific data for the device\n"));
+        if ( EFI_ERROR( Status ) ) {
             return Status;
         }
     }
 
     UsbIoPpi = &PeiUsbDevice->UsbIoPpi;
 
-    if (gEdk2IoMmuPpi) {
-        Size = sizeof(EFI_USB_DEVICE_DESCRIPTOR);
-        Status = gEdk2IoMmuPpi->Map (
-                     gEdk2IoMmuPpi,
-                     EdkiiIoMmuOperationBusMasterWrite,
-                     (VOID*)DeviceDescriptorPtr,
-                     &Size,
-                     (EFI_PHYSICAL_ADDRESS*)&TempAddress,
-                     &Mapping
-                     );
-
-        if (EFI_ERROR(Status)){
-            return Status;
-        }
-
-        DeviceDescriptorPtr = (EFI_USB_DEVICE_DESCRIPTOR*)TempAddress;
-    }
-
     //-----------------------------------------------------------------------
     // Try 5 times to read the first 8 bytes to determine the size
-    for (Index = 0; Index < 5; Index++) {
+    for (i = 0; i < 5; i++) {
         Status = PeiUsbGetDescriptor( PeiServices,
-                     UsbIoPpi,
-                     USB_DT_DEVICE << 8, // Value = Type << 8 | Index
-                     0,                                    // Index
-                     8,                                    // DescriptorLength
-                     DeviceDescriptorPtr );
+            UsbIoPpi,
+            USB_DT_DEVICE << 8, // Value = Type << 8 | Index
+            0,                                    // Index
+            8,                                    // DescriptorLength
+            &DeviceDescriptor );
         if ((!EFI_ERROR(Status)) || (Status == EFI_TIMEOUT)) {
             break;
         }
         StallPpi->Stall( PeiServices, StallPpi, 100 * 1000 ); // 100msec delay
     }
     if ( EFI_ERROR( Status ) ) {
-        DEBUG((DEBUG_ERROR, "Failed to get the first 8 bytes of the device descriptor.\n"));
         return Status;
     }
 
     //-----------------------------------------------------------------------
     // Set MaxPacketSize0 = 0x40 if packet size is not specified
-    if (DeviceDescriptorPtr->BcdUSB >= 0x0300) {
-        PeiUsbDevice->MaxPacketSize0 = (UINT16)1 << DeviceDescriptorPtr->MaxPacketSize0;
+    if (DeviceDescriptor.BcdUSB >= 0x0300) {
+        PeiUsbDevice->MaxPacketSize0 = (UINT16)1 << DeviceDescriptor.MaxPacketSize0;
     } else {
-        PeiUsbDevice->MaxPacketSize0 = (DeviceDescriptorPtr->MaxPacketSize0)
-                                       ? DeviceDescriptorPtr->MaxPacketSize0
+        PeiUsbDevice->MaxPacketSize0 = (DeviceDescriptor.MaxPacketSize0)
+                                       ? DeviceDescriptor.MaxPacketSize0
                                        : 0x40;
     }
 
@@ -623,7 +556,6 @@ PeiConfigureUsbDevice (
         *DeviceAddress );
     
     if (EFI_ERROR(Status)) {
-        DEBUG((DEBUG_ERROR, "Failed to set device address.\n"));
         return Status;
     }
     PeiUsbDevice->DeviceAddress = *DeviceAddress;
@@ -639,10 +571,9 @@ PeiConfigureUsbDevice (
         USB_DT_DEVICE << 8,   // Value = Type << 8 | Index
         0,                                      // Index
         sizeof(EFI_USB_DEVICE_DESCRIPTOR),      // DescriptorLength
-        DeviceDescriptorPtr );
+        &DeviceDescriptor );
         
     if (EFI_ERROR(Status)) {
-        DEBUG((DEBUG_ERROR, "Failed to get the completed device descriptor.\n"));
         return Status;
     }
     //-----------------------------------------------------------------------
@@ -666,12 +597,7 @@ PeiConfigureUsbDevice (
         UsbIoPpi );
 
     if (EFI_ERROR(Status)) {
-        DEBUG((DEBUG_ERROR, "Failed to set configuration.\n"));
         return Status;
-    }
-
-    if (Mapping){
-        gEdk2IoMmuPpi->Unmap(gEdk2IoMmuPpi, Mapping);
     }
 
     return EFI_SUCCESS;
@@ -681,46 +607,12 @@ static EFI_STATUS PeiUsbGetAllConfiguration (
     IN EFI_PEI_SERVICES **PeiServices,
     IN PEI_USB_DEVICE   *Device )
 {
-    EFI_USB_CONFIG_DESCRIPTOR    ConfigDesc = {0};
-    EFI_USB_ENDPOINT_DESCRIPTOR  *EndPointDesc = NULL;  //(EIP32503+)
-    EFI_STATUS                   Status;
-    PEI_USB_IO_PPI               *UsbIoPpi = &Device->UsbIoPpi;
-    UINTN                        Index;
-    UINT8                        *LastAddress = 0;
-    UINTN                        Size;
-    VOID                         *ConfigDescMapping = NULL;
-    VOID                         *EndPointDescMapping = NULL;
-
-    if (gEdk2IoMmuPpi) {
-        Size = sizeof(EFI_USB_CONFIG_DESCRIPTOR);
-        Status = gEdk2IoMmuPpi->Map (
-                     gEdk2IoMmuPpi,
-                     EdkiiIoMmuOperationBusMasterWrite,
-                     (VOID*)&ConfigDesc,
-                     &Size,
-                     (EFI_PHYSICAL_ADDRESS*)&ConfigDesc,
-                     &ConfigDescMapping
-                     );
-        if (EFI_ERROR(Status)){
-            return Status;
-        }
-
-        Size = sizeof(EFI_USB_ENDPOINT_DESCRIPTOR);
-        Status = gEdk2IoMmuPpi->Map (
-                     gEdk2IoMmuPpi,
-                     EdkiiIoMmuOperationBusMasterWrite,
-                     (VOID*)EndPointDesc,
-                     &Size,
-                     (EFI_PHYSICAL_ADDRESS*)EndPointDesc,
-                     &EndPointDescMapping
-                     );
-        if (EFI_ERROR(Status)){
-            if (ConfigDescMapping){
-                gEdk2IoMmuPpi->Unmap(gEdk2IoMmuPpi, ConfigDescMapping);
-            }
-            return Status;
-        }
-    }
+	EFI_USB_CONFIG_DESCRIPTOR	ConfigDesc = {0};
+	EFI_USB_ENDPOINT_DESCRIPTOR	*EndPointDesc = NULL;	//(EIP32503+)
+    EFI_STATUS     Status;
+    PEI_USB_IO_PPI *UsbIoPpi = &Device->UsbIoPpi;
+    UINTN i;
+    UINT8          *LastAddress = 0;
 
 
     // Here we are parsing the descriptors for the device
@@ -781,25 +673,14 @@ static EFI_STATUS PeiUsbGetAllConfiguration (
         USB_DT_CONFIG << 8,
         0,
         9,
-        &ConfigDesc);
-    if (EFI_ERROR(Status)) {
-        DEBUG((DEBUG_ERROR, "Failed to get the first 9 bytes of the configuration descriptor.\n"));
+        &ConfigDesc );
+    if ( EFI_ERROR( Status ) ) {
         return Status;
     }
 
-    if (gEdk2IoMmuPpi) {
-        Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                    gEdk2IoMmuPpi,
-                                    EfiRuntimeServicesData,
-                                    EFI_SIZE_TO_PAGES(ConfigDesc.TotalLength),
-                                    (VOID**)&Device->ConfigurationData,
-                                    EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                    );
-    } else {
-        Status = (*PeiServices)->AllocatePool( PeiServices,
-            ConfigDesc.TotalLength, (VOID**)&Device->ConfigurationData );
-    }
-    if (EFI_ERROR(Status)) {
+    Status = (*PeiServices)->AllocatePool( PeiServices,
+    	ConfigDesc.TotalLength, &Device->ConfigurationData );
+    if ( EFI_ERROR( Status ) ) {
         return Status;
     }
     //-------------------------------------------------------------
@@ -813,9 +694,8 @@ static EFI_STATUS PeiUsbGetAllConfiguration (
         USB_DT_CONFIG << 8,
         0,
         ConfigDesc.TotalLength,
-        (VOID *) Device->ConfigurationData);
-    if (EFI_ERROR(Status)) {
-        DEBUG((DEBUG_ERROR, "Failed to get the completed configuration descriptor.\n"));
+        (VOID *) Device->ConfigurationData );
+    if ( EFI_ERROR( Status ) ) {
         return Status;
     }
     Device->ConfigDesc =
@@ -828,8 +708,7 @@ static EFI_STATUS PeiUsbGetAllConfiguration (
         Status = Device->UsbHcPpi->EnableEndpoints(PeiServices,
                     Device->UsbHcPpi, Device->DeviceAddress, Device->ConfigurationData);
     
-        if (EFI_ERROR(Status)) {
-            DEBUG((DEBUG_ERROR, "Failed to enable endpoints\n"));
+        if ( EFI_ERROR( Status ) ) {
             return Status;
         }
     }
@@ -862,23 +741,16 @@ static EFI_STATUS PeiUsbGetAllConfiguration (
                    ( (UINT8 *) Device->InterfaceDesc +
                    Device->InterfaceDesc->Length );
 
-    for (Index = 0; Index < Device->InterfaceDesc->NumEndpoints && 
+    for (i = 0; i < Device->InterfaceDesc->NumEndpoints && 
 		(UINT8 *)EndPointDesc < LastAddress;) {
 		if (EndPointDesc->DescriptorType == USB_DT_ENDPOINT) {
-			Device->EndpointDesc[Index++] = EndPointDesc;
+			Device->EndpointDesc[i++] = EndPointDesc;
 		}
 		EndPointDesc = (EFI_USB_ENDPOINT_DESCRIPTOR *)
     	               ( (UINT8 *) EndPointDesc +
         	           EndPointDesc->Length );
     }
 										//<(EIP32503)
-    if (gEdk2IoMmuPpi && ConfigDescMapping){
-        gEdk2IoMmuPpi->Unmap(gEdk2IoMmuPpi, ConfigDescMapping);
-    }
-    if (gEdk2IoMmuPpi && EndPointDescMapping){
-        gEdk2IoMmuPpi->Unmap(gEdk2IoMmuPpi, EndPointDescMapping);
-    }
-
     return EFI_SUCCESS;
 }
 
@@ -900,7 +772,7 @@ VOID ResetRootPort (
         &gEfiPeiStallPpiGuid,
         0,
         NULL,
-        (VOID**)&PeiStall
+        &PeiStall
     );
 
 
@@ -963,7 +835,7 @@ VOID ResetRootPort (
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

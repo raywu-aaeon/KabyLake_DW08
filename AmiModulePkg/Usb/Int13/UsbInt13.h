@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -36,7 +36,7 @@ typedef struct _USBMASS_INT13_DEV {
     UINT8   BbsEntryNo;
     UINT8   DevBaidType;
     UINT16  NumHeads;
-    UINT16  LbaNumHeads;
+    UINT16  LBANumHeads;
     UINT16  NumCylinders;
     UINT16  LBANumCyls;
     UINT8   NumSectors;
@@ -80,7 +80,7 @@ EFI_STATUS InitializeHotplugDevices();
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

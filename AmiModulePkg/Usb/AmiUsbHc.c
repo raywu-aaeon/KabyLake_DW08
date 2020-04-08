@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,29 +17,33 @@
 
 **/
 
+//#include <Efi.h>
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "Uhcd.h"
-#include <Xhci.h>
+#include "Xhci.h"
+
 #include "Tree.h"
+//#include "Uhci.h"
 #include <Pci.h>
 #include <Protocol/Cpu.h>
-#include <Protocol/AmiUsbHcMemRecordProtocol.h>
+#include <Protocol/Legacy8259.h>
+
+#define INTERRUPTQUEUESIZE 10
 
 extern USB_GLOBAL_DATA *gUsbData;
-extern USB_DATA_LIST   *gUsbDataList;
-extern URP_STRUC       *gParameters;
-extern HC_STRUC        **gHcTable;
+extern EFI_USB_PROTOCOL            *gAmiUsbController;
 
-static UINT8 gSpeedMap[] = { 0x10, 0x01, 0, 0 };
+static UINT8 SpeedMap[] = { 0x10, 0x01, 0, 0 };
 
-UINT8   *gUsbBusTempBuffer = NULL;
-UINTN   gTempBufferPages = 0;
+EFI_LEGACY_8259_PROTOCOL    *gPic;
+UINT32  gVector = 0;
+
+UINT8	*gUsbBusTempBuffer = NULL;
+UINTN	gTempBufferPages = 0;
 
 /**
     Function returns a pointer to HcProtocol2 record of a given protocol
-
-    @param   Protocol  EFI USB2 Hc protocol
-
-    @retval  Pointer   Function returns a pointer to HcProtocol2 record of a given protocol
 
 **/
 
@@ -53,10 +57,6 @@ static HC_DXE_RECORD* GetThis(EFI_USB2_HC_PROTOCOL* Protocol)
 /**
     Function returns a pointer to HcProtocol record of a given protocol
 
-    @param   Protocol  EFI USB Hc protocol
-
-    @retval  Pointer   Function returns a pointer to HcProtocol record of a given protocol
-
 **/
 
 static HC_DXE_RECORD* GetThis1 (EFI_USB_HC_PROTOCOL* Protocol)
@@ -67,7 +67,7 @@ static HC_DXE_RECORD* GetThis1 (EFI_USB_HC_PROTOCOL* Protocol)
 
 
 /**
-    Function converts the bitmap of gUsbData->UsbLastCommandStatusExtended into
+    Function converts the bitmap of gUsbData->dLastCommandStatusExtended into
     a valid USB error.
 
 **/
@@ -82,17 +82,17 @@ static UINT32 GetTransferStatus()
         EFI_USB_ERR_BABBLE,     USB_TRNSFR_BABBLE,
         EFI_USB_ERR_NAK,        USB_TRNSFR_NAK,
         EFI_USB_ERR_CRC,        USB_TRNSFR_CRCERROR,
-        EFI_USB_ERR_TIMEOUT,    USB_TRNSFR_TIMEOUT,     //(EIP84790)
+        EFI_USB_ERR_TIMEOUT,    USB_TRNSFR_TIMEOUT,	//(EIP84790)
         EFI_USB_ERR_BITSTUFF,   USB_TRNSFR_BITSTUFF,
         EFI_USB_ERR_SYSTEM, 0
     };
     UINT32 Err = 0;
-    UINT32 Status = gUsbData->UsbLastCommandStatusExtended;
-    UINT8 Index;
+    UINT32 Status = gUsbData->dLastCommandStatusExtended;
+    UINT8 i;
 
-    for (Index = 0; Index<COUNTOF(ErrorMap); ++Index){
-        if( Status & ErrorMap[Index].BitSrc ) {
-            Err |= ErrorMap[Index].BitDst;
+    for (i = 0; i<COUNTOF(ErrorMap); ++i){
+        if( Status & ErrorMap[i].BitSrc ) {
+            Err |= ErrorMap[i].BitDst;
         }
     }
 
@@ -102,6 +102,19 @@ static UINT32 GetTransferStatus()
         return Err;
     }
 }
+
+/**
+    Bridge between DXE code and function in USB Core proc table which is inside
+    our SMI code.
+
+    @param 
+        Func - function number opUSBCORE_XXX which corresponds to index in Core Proc table.
+        Rest of the parameters coresponds the callee interface
+
+    @retval 
+        Whatever callee returns
+
+**/
 
 enum {
     opUSBCORE_GetDescriptor,
@@ -115,6 +128,7 @@ enum {
     opUSBCORE_Last,
 };
 
+
 int CoreprocStackSize[] = {
     6*sizeof(VOID*), // opUSBSMI_GetDescriptor
     2*sizeof(VOID*), // opUSBCORE_ReConfigDevice
@@ -126,70 +140,50 @@ int CoreprocStackSize[] = {
     0, // opUSBCORE_PeriodicEvent
 };
 
-/**
-    Bridge between DXE code and function in USB Core proc table which is inside
-    our SMI code.
-
-    @param Func - function number opUSBCORE_XXX which corresponds to index in 
-           Core Proc table. Rest of the parameters coresponds the callee interface
-
-    @retval Value  Whatever callee returns
-
-**/
 UINTN UsbSmiCore( UINT8 Func, ...  )
 {
-    EFI_STATUS  Status;
-    UINTN       Index;
-    UINTN       *Buffer = NULL;
-    VA_LIST     ArgList;
-   
+	EFI_STATUS	Status;
+	UINTN		Index;
+	UINTN		*Buffer = NULL;
+    URP_STRUC   Params;
+    va_list     ArgList;
     ASSERT(Func < COUNTOF(CoreprocStackSize));
+//    ASSERT(CoreprocStackSize[Func] > 0);
 
-    VA_START(ArgList, Func);
+    va_start(ArgList, Func);
 
-    Status = gBS->AllocatePool(EfiBootServicesData, 
-                    CoreprocStackSize[Func], (VOID**)&Buffer);
-    if (EFI_ERROR(Status)) {
-        VA_END(ArgList);
-        return USB_ERROR;
-    }
+	Status = pBS->AllocatePool(EfiBootServicesData, 
+						CoreprocStackSize[Func], &Buffer);
+	if (EFI_ERROR(Status)) {
+        va_end(ArgList);
+		return USB_ERROR;
+	}
 
-    for (Index = 0; Index < CoreprocStackSize[Func] / sizeof(VOID*); Index++) {
-        Buffer[Index] = VA_ARG(ArgList, UINTN);
-    }
+	for (Index = 0; Index < CoreprocStackSize[Func] / sizeof(VOID*); Index++) {
+		Buffer[Index] = va_arg(ArgList, UINTN);
+	}
+	va_end(ArgList);
 
-    VA_END(ArgList);
-
-    gBS->SetMem(gParameters, sizeof(URP_STRUC), 0);
-    gParameters->bFuncNumber = USB_API_CORE_PROC;
-    gParameters->bSubFunc = Func;
-    gParameters->bRetValue = USB_ERROR;       //(EIP91840+)
-    gParameters->ApiData.CoreProc.ParamBuffer = Buffer;
-    gParameters->ApiData.CoreProc.ParamSize = CoreprocStackSize[Func];
-    gParameters->ApiData.CoreProc.RetVal = 0; //(EIP91840+)
+    Params.bFuncNumber = USB_API_CORE_PROC;
+    Params.bSubFunc = Func;
+	Params.bRetValue = USB_ERROR;       //(EIP91840+)
+    Params.ApiData.CoreProc.paramBuffer = Buffer;
+    Params.ApiData.CoreProc.paramSize = CoreprocStackSize[Func];
+    Params.ApiData.CoreProc.retVal = 0; //(EIP91840+)
     USB_DEBUG(DEBUG_INFO, DEBUG_USBHC_LEVEL8,
-        "call CORE SMI proc(%d); params: %x\n", Func, gParameters->ApiData.CoreProc.ParamBuffer);
+        "call CORE SMI proc(%d); params: %x\n", Func, Params.ApiData.CoreProc.paramBuffer);
 
-    InvokeUsbApi(gParameters);
+	InvokeUsbApi(&Params);
 
-    gBS->FreePool(Buffer);
+	pBS->FreePool(Buffer);
+//    ASSERT(Params.bRetValue == USB_SUCCESS);
 
-    return gParameters->ApiData.CoreProc.RetVal;
+    return Params.ApiData.CoreProc.retVal;
 }
 
 
 /**
     SW SMI to execute GetDescriptor transfer
-
-    @param HostController   Ptr to the host controller structure
-    @param Device           Ptr to the device info structure
-    @param Buffer           Buffer for return.
-    @param Length           Buffer Length
-    @param DescType         Descriptor type
-    @param DescIndex        Descriptor Index
-    
-    @retval Buffer          Descriptior data in Buffer
-    @retval NULl            Get descriptor ommand fail
 
 **/
 
@@ -203,56 +197,50 @@ UsbSmiGetDescriptor (
     UINT8       DescIndex
 )
 {
-    EFI_STATUS      Status;
-    UINT8           *DataBuffer = Buffer;
-    UINTN           ReturnValue;
+	EFI_STATUS	Status;
+	UINT8		*DataBuffer = Buffer;
+	UINTN		ReturnValue;
 
-    if (RShiftU64((UINTN)Buffer, 32)) {
-        if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
-            if (gUsbBusTempBuffer) {
-                gBS->FreePages((EFI_PHYSICAL_ADDRESS)gUsbBusTempBuffer, gTempBufferPages);
+	if (RShiftU64((UINTN)Buffer, 32)) {
+		if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
+			if (gUsbBusTempBuffer) {
+				gBS->FreePages((EFI_PHYSICAL_ADDRESS)gUsbBusTempBuffer, gTempBufferPages);
+				gUsbBusTempBuffer = NULL;
+				gTempBufferPages = 0;
+			}
+			gTempBufferPages = EFI_SIZE_TO_PAGES(Length);
+			gUsbBusTempBuffer = (UINT8*)0xFFFFFFFF;
+			Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
+							gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
+			if (!EFI_ERROR(Status)) {
+				gBS->SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
+			} else {
                 gUsbBusTempBuffer = NULL;
                 gTempBufferPages = 0;
-            }
-            gTempBufferPages = EFI_SIZE_TO_PAGES(Length);
-            gUsbBusTempBuffer = (UINT8*)0xFFFFFFFF;
-            Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
-                            gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
-            if (!EFI_ERROR(Status)) {
-                SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
-            } else {
-                gUsbBusTempBuffer = NULL;
-                gTempBufferPages = 0;
-            }
-        }
+			}
+		}
 
         if (gUsbBusTempBuffer) {
-                    DataBuffer = gUsbBusTempBuffer;
+		    DataBuffer = gUsbBusTempBuffer;
         }
-    }
+	}
     ReturnValue = UsbSmiCore(opUSBCORE_GetDescriptor,
-                    HostController, 
-                    Device, 
-                    DataBuffer, Length, DescType, DescIndex);
+        HostController, Device, DataBuffer, Length, DescType, DescIndex);
     
     if (ReturnValue == 0) {
         return NULL;
     }
     
-    if (DataBuffer != Buffer) {
-        CopyMem (Buffer, DataBuffer, Length);
-    }
+	if (DataBuffer != Buffer) {
+		gBS->CopyMem (Buffer, DataBuffer, Length);
+	}
 
-    return Buffer;
+	return Buffer;
 }
 
 /**
     Perform the device specific configuration
-    
-    @param HostController   Ptr to the host controller structure
-    @param Device           Ptr to the device info structure
 
-    @retval Value  Whatever callee returns
 **/
 
 UINT8
@@ -268,7 +256,6 @@ UsbSmiReConfigDevice(
 /**
     Allocate the empty buffer for USB device
 
-    @retval Pointer  Device pointer.
 **/
 
 DEV_INFO*
@@ -285,25 +272,12 @@ UsbAllocDevInfo()
 
 VOID UsbPrepareForLegacyOS()
 {
-    gBS->SetMem(gParameters, sizeof(URP_STRUC), 0);
-    gParameters->bFuncNumber = USB_API_CORE_PROC;
-    gParameters->bSubFunc = opUSBCORE_PrepareForLegacyOS;
-    gParameters->bRetValue = USB_ERROR;
-    gParameters->ApiData.CoreProc.ParamBuffer = NULL;
-    gParameters->ApiData.CoreProc.ParamSize = sizeof(VOID*);
-    gParameters->ApiData.CoreProc.RetVal = 0;
-    USBGenerateSWSMI(gUsbData->UsbSwSmi);
-
+    UsbSmiCore(opUSBCORE_PrepareForLegacyOS, 1);
 }
 
 /**
-    Reset device and reconfig device.
 
-    @param HostController   Ptr to the host controller structure
-    @param Device           Ptr to the device info structure
 
-    @retval Value  Whatever callee returns
-    
 **/
 
 UINT8
@@ -316,12 +290,7 @@ UsbResetAndReconfigDev(
 }
 
 /**
-    Device driver disconnect
 
-    @param HostController   Ptr to the host controller structure
-    @param Device           Ptr to the device info structure
-
-    @retval Value  Whatever callee returns
 **/
 
 UINT8
@@ -332,6 +301,19 @@ UsbDevDriverDisconnect(
 {
     return (UINT8)UsbSmiCore(opUSBCORE_DevDriverDisconnect, HostController, Device);
 }
+
+/**
+    Bridge between DXE code and SMI function in USB HC driver.
+
+    @param 
+        Func       - function number opHC_XXX which corresponds to index in HCD_HEADER
+        HcType     - type of USB HC controller; selects an HC driver to call
+        Rest of the parameters coresponds the callee interface
+
+    @retval 
+        Whatever callee returns
+
+**/
 
 int HcprocStackSize[] = {
     sizeof(VOID*) * 1, // opHC_Start
@@ -360,16 +342,6 @@ int HcprocStackSize[] = {
     sizeof(VOID*) * 2, // opHC_SmiControl
 };
 
-/**
-    Bridge between DXE code and SMI function in USB HC driver.
-
-    @param Func     function number opHC_XXX which corresponds to index in HCD_HEADER
-    @param HcType   type of USB HC controller; selects an HC driver to call
-                    Rest of the parameters coresponds the callee interface
-
-    @retval Value   Whatever callee returns
-
-**/
 UINTN
 UsbSmiHc(
     UINT8 Func,
@@ -377,65 +349,58 @@ UsbSmiHc(
     ...
 )
 {
-    EFI_STATUS  Status;
-    UINTN       Index = 0;
-    UINTN       *Buffer = NULL;
-    VA_LIST     ArgList;
+	EFI_STATUS	Status;
+	UINTN		Index = 0;
+	UINTN		*Buffer = NULL;
+    URP_STRUC   Params;
+    va_list     ArgList;
 
     ASSERT(Func < sizeof(HcprocStackSize)/sizeof(int));
     ASSERT( HcprocStackSize[Func] > 0);
 
-    VA_START(ArgList, HcType);
+    va_start(ArgList, HcType);
 
-    Status = gBS->AllocatePool(EfiBootServicesData, 
-                    HcprocStackSize[Func], (VOID**)&Buffer);
-    if (EFI_ERROR(Status)) {
-        VA_END(ArgList);
-        return USB_ERROR;
-    }
+	Status = pBS->AllocatePool(EfiBootServicesData, 
+						HcprocStackSize[Func], &Buffer);
+	if (EFI_ERROR(Status)) {
+        va_end(ArgList);
+		return USB_ERROR;
+	}
 
-    for (Index = 0; Index < HcprocStackSize[Func] / sizeof(VOID*); Index++) {
-        Buffer[Index] = VA_ARG(ArgList, UINTN);
-    }
-    VA_END(ArgList);
+	for (Index = 0; Index < HcprocStackSize[Func] / sizeof(VOID*); Index++) {
+		Buffer[Index] = va_arg(ArgList, UINTN);
+	}
+	va_end(ArgList);
 
-    gBS->SetMem(gParameters, sizeof(URP_STRUC), 0);
-    gParameters->bFuncNumber = USB_API_HC_PROC;
-    gParameters->bSubFunc = Func;
-    gParameters->bRetValue = USB_ERROR;       //(EIP91840+)
-    gParameters->ApiData.HcProc.ParamBuffer = Buffer;
-    gParameters->ApiData.HcProc.ParamSize = HcprocStackSize[Func];
-    gParameters->ApiData.HcProc.HcType = HcType;
-    gParameters->ApiData.HcProc.RetVal = 0;   //(EIP91840+)
+    Params.bFuncNumber = USB_API_HC_PROC;
+    Params.bSubFunc = Func;
+	Params.bRetValue = USB_ERROR;       //(EIP91840+)
+    Params.ApiData.HcProc.paramBuffer = Buffer;
+    Params.ApiData.HcProc.paramSize = HcprocStackSize[Func];
+    Params.ApiData.HcProc.bHCType = HcType;
+    Params.ApiData.HcProc.retVal = 0;   //(EIP91840+)
     USB_DEBUG(DEBUG_INFO, DEBUG_USBHC_LEVEL8,
         "call HC SMI driver(type:%d;func:%d); params at %x\n",
-            HcType, Func, gParameters->ApiData.HcProc.ParamBuffer);
+            HcType, Func, Params.ApiData.HcProc.paramBuffer);
 
-    InvokeUsbApi(gParameters);
+	InvokeUsbApi(&Params);
 
-    gBS->FreePool(Buffer);
+	pBS->FreePool(Buffer);
+//    ASSERT(Params.bRetValue == USB_SUCCESS);
 
-    return gParameters->ApiData.HcProc.RetVal;
+    return Params.ApiData.HcProc.retVal;
 }
-
-/**
-    Usb Periodic Event
-**/
 
 VOID
 UsbSmiPeriodicEvent(VOID)
 {
-
+//    UsbSmiCore(opUSBCORE_PeriodicEvent);
 }
+
 
 /**
     Wrappers for calling USB HC driver functions in USBSMI service
 
-    @param HcStruc   Ptr to the host controller structure
-    @param PortNum   Usb port number
-    @param ClearChangeBits   Clear change bits.
-    
-    @retval Value    Usb Port status.
 **/
 
 UINT32
@@ -446,66 +411,32 @@ UsbSmiGetRootHubStatus(
 )
 {
     return (UINT32)UsbSmiHc(
-            opHC_GetRootHubStatus, HcStruc->HcType, HcStruc, PortNum, ClearChangeBits);
+            opHC_GetRootHubStatus, HcStruc->bHCType, HcStruc, PortNum, ClearChangeBits);
 }
 
-/**
-    Wrappers for calling USB HC driver functions in USBSMI service
-
-    @param HcStruc   Ptr to the host controller structure
-    @param PortNum   Usb port number
-    
-    @retval USB_SUCCESS   Success to enable root hub.
-**/
 UINT8 UsbSmiEnableRootHub(HC_STRUC* HcStruc, UINT8 PortNum)
 {
     return (UINT8)UsbSmiHc(
-            opHC_EnableRootHub, HcStruc->HcType, HcStruc, PortNum);
+            opHC_EnableRootHub, HcStruc->bHCType, HcStruc, PortNum);
 }
 
-/**
-    Wrappers for calling USB HC driver functions in USBSMI service
-
-    @param HcStruc   Ptr to the host controller structure
-    @param PortNum   Usb port number
-    
-    @retval USB_SUCCESS   Success to disable root hub.
-**/
 UINT8 UsbSmiDisableRootHub(HC_STRUC* HcStruc, UINT8 PortNum)
 {
     return (UINT8)UsbSmiHc(
-            opHC_DisableRootHub, HcStruc->HcType, HcStruc, PortNum);
+            opHC_DisableRootHub, HcStruc->bHCType, HcStruc, PortNum);
 }
 
-/**
-    Wrappers for calling USB HC driver functions in USBSMI service
-
-    @param HcStruc   Ptr to the host controller structure
-    @param PortNum   Usb port number
-    @param Desc      Usb descriptor
-    
-    @retval USB_SUCCESS   Success to enable enable endpoint
-**/
 UINT8 UsbSmiEnableEndpoints(HC_STRUC* HcStruc, DEV_INFO* DevInfo, UINT8 *Desc)
 {
     return (UINT8) UsbSmiHc(
-            opHC_EnableEndpoints, HcStruc->HcType, HcStruc, DevInfo, Desc);
+            opHC_EnableEndpoints, HcStruc->bHCType, HcStruc, DevInfo, Desc);
 }
 
 /**
     Wrappers for calling USB HC driver USB transfer functions
 
-    @param HcStruc       Ptr to the host controller structure
-    @param Device        Ptr to the device info structure
-    @param Request       Usb Request
-    @param Index         Index
-    @param Value         Value
-    @param Buffer        Buffer
-    @param Length        Buffer length
-
-    @retval Value        Number of bytes actually transferred
-
 **/
+
 
 UINT16
 UsbSmiControlTransfer (
@@ -517,67 +448,52 @@ UsbSmiControlTransfer (
     UINT8       *Buffer,
     UINT16      Length)
 {
-    EFI_STATUS      Status;
-    UINT8           *DataBuffer = Buffer;
-    UINTN           ReturnValue;
-    
-    if (RShiftU64((UINTN)Buffer, 32)) {
-        
-        if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
-            if (gUsbBusTempBuffer) {
-                gBS->FreePages((EFI_PHYSICAL_ADDRESS)gUsbBusTempBuffer, gTempBufferPages);
+	EFI_STATUS	Status;
+	UINT8		*DataBuffer = Buffer;
+	UINTN		ReturnValue;
+
+	if (RShiftU64((UINTN)Buffer, 32)) {
+		if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
+			if (gUsbBusTempBuffer) {
+				gBS->FreePages((EFI_PHYSICAL_ADDRESS)gUsbBusTempBuffer, gTempBufferPages);
+				gUsbBusTempBuffer = NULL;
+				gTempBufferPages = 0;
+			}
+			gTempBufferPages = EFI_SIZE_TO_PAGES(Length);
+			gUsbBusTempBuffer = (UINT8*)0xFFFFFFFF;
+			Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
+							gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
+			if (!EFI_ERROR(Status)) {
+				gBS->SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
+			} else {
                 gUsbBusTempBuffer = NULL;
                 gTempBufferPages = 0;
-            }
-            gTempBufferPages = EFI_SIZE_TO_PAGES(Length);
-            gUsbBusTempBuffer = (UINT8*)0xFFFFFFFF;
-            Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
-                            gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
-            if (!EFI_ERROR(Status)) {
-                SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
-            } else {
-                gUsbBusTempBuffer = NULL;
-                gTempBufferPages = 0;
-            }
-        }
-        
+			}
+		}
         if (gUsbBusTempBuffer) {
-            DataBuffer = gUsbBusTempBuffer;
+		    DataBuffer = gUsbBusTempBuffer;
         }
-    }
+	}
 
     if (DataBuffer != Buffer) {
         if (!(Request & USB_REQ_TYPE_INPUT)) {
-            CopyMem(DataBuffer, Buffer, Length);
+            gBS->CopyMem(DataBuffer, Buffer, Length);
         }
     }
     
     ReturnValue = UsbSmiHc(opHC_ControlTransfer,
-                    HcStruc->HcType, HcStruc, DevInfo,
-                    Request, Index, Value, DataBuffer, Length);
+        HcStruc->bHCType, HcStruc, DevInfo,
+        Request, Index, Value, DataBuffer, Length);
     
-    if (DataBuffer != Buffer) {
+	if (DataBuffer != Buffer) {
         if (Request & USB_REQ_TYPE_INPUT) {
-            CopyMem(Buffer, DataBuffer, Length);
+            gBS->CopyMem(Buffer, DataBuffer, Length);
         }
-    }
+	}
 
-    return (UINT16)ReturnValue;
+	return (UINT16)ReturnValue;
 }
 
-/**
-    Wrappers for calling USB HC driver USB Bulk transfer functions
-
-    @param HcStruc       Ptr to the host controller structure
-    @param Device        Ptr to the device info structure
-    @param XferDir       Transfer direction
-    @param Buffer        Buffer containing data to be sent to the device 
-                         or buffer to be used to receive data value
-    @param Length        Length request parameter, number of bytes of data 
-                         to be transferred in or out of the HC
-    @retval Value        Number of bytes actually transferred
-
-**/
 UINT32
 UsbSmiBulkTransfer(
     HC_STRUC    *HcStruc,
@@ -587,65 +503,52 @@ UsbSmiBulkTransfer(
     UINT32      Length
 )
 {
-    EFI_STATUS      Status;
-    UINT8           *DataBuffer = Buffer;
-    UINTN           ReturnValue;
-    
-    if (RShiftU64((UINTN)Buffer, 32)) {
-        if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
-            if (gUsbBusTempBuffer) {
-                gBS->FreePages((EFI_PHYSICAL_ADDRESS)gUsbBusTempBuffer, gTempBufferPages);
-                gUsbBusTempBuffer = NULL;
-                gTempBufferPages = 0;
-            }
-            gTempBufferPages = EFI_SIZE_TO_PAGES(Length);
-            gUsbBusTempBuffer = (UINT8*)0xFFFFFFFF;
-            Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
-                             gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
-            if (!EFI_ERROR(Status)) {
-                SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
-            } else {
-                gUsbBusTempBuffer = NULL;
-                gTempBufferPages = 0;
-            }
-        }
-        if (gUsbBusTempBuffer) {
-                DataBuffer = gUsbBusTempBuffer;
-        }
-    }
-    
-    if (DataBuffer != Buffer) {
-        if (!(XferDir & BIT7)) {
-            CopyMem(DataBuffer, Buffer, Length);
-        }
-    }
-        
-    ReturnValue = UsbSmiHc(opHC_BulkTransfer,
-    HcStruc->HcType, HcStruc, DevInfo, XferDir, DataBuffer, Length);
-    
-    if (DataBuffer != Buffer) {
-       if (XferDir & BIT7) {
-           CopyMem(Buffer, DataBuffer, Length);
-       }
-    }
+	EFI_STATUS	Status;
+	UINT8		*DataBuffer = Buffer;
+	UINTN		ReturnValue;
 
-    return (UINT32)ReturnValue;
+	if (RShiftU64((UINTN)Buffer, 32)) {
+		if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
+			if (gUsbBusTempBuffer) {
+				gBS->FreePages((EFI_PHYSICAL_ADDRESS)gUsbBusTempBuffer, gTempBufferPages);
+				gUsbBusTempBuffer = NULL;
+				gTempBufferPages = 0;
+			}
+			gTempBufferPages = EFI_SIZE_TO_PAGES(Length);
+			gUsbBusTempBuffer = (UINT8*)0xFFFFFFFF;
+			Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
+							gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
+			if (!EFI_ERROR(Status)) {
+				gBS->SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
+			} else {
+                gUsbBusTempBuffer = NULL;
+                gTempBufferPages = 0;
+			}
+		}
+        if (gUsbBusTempBuffer) {
+		    DataBuffer = gUsbBusTempBuffer;
+        }
+	}
+
+	if (DataBuffer != Buffer) {
+        if (!(XferDir & BIT7)) {
+		    gBS->CopyMem(DataBuffer, Buffer, Length);
+        }
+	}
+	
+    ReturnValue = UsbSmiHc(opHC_BulkTransfer,
+      HcStruc->bHCType, HcStruc, DevInfo, XferDir, DataBuffer, Length);
+    
+	if (DataBuffer != Buffer) {
+        if (XferDir & BIT7) {
+            gBS->CopyMem(Buffer, DataBuffer, Length);
+        }
+	}
+
+	return (UINT32)ReturnValue;
 }
 
-/**
-    Wrappers for calling USB HC driver USB Isoc transfer functions
 
-    @param HcStruc       Ptr to the host controller structure
-    @param Device        Ptr to the device info structure
-    @param XferDir       Transfer direction
-    @param Buffer        Buffer containing data to be sent to the device 
-                         or buffer to be used to receive data value
-    @param Length        Length request parameter, number of bytes of data 
-                         to be transferred in or out of the HC
-    @param Async         Async Indicator
-    @retval Value        Number of bytes actually transferred
-
-**/
 UINT32
 UsbSmiIsocTransfer(
     HC_STRUC    *HcStruc,
@@ -657,38 +560,11 @@ UsbSmiIsocTransfer(
 )
 {
     return (UINT32)UsbSmiHc(opHC_IsocTransfer,
-      HcStruc->HcType, HcStruc, DevInfo, XferDir, Buffer, Length, Async );
-}
+      HcStruc->bHCType, HcStruc, DevInfo, XferDir, Buffer, Length, Async );
+/*    EFI_STATUS  Status;
+    UINT8       *DataBuffer = Buffer;
+    UINTN       ReturnValue;
 
-/**
-    Wrappers for calling USB HC driver USB Interrupt transfer functions
-
-    @param HcStruc       Ptr to the host controller structure
-    @param Device        Ptr to the device info structure
-    @param EndpointAddress EndPoint address.
-    @param MaxPktSize    Max packet size.
-    @param Buffer        Buffer containing data to be sent to the device 
-                         or buffer to be used to receive data value
-    @param Length        Length request parameter, number of bytes of data 
-                         to be transferred in or out of the HC
-    
-    @retval Value        Number of bytes actually transferred
-
-**/
-UINT16
-UsbSmiInterruptTransfer(
-    HC_STRUC*   HcStruc,
-    DEV_INFO*   DevInfo,
-    UINT8       EndpointAddress,
-    UINT16      MaxPktSize,
-    UINT8       *Buffer,
-    UINT16      Length
-)
-{
-    EFI_STATUS      Status;
-    UINT8           *DataBuffer = Buffer;
-    UINTN           ReturnValue;
-    
     if (RShiftU64((UINTN)Buffer, 32)) {
         if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
             if (gUsbBusTempBuffer) {
@@ -701,7 +577,7 @@ UsbSmiInterruptTransfer(
             Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
                             gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
             if (!EFI_ERROR(Status)) {
-                SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
+                gBS->SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
             } else {
                 gUsbBusTempBuffer = NULL;
                 gTempBufferPages = 0;
@@ -711,63 +587,101 @@ UsbSmiInterruptTransfer(
             DataBuffer = gUsbBusTempBuffer;
         }
     }
-    
+
+    ReturnValue = UsbSmiHc(opHC_IsocTransfer,
+      HcStruc->bHCType, HcStruc, DevInfo, XferDir, DataBuffer, Length );
     if (DataBuffer != Buffer) {
-        if (!(EndpointAddress & BIT7)) {
-            CopyMem(DataBuffer, Buffer, Length);
-        }
+        gBS->CopyMem (Buffer, DataBuffer, Length);
     }
 
-    ReturnValue = UsbSmiHc(opHC_InterruptTransfer,
-                    HcStruc->HcType, HcStruc, DevInfo, 
-                    EndpointAddress, MaxPktSize, DataBuffer, Length);
-    
-    if (DataBuffer != Buffer) {
-        if (EndpointAddress & BIT7) {
-             CopyMem(Buffer, DataBuffer, Length);
-        }
-    }
-    
-    return (UINT16)ReturnValue;
+    return (UINT32)ReturnValue;
+	*/
 }
 
+UINT16
+UsbSmiInterruptTransfer(
+    HC_STRUC*   HcStruc,
+    DEV_INFO*   DevInfo,
+    UINT8       EndpointAddress,
+    UINT16      MaxPktSize,
+    UINT8       *Buffer,
+    UINT16      Length
+)
+{
+	EFI_STATUS	Status;
+	UINT8		*DataBuffer = Buffer;
+	UINTN		ReturnValue;
+
+	if (RShiftU64((UINTN)Buffer, 32)) {
+		if (gUsbBusTempBuffer == NULL || Length > (gTempBufferPages << 12)) {
+			if (gUsbBusTempBuffer) {
+				gBS->FreePages((EFI_PHYSICAL_ADDRESS)gUsbBusTempBuffer, gTempBufferPages);
+				gUsbBusTempBuffer = NULL;
+				gTempBufferPages = 0;
+			}
+			gTempBufferPages = EFI_SIZE_TO_PAGES(Length);
+			gUsbBusTempBuffer = (UINT8*)0xFFFFFFFF;
+			Status = gBS->AllocatePages(AllocateMaxAddress, EfiBootServicesData,
+							gTempBufferPages, (EFI_PHYSICAL_ADDRESS*)&gUsbBusTempBuffer);
+			if (!EFI_ERROR(Status)) {
+				gBS->SetMem (gUsbBusTempBuffer, gTempBufferPages << 12, 0);
+			} else {
+                gUsbBusTempBuffer = NULL;
+                gTempBufferPages = 0;
+			}
+		}
+        if (gUsbBusTempBuffer) {
+		    DataBuffer = gUsbBusTempBuffer;
+        }
+	}
+
+	if (DataBuffer != Buffer) {
+        if (!(EndpointAddress & BIT7)) {
+		    gBS->CopyMem(DataBuffer, Buffer, Length);
+        }
+	}
+
+    ReturnValue = UsbSmiHc(opHC_InterruptTransfer,
+        HcStruc->bHCType, HcStruc, DevInfo, EndpointAddress, MaxPktSize, DataBuffer, Length);
+    
+	if (DataBuffer != Buffer) {
+        if (EndpointAddress & BIT7) {
+		    gBS->CopyMem(Buffer, DataBuffer, Length);
+        }
+	}
+
+	return (UINT16)ReturnValue;
+}
+
+
 /**
-    Wrappers for calling USB HC driver USB Deactive polling functions
+    Wrappers for calling USB HC driver USB polling functions
 
-    @param HostController   Ptr to the host controller structure
-    @param Device           Ptr to the device info structure
-
-    @retval Value  Whatever callee returns
 **/
+
 UINT8 UsbSmiDeactivatePolling (HC_STRUC* HostController, DEV_INFO* DevInfo )
 {
     return (UINT8)UsbSmiHc( opHC_DeactivatePolling,
-            HostController->HcType, HostController, DevInfo );
+            HostController->bHCType, HostController, DevInfo );
 }
 
-/**
-    Wrappers for calling USB HC driver USB Active polling functions
-
-    @param HostController   Ptr to the host controller structure
-    @param Device           Ptr to the device info structure
-
-    @retval Value  Whatever callee returns
-**/
 UINT8   UsbSmiActivatePolling (HC_STRUC* HostController, DEV_INFO* DevInfo )
 {
     return (UINT8)UsbSmiHc( opHC_ActivatePolling,
-            HostController->HcType, HostController, DevInfo );
+            HostController->bHCType, HostController, DevInfo );
 }
 
 
 /**
     Converts one bit-strng to another using a convertion table
 
-    @param Val     intial 32 bit wide bit-string
-    @param BitT    array of bitmaptable_t recodrds
-    @param Cnt     number of records in array BitT
-    
-    @retval Value  32 bit wide bit-string - result of conversion applied to Val
+    @param 
+        Val - intial 32 bit wide bit-string
+        BitT- array of bitmaptable_t recodrds
+        Cnt - number of records in array BitT
+
+         
+    @retval 32 bit wide bit-string - result of conversion applied to Val
 
 **/
 
@@ -781,8 +695,8 @@ ConvertBitmaps(
 )
 {
     UINT32 Res = 0;
-    UINT32 Index;
-    for( Index=0; (BitT->src !=0)&& ( Index < Cnt); ++Index, BitT++ ){
+    UINT32 i;
+    for( i=0; (BitT->src !=0)&& ( i < Cnt); ++i, BitT++ ){
         if( BitT->src & Val )
             Res |= BitT->dst;
     }
@@ -791,17 +705,18 @@ ConvertBitmaps(
 
 
 /**
-    Enumerates DEV_INFO structures in DevInfoTable array of USB data to find
+    Enumerates DEV_INFO structures in aDevInfoTable array of USB data to find
     one that matches the specified USB address and connects to a specified USB
     host controller.
 
-    
-    @param DEV_INFO    Start Pointer to the device info structure from
-                       where the search begins (if 0 start from first entry)
-    @param DevAddr     Device address
-    @param HcStruc     Pointer to the HCStruc structure
+    @param 
+        DEV_INFO    Start Pointer to the device info structure from
+        where the search begins (if 0 start from first entry)
+        DevAddr    Device address
+        HcStruc    Pointer to the HCStruc structure
 
-    @retval Pointer    Pointer to DEV_INFO structure, NULL if device is not found
+    @retval 
+        Pointer to DEV_INFO structure, NULL if device is not found
 
 **/
 
@@ -813,14 +728,14 @@ SearchDevinfoByAdr(
 )
 {
     DEV_INFO*   DevInfo;
-    DEV_INFO*   Dev = gUsbDataList->DevInfoTable + gUsbData->MaxDevCount;
+    DEV_INFO*   Dev = gUsbData->aDevInfoTable + COUNTOF(gUsbData->aDevInfoTable);
 
-    for ( DevInfo = Start!=NULL?Start:&gUsbDataList->DevInfoTable[1];
+    for ( DevInfo = Start!=NULL?Start:&gUsbData->aDevInfoTable[1];
             DevInfo != Dev; ++DevInfo ){
         if ((DevInfo->Flag & (DEV_INFO_VALID_STRUC | DEV_INFO_DEV_DUMMY)) ==
-                        DEV_INFO_VALID_STRUC) {
-            if(( gHcTable[DevInfo->HcNumber - 1] == HcStruc) &&
-                ( DevInfo->DeviceAddress == DevAddr )){
+			DEV_INFO_VALID_STRUC) {
+            if(( gUsbData->HcTable[DevInfo->bHCNumber - 1] == HcStruc) &&
+                ( DevInfo->bDeviceAddress == DevAddr )){
                     return DevInfo;
             }
         }
@@ -833,10 +748,12 @@ SearchDevinfoByAdr(
     Returns a DEV_INFO that corresponds to a device that is connected to a
     specified host controller and has a specified address
 
-    @param Addr    Device address
-    @param Hc      Pointer to the HCStruc structure
+    @param 
+        Addr    Device address
+        Hc      Pointer to the HCStruc structure
 
-    @retval Pointer Pointer to DEV_INFO structure, NULL if device is not found
+    @retval 
+        Pointer to DEV_INFO structure, NULL if device is not found
 
 **/
 
@@ -849,43 +766,42 @@ DevAddr2Info(
     DEV_INFO* Dev = SearchDevinfoByAdr(NULL, Addr, Hc);
     USB_DEBUG(DEBUG_INFO, DEBUG_USBHC_LEVEL8,
         "\tDevAddr2Info %x -> %x(hc:%x;hub:%x;port:%x;if:%x)\n",
-            Addr, Dev, Dev->HcNumber, Dev->HubDeviceNumber,
-            Dev->HubPortNumber, Dev->InterfaceNum );
+            Addr, Dev, Dev->bHCNumber, Dev->bHubDeviceNumber,
+            Dev->bHubPortNumber, Dev->bInterfaceNum );
     return Dev;
 }
 
 
 /**
     Searches a DEV_INFO that was used as a temporary structure for the USB transfer.
- 
-    @param HubPortNumber   Hub port number
-    @param HubDeviceNumber Hub device number
-    @param EndPoint        Interrupt Endpoint number that was assigned to temporary structure
-    @param HCStruc         Pointer to the HCStruc structure
 
-    @retval Pointer        Pointer to DeviceInfo Structure NULL if device is not found
+    @param 
+        Device address
+        EndPoint   Interrupt Endpoint number that was assigned to temporary structure
+        HCStruc    Pointer to the HCStruc structure
+
+    @retval 
+        Pointer to DeviceInfo Structure NULL if device is not found
 
 **/
 
 DEV_INFO*
 FindOldTransfer(
-    UINT8 HubPortNumber,
-    UINT8 HubDeviceNumber,
+    UINT8 DevAddr,
     UINT8 EndPoint,
     HC_STRUC* HcStruc
 )
 {
     DEV_INFO *Dev;
-    DEV_INFO *LastDev = gUsbDataList->DevInfoTable + 
-                          gUsbData->MaxDevCount;
+    DEV_INFO *LastDev = gUsbData->aDevInfoTable + 
+                            COUNTOF(gUsbData->aDevInfoTable);
 
-    for ( Dev = &gUsbDataList->DevInfoTable[1]; Dev != LastDev; ++Dev ){
+    for ( Dev = &gUsbData->aDevInfoTable[1]; Dev != LastDev; ++Dev ){
         if( ((Dev->Flag & (DEV_INFO_VALID_STRUC|DEV_INFO_DEV_PRESENT) )==
             (DEV_INFO_VALID_STRUC|DEV_INFO_DEV_PRESENT)) &&
-            (Dev->HcNumber == HcStruc->HcNumber ) &&
-            (Dev->HubPortNumber == HubPortNumber ) &&
-            (Dev->HubDeviceNumber == HubDeviceNumber ) &&
-            (Dev->IntInEndpoint == EndPoint )) 
+            (Dev->bHCNumber == HcStruc->bHCNumber ) &&
+            (Dev->bDeviceAddress == DevAddr ) &&
+            (Dev->IntInEndpoint == EndPoint ))
         {
             return Dev;
         }
@@ -897,7 +813,10 @@ FindOldTransfer(
 /**
     Allocates temporary DEV_INFO structure in USB data area for use in USB transfer.
 
-    @retval Pointer Pointer to a DEV_INFO structure
+    @param VOID
+    @retval 
+        Pointer to a DEV_INFO structure
+
 **/
 
 DEV_INFO*
@@ -906,7 +825,7 @@ AllocDevInfo()
     DEV_INFO* Dev = UsbAllocDevInfo();
     ASSERT(Dev);
     if(Dev){
-        Dev->DeviceType = BIOS_DEV_TYPE_USBBUS_SHADOW;
+        Dev->bDeviceType = BIOS_DEV_TYPE_USBBUS_SHADOW;
         Dev->Flag |= DEV_INFO_DEV_DUMMY;
     }
     return Dev;
@@ -915,6 +834,7 @@ AllocDevInfo()
 
 /**
     Marks DEV_INFO structure that it is free for use in consequent operations.
+
 **/
 
 VOID
@@ -928,13 +848,6 @@ FreeDevInfo(
     }
 }
 
-/**
-    Translate interval
-    @param Speed     Speed
-    @param Interval  Interval
-
-    @retval Value    Translate interval
-**/
 UINT8
 TranslateInterval(
     UINT8   Speed,
@@ -961,17 +874,19 @@ TranslateInterval(
 /**
     Provides software reset for the USB host controller.
 
-    @param This        A pointer to the EFI_USB_HC_PROTOCOL instance. Type
-                       EFI_USB_HC_PROTOCOL is defined in Section 14.1.
-    @param Attributes  A bit mask of the reset operation to perform.
+    @param 
+        This        A pointer to the EFI_USB_HC_PROTOCOL instance. Type
+        EFI_USB_HC_PROTOCOL is defined in Section 14.1.
+        Attributes  A bit mask of the reset operation to perform.
 
-    @retval EFI_SUCCESS             The reset operation succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
-    @retval EFI_UNSUPPORTED         The type of reset specified by Attributes is
-                                    not currently supported by the host controller
-                                    hardware.
-    @retval EFI_DEVICE_ERROR        An error was encountered while attempting to
-                                    perform the reset operation.
+    @retval 
+        EFI_SUCCESS             The reset operation succeeded.
+        EFI_INVALID_PARAMETER   Attributes is not valid.
+        EFI_UNSUPPORTED         The type of reset specified by Attributes is
+        not currently supported by the host controller
+        hardware.
+        EFI_DEVICE_ERROR        An error was encountered while attempting to
+        perform the reset operation.
 
 **/
 
@@ -982,7 +897,7 @@ AmiUsbHcReset(
     IN UINT16               Attributes
 )
 {
-    REPORT_STATUS_CODE(EFI_PROGRESS_CODE,DXE_USB_RESET);
+    PROGRESS_CODE(DXE_USB_RESET);
 
     if (!(Attributes & (EFI_USB_HC_RESET_GLOBAL | EFI_USB_HC_RESET_HOST_CONTROLLER))) {
         return EFI_INVALID_PARAMETER;
@@ -997,19 +912,13 @@ AmiUsbHcReset(
 /**
     Protocol USB HC function that returns Host Controller state.
 
-    @param This        A pointer to the EFI_USB_HC_PROTOCOL instance. Type
-                       EFI_USB_HC_PROTOCOL is defined in Section 14.1.
-    @param State       A pointer to state
-
-    @retval EFI_SUCCESS             The get state operation succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
 EFIAPI
 AmiUsbHcGetState(
-    IN  EFI_USB_HC_PROTOCOL  *This,
-    OUT EFI_USB_HC_STATE     *State
+    IN EFI_USB_HC_PROTOCOL  *This,
+    OUT EFI_USB_HC_STATE *State
 )
 {
     return AmiUsb2HcGetState(&GetThis1(This)->hcprotocol2, State);
@@ -1018,12 +927,7 @@ AmiUsbHcGetState(
 
 /**
     Protocol USB HC function that sets Host Controller state.
-    @param This        A pointer to the EFI_USB_HC_PROTOCOL instance. Type
-                       EFI_USB_HC_PROTOCOL is defined in Section 14.1.
-    @param State       A pointer to state
 
-    @retval EFI_SUCCESS             The set state operation succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1041,19 +945,6 @@ AmiUsbHcSetState(
 /**
     Protocol USB HC function that performs USB transfer.
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  IsSlowDevice            Slow device check
-    @param  MaximumPacketLength     Max packet of device
-    @param  Request                 Point to transfer requestion
-    @param  TransferDirection       Transfer directioin
-    @param  Data                    Point to control transfer data
-    @param  DataLength              Point to control transfer data length
-    @param  Timeout                 Time out value
-    @param  TransferResult          Point to transfer result
-    
-    @retval EFI_SUCCESS             The control transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1072,28 +963,16 @@ AmiUsbHcControlTransfer(
 )
 {
     return AmiUsb2HcControlTransfer(&GetThis1(HcProtocol)->hcprotocol2,
-             DeviceAddress,
-             IsSlowDevice?EFI_USB_SPEED_LOW:EFI_USB_SPEED_FULL,
-             MaximumPacketLength, Request, TransferDirection, Data,
-             DataLength, Timeout, NULL, TransferResult);
+        DeviceAddress,
+        IsSlowDevice?EFI_USB_SPEED_LOW:EFI_USB_SPEED_FULL,
+        MaximumPacketLength, Request, TransferDirection, Data,
+        DataLength, Timeout, NULL, TransferResult);
 }
 
 
 /**
     Protocol USB HC function that performs USB bulk transfer.
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  MaximumPacketLength     Max packet of device
-    @param  Data                    Point to Bulk transfer data
-    @param  DataLength              Point to bulk transfer data length
-    @param  DataToggle              Point to data toggole
-    @param  Timeout                 Time out value
-    @param  Translator              Point to usb2 hc transaction translator
-    @param  TransferResult          Point to transfer result
-    
-    @retval EFI_SUCCESS             The bulk transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS 
@@ -1119,29 +998,15 @@ AmiUsbHcBulkTransfer(
          MaximumPacketLength != 64 ) return EFI_INVALID_PARAMETER;
 
     return AmiUsb2HcBulkTransfer(&GetThis1(HcProtocol)->hcprotocol2,
-             DeviceAddress, EndpointAddress, EFI_USB_SPEED_FULL,
-             MaximumPacketLength, 1, &Data, DataLength,
-             DataToggle, Timeout, NULL, TransferResult);
+        DeviceAddress, EndpointAddress, EFI_USB_SPEED_FULL,
+        MaximumPacketLength, 1, &Data, DataLength,
+        DataToggle, Timeout, NULL, TransferResult);
 }
 
 
 /**
     Protocol USB HC function that performs USB async interrupt transfer.
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Endpoint address
-    @param  IsSlowDevice            Slow device check
-    @param  MaxPacket               Max packet of device
-    @param  IsNewTransfer           New transfer check
-    @param  DataToggle              Point to data toogle
-    @param  PollingInterval         Polling interval
-    @param  DataLength              Data length
-    @param  CallbackFunction        callback function
-    @param  Context                 Point to Context
-    
-    @retval EFI_SUCCESS             The Async interrupt transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1154,9 +1019,9 @@ AmiUsbHcAsyncInterruptTransfer(
   IN     UINT8                            MaxPacket,
   IN     BOOLEAN                          IsNewTransfer,
   IN OUT UINT8                            *DataToggle,
-  IN     UINTN                            PollingInterval,
+  IN     UINTN                            PollingInterval  ,
   IN     UINTN                            DataLength,
-  IN     EFI_ASYNC_USB_TRANSFER_CALLBACK  CallbackFunction,
+  IN     EFI_ASYNC_USB_TRANSFER_CALLBACK  CallbackFunction ,
   IN     VOID                             *Context)
 {
     return AmiUsb2HcAsyncInterruptTransfer(
@@ -1171,19 +1036,6 @@ AmiUsbHcAsyncInterruptTransfer(
 /**
     Protocol USB HC function that performs USB sync interrupt transfer.
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Endpoint address
-    @param  IsSlowDevice            Slow device check
-    @param  MaximumPacketLength     Max packet of device
-    @param  Data                    Point to interrupt transfer data
-    @param  DataLength              Point to interrupt transfer data length
-    @param  DataToggle              Point to data toogle
-    @param  Timeout                 Time out value
-    @param  TransferResult          Point to transfer result
-    
-    @retval EFI_SUCCESS             The interrupt transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1213,15 +1065,6 @@ AmiUsbHcSyncInterruptTransfer(
 /**
     Protocol USB HC function that performs USB sync isochronous transfer.
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Endpoint address
-    @param  MaximumPacketLength     Max packet of device
-    @param  Data                    Point to interrupt transfer data
-    @param  DataLength              Point to interrupt transfer data length
-    @param  TransferResult          Point to transfer result
-    
-    @retval EFI_UNSUPPORTED         The featue not support.
 **/
 
 EFI_STATUS
@@ -1243,16 +1086,6 @@ AmiUsbHcIsochronousTransfer(
 /**
     Protocol USB HC function that performs USB async isochronous transfer.
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Endpoint address
-    @param  MaximumPacketLength     Max packet of device
-    @param  Data                    Point to Async interrupt transfer data
-    @param  DataLength              Point to Ansync interrupt transfer data length
-    @param  IsochronousCallback     Point to call back function.
-    @param  Context                 Point to Context
-    
-    @retval EFI_UNSUPPORTED         The featue not support.
 **/
 
 EFI_STATUS
@@ -1276,19 +1109,13 @@ AmiUsbHcAsyncIsochronousTransfer(
     Protocol USB HC function that returns the number of ports of a root hub
     on a given controller.
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  PortNumber              Pointer to Port number
-    
-    @retval EFI_SUCCESS             The get root hub port number succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
-
 **/
 
 EFI_STATUS
 EFIAPI
 AmiUsbHcGetRootHubPortNumber (
-    IN  EFI_USB_HC_PROTOCOL *HcProtocol,
-    OUT UINT8               *PortNumber
+    IN EFI_USB_HC_PROTOCOL *HcProtocol,
+    OUT UINT8 *PortNumber
 )
 {
     HC_DXE_RECORD *This = GetThis1(HcProtocol);
@@ -1298,7 +1125,7 @@ AmiUsbHcGetRootHubPortNumber (
 
     if (PortNumber == NULL) return EFI_INVALID_PARAMETER;
 
-    *PortNumber = This->hc_data->NumPorts;
+    *PortNumber = This->hc_data->bNumPorts;
 
     return EFI_SUCCESS;
 }
@@ -1306,13 +1133,7 @@ AmiUsbHcGetRootHubPortNumber (
 
 /**
     Protocol USB HC function that returns the root port status
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  PortNumber              Port number
-    @param  PortStatus              Pointer to Port status
-    
-    @retval EFI_SUCCESS             The get root hub port status succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
-    
+
 **/
 
 EFI_STATUS
@@ -1348,15 +1169,15 @@ AmiUsbHcGetRootHubPortStatus(
 
     USB_DEBUG(DEBUG_INFO, DEBUG_USBHC_LEVEL, "USB HC:\t\tget_roothub_port_status\n" );
 
-    if (PortStatus == NULL || PortNumber >= This->hc_data->NumPorts)
+    if (PortStatus == NULL || PortNumber >= This->hc_data->bNumPorts)
         return EFI_INVALID_PARAMETER;
 
     PortSts = UsbSmiGetRootHubStatus(This->hc_data,(UINT8)PortNumber + 1, FALSE);
 
     PortStatus->PortStatus = (UINT16)ConvertBitmaps(
-                  PortSts, StatusTable, COUNTOF(StatusTable));
+            PortSts, StatusTable, COUNTOF(StatusTable));
     PortStatus->PortChangeStatus = (UINT16)ConvertBitmaps(
-                  PortSts, ChangeStatusMapTable, COUNTOF(ChangeStatusMapTable)) ;
+            PortSts, ChangeStatusMapTable, COUNTOF(ChangeStatusMapTable)) ;
 
     if (((PortSts & USB_PORT_STAT_DEV_CONNECTED) != 0) &&
         ((PortSts & USB_PORT_STAT_DEV_SPEED_MASK) == 0)) {
@@ -1372,13 +1193,7 @@ AmiUsbHcGetRootHubPortStatus(
 
 /**
     Protocol USB HC function set root hub port feature
-    
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  PortNumber              Port number
-    @param  PortFeature             Port feature.
-    
-    @retval EFI_SUCCESS             The set root hub port feature succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
+
 **/
 
 EFI_STATUS
@@ -1393,7 +1208,7 @@ AmiUsbHcSetRootHubPortFeature(
 
     USB_DEBUG(DEBUG_INFO, DEBUG_USBHC_LEVEL, "USB HC:\t\tset_roothub_port_feature\n" );
 
-    if ( PortNumber >= This->hc_data->NumPorts)
+    if ( PortNumber >= This->hc_data->bNumPorts)
         return EFI_INVALID_PARAMETER;
 
     switch( PortFeature ){
@@ -1412,12 +1227,6 @@ AmiUsbHcSetRootHubPortFeature(
 /**
     Protocol USB HC function clear root hub port feature
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  PortNumber              Port number
-    @param  PortFeature             Port feature.
-    
-    @retval EFI_SUCCESS             The clear root hub port feature succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1432,7 +1241,7 @@ AmiUsbHcClearRootHubPortFeature(
 
     USB_DEBUG(DEBUG_INFO, DEBUG_USBHC_LEVEL, "USB HC:\t\tclear_roothub_port_feature\n");
 
-    if (PortNumber >= This->hc_data->NumPorts) return EFI_INVALID_PARAMETER;
+    if (PortNumber >= This->hc_data->bNumPorts) return EFI_INVALID_PARAMETER;
 
     switch (PortFeature ) {
         case EfiUsbPortEnable:
@@ -1453,14 +1262,6 @@ AmiUsbHcClearRootHubPortFeature(
 /**
     This is USB2HC API to get the host controller capability.
 
-    @param  This                    Pointer to EFI_USB2_HC_PROTOCOL
-    @param  MaxSpeed                Pointer to Max Speed.
-    @param  PortNumber              Pointer to port number.
-    @param  Is64BitCapable          Pointer to 64-bit capable
-    
-    @retval EFI_SUCCESS             The get capability feature succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
-
 **/
 
 EFI_STATUS
@@ -1479,7 +1280,7 @@ AmiUsb2HcGetCapability(
         return EFI_INVALID_PARAMETER;
     }
 
-    switch (Rec->hc_data->HcType) {
+    switch (Rec->hc_data->bHCType) {
         case USB_HC_OHCI:
         case USB_HC_UHCI:
             *Is64BitCapable = FALSE;
@@ -1490,7 +1291,7 @@ AmiUsb2HcGetCapability(
             *MaxSpeed = EFI_USB_SPEED_HIGH;
             break;
         case USB_HC_XHCI:
-            Usb3Hc = (USB3_HOST_CONTROLLER*)Rec->hc_data->Usb3HcData;
+            Usb3Hc = (USB3_HOST_CONTROLLER*)Rec->hc_data->usbbus_data;
             if (Usb3Hc->CapRegs.HccParams1.Ac64) {
                 *Is64BitCapable = TRUE;
             } else {
@@ -1500,7 +1301,7 @@ AmiUsb2HcGetCapability(
             break;
     }
 
-    *PortNumber = Rec->hc_data->NumPorts;
+    *PortNumber = Rec->hc_data->bNumPorts;
 
     return EFI_SUCCESS;
 }
@@ -1509,12 +1310,6 @@ AmiUsb2HcGetCapability(
 /**
     This is USB2HC API to perform host controller reset.
 
-    @param  This                    Pointer to EFI_USB2_HC_PROTOCOL
-    @param  Attributes              Reset Attributes
-
-    
-    @retval EFI_UNSUPPORTED         This feature unsupported.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1524,7 +1319,7 @@ AmiUsb2HcReset(
   IN UINT16                 Attributes
 )
 {
-    REPORT_STATUS_CODE(EFI_PROGRESS_CODE,DXE_USB_RESET);
+    PROGRESS_CODE(DXE_USB_RESET);
 
     if (Attributes == 0 || (Attributes & ~(EFI_USB_HC_RESET_GLOBAL
         | EFI_USB_HC_RESET_HOST_CONTROLLER | EFI_USB_HC_RESET_GLOBAL_WITH_DEBUG
@@ -1540,11 +1335,6 @@ AmiUsb2HcReset(
 /**
     This is USB2HC API to get the host controller state.
 
-    @param  This                    Pointer to EFI_USB2_HC_PROTOCOL
-    @param  State                   Pointer to Host state
-    
-    @retval EFI_SUCCESS             The get Host state feature succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1561,12 +1351,12 @@ AmiUsb2HcGetState(
         return EFI_INVALID_PARAMETER;
     }
 
-    if (Rec->hc_data->HcFlag & HC_STATE_RUNNING) {
+    if (Rec->hc_data->dHCFlag & HC_STATE_RUNNING) {
         *State = EfiUsbHcStateOperational;
         return EFI_SUCCESS;
     }
 
-    if (Rec->hc_data->HcFlag & HC_STATE_SUSPEND) {
+    if (Rec->hc_data->dHCFlag & HC_STATE_SUSPEND) {
         *State = EfiUsbHcStateSuspend;
         return EFI_SUCCESS;
     }
@@ -1579,11 +1369,7 @@ AmiUsb2HcGetState(
 
 /**
     This is USB2HC API to set the host controller state.
-    @param  This    Pointer to EFI_USB2_HC_PROTOCOL
-    @param  State   USB host controller state
 
-    @retval EFI_SUCCESS             The set Host state feature succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 **/
 
 EFI_STATUS
@@ -1595,7 +1381,7 @@ AmiUsb2HcSetState(
 {
     HC_DXE_RECORD       *Rec = GetThis(This);
     EFI_USB_HC_STATE    CurrentState;
-    EFI_STATUS          Status;
+    EFI_STATUS          Status = EFI_SUCCESS;
     UINT8               UsbStatus = USB_SUCCESS;
 
     Status = AmiUsb2HcGetState(This, &CurrentState);
@@ -1610,13 +1396,13 @@ AmiUsb2HcSetState(
 
     switch (State) {
         case EfiUsbHcStateHalt:
-            UsbStatus = (UINT8)UsbSmiHc(opHC_Stop, Rec->hc_data->HcType, Rec->hc_data);
+            UsbStatus = (UINT8)UsbSmiHc(opHC_Stop, Rec->hc_data->bHCType, Rec->hc_data);
             break;
         case EfiUsbHcStateOperational:
-            UsbStatus = (UINT8)UsbSmiHc(opHC_Start, Rec->hc_data->HcType, Rec->hc_data);
+            UsbStatus = (UINT8)UsbSmiHc(opHC_Start, Rec->hc_data->bHCType, Rec->hc_data);
             break;
         case EfiUsbHcStateSuspend:
-            UsbStatus = (UINT8)UsbSmiHc(opHC_GlobalSuspend, Rec->hc_data->HcType, Rec->hc_data);
+            UsbStatus = (UINT8)UsbSmiHc(opHC_GlobalSuspend, Rec->hc_data->bHCType, Rec->hc_data);
             break;
         default:
             Status = EFI_INVALID_PARAMETER;
@@ -1634,9 +1420,6 @@ AmiUsb2HcSetState(
     This function checks if queue has a new transfer. If yes, calls a
     callback with data from transfer.
 
-    @param  Event       Efi event occurred upon AsyncInterrupt
-    @param  Context     Usb Hc interrupt device info
-
 **/
 
 VOID
@@ -1646,79 +1429,30 @@ AsyncInterruptOnTimer (
     VOID        *Ctx
 )
 {
-    USBHC_INTERRUPT_DEVNINFO_T *IntDeviceInfo = (USBHC_INTERRUPT_DEVNINFO_T*)Ctx;
+    USBHC_INTERRUPT_DEVNINFO_T *Idi = (USBHC_INTERRUPT_DEVNINFO_T*)Ctx;
     UINT8   Lock;
     VOID    *Data;
-    UINTN   DataLength;
-        
-    if (IntDeviceInfo == NULL) {
-      return;
-    }    
+
     //
     // Check re-entrance
     //
-    ATOMIC({Lock = IntDeviceInfo->Lock; IntDeviceInfo->Lock = 1;});
+    ATOMIC({Lock = Idi->Lock; Idi->Lock = 1;});
     if (Lock) {
-      return; //control is already inside
+        return; //control is already inside
     }
 
-    if ((UINTN)QueueSize(&IntDeviceInfo->QCompleted)) {
-        if ((UINTN)QueueSize(&IntDeviceInfo->QCompleted) > IntDeviceInfo->DataLength) {
-            while ((UINTN)QueueSize(&IntDeviceInfo->QCompleted) >= IntDeviceInfo->DataLength) {
-                ATOMIC(Data = QueueRemoveMsg(&IntDeviceInfo->QCompleted, (int)IntDeviceInfo->DataLength));
-                if (IntDeviceInfo->CallbackFunction == NULL) {
-                    USB_DEBUG (DEBUG_INFO, DEBUG_LEVEL_3,"[IntDeviceInfo] CallbackFunction is NULL\n");
-                    return;
-                }
-                IntDeviceInfo->CallbackFunction(
-                           Data,
-                           IntDeviceInfo->DataLength, 
-                           IntDeviceInfo->Context, 
-                           EFI_USB_NOERROR
-                           );
-                                                   
-            } 
-        } else {
-            DataLength = (UINTN)QueueSize(&IntDeviceInfo->QCompleted);
-            ATOMIC(Data = QueueRemoveMsg(&IntDeviceInfo->QCompleted, (int)DataLength));
-            if (IntDeviceInfo->CallbackFunction == NULL) {
-                USB_DEBUG (DEBUG_INFO, DEBUG_LEVEL_3,"[IntDeviceInfo] CallbackFunction is NULL\n");
-                return;
-            }
-            IntDeviceInfo->CallbackFunction(
-                           Data, 
-                           DataLength,
-                           IntDeviceInfo->Context, 
-                           EFI_USB_NOERROR
-                           );
-      
-        }
+    while ((UINTN)QueueSize(&Idi->QCompleted) >= Idi->DataLength) {
+    ATOMIC(Data = QueueRemoveMsg(&Idi->QCompleted, (int)Idi->DataLength));
+        Idi->CallbackFunction(
+            Data, Idi->DataLength, Idi->Context, EFI_USB_NOERROR);
     }
 
-    IntDeviceInfo->Lock = 0;
+    Idi->Lock = 0;
 }
 
 
 /**
     This function performs USB2 HC Bulk Transfer
-
-    @param HcProtocol    Pointer to EFI_USB2_HC_PROTOCOL
-    @param DeviceAddress USB device address
-    @param EndpointAddress Endpoint address
-    @param DeviceSpeed   Usb Device speed
-    @param MaximumPacketLength Max packet size
-    @param DataBuffersNumber Data buffer number
-    @param Data          Buffer containing data to be sent to the device 
-                         or buffer to be used to receive data value
-    @param DataLength    Length request parameter, number of bytes of data 
-                         to be transferred in or out of the HC
-    @param DataToggle    Point to data toogle
-    @param Timeout       Time out value
-    @param Translator    Point to EFI_USB2_HC_TRANSACTION_TRANSLATOR
-    @param TransferResult Point to transfer result
-
-    @retval EFI_SUCCESS             The bulk transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
 
 **/
 
@@ -1745,7 +1479,7 @@ AmiUsb2HcBulkTransfer(
     DEV_INFO* DevSrc = DevAddr2Info( DeviceAddress, This->hc_data );
     UINT8 XferDir = 0;
     UINT16 CurrentTimeout;
-        UINT8 ToggleBit = (EndpointAddress & 0xF) - 1;
+	UINT8 ToggleBit = (EndpointAddress & 0xF) - 1;
 
     //
     // Check Params
@@ -1784,40 +1518,41 @@ AmiUsb2HcBulkTransfer(
     //
     // Fill DEV_INFO
     //
-    DevInfo->DeviceAddress = DeviceAddress;
-    DevInfo->HcNumber = This->hc_data->HcNumber;
-    DevInfo->EndpointSpeed = gSpeedMap[DeviceSpeed];
-    DevInfo->HubDeviceNumber = DevSrc->HubDeviceNumber;
-    DevInfo->HubPortNumber = DevSrc->HubPortNumber;
-    DevInfo->DevMiscInfo = DevSrc->DevMiscInfo; //(EIP84790+)
+    DevInfo->bDeviceAddress = DeviceAddress;
+    DevInfo->bHCNumber = This->hc_data->bHCNumber;
+    DevInfo->bEndpointSpeed = SpeedMap[DeviceSpeed];
+    DevInfo->bHubDeviceNumber = DevSrc->bHubDeviceNumber;
+    DevInfo->bHubPortNumber = DevSrc->bHubPortNumber;
+    DevInfo->DevMiscInfo = DevSrc->DevMiscInfo;	//(EIP84790+)
 
     if (EndpointAddress & 0x80) {
         XferDir = 0x80;
-        DevInfo->BulkInEndpoint = EndpointAddress & 0xF;
-        DevInfo->BulkInMaxPkt = (UINT16)MaximumPacketLength;
-        DevInfo->DataInSync = (UINT16)(*DataToggle) << ToggleBit;
+        DevInfo->bBulkInEndpoint = EndpointAddress & 0xF;
+        DevInfo->wBulkInMaxPkt = (UINT16)MaximumPacketLength;
+        DevInfo->wDataInSync = (UINT16)(*DataToggle) << ToggleBit;
     } else {
         XferDir = 0x0;
-        DevInfo->BulkOutEndpoint = EndpointAddress & 0xF;
-        DevInfo->BulkOutMaxPkt = (UINT16)MaximumPacketLength;
-        DevInfo->DataOutSync = (UINT16)(*DataToggle) << ToggleBit;
+        DevInfo->bBulkOutEndpoint = EndpointAddress & 0xF;
+        DevInfo->wBulkOutMaxPkt = (UINT16)MaximumPacketLength;
+        DevInfo->wDataOutSync = (UINT16)(*DataToggle) << ToggleBit;
     }
 
     //
     // Call SMI routine and retrieve last status
     // if any error
     //
-    CRITICAL_CODE( TPL_NOTIFY, {
-        CurrentTimeout = gUsbData->UsbReqTimeOutValue;
-        gUsbData->UsbReqTimeOutValue = (UINT16)Timeout;
-        gUsbData->UsbLastCommandStatusExtended = 0;
+    CRITICAL_CODE( EFI_TPL_NOTIFY,
+    {
+        CurrentTimeout = gUsbData->wTimeOutValue;
+        gUsbData->wTimeOutValue = (UINT16)Timeout;
+        gUsbData->dLastCommandStatusExtended = 0;
         SmiRes = UsbSmiBulkTransfer(
-                   This->hc_data, DevInfo,
-                   XferDir,
-                  (UINT8*)Data[0],
-                  (UINT32)*DataLength );
+            This->hc_data, DevInfo,
+            XferDir,
+            (UINT8*)Data[0],
+            (UINT32)*DataLength );
         *TransferResult = GetTransferStatus();
-        gUsbData->UsbReqTimeOutValue = CurrentTimeout;
+        gUsbData->wTimeOutValue = CurrentTimeout;
     });
 
     //
@@ -1829,9 +1564,9 @@ AmiUsb2HcBulkTransfer(
     // Update Toggle bit
     //
     if (XferDir) {
-        *DataToggle = (UINT8)(DevInfo->DataInSync >> ToggleBit) & 0x1;
+        *DataToggle = (UINT8)(DevInfo->wDataInSync >> ToggleBit) & 0x1;
     } else {
-        *DataToggle = (UINT8)(DevInfo->DataOutSync >> ToggleBit) & 0x1;
+        *DataToggle = (UINT8)(DevInfo->wDataOutSync >> ToggleBit) & 0x1;
     }
     FreeDevInfo(DevInfo);
 
@@ -1844,21 +1579,7 @@ AmiUsb2HcBulkTransfer(
 
 /**
     This function performs USB2 HC Async Interrupt Transfer
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Address of Endpoint
-    @param  DeviceSpeed             Speed of Device
-    @param  MaxPacket               Max Packet of Device
-    @param  IsNewTransfer           Check is new transfer or not
-    @param  DataToggle              Data toggle
-    @param  PollingInterval         Polling interval
-    @param  DataLength              Data length
-    @param  Translator              Point to usb2 hc transaction translator
-    @param  CallbackFunction        Interrupt call back function
-    @param  Context                 Point to transfer context
 
-    @retval EFI_SUCCESS             The Async interrupt transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.   
 **/
 
 EFI_STATUS
@@ -1873,53 +1594,46 @@ AmiUsb2HcAsyncInterruptTransfer(
     IN OUT UINT8            *DataToggle,
     IN UINTN                PollingInterval,
     IN UINTN                DataLength,
-    IN EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
+    IN     EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
     IN EFI_ASYNC_USB_TRANSFER_CALLBACK  CallbackFunction ,
     IN VOID                 *Context
 )
 {
     HC_DXE_RECORD *This = GetThis( HcProtocol );
     DEV_INFO* DevInfo;
-    DEV_INFO* DevInfoSrc = DevAddr2Info( DeviceAddress, This->hc_data );
     USBHC_INTERRUPT_DEVNINFO_T* AsyncTransfer = 0;
-    UINT8     SmiStatus = USB_SUCCESS;
-    UINT8     ToggleBit = (EndpointAddress & (BIT0 | BIT1 | BIT2 | BIT3))-1;
-    EFI_STATUS  Status;
+    UINT8 SmiStatus = USB_SUCCESS;
+	UINT8 ToggleBit = (EndpointAddress & 0xF) - 1;
+	EFI_STATUS  Status;
 
     if (DeviceSpeed != EFI_USB_SPEED_SUPER && 
-         DeviceSpeed != EFI_USB_SPEED_HIGH &&
-         DeviceSpeed != EFI_USB_SPEED_FULL &&
-         DeviceSpeed != EFI_USB_SPEED_LOW){
-         return EFI_INVALID_PARAMETER;
+		DeviceSpeed != EFI_USB_SPEED_HIGH &&
+		DeviceSpeed != EFI_USB_SPEED_FULL &&
+		DeviceSpeed != EFI_USB_SPEED_LOW){
+		return EFI_INVALID_PARAMETER;
     }
 
     if (!(EndpointAddress & BIT7)) {
-        return EFI_INVALID_PARAMETER;
+		return EFI_INVALID_PARAMETER;
     }
 
     if (IsNewTransfer){
+        DEV_INFO* DevInfoSrc = DevAddr2Info( DeviceAddress, This->hc_data );
+        DevInfo = FindOldTransfer( DeviceAddress, EndpointAddress, This->hc_data );
 
-        if( DevInfoSrc == NULL ) {
-            return EFI_INVALID_PARAMETER;
-        }
+		if (DataLength == 0) {
+			 return EFI_INVALID_PARAMETER;
+		}
 
-        DevInfo = FindOldTransfer( DevInfoSrc->HubPortNumber, 
-                                   DevInfoSrc->HubDeviceNumber, 
-                                   EndpointAddress, This->hc_data );
+	    if (*DataToggle != 0 && *DataToggle != 1) {
+	        return EFI_INVALID_PARAMETER;
+	    }
 
-        if (DataLength == 0) {
-            return EFI_INVALID_PARAMETER;
-        }
-
-        if (*DataToggle != 0 && *DataToggle != 1) {
-            return EFI_INVALID_PARAMETER;
-        }
-
-        if (PollingInterval < 1 || PollingInterval > 255) {     //Input polling interval should be less than 255
-            return EFI_INVALID_PARAMETER;                       //and should be greater than 1, or return
-        }                                                       //invalid parameter
-        
-        if( CallbackFunction == NULL) {
+		if (PollingInterval < 1 || PollingInterval > 255) {
+			return EFI_INVALID_PARAMETER;
+		}
+	
+        if( DevInfoSrc == NULL || CallbackFunction == NULL) {
             return EFI_INVALID_PARAMETER;
         }
         if( DevInfo != NULL ){
@@ -1927,31 +1641,30 @@ AmiUsb2HcAsyncInterruptTransfer(
             return EFI_INVALID_PARAMETER;
         }
         DevInfo = AllocDevInfo();
-        CopyMem(DevInfo, DevInfoSrc, sizeof(DEV_INFO));
+        *DevInfo = *DevInfoSrc;
         DevInfo->IntInEndpoint = EndpointAddress;
-        DevInfo->EndpointSpeed = gSpeedMap[DeviceSpeed];
+        DevInfo->bEndpointSpeed = SpeedMap[DeviceSpeed];
         DevInfo->IntInMaxPkt = (UINT16)MaxPacket;    //(EIP84790+)
-        DevInfo->PollInterval = TranslateInterval(DeviceSpeed, PollingInterval);
+        DevInfo->bPollInterval = TranslateInterval(DeviceSpeed, PollingInterval);
         DevInfo->PollingLength = (UINT16)DataLength;
 
         //create new transfer
         gBS->AllocatePool (EfiBootServicesData,
-               sizeof(USBHC_INTERRUPT_DEVNINFO_T) + DataLength*INTERRUPTQUEUESIZE,
-               (VOID**)&AsyncTransfer );
-        SetMem(AsyncTransfer, sizeof(USBHC_INTERRUPT_DEVNINFO_T)+
-          DataLength*INTERRUPTQUEUESIZE, 0);
-        DevInfo->ExtraData = (UINT8*)AsyncTransfer;
+            sizeof(USBHC_INTERRUPT_DEVNINFO_T) + DataLength*INTERRUPTQUEUESIZE,
+            &AsyncTransfer );
+        EfiZeroMem(AsyncTransfer, sizeof(USBHC_INTERRUPT_DEVNINFO_T)+
+                    DataLength*INTERRUPTQUEUESIZE);
+        DevInfo->pExtra = (UINT8*)AsyncTransfer;
         AsyncTransfer->QCompleted.data = (VOID *volatile *)AsyncTransfer->Data;
         AsyncTransfer->QCompleted.maxsize = (int)DataLength * INTERRUPTQUEUESIZE;
         AsyncTransfer->DataLength = DataLength;
         AsyncTransfer->EndpointAddress = EndpointAddress;
-        InitializeListHead(&AsyncTransfer->Link);
 
         DevInfo->Flag |= DEV_INFO_DEV_DUMMY;
         
         Status = gBS->CreateEvent(EFI_EVENT_TIMER | EFI_EVENT_NOTIFY_SIGNAL,
-                        TPL_CALLBACK, AsyncInterruptOnTimer,
-                        AsyncTransfer,&AsyncTransfer->Event);
+            EFI_TPL_CALLBACK, AsyncInterruptOnTimer,
+            AsyncTransfer,&AsyncTransfer->Event);
         
         ASSERT_EFI_ERROR(Status);
         
@@ -1959,10 +1672,10 @@ AmiUsb2HcAsyncInterruptTransfer(
             return Status;
         }
 
-        PollingInterval = PollingInterval < 32 ? 32 : PollingInterval;      //Polling interval for setTimer()
-                                                                            //should be greater than 32
+		PollingInterval = PollingInterval < 32 ? 32 : PollingInterval;
+		
         Status = gBS->SetTimer(AsyncTransfer->Event, TimerPeriodic,
-                        PollingInterval * MILLISECOND);
+                PollingInterval * MILLISECOND);
                 
         ASSERT_EFI_ERROR(Status);
                 
@@ -1972,11 +1685,11 @@ AmiUsb2HcAsyncInterruptTransfer(
         
         AsyncTransfer->CallbackFunction = CallbackFunction;
         AsyncTransfer->Context = Context;
-        if(EndpointAddress & BIT7) {
-            DevInfo->DataInSync = (UINT16)(*DataToggle) << ToggleBit;
-        } else {
-            DevInfo->DataOutSync = (UINT16)(*DataToggle) << ToggleBit;
-        }
+		if(EndpointAddress & 0x80) {
+	        DevInfo->wDataInSync = (UINT16)(*DataToggle) << ToggleBit;
+		} else {
+			DevInfo->wDataOutSync = (UINT16)(*DataToggle) << ToggleBit;
+		}
 
         //
         // Activate transfer
@@ -1987,25 +1700,26 @@ AmiUsb2HcAsyncInterruptTransfer(
         //
         // Find old transfer
         //
-        DevInfo = FindOldTransfer(DevInfoSrc->HubPortNumber, 
-                                  DevInfoSrc->HubDeviceNumber,
-                                  EndpointAddress, This->hc_data );
-        if( DevInfo == NULL  || DevInfo->ExtraData == NULL ){
+        DevInfo = FindOldTransfer(
+                    DeviceAddress,
+                    EndpointAddress,
+                    This->hc_data );
+        if( DevInfo == NULL  || DevInfo->pExtra == NULL ){
             USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "Canceling bad AsyncInterrupt request\n");
             return EFI_INVALID_PARAMETER;
         }
-        AsyncTransfer = (USBHC_INTERRUPT_DEVNINFO_T*)DevInfo->ExtraData;
-        DevInfo->ExtraData = 0;
+        AsyncTransfer = (USBHC_INTERRUPT_DEVNINFO_T*)DevInfo->pExtra;
+        DevInfo->pExtra = 0;
         // 
         // Deactivate transfer
         //
         SmiStatus = UsbSmiDeactivatePolling (This->hc_data, DevInfo);
         if (DataToggle){
-            if(EndpointAddress & BIT7) {
-                *DataToggle = (UINT8)(DevInfo->DataInSync >> ToggleBit) & BIT0;
-            } else {
-                *DataToggle = (UINT8)(DevInfo->DataOutSync >> ToggleBit) & BIT0;
-            }
+			if(EndpointAddress & 0x80) {
+				*DataToggle = (UINT8)(DevInfo->wDataInSync >> ToggleBit) & 0x1;
+			} else {
+				*DataToggle = (UINT8)(DevInfo->wDataOutSync >> ToggleBit) & 0x1;
+			}
         }
         gBS->SetTimer(AsyncTransfer->Event, TimerCancel, 0);
         gBS->CloseEvent(AsyncTransfer->Event);
@@ -2019,21 +1733,7 @@ AmiUsb2HcAsyncInterruptTransfer(
 
 /**
     This function performs USB2 HC Sync Interrupt Transfer
-    
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Address of Endpoint
-    @param  DeviceSpeed             Device speed
-    @param  MaxPacket               Max packet of device
-    @param  Data                    Point to interrupt transfer data
-    @param  DataLength              Point to interrupt transfer data length
-    @param  DataToggle              Point to interrupt transfer data toggle
-    @param  Timeout                 Time out value
-    @param  Translator              Point to usb2 hc transaction translator
-    @param  TransferResult          Point to transfer result
 
-    @retval EFI_SUCCESS             The Sync interrupt transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid. 
 **/
 
 EFI_STATUS
@@ -2057,67 +1757,68 @@ AmiUsb2HcSyncInterruptTransfer(
     DEV_INFO    *DevInfo;
     DEV_INFO*   DevSrc = DevAddr2Info( DeviceAddress, This->hc_data );
     UINT16      CurrentTimeout;
-    UINT8       ToggleBit = (EndpointAddress & (BIT0 | BIT1 | BIT2 | BIT3))-1;
-    UINT16      *wDataSync;
+	UINT8		ToggleBit = (EndpointAddress & 0xF) - 1;
+	UINT16		*wDataSync;
 
     if (DeviceSpeed != EFI_USB_SPEED_SUPER && 
-        DeviceSpeed != EFI_USB_SPEED_HIGH && 
-        DeviceSpeed != EFI_USB_SPEED_FULL && 
-        DeviceSpeed != EFI_USB_SPEED_LOW) {
-        return EFI_INVALID_PARAMETER;
+		DeviceSpeed != EFI_USB_SPEED_HIGH && 
+		DeviceSpeed != EFI_USB_SPEED_FULL && 
+		DeviceSpeed != EFI_USB_SPEED_LOW) {
+		return EFI_INVALID_PARAMETER;
     }
 
-    if ((gUsbData->UsbFeature & USB_EFI_USB_HC_INTERRUPT_OUT_SUPPORT) == 0){
-        if (!(EndpointAddress & BIT7)) {
-            return EFI_INVALID_PARAMETER;
-        }
+#if !defined(EFI_USB_HC_INTERRUPT_OUT_SUPPORT) || !EFI_USB_HC_INTERRUPT_OUT_SUPPORT
+    if (!(EndpointAddress & BIT7)) {
+		return EFI_INVALID_PARAMETER;
     }
+#endif
 
     if (Data == NULL || DataLength == NULL ||
-        *DataLength == 0 || TransferResult == NULL) {
+		*DataLength == 0 || TransferResult == NULL) {
         return EFI_INVALID_PARAMETER;
     }
 
-    if ( DeviceSpeed == EFI_USB_SPEED_LOW  && MaximumPacketLength != 8) {   //Device is low speed and maximum packet
-        return EFI_INVALID_PARAMETER;                                       //should be 8, or return invalid parameter
-    }
-
-    if (DeviceSpeed == EFI_USB_SPEED_FULL &&            //Device is full speed and maximum packet should be
-        (MaximumPacketLength != 8 &&                    // 8/16/32/64 , or return invalid parameter
-        MaximumPacketLength != 16 &&
-        MaximumPacketLength != 32 &&
-        MaximumPacketLength != 64)) {
+    if ( DeviceSpeed == EFI_USB_SPEED_LOW  && MaximumPacketLength != 8) {
         return EFI_INVALID_PARAMETER;
     }
 
-    if (DeviceSpeed == EFI_USB_SPEED_HIGH && MaximumPacketLength > 3072 ) { //Device is high speed and maximum packet
-        return EFI_INVALID_PARAMETER;                                       //should be less than 3072, or return
-    }                                                                       //invalid parameter
+    if (DeviceSpeed == EFI_USB_SPEED_FULL && 
+		(MaximumPacketLength != 8 &&
+		MaximumPacketLength != 16 &&
+		MaximumPacketLength != 32 &&
+		MaximumPacketLength != 64)) {
+		return EFI_INVALID_PARAMETER;
+    }
 
-    if (*DataToggle != 0 && *DataToggle != 1) return EFI_INVALID_PARAMETER;
-        
+    if (DeviceSpeed == EFI_USB_SPEED_HIGH && MaximumPacketLength > 3072 ) {
+        return EFI_INVALID_PARAMETER;
+    }
+
+	if (*DataToggle != 0 && *DataToggle != 1) return EFI_INVALID_PARAMETER;
+	
     if (DevSrc == NULL) {
         return EFI_INVALID_PARAMETER;
     }
 
     DevInfo = AllocDevInfo();
-    DevInfo->DeviceAddress = DeviceAddress;
-    DevInfo->HcNumber = This->hc_data->HcNumber;
-    DevInfo->EndpointSpeed = gSpeedMap[DeviceSpeed];
-    DevInfo->PollInterval = TranslateInterval(DeviceSpeed, 1);
-    DevInfo->HubDeviceNumber = DevSrc->HubDeviceNumber;
-    DevInfo->HubPortNumber = DevSrc->HubPortNumber;
-    DevInfo->DevMiscInfo = DevSrc->DevMiscInfo;     //(EIP84790+)
+    DevInfo->bDeviceAddress = DeviceAddress;
+    DevInfo->bHCNumber = This->hc_data->bHCNumber;
+    DevInfo->bEndpointSpeed = SpeedMap[DeviceSpeed];
+    DevInfo->bPollInterval = TranslateInterval(DeviceSpeed, 1);
+    DevInfo->bHubDeviceNumber = DevSrc->bHubDeviceNumber;
+    DevInfo->bHubPortNumber = DevSrc->bHubPortNumber;
+	DevInfo->DevMiscInfo = DevSrc->DevMiscInfo;	//(EIP84790+)
 
-    wDataSync = (EndpointAddress & BIT7) ? &DevInfo->DataInSync : 
-                &DevInfo->DataOutSync;
+	wDataSync = EndpointAddress & 0x80 ? &DevInfo->wDataInSync : 
+		&DevInfo->wDataOutSync;
 
-    *wDataSync = (UINT16)(*DataToggle) << ToggleBit;
+	*wDataSync = (UINT16)(*DataToggle) << ToggleBit;
 
-    CRITICAL_CODE( TPL_NOTIFY, {
-        CurrentTimeout = gUsbData->UsbReqTimeOutValue;
-        gUsbData->UsbReqTimeOutValue = (UINT16)Timeout;
-        gUsbData->UsbLastCommandStatusExtended = 0;
+    CRITICAL_CODE( EFI_TPL_NOTIFY,
+    {
+        CurrentTimeout = gUsbData->wTimeOutValue;
+        gUsbData->wTimeOutValue = (UINT16)Timeout;
+        gUsbData->dLastCommandStatusExtended = 0;
         SmiRes = UsbSmiInterruptTransfer(
             This->hc_data,
             DevInfo,
@@ -2126,11 +1827,11 @@ AmiUsb2HcSyncInterruptTransfer(
             (UINT8*)Data,
             (UINT16)*DataLength);
         *TransferResult = GetTransferStatus();
-        gUsbData->UsbReqTimeOutValue = CurrentTimeout;
+        gUsbData->wTimeOutValue = CurrentTimeout;
     });
 
     *DataLength = (UINTN)SmiRes;
-    *DataToggle = (UINT8)(*wDataSync >> ToggleBit) & BIT0;
+    *DataToggle = (UINT8)(*wDataSync >> ToggleBit) & 0x1;
 
     FreeDevInfo(DevInfo);
     //
@@ -2144,19 +1845,6 @@ AmiUsb2HcSyncInterruptTransfer(
 /**
     This function performs USB2 HC Isochronous Transfer
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Address of Endpoint
-    @param  DeviceSpeed             Device speed
-    @param  MaximumPacketLength     Max packet of device
-    @param  DataBuffersNumber       Data buffer number
-    @param  Data                    Point to interrupt transfer data
-    @param  DataLength              Point to interrupt transfer data length
-    @param  Translator              Point to usb2 hc transaction translator
-    @param  TransferResult          Point to transfer result
-
-    @retval EFI_SUCCESS             The Isochronous transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid. 
 **/
 
 EFI_STATUS
@@ -2194,6 +1882,8 @@ AmiUsb2HcIsochronousTransfer(
 
     This = GetThis(HcProtocol);
 
+    // DevInfo = DevAddr2Info( DeviceAddress, This->hc_data );
+
     // Several DevInfo might have same DeviceAddress, validate it using
     // endpoint address
     for (DevInfo = NULL; ;DevInfo++) {
@@ -2206,8 +1896,9 @@ AmiUsb2HcIsochronousTransfer(
         return EFI_NOT_FOUND;
     }
 
-    CRITICAL_CODE( TPL_NOTIFY, {
-        gUsbData->UsbLastCommandStatusExtended = 0;
+    CRITICAL_CODE( EFI_TPL_NOTIFY,
+    {
+        gUsbData->dLastCommandStatusExtended = 0;
         SmiRes = UsbSmiIsocTransfer(
             This->hc_data,
             DevInfo,
@@ -2228,14 +1919,7 @@ AmiUsb2HcIsochronousTransfer(
     return (*TransferResult) ? EFI_DEVICE_ERROR:EFI_SUCCESS;
 }
 
-/**
-    This function checks if queue has a new transfer. If yes, calls a
-    callback with data from transfer.
 
-    @param  Event       Efi event occurred upon Isochronous.
-    @param  Context     Usb Hc interrupt device info
-
-**/
 VOID
 EFIAPI
 AsyncIsochOnTimer (
@@ -2258,20 +1942,6 @@ AsyncIsochOnTimer (
 /**
     This function performs USB2 HC Async Isochronous Transfer
 
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  EndpointAddress         Endpoint address
-    @param  DeviceSpeed             Device speed
-    @param  MaximumPacketLength     Max packet of device
-    @param  DataBuffersNumber       Data buffer number
-    @param  Data                    Point to Async interrupt transfer data
-    @param  DataLength              Point to Ansync interrupt transfer data length
-    @param  IsochronousCallback     Point to call back function.
-    @param  Translator              Point to usb2 hc transaction translator
-    @param  Context                 Point to Context
-    
-    @retval EFI_SUCCESS             The Async isochronous transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid. 
 **/
 
 EFI_STATUS
@@ -2325,7 +1995,7 @@ AmiUsb2HcAsyncIsochronousTransfer(
     }
 
     // create new transfer
-    gBS->AllocatePool (EfiBootServicesData, sizeof(USBHC_ASYNC_ISOC_CONTEXT), (VOID**)&AsyncIsocTransfer );
+    gBS->AllocatePool (EfiBootServicesData, sizeof(USBHC_ASYNC_ISOC_CONTEXT), &AsyncIsocTransfer );
     
     AsyncIsocTransfer->CallbackFunction = IsochronousCallBack;
     AsyncIsocTransfer->Context = Context;
@@ -2334,20 +2004,22 @@ AmiUsb2HcAsyncIsochronousTransfer(
     AsyncIsocTransfer->Complete = 0;
 
     gBS->CreateEvent(EFI_EVENT_TIMER | EFI_EVENT_NOTIFY_SIGNAL,
-           TPL_CALLBACK, AsyncIsochOnTimer, AsyncIsocTransfer, &AsyncIsocTransfer->Event);
+            EFI_TPL_CALLBACK, AsyncIsochOnTimer, AsyncIsocTransfer, &AsyncIsocTransfer->Event);
     
     gBS->SetTimer(AsyncIsocTransfer->Event, TimerPeriodic, 55 * MILLISECOND);
 
-    gUsbData->UsbLastCommandStatusExtended = 0;
-    
-    UsbSmiIsocTransfer(
-      This->hc_data,
-      DevInfo,
-      EndPointAddress & 0x80,
-      (UINT8*)Data[0],
-      (UINT32)DataLength,
-      &AsyncIsocTransfer->Complete
-    );
+//    CRITICAL_CODE( EFI_TPL_NOTIFY,
+//    {
+        gUsbData->dLastCommandStatusExtended = 0;
+        UsbSmiIsocTransfer(
+            This->hc_data,
+            DevInfo,
+            EndPointAddress & 0x80,
+            (UINT8*)Data[0],
+            (UINT32)DataLength,
+            &AsyncIsocTransfer->Complete
+        );
+//    });
 
     return EFI_SUCCESS;
 }
@@ -2355,20 +2027,7 @@ AmiUsb2HcAsyncIsochronousTransfer(
 
 /**
     This function performs USB2 HC Control Transfer
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  DeviceAddress           Device address
-    @param  DeviceSpeed             Device speed
-    @param  MaximumPacketLength     Max packet of device
-    @param  Request                 Point to transfer requestion
-    @param  TransferDirection       Transfer directioin
-    @param  Data                    Point to interrupt transfer data
-    @param  DataLength              Point to interrupt transfer data length
-    @param  Timeout                 Time out value
-    @param  Translator              Point to usb2 hc transaction translator
-    @param  TransferResult          Point to transfer result
 
-    @retval EFI_SUCCESS             The control transfer succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid. 
 **/
 
 EFI_STATUS
@@ -2416,43 +2075,45 @@ AmiUsb2HcControlTransfer(
         return EFI_INVALID_PARAMETER;
     }
 
-    if (DeviceSpeed == EFI_USB_SPEED_LOW  && MaximumPacketLength != 8) {        //Device is low speed and maximum
-        return EFI_INVALID_PARAMETER;                                           //packet should be 8, or return
-    }                                                                           //invalid parameter
+    if (DeviceSpeed == EFI_USB_SPEED_LOW  && MaximumPacketLength != 8) {
+        return EFI_INVALID_PARAMETER;
+    }
 
-    if ((DeviceSpeed == EFI_USB_SPEED_HIGH || DeviceSpeed == EFI_USB_SPEED_FULL) && //Device is high/full speed
-            ( MaximumPacketLength != 8 &&                                           //and maximum packet should
-             MaximumPacketLength != 16 &&                                           //be 8/16/32/64, or return
-             MaximumPacketLength != 32 &&                                           //invalid parameter
+    if ((DeviceSpeed == EFI_USB_SPEED_HIGH || DeviceSpeed == EFI_USB_SPEED_FULL) &&
+            ( MaximumPacketLength != 8 &&
+             MaximumPacketLength != 16 &&
+             MaximumPacketLength != 32 &&
              MaximumPacketLength != 64 )) {
         return EFI_INVALID_PARAMETER;
     }
 
-    if (DeviceSpeed == EFI_USB_SPEED_SUPER && MaximumPacketLength != 512) {     //Device is super speed and
-        return EFI_INVALID_PARAMETER;                                       //maximum packet should be 512,
-    }                                                                       // or return invalid parameter
+    if (DeviceSpeed == EFI_USB_SPEED_SUPER && MaximumPacketLength != 512) {
+        return EFI_INVALID_PARAMETER;
+    }
 
     DevInfo = AllocDevInfo();
-    DevInfo->DeviceAddress = DeviceAddress;
-    DevInfo->HcNumber = This->hc_data->HcNumber;
-    DevInfo->EndpointSpeed = gSpeedMap[DeviceSpeed];
-    DevInfo->Endp0MaxPacket = (UINT16)MaximumPacketLength;
-    DevInfo->HubDeviceNumber = DevSrc->HubDeviceNumber;
-    DevInfo->HubPortNumber = DevSrc->HubPortNumber;
-    DevInfo->DevMiscInfo = DevSrc->DevMiscInfo; //(EIP84790+)
+    DevInfo->bDeviceAddress = DeviceAddress;
+    DevInfo->bHCNumber = This->hc_data->bHCNumber;
+    DevInfo->bEndpointSpeed = SpeedMap[DeviceSpeed];
+    DevInfo->wEndp0MaxPacket = (UINT16)MaximumPacketLength;
+    DevInfo->bHubDeviceNumber = DevSrc->bHubDeviceNumber;
+    DevInfo->bHubDeviceNumber = DevSrc->bHubDeviceNumber;
+    DevInfo->bHubPortNumber = DevSrc->bHubPortNumber;
+    DevInfo->DevMiscInfo = DevSrc->DevMiscInfo;	//(EIP84790+)
 
-    CRITICAL_CODE( TPL_NOTIFY, {
-        CurrentTimeout = gUsbData->UsbReqTimeOutValue;
-        gUsbData->UsbReqTimeOutValue = (UINT16)Timeout;
-        gUsbData->UsbLastCommandStatusExtended = 0;
+    CRITICAL_CODE( EFI_TPL_NOTIFY,
+    {
+        CurrentTimeout = gUsbData->wTimeOutValue;
+        gUsbData->wTimeOutValue = (UINT16)Timeout;
+        gUsbData->dLastCommandStatusExtended = 0;
         SmiRes = UsbSmiControlTransfer(This->hc_data, DevInfo,
-                (UINT16)((( TransferDirection == EfiUsbDataIn?1:0) << 7) |
-                (((UINT16)Request->RequestType)) |
-                (((UINT16)Request->Request)<<8)),
-                (UINT16)Request->Index, (UINT16)Request->Value,
-                (UINT8*)Data, (UINT16)Request->Length);
+            (UINT16)((( TransferDirection == EfiUsbDataIn?1:0) << 7) |
+            (((UINT16)Request->RequestType)) |
+            (((UINT16)Request->Request)<<8)),
+            (UINT16)Request->Index, (UINT16)Request->Value,
+            (UINT8*)Data, (UINT16)Request->Length);
         *TransferResult = GetTransferStatus();
-        gUsbData->UsbReqTimeOutValue = CurrentTimeout;
+        gUsbData->wTimeOutValue = CurrentTimeout;
     });
 
     Status = EFI_SUCCESS;
@@ -2474,13 +2135,7 @@ AmiUsb2HcControlTransfer(
 
 /**
     This function returns HC root port status.
-    
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  PortNumber              Port number
-    @param  PortStatus              Pointer to Port status
-    
-    @retval EFI_SUCCESS             The get root hub port status succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
+
 **/
 
 EFI_STATUS
@@ -2499,12 +2154,7 @@ AmiUsb2HcGetRootHubPortStatus (
 
 /**
     This function set root hub port features.
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  PortNumber              Port number
-    @param  PortFeature             Port feature.
-    
-    @retval EFI_SUCCESS             The set root hub port feature succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
+
 **/
 
 EFI_STATUS
@@ -2523,12 +2173,7 @@ AmiUsb2HcSetRootHubPortFeature(
 
 /**
     This function clears root hub port feature.
-    @param  HcProtocol              Pointer to EFI_USB2_HC_PROTOCOL
-    @param  PortNumber              Port number
-    @param  PortFeature             Port feature.
-    
-    @retval EFI_SUCCESS             The clear root hub port feature succeeded.
-    @retval EFI_INVALID_PARAMETER   Input is not valid.
+
 **/
 
 EFI_STATUS EFIAPI
@@ -2547,40 +2192,42 @@ AmiUsb2HcClearRootHubPortFeature(
 /**
     Search gUsbData for information about HC linked to an EFI handle
 
-    @param Controller   Host Controller handle
-    @retval Pointer     Ptr to Host struc
+    @param 
+        Controller - Host Controller handle
+
 **/
 
 HC_STRUC* FindHcStruc(
     EFI_HANDLE Controller
 )
 {
-    UINTN Index;
-    for (Index = 0; Index < gUsbDataList->HcTableCount; Index++) {
-        if (gHcTable[Index] == NULL) {
+    unsigned i;
+    for (i = 0; i < gUsbData->HcTableCount; i++) {
+        if (gUsbData->HcTable[i] == NULL) {
             continue;
         }
-        if (!(gHcTable[Index]->HcFlag & HC_STATE_USED)) {
+        if (!(gUsbData->HcTable[i]->dHCFlag & HC_STATE_USED)) {
             continue;
         }
-        if (gHcTable[Index]->Controller == Controller )
-            return gHcTable[Index];
+        if (gUsbData->HcTable[i]->Controller == Controller )
+            return gUsbData->HcTable[i];
     }
     return NULL;
 }
 
 /**
     Start the AMI USB driver; Sets USB_FLAG_DRIVER_STARTED
- 
-    @param This                Protocol instance pointer.
-    @param Controller          Handle of controller
-    @param PciIo               Ptr to EFI_PCI_IO_PROTOCOL
-    @param HCStruc             Pointer to the HCStruc structure
 
-    @retval EFI_SUCCESS          USB HC devices were initialized.
-    @retval EFI_UNSUPPORTED      This device is not supported by USB driver.
-    @retval EFI_DEVICE_ERROR     This driver cannot be started due to device error
-    @retval EFI_OUT_OF_RESOURCES Allocate memory fail.
+    @param 
+        This                - Protocol instance pointer.
+        ControllerHandle    - Handle of device to test
+        RemainingDevicePath - Not used
+
+         
+    @retval EFI_SUCCESS USB HC devices were initialized.
+    @retval EFI_UNSUPPORTED pThis device is not supported by USB driver.
+    @retval EFI_DEVICE_ERROR pThis driver cannot be started due to device error
+        EFI_OUT_OF_RESOURCES
 
 **/
 
@@ -2588,22 +2235,22 @@ EFI_STATUS
 InstallHcProtocols(
     IN EFI_DRIVER_BINDING_PROTOCOL  *This,
     IN EFI_HANDLE                   Controller,
-    IN EFI_PCI_IO_PROTOCOL          *PciIo,
-    IN HC_STRUC                     *HcData
+    IN EFI_PCI_IO_PROTOCOL   		*PciIo,
+    IN HC_STRUC              		*HcData
 )
 {
     HC_DXE_RECORD         *Rec;
-    USB3_HOST_CONTROLLER  *Usb3Hc;
-    EFI_STATUS            Status;
+    USB3_HOST_CONTROLLER *Usb3Hc;
+    EFI_STATUS              Status;
 
     //
     // Create HcDxeRecord
     //
 
     Status = gBS->AllocatePool(
-                    EfiBootServicesData,
-                    sizeof(HC_DXE_RECORD),
-                    (VOID**)&Rec);
+        EfiBootServicesData,
+        sizeof(HC_DXE_RECORD),
+        &Rec);
     
     ASSERT_EFI_ERROR(Status);
     
@@ -2613,8 +2260,8 @@ InstallHcProtocols(
         
     Rec->hc_data = HcData;
     Rec->pciIo = PciIo;
-
-    InitializeListHead(&Rec->AsyncTransfers.Link);
+    Rec->AsyncTransfers.pHead = NULL;
+    Rec->AsyncTransfers.pTail = NULL;
     Rec->AsyncTransfers.Size = 0;
 
     Rec->hcprotocol.Reset = AmiUsbHcReset;
@@ -2639,7 +2286,7 @@ InstallHcProtocols(
     // USB_HC_XHCI 0.96, 1.0 -> 3.0
     // USB_HC_XHCI 1.1 -> 3.1
 
-    switch (HcData->HcType) {
+    switch (HcData->bHCType) {
         case USB_HC_UHCI:
         case USB_HC_OHCI:
             Rec->hcprotocol.MajorRevision = 1;
@@ -2651,7 +2298,7 @@ InstallHcProtocols(
             break;
         case USB_HC_XHCI:
             Rec->hcprotocol.MajorRevision = 3;
-            Usb3Hc = (USB3_HOST_CONTROLLER*)HcData->Usb3HcData;
+            Usb3Hc = (USB3_HOST_CONTROLLER*)HcData->usbbus_data;
             if (Usb3Hc->CapRegs.HciVersion <= 0x0100) {
                 Rec->hcprotocol.MinorRevision = 0;
             } else {
@@ -2691,97 +2338,149 @@ InstallHcProtocols(
 }
 
 
-
 /**
-    This function allocates memory for EHCI iTD list.
-    
-    @param  Handle  Handle number of HC
-    @param  HCStruc Pointer to the HC information structure
+    This function allocates XHCI scratchpad buffers. Data initialization will
+    be done later, in SMI XhciStart function.
 
-    @retval EFI_SUCCESS Success to pre-initial EHCI
+    @note  
+  Usb3Hc->DcbaaPtr points to the beginning of memory block first 2048 Bytes
+  of which is used for DCBAA.
+
 **/
 
-EFI_STATUS PreInitEhci(
-    EFI_HANDLE  Handle,
-    HC_STRUC    *HcStruc
+EFI_STATUS
+XhciAllocateScratchpadBuffers (
+	IN HC_STRUC				*HcStruct,
+    IN USB3_HOST_CONTROLLER *Usb3Hc
 )
 {
-    VOID                    **IsocTdsDataPtr = NULL;
-    EHCI_ITD_DATA           *IsocTdsData = NULL;
-    UINTN                   Index;
-    EFI_PCI_IO_PROTOCOL     *PciIo = HcStruc->PciIo;
-    UINT64                  MappedBaseAddr = 0;
-    VOID                    *MapedAddress = NULL;
-    UINTN                   TempMemSize;
-    UINTN                   TotalMemSize;
-    EFI_STATUS              Status;
-    VOID                    *TempAddress = NULL;
+    UINT16  NumBufs =  ((Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsHi) << 5) + 
+                        Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsLo;
+    UINT16      Count;
+    VOID        *Buffer;
 
-    if (((gUsbData->UsbFeature & USB_HC_EHCI_SUPPORT) == USB_HC_EHCI_SUPPORT) &&
-        ((gUsbData->UsbStateFlag & USB_FLAG_USB_ISOCTRANSFER_SUPPORT) == USB_FLAG_USB_ISOCTRANSFER_SUPPORT)){
-        if (HcStruc->IsocTds == NULL) {
+    if (NumBufs == 0) {
+        return EFI_SUCCESS;
+    }
 
-            if (gUsbDataList->IsocTdsData == NULL) {
-                USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EFI_OUT_OF_RESOURCES gUsbDataList->IsocTdsData %x\n", gUsbDataList->IsocTdsData);
-                return EFI_UNSUPPORTED;
-            }
+    if (Usb3Hc->ScratchBufEntry == NULL) {
+        // Allcate a PAGESIZE boundary for Scratchpad Buffer Array Base Address
+        // because bit[0..5] are reserved in  Device Context Base Address Array Element 0.
+        Usb3Hc->ScratchBufEntry = AllocateHcMemory(HcStruct->PciIo, 
+                    EFI_SIZE_TO_PAGES((sizeof(UINT64) * NumBufs)), 0x1000);
 
-            IsocTdsDataPtr = (VOID**)(gUsbDataList->IsocTdsData);
-            USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "IsocTdsDataPtr %x \n", IsocTdsDataPtr);
-            for (Index = 0; Index < gUsbDataList->IsocTdsDataCount; Index++) {
-                IsocTdsData = IsocTdsDataPtr[Index];
-                if (IsocTdsData == NULL) continue;
-                if ((HcStruc->Vid == IsocTdsData->Vid) && (HcStruc->Did == IsocTdsData->Did) && (HcStruc->Controller == IsocTdsData->Controller)) {
-                    break;
-                }
-                IsocTdsData = NULL;
-            }
-            if (IsocTdsData == NULL) {
-                return EFI_UNSUPPORTED;
-            }
-            HcStruc->IsocTds = (VOID*)(UINTN)IsocTdsData->IsocTds;
-            if ((gUsbData->UsbRuntimeDriverInSmm != USB_RUNTIME_DRV_MODE_0) && 
-                (gUsbData->UsbStateFlag & USB_FLAG_EDKII_IOMMU_PROTOCOL_ON)) {
-                TempMemSize = EFI_PAGES_TO_SIZE(EFI_SIZE_TO_PAGES(EHCI_FRAMELISTSIZE * sizeof(EHCI_ITD)));
-                if ((gUsbData->UsbStateFlag & USB_FLAG_ITD_MEM_ALLOC_FOR_ALL_EHCI) == USB_FLAG_ITD_MEM_ALLOC_FOR_ALL_EHCI) {
-                    HcStruc->FrameList = (UINT32*)((UINTN)IsocTdsData->IsocTds - USB_EHCI_FRAME_LIST_SIZE);
-                    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "HcStruc->FrameList %x \n", HcStruc->FrameList);
-                    TotalMemSize = TempMemSize + USB_EHCI_FRAME_LIST_SIZE;
-                    TempAddress = (VOID *)HcStruc->FrameList;
-                } else {
-                    TempAddress = (VOID *)IsocTdsData->IsocTds;
-                    TotalMemSize = TempMemSize;
-                }
-                Status = PciIo->Map (
-                              PciIo,
-                              EfiPciIoOperationBusMasterCommonBuffer,
-                              (VOID *)TempAddress,
-                              &TotalMemSize,
-                              (EFI_PHYSICAL_ADDRESS *)&MappedBaseAddr,
-                              &MapedAddress
-                              );
-                if (!EFI_ERROR (Status)) {
-                    if ((gUsbData->UsbStateFlag & USB_FLAG_ITD_MEM_ALLOC_FOR_ALL_EHCI) == USB_FLAG_ITD_MEM_ALLOC_FOR_ALL_EHCI) {
-                        HcStruc->IsocTds = (VOID*)((UINTN)MappedBaseAddr + USB_EHCI_FRAME_LIST_SIZE);
-                        HcStruc->FrameListPhyAddr = (VOID*)(UINTN)MappedBaseAddr;
-                        HcStruc->FrameListMapping = MapedAddress;
-                        USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "HcStruc->FrameListPhyAddr %x HcStruc->FrameListMapping %x \n", MappedBaseAddr, MapedAddress);
-                    } else {
-                        HcStruc->IsocTds = (VOID*)(UINTN)MappedBaseAddr;
-                    }
-                } else {
-                    if ((gUsbData->UsbStateFlag & USB_FLAG_ITD_MEM_ALLOC_FOR_ALL_EHCI) == USB_FLAG_ITD_MEM_ALLOC_FOR_ALL_EHCI) {
-                        HcStruc->FrameListPhyAddr = NULL;
-                        HcStruc->FrameListMapping = NULL;
-                    }
-                }
-            }
+        if (Usb3Hc->ScratchBufEntry == NULL) {
+            return EFI_OUT_OF_RESOURCES;
         }
-    
-        SetMem(HcStruc->IsocTds, EHCI_FRAMELISTSIZE * sizeof(EHCI_ITD), 0);
-    
 
-        USB_DEBUG(DEBUG_INFO, 3, "PreInitEhci: ITD buffer address: %x\n", (UINTN)HcStruc->IsocTds);
+    	gBS->SetMem(Usb3Hc->ScratchBufEntry, (sizeof(UINT64) * NumBufs), 0);
+
+        for (Count = 0; Count < NumBufs; Count++) {
+
+            // Allocate scratchpad buffer: PAGESIZE block located on
+            // a PAGESIZE boundary. Section 4.20.
+            Buffer = AllocateHcMemory( HcStruct->PciIo,
+                        Usb3Hc->PageSize4K, Usb3Hc->PageSize4K << 12);
+            ASSERT(Buffer != NULL); // See if allocation is successful
+
+            if (Buffer == NULL) {
+                return EFI_OUT_OF_RESOURCES;
+            }
+
+            // Update *ScratchBufArrayBase
+            Usb3Hc->ScratchBufEntry[Count] = (UINTN)Buffer;
+        }
+    }
+
+    // Update scratchpad pointer only if # of scratch buffers >0
+    if (NumBufs > 0) {
+        *(UINTN*)Usb3Hc->DcbaaPtr = (UINTN)Usb3Hc->ScratchBufEntry;
+    }
+
+    return EFI_SUCCESS;
+}
+
+
+/**
+    This function allocates XHCI memory buffers. Data initialization will be
+    done later, in SMI XhciStart function. These are the memory blocks:
+
+    1. DCBAAP + ScrPadBuf pointers + InpCtx + ERST <-- 8KB
+    2. CommandRing  <-- 1KB
+    3. EventRing    <-- 1KB
+    4. XferRings    <-- 1KB*MaxSlots, 1KB = 32EP per slot times 32 (padded size of TRB_RING)
+    4. N*sizeof(XHCI_DEVICE_CONTEXT) for device context segment <-- N KB or 2*N KB,
+    N is SlotNumber from CONFIG register
+  
+    5. TransferRings <-- MaxSlots*32*1KB
+
+    @note  
+  Scratchpad buffers are optional, they are allocated and initialized separately.
+
+**/
+
+EFI_STATUS
+XhciInitMemory (
+	IN HC_STRUC				*HcStruct,
+    IN USB3_HOST_CONTROLLER *Usb3Hc
+)
+{
+    EFI_STATUS  Status;
+    UINTN       MemSize;
+    UINTN       DeviceContextSize;
+    UINTN       XfrRingsSize;
+    UINTN       XfrTrbsSize;
+
+    XfrRingsSize = Usb3Hc->CapRegs.HcsParams1.MaxSlots * 32 * 32;   // 32 endpoints per device, 32 padded size of TRB_RING
+    XfrTrbsSize = RING_SIZE * Usb3Hc->CapRegs.HcsParams1.MaxSlots *32;
+    DeviceContextSize = (XHCI_DEVICE_CONTEXT_ENTRIES * Usb3Hc->ContextSize) * Usb3Hc->CapRegs.HcsParams1.MaxSlots;
+
+//    MemSize = 0x2800 + XfrRingsSize + XfrTrbsSize + DeviceContextSize;
+    MemSize = 0x6400 + XfrRingsSize + XfrTrbsSize + DeviceContextSize;
+    if (Usb3Hc->DcbaaPtr == NULL) {
+    	Usb3Hc->DcbaaPtr = (XHCI_DCBAA*)AllocateHcMemory(HcStruct->PciIo, 
+    										EFI_SIZE_TO_PAGES(MemSize), 0x1000);
+    }
+    gBS->SetMem(Usb3Hc->DcbaaPtr, MemSize, 0);  // Clear buffer
+
+    USB_DEBUG(DEBUG_INFO, 3, "XHCI: Memory allocation - total %x Bytes:\n 0x6400+XfrRings(%x)+XfrTrbs(%x)+DevCtx(%x)\n",
+        MemSize, XfrRingsSize, XfrTrbsSize, DeviceContextSize);
+
+    // Assign DCBAA (Device Context Base Address); program the
+    // DCBAA Pointer (DCBAAP) register (5.4.6) with a 64-bit address
+    // pointing to where the Device Context Base Address Array is located.
+    //
+    // DCBAA: size 2048 Bytes, within PAGESIZE, 64 Bytes aligned.
+    //
+    // These requirements can be met by allocating 1 page using
+    // pBS->AllocatePages; the address will be 4K aligned and will
+    // not span PAGESIZE boundary.
+
+    Status = XhciAllocateScratchpadBuffers(HcStruct, Usb3Hc);
+    ASSERT_EFI_ERROR(Status);
+
+    // Assign Input Context; the size of Input Context is either
+    // 0x420 or 0x840 depending on HCPARAMS.Csz
+    if (Usb3Hc->InputContext == NULL) {
+        Usb3Hc->InputContext = (VOID*)((UINTN)Usb3Hc->DcbaaPtr + 0x940);
+    }
+
+    // Initialize Transfer Rings pointer and store it in Usb3Hc; actual
+    // xfer ring initialization happens later, when the EP is being enabled
+//    Usb3Hc->XfrRings = (TRB_RING*)((UINTN)Usb3Hc->DcbaaPtr + 0x2800);
+    if (Usb3Hc->XfrRings == NULL) {
+        Usb3Hc->XfrRings = (TRB_RING*)((UINTN)Usb3Hc->DcbaaPtr + 0x6400);
+    }
+
+    // 1024 = 32 bytes is padded sizeof(TRB_RING) times 32 EP per device
+    if (Usb3Hc->XfrTrbs == 0) {
+        Usb3Hc->XfrTrbs = (UINTN)Usb3Hc->XfrRings + XfrRingsSize;
+    }
+
+    // Assign device context memory: Usb3Hc->MaxSlots devices,
+    // 1024 (2048 if HCPARAMS.Csz is set) Bytes each
+    if (Usb3Hc->DeviceContext == NULL) {
+        Usb3Hc->DeviceContext = (VOID*)((UINTN)Usb3Hc->XfrTrbs + XfrTrbsSize);
     }
 
     return EFI_SUCCESS;
@@ -2789,12 +2488,130 @@ EFI_STATUS PreInitEhci(
 
 /**
 
-    This function frees the memory previously allocated for iTDs.
-   
-    @param  Handle  Handle number of HC
-    @param  HCStruc Pointer to the HC information structure
+**/
 
-    @retval EFI_SUCCESS Success to stop EHCI
+EFI_STATUS
+XhciExtCapParser(
+    HC_STRUC    *HcStruc,
+    IN USB3_HOST_CONTROLLER *Usb3Hc
+)
+{
+	EFI_PCI_IO_PROTOCOL		*PciIo = HcStruc->PciIo;
+    UINT32                  CurPtrOffset;
+    UINT32                  XhciLegCtrlSts;
+    UINT32                  XhciLegSup;
+    XHCI_EXT_CAP            *XhciExtCap = (XHCI_EXT_CAP*)&XhciLegSup;
+
+    if (Usb3Hc->CapRegs.HccParams1.Xecp == 0) {
+        return EFI_SUCCESS;
+    }
+
+	// Starts from first capability
+	CurPtrOffset = Usb3Hc->CapRegs.HccParams1.Xecp << 2;
+
+    // Traverse all capability structures
+	for(;;) {
+        PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, CurPtrOffset, 1, XhciExtCap);
+		switch (XhciExtCap->CapId) {
+			case XHCI_EXT_CAP_USB_LEGACY:
+                
+                Usb3Hc->UsbLegSupOffSet = CurPtrOffset;
+                
+                // Clear HC BIOS and OS Owned Semaphore bit               
+                XhciLegSup &= ~(XHCI_BIOS_OWNED_SEMAPHORE | XHCI_OS_OWNED_SEMAPHORE);
+                PciIo->Mem.Write(PciIo, EfiPciIoWidthUint32, 0, CurPtrOffset, 1, &XhciLegSup);
+                
+				// Clear SMI enable bit
+				PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, 
+				    CurPtrOffset + XHCI_LEGACY_CTRL_STS_REG, 1, &XhciLegCtrlSts);
+                XhciLegCtrlSts &= ~(XHCI_SMI_ENABLE | XHCI_SMI_OWNERSHIP_CHANGE_ENABLE);
+				PciIo->Mem.Write(PciIo, EfiPciIoWidthUint32, 0, 
+                    CurPtrOffset + XHCI_LEGACY_CTRL_STS_REG, 1, &XhciLegCtrlSts);
+				USB_DEBUG(DEBUG_INFO, 3, "XHCI: USB Legacy Support Offset %x\n", Usb3Hc->UsbLegSupOffSet);
+				break;
+
+			case XHCI_EXT_CAP_SUPPORTED_PROTOCOL:
+                if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev == 0x02) {
+                    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, CurPtrOffset, 3, &Usb3Hc->Usb2Protocol);
+                    USB_DEBUG(DEBUG_INFO, 3, "XHCI: USB2 Support Protocol %x, PortOffset %x PortCount %x\n", 
+                        (UINTN*)(HcStruc->BaseAddress + CurPtrOffset), Usb3Hc->Usb2Protocol.PortOffset, Usb3Hc->Usb2Protocol.PortCount);
+                } else if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev == 0x03) {
+                    if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev == 0x00) {
+                        PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, CurPtrOffset, 3, &Usb3Hc->Usb3Protocol);
+                        USB_DEBUG(DEBUG_INFO, 3, "XHCI: USB3.0 Support Protocol %x, PortOffset %x PortCount %x\n", 
+                            (UINTN*)(HcStruc->BaseAddress + CurPtrOffset), Usb3Hc->Usb3Protocol.PortOffset, Usb3Hc->Usb3Protocol.PortCount);
+                    } else if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev == 0x01) {
+                        PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, CurPtrOffset, 3, &Usb3Hc->Usb31Protocol);
+                        USB_DEBUG(DEBUG_INFO, 3, "XHCI: USB3.1 Support Protocol %x, PortOffset %x PortCount %x\n",
+                            (UINTN*)(HcStruc->BaseAddress + CurPtrOffset), Usb3Hc->Usb31Protocol.PortOffset, Usb3Hc->Usb31Protocol.PortCount);
+                    }
+                }
+				break;
+
+			case XHCI_EXT_CAP_POWERMANAGEMENT:
+			case XHCI_EXT_CAP_IO_VIRTUALIZATION:
+                break;
+			case XHCI_EXT_CAP_USB_DEBUG_PORT:
+                Usb3Hc->DbCapOffset = CurPtrOffset;
+                USB_DEBUG(DEBUG_INFO, 3, "XHCI: USB Debug Capability Offset %x\n", Usb3Hc->DbCapOffset);
+				break;
+		}
+        if (XhciExtCap->NextCapPtr == 0) {
+            break;
+        }
+	    // Point to next capability
+	    CurPtrOffset += XhciExtCap->NextCapPtr << 2;
+	}
+
+	return EFI_SUCCESS;
+}
+
+
+/**
+      This function allocates memory for EHCI iTD list.
+**/
+
+EFI_STATUS PreInitEhci(
+    EFI_HANDLE  Handle,
+    HC_STRUC    *HcStruc
+)
+{
+    EFI_STATUS Status = EFI_SUCCESS;
+#if EHCI_SUPPORT
+#if USB_ISOCTRANSFER_SUPPORT
+    EFI_PHYSICAL_ADDRESS    Address;
+    UINTN                   NumPages;
+    
+    if (HcStruc->IsocTds == NULL) {
+
+        Address = 0xFFFFFFFF;
+        NumPages = EFI_SIZE_TO_PAGES(EHCI_FRAMELISTSIZE * sizeof(EHCI_ITD));
+        
+        Status = gBS->AllocatePages(AllocateMaxAddress, EfiRuntimeServicesData,
+                        NumPages, &Address);
+        
+        //ASSERT_EFI_ERROR(Status);
+        
+        if (EFI_ERROR(Status)) {
+            return Status;
+        }
+        HcStruc->IsocTds = (VOID*)(UINTN)Address;
+    }
+    
+    gBS->SetMem(HcStruc->IsocTds, EHCI_FRAMELISTSIZE * sizeof(EHCI_ITD), 0);
+    
+
+    USB_DEBUG(DEBUG_INFO, 3, "PreInitEhci: ITD buffer address: %x\n", (UINTN)Address);
+#endif
+#endif
+
+    return Status;
+}
+
+/**
+
+  This function frees the memory previously allocated for iTDs.
+
 **/
 
 EFI_STATUS PostStopEhci(
@@ -2802,7 +2619,15 @@ EFI_STATUS PostStopEhci(
     HC_STRUC    *HcStruc
 )
 {
-    return EFI_SUCCESS;
+    EFI_STATUS Status = EFI_SUCCESS;
+#if EHCI_SUPPORT
+#if USB_ISOCTRANSFER_SUPPORT
+    //Status = gBS->FreePages((EFI_PHYSICAL_ADDRESS)(HcStruc->IsocTds),
+    //                    EFI_SIZE_TO_PAGES(EHCI_FRAMELISTSIZE*sizeof(EHCI_ITD)));
+    //ASSERT_EFI_ERROR(Status);
+#endif
+#endif
+    return Status;
 }
 
 
@@ -2810,11 +2635,6 @@ EFI_STATUS PostStopEhci(
     This function initializes XHCI data structures, allocates HC memory and
     updates the relevant fields in HcStruc. At this point the controller's
     resources are assigned and accessible.
-
-    @param  Handle  Handle number of HC
-    @param  HCStruc Pointer to the HC information structure
-
-    @retval EFI_SUCCESS Success to pre-init xhci
 
 **/
 
@@ -2824,76 +2644,88 @@ PreInitXhci(
     HC_STRUC    *HcStruc
 )
 {
+#if XHCI_SUPPORT
     UINT8   MaxSlots;
     EFI_STATUS Status;
-    EFI_PCI_IO_PROTOCOL     *PciIo = HcStruc->PciIo;
-    USB3_HOST_CONTROLLER    **Usb3HcMem = NULL;
+	EFI_PCI_IO_PROTOCOL		*PciIo = HcStruc->PciIo;
     USB3_HOST_CONTROLLER    *Usb3Hc = NULL;
-    UINTN                   Index;
-    UINT64                  MappedBaseAddr = 0;
-    void                    *MapedAddress = NULL;
-    UINTN                   TempMemSize;
 
-    if ((gUsbData->UsbFeature & USB_HC_XHCI_SUPPORT) == 0) return EFI_UNSUPPORTED;
-
-    if (HcStruc->Usb3HcData == NULL) {
-        if (gUsbDataList == NULL) {
-           return EFI_UNSUPPORTED;
+    if (HcStruc->usbbus_data == NULL) {
+        Status = gBS->AllocatePool(EfiRuntimeServicesData, 
+            sizeof(USB3_HOST_CONTROLLER), &Usb3Hc);
+        if (EFI_ERROR(Status)) {
+            return Status;
         }
-        if (gUsbDataList->Usb3HcMem == NULL) {
-            USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EFI_OUT_OF_RESOURCES gUsbDataList->Usb3HcMem %x\n", gUsbDataList->Usb3HcMem);
-            return EFI_UNSUPPORTED;
-        }
-        Usb3HcMem = (USB3_HOST_CONTROLLER**)(gUsbDataList->Usb3HcMem);
-        for (Index = 0; Index < gUsbDataList->Usb3HcCount; Index++) {
-            Usb3Hc = Usb3HcMem[Index];
-            if (Usb3Hc == NULL) continue;
-            if ((HcStruc->Vid == Usb3Hc->Vid) && (HcStruc->Did == Usb3Hc->Did) && (HcStruc->Controller == Usb3Hc->Controller)) {
-                break;
-            }
-            Usb3Hc = NULL;
-        }
+        gBS->SetMem(Usb3Hc, sizeof(USB3_HOST_CONTROLLER), 0);
     } else {
-        Usb3Hc = HcStruc->Usb3HcData;
+        Usb3Hc = HcStruc->usbbus_data;
     }
 
-    if (Usb3Hc == NULL) {
-        return EFI_UNSUPPORTED;
-    }
     Usb3Hc->Controller = Handle;
 
     // Get Capability Registers offset off the BAR
                                         //(EIP101226)>
-    Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint32, PCI_BAR0, 1, &HcStruc->BaseAddress);
+    Status = PciIo->Pci.Read(PciIo, 
+    			EfiPciIoWidthUint32, PCI_BAR0, 1, &HcStruc->BaseAddress);
+    ASSERT_EFI_ERROR(Status);
     if (EFI_ERROR(Status)) {
-                return Status;
+		return Status;
     }
     if (((UINT8)HcStruc->BaseAddress & (BIT1 |BIT2)) == BIT2) {
         Status = PciIo->Pci.Read(PciIo, 
-                    EfiPciIoWidthUint32, PCI_BAR0, 
-                    (sizeof(VOID*)/sizeof(UINT32)), &HcStruc->BaseAddress);
-        if (EFI_ERROR (Status)) {
-            return Status;
-        }
+            		EfiPciIoWidthUint32, PCI_BAR0, 
+            		sizeof(VOID*)/sizeof(UINT32), &HcStruc->BaseAddress);
     }
+
 
                                         //<(EIP101226)
     //clear all attributes before use
-    HcStruc->BaseAddress &= ~(0x7F);
+	HcStruc->BaseAddress &= ~(0x7F); // Clear attributes
 
-    HcStruc->OpRegOffset = Usb3Hc->CapRegs.CapLength;
-    HcStruc->NumPorts = (UINT8)Usb3Hc->CapRegs.HcsParams1.MaxPorts;
+    PciIo->Pci.Read(PciIo, EfiPciIoWidthUint16, PCI_VID, 1, &Usb3Hc->Vid);
+
+    PciIo->Pci.Read(PciIo, EfiPciIoWidthUint16, PCI_DID, 1, &Usb3Hc->Did);
+
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint8, 0, XHCI_CAPLENGTH_OFFSET, 1, &Usb3Hc->CapRegs.CapLength);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint16, 0, XHCI_HCIVERSION_OFFSET, 1, &Usb3Hc->CapRegs.HciVersion);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, XHCI_HCSPARAMS1_OFFSET, 1, &Usb3Hc->CapRegs.HcsParams1);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, XHCI_HCSPARAMS2_OFFSET, 1, &Usb3Hc->CapRegs.HcsParams2);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, XHCI_HCSPARAMS3_OFFSET, 1, &Usb3Hc->CapRegs.HcsParams3);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, XHCI_HCCPARAMS1_OFFSET, 1, &Usb3Hc->CapRegs.HccParams1);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, XHCI_DBOFF_OFFSET, 1, &Usb3Hc->CapRegs.DbOff);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, XHCI_RTSOFF_OFFSET, 1, &Usb3Hc->CapRegs.RtsOff);
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, XHCI_HCCPARAMS2_OFFSET, 1, &Usb3Hc->CapRegs.HccParams2);
+
+    HcStruc->bOpRegOffset = Usb3Hc->CapRegs.CapLength;
+    HcStruc->bNumPorts = Usb3Hc->CapRegs.HcsParams1.MaxPorts;
+ 
+    Usb3Hc->OpRegs = (XHCI_HC_OP_REGS*)(HcStruc->BaseAddress + Usb3Hc->CapRegs.CapLength);
+
+    PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, 
+        Usb3Hc->CapRegs.CapLength + XHCI_PAGESIZE_OFFSET, 1, &Usb3Hc->PageSize4K);
+    
+	Usb3Hc->ContextSize = 0x20 << Usb3Hc->CapRegs.HccParams1.Csz;
+
+//    USB_DEBUG(DEBUG_INFO, 3, "XHCI: Cap %x, OpRegs: %x Ver %x,\n      MaxPorts 0x%x, PageSize %x*4K\n",
+//        Usb3Hc->CapRegs, Usb3Hc->OpRegs, Usb3Hc->HciVersion, Usb3Hc->MaxPorts, Usb3Hc->PageSize4K);
+
+    ASSERT(Usb3Hc->PageSize4K < 0x8000);   // Maximum possible page size is 128MB
+
+    Status = PciIo->Pci.Read(PciIo, 
+				EfiPciIoWidthUint8, XHCI_PCI_SBRN, 1, &Usb3Hc->SBRN);
+    ASSERT_EFI_ERROR(Status);
+    USB_DEBUG(DEBUG_INFO, 3, "XHCI: Serial Bus Release Number is %x\n", Usb3Hc->SBRN);
 
     // OEM might change the default number of MaxSlots
-    MaxSlots = (UINT8)Usb3Hc->CapRegs.HcsParams1.MaxSlots;
+    MaxSlots = Usb3Hc->CapRegs.HcsParams1.MaxSlots;
     Status = Usb3OemGetMaxDeviceSlots(HcStruc, &MaxSlots);
 
     if (!EFI_ERROR(Status)) {
-        // Validate the porting function output
-        ASSERT(MaxSlots > 0 && MaxSlots <= Usb3Hc->CapRegs.HcsParams1.MaxSlots);
-        if (MaxSlots < Usb3Hc->CapRegs.HcsParams1.MaxSlots){
-        Usb3Hc->CapRegs.HcsParams1.MaxSlots = MaxSlots;
-        }
+    	// Validate the porting function output
+    	ASSERT(MaxSlots > 0 && MaxSlots <= Usb3Hc->CapRegs.HcsParams1.MaxSlots);
+    	if (MaxSlots < Usb3Hc->CapRegs.HcsParams1.MaxSlots){
+    		Usb3Hc->CapRegs.HcsParams1.MaxSlots = MaxSlots;
+    	}
     }
 
     USB_DEBUG(DEBUG_INFO, 3, "XHCI: MaxSlots %x, MaxIntrs %x, Doorbell Offset %x\n", 
@@ -2901,37 +2733,36 @@ PreInitXhci(
             Usb3Hc->CapRegs.HcsParams1.MaxIntrs,
             Usb3Hc->CapRegs.DbOff);
 
-    if ((!(gUsbData->UsbStateFlag & USB_FLAG_AFTER_END_OF_DXE)) &&
-        (gUsbData->UsbStateFlag & USB_FLAG_EDKII_IOMMU_PROTOCOL_ON)) {
-        TempMemSize = EFI_PAGES_TO_SIZE(Usb3Hc->DcbaaPages);
-        Status = PciIo->Map (
-                      PciIo,
-                      EfiPciIoOperationBusMasterCommonBuffer,
-                      (VOID *)Usb3Hc->DcbaaPtr,
-                      &TempMemSize,
-                      (EFI_PHYSICAL_ADDRESS *)&MappedBaseAddr,
-                      &MapedAddress
-                      );
-        if (EFI_ERROR (Status)) {
-            USB_DEBUG(DEBUG_INFO, 3, "Usb3Hc->DcbaaPtr PciIo->Map Status %r \n", Status);
-        } else {
-            USB_DEBUG(DEBUG_INFO, 3, "DcbaaPtr %x \n", Usb3Hc->DcbaaPtr);
-            USB_DEBUG(DEBUG_INFO, 3, "MappedBaseAddr %x \n", MappedBaseAddr);
-            Usb3Hc->DcbaaPtr = (XHCI_DCBAA*)MappedBaseAddr;
-        }
+	// Parse all capability structures
+	XhciExtCapParser(HcStruc, Usb3Hc);
+
+	if (gUsbData->UsbXhciSupport == 0) {
+        gBS->FreePool(Usb3Hc);
+		return EFI_UNSUPPORTED;
+	}
+
+    // Allocate and initialize memory blocks
+    Status = XhciInitMemory(HcStruc, Usb3Hc);
+    ASSERT_EFI_ERROR(Status);
+    if (EFI_ERROR(Status)) {
+		gBS->FreePool(Usb3Hc);
+		return Status;
     }
 
-    HcStruc->Usb3HcData = (VOID*)Usb3Hc;
-    
+    HcStruc->usbbus_data = (VOID*)Usb3Hc;
+
+    // Install xHC event handler
+    Status = USBPort_InstallEventHandler(HcStruc);
+    ASSERT_EFI_ERROR(Status);
+
+#endif
+
     return EFI_SUCCESS;
 }
 
 /**
     This function frees the HC memory and clears XHCI data structures.
-    @param  Handle  Handle number of HC
-    @param  HCStruc Pointer to the HC information structure
 
-    @retval EFI_SUCCESS Success to stop xhci
 **/
 
 EFI_STATUS
@@ -2940,13 +2771,42 @@ PostStopXhci(
     HC_STRUC    *HcStruc
 )
 {
-    return EFI_SUCCESS;
+#if XHCI_SUPPORT
+/*
+	USB3_HOST_CONTROLLER *Usb3Hc = (USB3_HOST_CONTROLLER*)HcStruc->usbbus_data;
+    UINT16  NumBufs =  ((Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsHi) << 5) + 
+                        Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsLo;
+    UINT16  Count;
+    UINTN   MemSize;
+    UINTN   DeviceContextSize;
+    UINTN   XfrRingsSize;
+    UINTN   XfrTrbsSize;
+
+	for (Count = 0; Count < NumBufs; Count++) {
+		gBS->FreePages((EFI_PHYSICAL_ADDRESS)(Usb3Hc->ScratchBufEntry[Count]), Usb3Hc->PageSize4K);
+	}
+
+    XfrRingsSize = Usb3Hc->CapRegs.HcsParams1.MaxSlots * 32 * 32;   // 32 endpoints per device, 32 padded size of TRB_RING
+    XfrTrbsSize = RING_SIZE * Usb3Hc->CapRegs.HcsParams1.MaxSlots *32;
+    DeviceContextSize = (XHCI_DEVICE_CONTEXT_ENTRIES * Usb3Hc->ContextSize) * Usb3Hc->CapRegs.HcsParams1.MaxSlots;
+
+//    MemSize = 0x2800 + XfrRingsSize + XfrTrbsSize + DeviceContextSize;
+    MemSize = 0x6400 + XfrRingsSize + XfrTrbsSize + DeviceContextSize;
+
+	gBS->FreePages((EFI_PHYSICAL_ADDRESS)Usb3Hc->DcbaaPtr, EFI_SIZE_TO_PAGES(MemSize));
+	if (Usb3Hc->ScratchBufEntry) {
+	    gBS->FreePages((EFI_PHYSICAL_ADDRESS)Usb3Hc->ScratchBufEntry, EFI_SIZE_TO_PAGES((sizeof(UINT64) * NumBufs)));
+	}
+	//gBS->FreePool(Usb3Hc);
+*/
+#endif
+	return EFI_SUCCESS;
 }
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

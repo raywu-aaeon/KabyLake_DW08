@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,71 +17,62 @@
 
 **/
 
-
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "AmiUsb.h"
 #include "UsbKbd.h"
-#include "../UsbDevDriverElinks.h"
+#include <UsbDevDriverElinks.h>
+#include <Library/BaseMemoryLib.h>
 #include <Protocol/AmiUsbHid.h>
-#include <Library/AmiUsbHcdLib.h>
 
-extern USB_GLOBAL_DATA *gUsbData;
-extern USB_DATA_LIST   *gUsbDataList;
-extern HC_STRUC        **gHcTable;
+extern USB_GLOBAL_DATA *gUsbData; 
 
-typedef BOOLEAN (USB_HID_TYPE_CHECK_FUNCTIONS)( 
-    DEV_INFO            *DevInfo,
+typedef	BOOLEAN (USB_HID_TYPE_CHECK_FUNCTIONS)( 
+    DEV_INFO	        *DevInfo,
     HID_REPORT_FIELD    *Field
-        );
+	);
 extern USB_HID_TYPE_CHECK_FUNCTIONS USB_HID_TYPE_CHECK_ELINK_LIST EndOfCheckTypeList;
 USB_HID_TYPE_CHECK_FUNCTIONS* HidTypeCheckFunctionsList[] = {
     USB_HID_TYPE_CHECK_ELINK_LIST NULL};
 
-typedef BOOLEAN (USB_HID_BUFFER_CHECK_FUNCTIONS)( 
+typedef	BOOLEAN (USB_HID_BUFFER_CHECK_FUNCTIONS)( 
     DEV_INFO    *DevInfo,
     UINT8       *Buffer,
     UINT16      DataLength
-        );
+	);
 extern USB_HID_BUFFER_CHECK_FUNCTIONS USB_HID_BUFFER_CHECK_ELINK_LIST EndOfCheckBufferList;
 USB_HID_BUFFER_CHECK_FUNCTIONS* HidBufferCheckFunctionsList[] = {
     USB_HID_BUFFER_CHECK_ELINK_LIST NULL};
 
-UINT8   UsbControlTransfer(HC_STRUC*, DEV_INFO*, DEV_REQ, UINT16, VOID*);
+UINT8	UsbControlTransfer(HC_STRUC*, DEV_INFO*, DEV_REQ, UINT16, VOID*);
 
 VOID        USBHIDInitialize (VOID);
 UINT8       USBHIDCheckForDevice (DEV_INFO*, UINT8, UINT8, UINT8);
 DEV_INFO*   USBHIDConfigureDevice (HC_STRUC*, DEV_INFO*, UINT8*, UINT16, UINT16);
-UINT8           USBHIDProcessData ( HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
+UINT8   	USBHIDProcessData ( HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
 UINT8       USBHIDDisconnectDevice (DEV_INFO*);
 
-UINT8           HidGetReportDescriptor(HC_STRUC*, DEV_INFO*, HID_DESC*);  
+UINT8		HidGetReportDescriptor(HC_STRUC*, DEV_INFO*, HID_DESC*);  
 
 VOID        USBMSInitialize (VOID);
 DEV_INFO*   USBMSConfigureDevice (HC_STRUC*, DEV_INFO*, UINT8*, UINT16, UINT16); 
-DEV_INFO*   USBKBDConfigureDevice (DEV_INFO*); 
+DEV_INFO*   USBKBDConfigureDevice (DEV_INFO*);  //(EIP84455)
 DEV_INFO*   USBAbsConfigureDevice (HC_STRUC*, DEV_INFO*, UINT8*, UINT16, UINT16);  
-VOID        CheckInputMode(DEV_INFO *DevInfo, HID_REPORT_FIELD * Field); 
+VOID        CheckInputMode(DEV_INFO *DevInfo, HID_REPORT_FIELD * Field);    //(EIP101990)
 
-
-/**
-    This function fills the HID device driver routine pointers
-
-    @param DevDriver    Pointer to the device driver structure
-
-    @retval None
-**/
 VOID
 USBHIDFillDriverEntries(
     DEV_DRIVER *DevDriver
 )
 {
-    DevDriver->DevType               = BIOS_DEV_TYPE_HID;
-    DevDriver->BaseClass             = BASE_CLASS_HID;
-    DevDriver->SubClass              = 0;
-    DevDriver->Protocol              = 0;
-    DevDriver->FnDeviceInit          = USBHIDInitialize;
-    DevDriver->FnCheckDeviceType     = USBHIDCheckForDevice;
-    DevDriver->FnConfigureDevice     = USBHIDConfigureDevice;
-    DevDriver->FnDisconnectDevice    = USBHIDDisconnectDevice;
+    DevDriver->bDevType               = BIOS_DEV_TYPE_HID;
+    DevDriver->bBaseClass             = BASE_CLASS_HID;
+    DevDriver->bSubClass              = 0;
+    DevDriver->bProtocol              = 0;
+    DevDriver->pfnDeviceInit          = USBHIDInitialize;
+    DevDriver->pfnCheckDeviceType     = USBHIDCheckForDevice;
+    DevDriver->pfnConfigureDevice     = USBHIDConfigureDevice;
+    DevDriver->pfnDisconnectDevice    = USBHIDDisconnectDevice;
     return;
 }
 
@@ -107,18 +98,17 @@ USBHIDInitialize(
 }
 
 /**
-    This routine checks for HID type device from the
+    This routine checks for mouse type device from the
     interface data provided
-    
-    @param DevInfo    Pointer to devInfo structure
-    @param BaseClass  USB base class code
-    @param SubClass   USB sub-class code
-    @param Protocol   USB protocol code
 
-    @retval BIOS_DEV_TYPE_HID  on success 
-    @retval USB_ERROR0FFH      on error
+    @param bBaseClass  USB base class code
+        bSubClass   USB sub-class code
+        bProtocol   USB protocol code
+
+    @retval BIOS_DEV_TYPE_MOUSE type on success or 0FFH on error
 
 **/
+
 UINT8
 USBHIDCheckForDevice(
     DEV_INFO*   DevInfo,
@@ -134,8 +124,8 @@ USBHIDCheckForDevice(
         return USB_ERROR;
     }
 
-    if (((gUsbData->UsbFeature & USB_BOOT_PROTOCOL_SUPPORT) == USB_BOOT_PROTOCOL_SUPPORT) || 
-        (DevInfo->IncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
+    if ((BOOT_PROTOCOL_SUPPORT != 0) || 
+        (DevInfo->wIncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
         if (SubClass != SUB_CLASS_BOOT_DEVICE) {
             return USB_ERROR;
         }
@@ -146,7 +136,7 @@ USBHIDCheckForDevice(
         }
     }
 
-    return BIOS_DEV_TYPE_HID;
+    return	BIOS_DEV_TYPE_HID;
 }
 
 /**
@@ -155,12 +145,12 @@ USBHIDCheckForDevice(
     If the device matches the above criteria, then the device is
     configured and initialized
 
-    @param HcStruc    HCStruc pointer
-    @param DevInfo    Device information structure pointer
-    @param Desc       Pointer to the descriptor structure
-    @param Start      Offset within interface descriptor
-                      supported by the device
-    @param End        End offset of the device descriptor
+    @param fpHCStruc   HCStruc pointer
+        fpDevInfo   Device information structure pointer
+        fpDesc      Pointer to the descriptor structure
+        wStart      Offset within interface descriptor
+        supported by the device
+        wEnd        End offset of the device descriptor
 
     @retval FPDEV_INFO  New device info structure, 0 on error
 
@@ -179,13 +169,10 @@ USBHIDConfigureDevice (
     INTRF_DESC      *IntrfDesc;
     UINT8           *DescEnd;
     HID_DESC        *HidDesc = NULL;
-    DEV_REQ         Request;  
+    DEV_REQ         Request = {0};
     UINT8           Status;
     
-    
-    SetMem(&Request, sizeof(DEV_REQ), 0);
-    
-    DevInfo->DeviceType = (UINT8)BIOS_DEV_TYPE_HID;
+    DevInfo->bDeviceType = (UINT8)BIOS_DEV_TYPE_HID;
     DevInfo->HidDevType = 0;
     DevInfo->IntInEndpoint = 0;
     DevInfo->IntOutEndpoint = 0;
@@ -194,50 +181,46 @@ USBHIDConfigureDevice (
 
     USB_DEBUG(DEBUG_INFO, 3, "USBHIDConfigureDevice...  \n");
 
-    DevInfo->CallBackIndex = USB_InstallCallBackFunction(USBHIDProcessData);
+    DevInfo->bCallBackIndex = USB_InstallCallBackFunction(USBHIDProcessData);
 
     IntrfDesc = (INTRF_DESC*)(Desc + Start);
-    DescEnd = Desc + ((CNFG_DESC*)Desc)->TotalLength; // Calculate the end of descriptor block
-    EndpDesc = (ENDP_DESC*)((char*)IntrfDesc + IntrfDesc->DescLength);
+    DescEnd = Desc + ((CNFG_DESC*)Desc)->wTotalLength; // Calculate the end of descriptor block
+    EndpDesc = (ENDP_DESC*)((char*)IntrfDesc + IntrfDesc->bDescLength);
 
     //Select correct endpoint
-    for (;(EndpDesc->DescType != DESC_TYPE_INTERFACE) && ((UINT8*)EndpDesc < DescEnd);
-        EndpDesc = (ENDP_DESC*)((UINT8 *)EndpDesc + EndpDesc->DescLength)){
-        if (!(EndpDesc->DescLength)) {
+    for (;(EndpDesc->bDescType != DESC_TYPE_INTERFACE) && ((UINT8*)EndpDesc < DescEnd);
+        EndpDesc = (ENDP_DESC*)((UINT8 *)EndpDesc + EndpDesc->bDescLength)){
+        if (!(EndpDesc->bDescLength)) {
             break;  // Br if 0 length desc (should never happen, but...)
         }
 
-        if (EndpDesc->DescType == DESC_TYPE_HID ) {
-            HidDesc = (HID_DESC*)EndpDesc;
-             continue;
-        }
+		if (EndpDesc->bDescType == DESC_TYPE_HID ) {
+			HidDesc = (HID_DESC*)EndpDesc;
+			continue;
+		}
 
-        if (EndpDesc->DescType != DESC_TYPE_ENDPOINT ) {
+        if (EndpDesc->bDescType != DESC_TYPE_ENDPOINT ) {
             continue;
         }
 
         //
         // Check for and configure Interrupt endpoint if present
         //
-        if ((EndpDesc->EndpointFlags & EP_DESC_FLAG_TYPE_BITS) !=
-             EP_DESC_FLAG_TYPE_INT) {    // Bit 1-0: 10 = Endpoint does interrupt transfers
-             continue;
+        if ((EndpDesc->bEndpointFlags & EP_DESC_FLAG_TYPE_BITS) !=
+                EP_DESC_FLAG_TYPE_INT) {    // Bit 1-0: 10 = Endpoint does interrupt transfers
+			continue;
         }
 
-        if (EndpDesc->EndpointAddr & EP_DESC_ADDR_DIR_BIT) {
+        if (EndpDesc->bEndpointAddr & EP_DESC_ADDR_DIR_BIT) {
             if (DevInfo->IntInEndpoint == 0) {
-                DevInfo->IntInEndpoint = EndpDesc->EndpointAddr;
-                DevInfo->IntInMaxPkt = EndpDesc->MaxPacketSize;
-                DevInfo->PollInterval = EndpDesc->PollInterval;
-                USB_DEBUG(DEBUG_INFO, 3, "interrupt in endpoint addr: %x, max packet size: %x\n", 
-                          DevInfo->IntInEndpoint, DevInfo->IntInMaxPkt);
+                DevInfo->IntInEndpoint = EndpDesc->bEndpointAddr;
+                DevInfo->IntInMaxPkt = EndpDesc->wMaxPacketSize;
+                DevInfo->bPollInterval = EndpDesc->bPollInterval;
             }
         } else {
             if (DevInfo->IntOutEndpoint == 0) {
-                DevInfo->IntOutEndpoint = EndpDesc->EndpointAddr;
-                DevInfo->IntOutMaxPkt = EndpDesc->MaxPacketSize;
-                USB_DEBUG(DEBUG_INFO, 3, "interrupt out endpoint addr: %x, max packet size: %x\n", 
-                          DevInfo->IntOutEndpoint, DevInfo->IntOutMaxPkt);
+                DevInfo->IntOutEndpoint = EndpDesc->bEndpointAddr;
+                DevInfo->IntOutMaxPkt = EndpDesc->wMaxPacketSize;
             }
         }
     }
@@ -246,31 +229,31 @@ USBHIDConfigureDevice (
         return 0;
     }
 
-        //Set protocol (Option)
-    if (((gUsbData->UsbFeature & USB_BOOT_PROTOCOL_SUPPORT) == USB_BOOT_PROTOCOL_SUPPORT) &&
-        !(DevInfo->IncompatFlags & USB_INCMPT_SET_BOOT_PROTOCOL_NOT_SUPPORTED) ||
-        (DevInfo->IncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
-                //
-                // Send the set protocol command, wValue = 0 (Boot protocol)
-                //
-        Request.RequestType = HID_RQ_SET_PROTOCOL;
-        Request.Value = 0;              // 0: Boot Protocol
-        Request.Index = DevInfo->InterfaceNum;
-        Request.DataLength = 0;
-                
+	//Set protocol (Option)
+    if ((BOOT_PROTOCOL_SUPPORT != 0) &&
+        !(DevInfo->wIncompatFlags & USB_INCMPT_SET_BOOT_PROTOCOL_NOT_SUPPORTED) ||
+        (DevInfo->wIncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
+		//
+		// Send the set protocol command, wValue = 0 (Boot protocol)
+		//
+        Request.wRequestType = HID_RQ_SET_PROTOCOL;
+        Request.wValue = 0;		// 0: Boot Protocol
+        Request.wIndex = DevInfo->bInterfaceNum;
+        Request.wDataLength = 0;
+		
         UsbControlTransfer(HcStruc, DevInfo, Request, 100, NULL);
-        } 
+	} 
 
     //Send Set_Idle command 
-    Request.RequestType = HID_RQ_SET_IDLE;
-    Request.Value = 0;
-    Request.Index = DevInfo->InterfaceNum;
-    Request.DataLength = 0;
-        
+    Request.wRequestType = HID_RQ_SET_IDLE;
+    Request.wValue = 0;
+    Request.wIndex = DevInfo->bInterfaceNum;
+    Request.wDataLength = 0;
+	
     UsbControlTransfer(HcStruc, DevInfo, Request, 100, NULL);
 
-    if (((gUsbData->UsbFeature & USB_BOOT_PROTOCOL_SUPPORT) == 0) && 
-        !(DevInfo->IncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
+    if ((BOOT_PROTOCOL_SUPPORT == 0) && 
+        !(DevInfo->wIncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
         Status = HidGetReportDescriptor(HcStruc, DevInfo, HidDesc);
         if (Status == USB_ERROR) {
             return 0;
@@ -281,7 +264,7 @@ USBHIDConfigureDevice (
         }
     } else {
         DevInfo->PollingLength = DevInfo->IntInMaxPkt;
-        switch (DevInfo->Protocol) {
+        switch (DevInfo->bProtocol) {
             case PROTOCOL_KEYBOARD:
                 DevInfo->HidDevType = HID_DEV_TYPE_KEYBOARD;
                 break;
@@ -295,52 +278,18 @@ USBHIDConfigureDevice (
         }
     }
 
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "UsbHidDevType: %x, PollingLength: %x, PollInterval: %x\n", 
-        DevInfo->HidDevType, DevInfo->PollingLength, DevInfo->PollInterval);
-
     if (DevInfo->HidDevType & HID_DEV_TYPE_KEYBOARD) { 
         if (!(USBKBDConfigureDevice(DevInfo))) {
             return 0;
         }
     }
 
-    // Microsoft Wired Keyboard 600 (two interface)
-    // Sometimes the device won't send data, because the first interrupt 
-    // data is too quick to send after we configure the second interface.
-    // Workaround: we activates the polling with the first interface
-    // when configuring the second interface
-    if ((DevInfo->VendorId == MICROSOFT_VID) && (DevInfo->DeviceId == MICROSOFT_KB600_DID)) {
-       DEV_INFO*   FirstDevInfo;
-       UINTN       DeviceIndex;
-
-       if (DevInfo->IntInEndpoint == (EP_DESC_ADDR_DIR_BIT | EP_DESC_ADDR_EP_NUM_1))  return DevInfo;
-
-       for (DeviceIndex = 1; DeviceIndex < gUsbData->MaxDevCount; DeviceIndex++) {
-           FirstDevInfo = &gUsbDataList->DevInfoTable[DeviceIndex];
-           if ((FirstDevInfo->Flag & DEV_INFO_VALIDPRESENT) != DEV_INFO_VALIDPRESENT) {
-               continue;
-           }
-           if (FirstDevInfo->DeviceAddress == DevInfo->DeviceAddress) {
-               if (FirstDevInfo->IntInEndpoint == (EP_DESC_ADDR_DIR_BIT | EP_DESC_ADDR_EP_NUM_1)) {
-                   if ((FirstDevInfo->HidDevType & (HID_DEV_TYPE_KEYBOARD | HID_DEV_TYPE_MOUSE | 
-                      HID_DEV_TYPE_POINT | HID_DEV_TYPE_CONSUMER | HID_DEV_TYPE_OEM)) &&
-                      (FirstDevInfo->PollingLength != 0) && (FirstDevInfo->PollInterval != 0)) {
-                       if (!((FirstDevInfo->HidDevType & HID_DEV_TYPE_MOUSE) && (gUsbData->UsbStateFlag & USB_FLAG_EFIMS_DIRECT_ACCESS))) {
-                           AmiUsbActivatePolling(HcStruc, FirstDevInfo);
-                       }
-                   }
-                   break;
-               }
-           }
-       }
-    }
-
     //Active polling
     if ((DevInfo->HidDevType & (HID_DEV_TYPE_KEYBOARD | HID_DEV_TYPE_MOUSE |
-        HID_DEV_TYPE_POINT | HID_DEV_TYPE_CONSUMER | HID_DEV_TYPE_OEM)) &&
-        (DevInfo->PollingLength != 0) && (DevInfo->PollInterval != 0)) {
-        if (!((DevInfo->HidDevType & HID_DEV_TYPE_MOUSE) && (gUsbData->UsbStateFlag & USB_FLAG_EFIMS_DIRECT_ACCESS))) {
-            AmiUsbActivatePolling(HcStruc, DevInfo);
+        HID_DEV_TYPE_POINT | HID_DEV_TYPE_OEM)) &&
+        (DevInfo->PollingLength != 0) && (DevInfo->bPollInterval != 0)) {
+        if (!((DevInfo->HidDevType & HID_DEV_TYPE_MOUSE) && (gUsbData->dUSBStateFlag & USB_FLAG_EFIMS_DIRECT_ACCESS))) {
+            (*gUsbData->aHCDriverTable[GET_HCD_INDEX(HcStruc->bHCType)].pfnHCDActivatePolling)(HcStruc, DevInfo);
         }
     }
 
@@ -351,23 +300,22 @@ USBHIDConfigureDevice (
     This routine disconnects the keyboard by freeing
     the USB keyboard device table entry
 
-    @param DevInfo   Pointer to DeviceInfo structure
-    
-    @retval USB_SUCCESS      On success
-    @retval USB_ERROR        Failure
+    @param fpDevInfo   Pointer to DeviceInfo structure
+
+    @retval USB_SUCCESS/USB_ERROR
 
 **/
+
 UINT8
 USBHIDDisconnectDevice (
-    DEV_INFO    *DevInfo
+	DEV_INFO	*DevInfo
 )
 {
-    HC_STRUC  *HcStruc = gHcTable[DevInfo->HcNumber - 1];
-    UINT16    Index;
-    UINT8     *MemBlockEnd = (UINT8*)((UINTN)gUsbDataList->MemBlockStart + (gUsbData->MemPages << 12));
+    HC_STRUC    *HcStruc = gUsbData->HcTable[DevInfo->bHCNumber - 1];
+    UINT16      Index;
 
     // Stop polling the endpoint
-    AmiUsbDeactivatePolling(HcStruc, DevInfo);
+    (*gUsbData->aHCDriverTable[GET_HCD_INDEX(HcStruc->bHCType)].pfnHCDDeactivatePolling)(HcStruc, DevInfo);
     DevInfo->IntInEndpoint = 0;
 
     if (DevInfo->HidDevType & HID_DEV_TYPE_KEYBOARD) {
@@ -376,24 +324,9 @@ USBHIDDisconnectDevice (
 
     if (DevInfo->HidReport.Fields != NULL) {
         for (Index = 0; Index < DevInfo->HidReport.FieldCount; Index++) {
-            
-            if (((UINTN)DevInfo->HidReport.Fields[Index] < (UINTN)gUsbDataList->MemBlockStart) ||
-                (((UINTN)DevInfo->HidReport.Fields[Index] + sizeof(HID_REPORT_FIELD)) > (UINTN)MemBlockEnd)) {
-                DevInfo->HidReport.Fields = NULL;
-                DevInfo->HidReport.ReportDescLen = 0;
-                return USB_SUCCESS;
-            }
-                                 
             if (DevInfo->HidReport.Fields[Index]->Usages != NULL) {
-                if (((UINTN)DevInfo->HidReport.Fields[Index]->Usages < (UINTN)gUsbDataList->MemBlockStart) ||
-                    (((UINTN)DevInfo->HidReport.Fields[Index]->Usages + sizeof(UINT16)) > (UINTN)MemBlockEnd)) {
-                    DevInfo->HidReport.Fields = NULL;
-                    DevInfo->HidReport.ReportDescLen = 0;
-                    return USB_SUCCESS;
-                }
-
                 USB_MemFree(DevInfo->HidReport.Fields[Index]->Usages, 
-                GET_MEM_BLK_COUNT(DevInfo->HidReport.Fields[Index]->UsageCount * sizeof(UINT16)));
+                    GET_MEM_BLK_COUNT(DevInfo->HidReport.Fields[Index]->UsageCount * sizeof(UINT16)));
                 DevInfo->HidReport.Fields[Index]->Usages = NULL;
             }
             USB_MemFree(DevInfo->HidReport.Fields[Index], GET_MEM_BLK_COUNT(sizeof(HID_REPORT_FIELD)));
@@ -405,67 +338,72 @@ USBHIDDisconnectDevice (
         DevInfo->HidReport.ReportDescLen = 0;
     }
 
-    return USB_SUCCESS;         
+    return USB_SUCCESS; 	
 } 
 
 /**
-    This routine disconnects the keyboard by freeing
-    the USB keyboard device table entry
+    @param ExtractInputReportData
 
-    @param Report    Pointer to report data buffer
-    @param Offset    The offset for report data
-    @param Size      requested report size
-    @retval Data     report data
+
+ intput:      
+
+    @retval 
 
 **/
+
 UINT32
 ExtractInputReportData (
     UINT8   *Report,
-    UINT32  Offset,
+    UINT16  Offset,
     UINT16  Size
 )
 {
-    UINT32      *Start;
-    UINT8       BitOffset;
-    UINT32      Data = 0;
+    UINT32	*Start;
+    UINT8	BitOffset;
+    UINT32	Data = 0;
 
     ASSERT(Data <= 32);
     Start = (UINT32*)((UINTN)Report + (Offset >> 3));
-    BitOffset = (UINT8)Offset & 0x7;
+    BitOffset = Offset & 0x7;
     Data = (*Start >> BitOffset) & ((0x1 << Size) - 1);
 
     return Data;
 }
 
 /**
+    @param GetItemData
+
     This funtion copy data of the item to buffer.
 
-    @param  Item         Pointer to HID item structure
-    @param  Buffer       The target buffer
-    @param  BufferSize   Buffer size
-    @retval None
+ intput:      
+
+    @retval 
+
 **/
+
 VOID
 GetItemData (
-    HID_ITEM        *Item,
-    VOID            *Buffer,
-    UINT32          BufferSize
+	HID_ITEM	*Item,
+	VOID		*Buffer,
+	UINT32		BufferSize
 )
 {
-    UINT32  Size = Item->bSize > BufferSize ? BufferSize : Item->bSize;
-    
-    ZeroMem(Buffer, BufferSize);
-    CopyMem(Buffer, &Item->data, Size);
+	UINT32	Size = Item->bSize > BufferSize ? BufferSize : Item->bSize;
+	ZeroMem(Buffer, BufferSize);
+	CopyMem(Buffer, &Item->data, Size);
 }
- 
+
 /**
+    @param AddUsage
 
     This funtion adds usage into usage table.
-    @param  Field         Pointer to HID REPORT Field structure
-    @param  Usage         The usage that need to be added
-    @retval None
+
+ intput:      
+
+    @retval 
 
 **/
+
 VOID
 AddUsage (
     HID_REPORT_FIELD    *Field,
@@ -480,14 +418,16 @@ AddUsage (
 }
 
 /**
+    @param Add_Hid_Field
+
     Add input or output item.
 
-    @param  Report        Report data
-    @param  Field         Pointer to HID REPORT Field structure
+ intput:      
 
-    @retval None
+    @retval 
 
 **/
+
 VOID
 AddField (
     HID_REPORT          *Report,
@@ -542,12 +482,12 @@ AddField (
                 } else {
                     Report->Flag |= HID_REPORT_FLAG_ABSOLUTE_DATA;
                 }
-                Report->AbsMaxX = (UINT16)NewField->LogicalMax;
+                Report->AbsMaxX = NewField->LogicalMax;
             }
             if ((NewField->UsagePage == HID_UP_GENDESK) && (NewField->Usages[Index] == HID_GENDESK_Y)) {
-                Report->AbsMaxY= (UINT16)NewField->LogicalMax;
+                Report->AbsMaxY= NewField->LogicalMax;
             }
-            USB_DEBUG(DEBUG_INFO, 4, "%02X ", NewField->Usages[Index]);         
+            USB_DEBUG(DEBUG_INFO, 4, "%02X ", NewField->Usages[Index]); 	
             if ((Index & 0xF) == 0xF) {
                 USB_DEBUG(DEBUG_INFO, 4, "\n"); 
             }
@@ -573,14 +513,15 @@ AddField (
 }
 
 /**
-    Parsing Hid data
-    @param  DevInfo       Pointer to DevInfo structure
-    @param  Field         Pointer to HID REPORT Field structure
-    @param  Item          Pointer to HID Item structure
-    
-    @retval Zero          Finish to parsing
+    @param HidParserMain
+
+
+ intput:      
+
+    @retval 
 
 **/
+
 UINT8
 HidParserMain(
     DEV_INFO            *DevInfo,
@@ -597,37 +538,28 @@ HidParserMain(
 
             // Check if it is application collection
             if (Data == HID_COLLECTION_APPLICATION) {
-                switch (Field->UsagePage) {                 // Generic Desktop
-                    case HID_UP_GENDESK:
-                        switch (Field->Usages[Field->UsageCount - 1]) {
-                            case HID_GENDESK_POINTER:       // Pointer
-                            case HID_GENDESK_MOUSE:         // Mouse
-                                DevInfo->HidDevType |= HID_DEV_TYPE_MOUSE;
-                                break;
-                            case HID_GENDESK_KEYBOARD:      // Keyboard
-                            case HID_GENDESK_KEYPAD:        // KeyPad
-                                DevInfo->HidDevType |= HID_DEV_TYPE_KEYBOARD;
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    case HID_UP_CONSUMER:
-                        DevInfo->HidDevType |= HID_DEV_TYPE_CONSUMER;
-                        break;
-                    case HID_UP_DIGITIZER:                  // Digitizer
-                        if (Field->Usages[Field->UsageCount - 1] == HID_DIGITIZER_TOUCH_SCREEN) {
-                            DevInfo->HidDevType |= HID_DEV_TYPE_POINT;
-                        }
-                        break;
-                    case HID_UP_FIDO:
-                        if (Field->Usages[Field->UsageCount - 1] == HID_FIDO_U2F_AD) {
-                            USB_DEBUG(DEBUG_INFO, 3, "FIDO U2F is detected\n");
-                            DevInfo->HidDevType |= HID_DEV_TYPE_U2F;
-                        }
-                        break;
-                    default:
-                        break;
+                if (Field->UsagePage == HID_UP_GENDESK) { 	// Generic Desktop
+                    switch (Field->Usages[Field->UsageCount - 1]) {
+                        case HID_GENDESK_POINTER:       // Pointer
+                        case HID_GENDESK_MOUSE:		    // Mouse
+                            DevInfo->HidDevType |= HID_DEV_TYPE_MOUSE;
+                            break;
+                        case HID_GENDESK_KEYBOARD:		// Keyboard
+                        case HID_GENDESK_KEYPAD:		// KeyPad
+                            DevInfo->HidDevType |= HID_DEV_TYPE_KEYBOARD;
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (Field->UsagePage == HID_UP_DIGITIZER) {	// Digitizer
+                    if (Field->Usages[Field->UsageCount - 1] == HID_DIGITIZER_TOUCH_SCREEN) {
+                        DevInfo->HidDevType |= HID_DEV_TYPE_POINT;
+                    }
+                } else if (Field->UsagePage == HID_UP_FIDO) {
+                    if (Field->Usages[Field->UsageCount - 1] == HID_FIDO_U2F_AD) {
+                        USB_DEBUG(DEBUG_INFO, 3, "FIDO U2F is detected\n");
+                        DevInfo->HidDevType |= HID_DEV_TYPE_U2F;
+                    }
                 }
                 // Call all the OEM hooks that wants to check hid type.
                 for (OemHookIndex = 0; HidTypeCheckFunctionsList[OemHookIndex]; OemHookIndex++) {
@@ -648,8 +580,8 @@ HidParserMain(
             // Microstep USB Keyboard (Sonix Technology Co chip) workaround
             // The report descriptor has an error, Modifier keys is bitmap data, but 
             // it reports as array data. We force variable flag for Modifier keys input item.
-            if ((DevInfo->VendorId == 0x0C45) && 
-                ((DevInfo->DeviceId == 0x7603) || (DevInfo->DeviceId == 0x7624))) {
+            if ((DevInfo->wVendorId == 0x0C45) && 
+                ((DevInfo->wDeviceId == 0x7603) || (DevInfo->wDeviceId == 0x7624))) {
                 if ((Field->UsagePage == HID_UP_KEYBOARD) && 
                     (Field->UsageMin == HID_KEYBOARD_LEFT_CTRL) &&
                     (Field->UsageMax == HID_KEYBOARD_RIGHT_GUI)) {
@@ -663,7 +595,7 @@ HidParserMain(
         case HID_MAIN_ITEM_TAG_OUTPUT:
             GetItemData(Item, &Field->Flag, sizeof(Field->Flag));
             Field->Flag &= 7;
-            if ((Field->UsagePage == HID_UP_LED) && (Field->UsageCount > 0)) {
+            if (Field->UsagePage == HID_UP_LED) {
                 AddField(&DevInfo->HidReport, Field);
             }
             break;
@@ -674,7 +606,7 @@ HidParserMain(
 
         default:
             break;
-        }
+	}
 
     //Clear Local Item
     ZeroMem(Field->Usages, Field->UsageCount * sizeof(UINT16));
@@ -682,16 +614,17 @@ HidParserMain(
     Field->UsageMin = 0;
     Field->UsageMax = 0;
     
-    return 0;
+	return 0;
 }  
 
 /**
-    Parsing Hid report global item
-    @param  DevInfo       Pointer to DevInfo structure
-    @param  Field         Pointer to HID REPORT Field structure
-    @param  Item          Pointer to HID Item structure
-    
-    @retval USB_SUCCESS          Finish to parsing
+    @param HidParserGlobal
+
+    Parsing Global item 
+
+ intput:      
+
+    @retval 
 
 **/
 UINT8
@@ -713,7 +646,7 @@ HidParserGlobal (
         case HID_GLOBAL_ITEM_TAG_LOGICAL_MINIMUM:
             GetItemData(Item, &Field->LogicalMin, sizeof(Field->LogicalMin));
             break;
-                
+		
         case HID_GLOBAL_ITEM_TAG_LOGICAL_MAXIMUM:
             GetItemData(Item, &Field->LogicalMax, sizeof(Field->LogicalMax));
             break;
@@ -721,7 +654,7 @@ HidParserGlobal (
         case HID_GLOBAL_ITEM_TAG_PHYSICAL_MINIMUM:
             GetItemData(Item, &Field->PhysicalMin, sizeof(Field->PhysicalMin));
             break;
-                
+		
         case HID_GLOBAL_ITEM_TAG_PHYSICAL_MAXIMUM:
             GetItemData(Item, &Field->PhysicalMax, sizeof(Field->PhysicalMax));
             break;
@@ -733,85 +666,88 @@ HidParserGlobal (
         case HID_GLOBAL_ITEM_TAG_REPORT_SIZE:
             GetItemData(Item, &Field->ReportSize, sizeof(Field->ReportSize));
             break;
-                
+		
         case HID_GLOBAL_ITEM_TAG_REPORT_COUNT:
             GetItemData(Item, &Field->ReportCount, sizeof(Field->ReportCount));
             break;
-                
+		
         case HID_GLOBAL_ITEM_TAG_REPORT_ID:
             GetItemData(Item, &Field->ReportId, sizeof(Field->ReportId));
             break;
-                
+		
         default:
             break;
-        } 
+	} 
 
     return USB_SUCCESS;
 }
 
 /**
-    Parsing Hid report local item
-    @param  DevInfo       Pointer to DevInfo structure
-    @param  Field         Pointer to HID REPORT Field structure
-    @param  Item          Pointer to HID Item structure
-    
-    @retval USB_SUCCESS          Finish to parsing
+    @param HidParserLocal
+
+    Parsing Local item
+
+ intput:      
+
+    @retval 
 
 **/
 UINT8
 HidParserLocal (
-    DEV_INFO                *DevInfo,
-    HID_REPORT_FIELD        *Field,
-    HID_ITEM                *Item
+    DEV_INFO			*DevInfo,
+	HID_REPORT_FIELD	*Field,
+	HID_ITEM			*Item
 )
 {
-    UINT32  Data;
+	UINT32	Data;
 
-    GetItemData(Item, &Data, sizeof(Data));
+	GetItemData(Item, &Data, sizeof(Data));
 
-    switch (Item->bTag) {
-        case HID_LOCAL_ITEM_TAG_USAGE:
-             AddUsage(Field, (UINT16)Data);
-             break;
-                
-        case HID_LOCAL_ITEM_TAG_USAGE_MINIMUM:
-             Field->UsageMin = (UINT16)Data;
-             break;
-                
-        case HID_LOCAL_ITEM_TAG_USAGE_MAXIMUM:
-             Field->UsageMax = (UINT16)Data;
+	switch (Item->bTag) {
+		case HID_LOCAL_ITEM_TAG_USAGE:
+			AddUsage(Field, Data);
+			break;
+		
+		case HID_LOCAL_ITEM_TAG_USAGE_MINIMUM:
+			Field->UsageMin = Data;
+			break;
+		
+		case HID_LOCAL_ITEM_TAG_USAGE_MAXIMUM:
+			Field->UsageMax = Data;
             
-             // Medigenic-Esterline USB keboard (Advanced Input Devices chip) 
-             // workaround. This device reports the wrong local minimum for 
-             // keyboard data in its report descriptor, local minimum should be 0x00.
+            // Medigenic-Esterline USB keboard (Advanced Input Devices chip) 
+            // workaround. This device reports the wrong local minimum for 
+            // keyboard data in its report descriptor, local minimum should be 0x00.
             
-             if ((DevInfo->VendorId == 0x059d) && (DevInfo->DeviceId == 0x0708)) {
-                 if ((Field->UsageMin == 0x01) && (Field->UsageMax == 0x65)) {
-                     Field->UsageMin = 0x00;
-                 }
-             }
+            if ((DevInfo->wVendorId == 0x059d) && (DevInfo->wDeviceId == 0x0708)) {
+                if ((Field->UsageMin == 0x01) && (Field->UsageMax == 0x65)) {
+                    Field->UsageMin = 0x00;
+                }
+            }
 
-             for (Data = Field->UsageMin; Data <= Field->UsageMax; Data++) {
-                 AddUsage(Field, (UINT16)Data);
-             }
-             break;
-                
-        default:        
-             break;
-    }
+			for (Data = Field->UsageMin; Data <= Field->UsageMax; Data++) {
+				AddUsage(Field, Data);
+			}
+			break;
+		
+		default:	
+			break;
+	}
 
-    return USB_SUCCESS;
+	return USB_SUCCESS;
 }
 
 /**
-    Parsing Hid report reserved item
-    @param  DevInfo       Pointer to DevInfo structure
-    @param  Field         Pointer to HID REPORT Field structure
-    @param  Item          Pointer to HID Item structure
-    
-    @retval USB_SUCCESS          Finish to parsing
+    @param HidParserReserved
+
+    Parsing Reserved item
+
+ intput:      
+
+    @retval 
 
 **/
+
 UINT8
 HidParserReserved(
     DEV_INFO            *DevInfo,
@@ -823,13 +759,15 @@ HidParserReserved(
 } 
 
 /**
-    Parsing Hid report descriptor
-    @param  DevInfo       Pointer to DevInfo structure
-    @param  ReportDesc    Pointer to report descriptor data
-    
-    @retval None
+    @param HidParseReportDescriptor
+
+              
+ intput:      
+              
+    @retval 
 
 **/
+
 VOID
 HidParseReportDescriptor (
     DEV_INFO    *DevInfo,
@@ -839,27 +777,23 @@ HidParseReportDescriptor (
     HID_REPORT          *Report = &DevInfo->HidReport;
     UINT8               *Start = ReportDesc;
     UINT8               *End = Start + Report->ReportDescLen;
-    UINT16              Usages[0x300]; 
-    HID_REPORT_FIELD    Field; 
-    HID_ITEM            Item;
+    UINT16              Usages[0x300] = {0};
+    HID_REPORT_FIELD    Field = {0};
+    HID_ITEM            Item = {0};
     UINT8               Data;
     UINT8               DataSize[] = {0, 1, 2, 4};
 
     static  UINT8 (*DispatchType[]) (DEV_INFO *DevInfo, 
                 HID_REPORT_FIELD *Field, HID_ITEM *Item) = {
-                     HidParserMain,
-                     HidParserGlobal,
-                     HidParserLocal,
-                     HidParserReserved
-                };
-
-    SetMem(&Usages, sizeof(Usages), 0);
-    SetMem(&Field, sizeof(Field), 0);
-    SetMem(&Item, sizeof(Item), 0);
+        HidParserMain,
+        HidParserGlobal,
+        HidParserLocal,
+        HidParserReserved
+    };
 
     Field.Usages = Usages;
     Field.MaxUsages = COUNTOF(Usages);
-        
+	
     while (Start < End) {
         Data = *Start++;
 
@@ -870,7 +804,7 @@ HidParseReportDescriptor (
         if ((Start + Item.bSize) > End) {
             break;
         }
-        
+	
         CopyMem(&Item.data.u32, Start, Item.bSize);
         Start += Item.bSize;
         DispatchType[Item.bType](DevInfo, &Field, &Item);
@@ -880,14 +814,17 @@ HidParseReportDescriptor (
 }
 
 /**
+    @param CalculateInputReportDataLength
 
     This function calculates max data length to be reported 
     in the HID device.
-    
-    @param  DevInfo       Pointer to DevInfo structure
-    
-    @retval MaxLength     Max data length
+
+ intput:      
+              
+    @retval 
+
 **/
+
 UINT16
 CalculateInputReportDataLength (
     DEV_INFO    *DevInfo
@@ -895,13 +832,11 @@ CalculateInputReportDataLength (
 {
     UINT8               Index = 0;
     HID_REPORT_FIELD    *Field = NULL;
-    UINT16              ReportLen[256]; 
+    UINT16              ReportLen[256] = {0};
     UINT16              Length = 0;
     UINT16              MaxLength = 0;
     UINT16              ReportId = 0;
 
-    SetMem(&ReportLen, sizeof(ReportLen), 0);
-    
     for (Index = 0; Index < DevInfo->HidReport.FieldCount; Index++) {
         Field = DevInfo->HidReport.Fields[Index];
         if (!(Field->Flag & HID_REPORT_FIELD_FLAG_INPUT)) {
@@ -909,7 +844,7 @@ CalculateInputReportDataLength (
         }
 
         ReportId = Field->ReportId;
-        ReportLen[ReportId] += (UINT16)(Field->ReportCount * Field->ReportSize);
+        ReportLen[ReportId] += Field->ReportCount * Field->ReportSize;
     }
 
     for (ReportId = 0; ReportId < COUNTOF(ReportLen); ReportId++) {
@@ -929,21 +864,20 @@ CalculateInputReportDataLength (
 }
 
 /**
+    @param HidGetReportDescriptor
 
-    Get report descriptor
-    
-    @param  HcStruc       Pointer to HcStruc structure   
-    @param  DevInfo       Pointer to DevInfo structure
-    @param  HidDesc       Pointer to Hid descriptor data
-    
-    @retval USB_SUCCESS      On success
-    @retval USB_ERROR        Failure
+
+ intput:      
+              
+    @retval 
+
 **/
+
 UINT8
 HidGetReportDescriptor(
-    HC_STRUC    *HcStruc,
-    DEV_INFO    *DevInfo,
-    HID_DESC    *HidDesc
+    HC_STRUC	*HcStruc,
+    DEV_INFO	*DevInfo,
+    HID_DESC	*HidDesc
 )
 {
     UINT8       *ReportDesc = NULL;
@@ -951,25 +885,23 @@ HidGetReportDescriptor(
     UINT8       Status = USB_ERROR;
     DEV_REQ     Request = {0};
 
-    SetMem(&Request, sizeof(Request), 0);
-
     if (HidDesc == NULL) {
         return USB_ERROR;
     }
 
-    if (HidDesc->DescriptorLength == 0) {
+    if (HidDesc->bDescriptorLength == 0) {
         return USB_SUCCESS;
     }
 
-    ReportDesc = USB_MemAlloc(GET_MEM_BLK_COUNT(HidDesc->DescriptorLength));
+    ReportDesc = USB_MemAlloc(GET_MEM_BLK_COUNT(HidDesc->bDescriptorLength));
     if (ReportDesc == NULL) {
         return USB_ERROR;
     }
 
-    Request.RequestType = HID_RQ_GET_DESCRIPTOR;
-    Request.Value = DESC_TYPE_REPORT << 8;
-    Request.Index = DevInfo->InterfaceNum;
-    Request.DataLength = HidDesc->DescriptorLength;
+    Request.wRequestType = HID_RQ_GET_DESCRIPTOR;
+    Request.wValue = DESC_TYPE_REPORT << 8;
+    Request.wIndex = DevInfo->bInterfaceNum;
+    Request.wDataLength = HidDesc->bDescriptorLength;
 
     for (Index = 0; Index < 3; Index++) {
         Status = UsbControlTransfer(HcStruc, DevInfo, Request, USB_GET_REPORT_DESC_TIMEOUT_MS, ReportDesc);
@@ -978,29 +910,24 @@ HidGetReportDescriptor(
         }
     }
     if (Status == USB_SUCCESS) {
-        DevInfo->HidReport.ReportDescLen = HidDesc->DescriptorLength ;          
+        DevInfo->HidReport.ReportDescLen = HidDesc->bDescriptorLength ;		
         HidParseReportDescriptor(DevInfo, ReportDesc);
         DevInfo->PollingLength = CalculateInputReportDataLength(DevInfo);
-    } else {
-        USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "Failed to get the report descriptor\n");
     }
-    USB_MemFree(ReportDesc, GET_MEM_BLK_COUNT(HidDesc->DescriptorLength));
+    USB_MemFree(ReportDesc, GET_MEM_BLK_COUNT(HidDesc->bDescriptorLength));
     return Status;
 }
 
 /**
+    @param USBHIDProcessData
 
-    Process HID data
-    
-    @param HcStruc      Pointer to HCStruc
-    @param DevInfo      Pointer to device information structure
-    @param Td           Pointer to the polling TD
-    @param Buffer       Pointer to the data buffer
-    @param DataLength   Data length
-    
-    @retval USB_SUCCESS      On success
-    @retval USB_ERROR        Failure
-**/
+
+ intput:      
+              
+    @retval 
+
+**/ 
+
 UINT8
 USBHIDProcessData(
     HC_STRUC    *HcStruc,
@@ -1013,30 +940,30 @@ USBHIDProcessData(
     UINT8               DataType = 0;
     UINT8               i;
     UINT16              j;
-    HID_REPORT_FIELD    *Field = NULL;
+	HID_REPORT_FIELD 	*Field = NULL;
     UINT16              OemHookIndex;
 
     // Call all the OEM hooks that wants to check hid buffer.
     for (OemHookIndex = 0; HidBufferCheckFunctionsList[OemHookIndex]; OemHookIndex++) {
         if (HidBufferCheckFunctionsList[OemHookIndex](DevInfo, Buffer, DataLength)) {
             return USB_SUCCESS;
-        }
-    }
+		}
+	}
 
-    DataType = DevInfo->Protocol;
+    DataType = DevInfo->bProtocol;
 
-    if (DevInfo->HidReport.Flag & HID_REPORT_FLAG_REPORT_PROTOCOL) {
-       for (i = 0; i < DevInfo->HidReport.FieldCount; i++) {
-            Field = DevInfo->HidReport.Fields[i];
+	if (DevInfo->HidReport.Flag & HID_REPORT_FLAG_REPORT_PROTOCOL) {
+		for (i = 0; i < DevInfo->HidReport.FieldCount; i++) {
+			Field = DevInfo->HidReport.Fields[i];
 
-            //Check is input?
-            if (!(Field->Flag & HID_REPORT_FIELD_FLAG_INPUT)) {
-                  continue;
-            }
-            //if report id exist, check first byte
-            if (Field->ReportId != 0 && Field->ReportId != Buffer[0]) {
-                continue;
-            }
+			//Check is input?
+			if (!(Field->Flag & HID_REPORT_FIELD_FLAG_INPUT)) {
+				continue;
+			}
+			//if report id exist, check first byte
+			if (Field->ReportId != 0 && Field->ReportId != Buffer[0]) {
+				continue;
+			}
 
             if (Field->UsagePage == HID_UP_KEYBOARD) {
                 DataType = HID_BTYPE_KEYBOARD;
@@ -1044,18 +971,19 @@ USBHIDProcessData(
             //Check X,Y
             if ((Field->UsagePage == HID_UP_GENDESK) && (Field->UsageCount != 0)) {
                 for (j = 0; j < Field->UsageCount; j++) {
-                   //find X
-                     if (Field->Usages[j] == HID_GENDESK_X) {
+                //find X
+                    if (Field->Usages[j] == HID_GENDESK_X) {
                         if (Field->Flag & HID_REPORT_FIELD_FLAG_RELATIVE) {
                             DataType = HID_BTYPE_MOUSE;
                         } else {
                             DataType = HID_BTYPE_POINT;
                         }
-                     }
-                }    
+                    }
+
+				}    
             }
-       }
-    }
+		}
+	}
 
     switch(DataType) {
         case HID_BTYPE_KEYBOARD:
@@ -1074,60 +1002,52 @@ USBHIDProcessData(
 }
 
 /**
+    @param CheckInputMode
 
-    Check input mode
-    
-    @param DevInfo      Pointer to device information structure
-    @param Field        Pointer to the HID_REPORT_FIELD structure
-    
-    @retval None
 
-**/
+ intput:      
+              
+    @retval 
+
+**/ 
 VOID
 CheckInputMode(
-        DEV_INFO                *DevInfo,
-        HID_REPORT_FIELD        *Field
+	DEV_INFO			*DevInfo,
+	HID_REPORT_FIELD	*Field
 )
 {
-    HC_STRUC        *HcStruc = gHcTable[DevInfo->HcNumber - 1];
-    DEV_REQ         Request;
-    UINT8           *Buffer;
-    UINT16          Index;
-
-    SetMem(&Request, sizeof(Request), 0);
+	HC_STRUC	*HcStruc = gUsbData->HcTable[DevInfo->bHCNumber - 1];
+	DEV_REQ		Request = {0};
+    UINT8		*Buffer;
+	UINT16		Index;
     
-    Buffer = NULL;
-
     for (Index = 0; Index < Field->UsageCount; Index++) {
-         if (Field->UsagePage == HID_UP_DIGITIZER) {
-             if (Field->Usages[Index] == HID_DIGITIZER_DEVICE_MODE && 
-                 Field->Usages[Index + 1] == HID_DIGITIZER_DEVICE_IDENTIFIER) {
-                        Request.RequestType = HID_RQ_SET_REPORT;
-                        Request.Value = (0x03 << 8) | Field->ReportId;
-                        Request.Index = DevInfo->InterfaceNum;
-                        Request.DataLength = 3;
+		if (Field->UsagePage == HID_UP_DIGITIZER) {
+        	if (Field->Usages[Index] == HID_DIGITIZER_DEVICE_MODE && 
+                Field->Usages[Index + 1] == HID_DIGITIZER_DEVICE_IDENTIFIER) {
+				Request.wRequestType = HID_RQ_SET_REPORT;
+				Request.wValue = (0x03 << 8) | Field->ReportId;
+				Request.wIndex = DevInfo->bInterfaceNum;
+				Request.wDataLength = 3;
 
-                        Buffer = USB_MemAlloc (1); 
-                        if (Buffer == NULL) {
-                            break;
-                        }
-                        Buffer[0] = Field->ReportId;
-                        Buffer[1] = 2;
-                        Buffer[2] = 0;
+				Buffer = USB_MemAlloc (1); 
+				Buffer[0] = Field->ReportId;
+				Buffer[1] = 2;
+				Buffer[2] = 0;
 
-                        UsbControlTransfer(HcStruc, DevInfo, Request, 100, Buffer);
+				UsbControlTransfer(HcStruc, DevInfo, Request, 100, Buffer);
 
-                        USB_MemFree(Buffer, 1);
-                        break;
-             }
-         }
+				USB_MemFree(Buffer, 1);
+            	break;
+        	}
+        }
     }
 }
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

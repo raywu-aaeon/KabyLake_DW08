@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -112,7 +112,7 @@ EFI_STATUS OhciPeiUsbEntryPoint (
     // Initialize the EFI_PEI_STALL_PPI interface
     //-------------------------------------------
     Status = (**PeiServices).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid,
-        0, NULL, (VOID**)&StallPpi );
+        0, NULL, &StallPpi );
     if ( EFI_ERROR( Status ) ) {
         return EFI_UNSUPPORTED;
     }
@@ -250,7 +250,7 @@ OhciHcActivatePolling(
 
     // Allocate ED and TD, making allocation 64-Bytes aligned
     Status = (**PeiServices).AllocatePool( PeiServices,
-        sizeof(OHCI_ED)+sizeof(OHCI_TD)+64, (VOID**)&Ptr );
+        sizeof(OHCI_ED)+sizeof(OHCI_TD)+64, &Ptr );
 
     ASSERT(Status == EFI_SUCCESS);
     if (EFI_ERROR(Status)) {
@@ -463,7 +463,8 @@ VOID OhciInitHC (
     UINTN      MemPages;
     EFI_STATUS Status;
     EFI_PHYSICAL_ADDRESS TempPtr;
-    POHCI_DESC_PTRS      pstOHCIDescPtrs;
+    EFI_PEI_PCI_CFG2_PPI  *PciCfgPpi = OhciDevPtr->PciCfgPpi;
+    POHCI_DESC_PTRS      pstOHCIDescPtrs = &(OhciDevPtr->stOHCIDescPtrs);
     OHCI_HC_REGISTERS    *OhciHcReg =
         (OHCI_HC_REGISTERS *) OhciDevPtr->UsbHostControllerBaseAddress;
 
@@ -518,12 +519,13 @@ VOID OhciInitHC (
 
     MemPages = ( 7 *
                 sizeof (OHCI_ED) ) + ( 6 * sizeof(OHCI_TD) ) / 0x1000 + 1;
-    Status = (**PeiServices).AllocatePages(PeiServices, EfiBootServicesData, MemPages, &TempPtr);
-    ASSERT(Status == EFI_SUCCESS);
+    Status = (**PeiServices).AllocatePages(
+        PeiServices,
+        EfiBootServicesData,
+        MemPages,
+        &TempPtr
+             );
 
-    if (EFI_ERROR(Status)) {
-        return;
-    }
     pPtr = (UINT8 *) ( (UINTN) TempPtr );
     ZeroMem(pPtr, 7 * sizeof (OHCI_ED) + 6 * sizeof(OHCI_TD));
     if (!pPtr) {
@@ -1709,7 +1711,7 @@ EFI_STATUS OhciHcWaitForTransferComplete (
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

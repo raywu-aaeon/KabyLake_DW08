@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -27,11 +27,11 @@
 
 // XHCI Device Context structures
 //---------------------------------------------------------------------------
-typedef struct _XHCI_DCBAA XHCI_DCBAA;
-struct _XHCI_DCBAA{
+
+typedef struct {
     UINT64  ScratchpadBufArrayPtr;
     UINT64  DevCntxtAddr[255];
-};   // Total size is 256 64-bit entries, or 2K Bytes (section 6.1)
+} XHCI_DCBAA;   // Total size is 256 64-bit entries, or 2K Bytes (section 6.1)
 
 // XHCI PCI Configuration Registers
 //---------------------------------------------------------------------------
@@ -44,101 +44,94 @@ struct _XHCI_DCBAA{
 
 // Host Controller Capability Registers
 //---------------------------------------------------------------------------
-typedef struct _HCSPARAMS1 HCSPARAMS1;
-struct _HCSPARAMS1{
+
+typedef struct {
     UINT32  MaxSlots    : 8;    // Number of Device Slots
     UINT32  MaxIntrs    : 11;   // Number of Interrupters
     UINT32  Rsvd        : 5;    // Reserved
     UINT32  MaxPorts    : 8;    // Number of ports
-};
+} HCSPARAMS1;
 
-typedef struct _HCSPARAMS2 HCSPARAMS2;
-struct _HCSPARAMS2{
-    UINT32  Ist                   : 4;         // Isochronous Scheduling Threshold
-    UINT32  ErstMax               : 4;         // Event Ring Segment Table Max
-    UINT32  Rsvd                  : 13;
-    UINT32  MaxScratchPadBufsHi   : 5;         // Max Scratchpad Buffers (Max Scratchpad Bufs Hi).
-    UINT32  Spr                   : 1;         // Scratchpad restore
-    UINT32  MaxScratchPadBufsLo   : 5;         // Max Scratchpad Buffers (Max Scratchpad Bufs Lo).
-};
+typedef struct {
+    UINT32  Ist         : 4;            // Isochronous Scheduling Threshold
+    UINT32  ErstMax     : 4;            // Event Ring Segment Table Max
+    UINT32  Rsvd        : 13;
+    UINT32  MaxScratchPadBufsHi   : 5;  // Max Scratchpad Buffers (Max Scratchpad Bufs Hi).
+    UINT32  Spr         : 1;            // Scratchpad restore
+    UINT32  MaxScratchPadBufsLo   : 5;  // Max Scratchpad Buffers (Max Scratchpad Bufs Lo).
+} HCSPARAMS2;
 
-typedef struct _HCSPARAMS3 HCSPARAMS3;
-struct _HCSPARAMS3{
-    UINT32  U1DevExitLatency      : 8;         // Worst case latency of U1->U0, mks
-    UINT32  Rsvd                  : 8;    
-    UINT32  U2DevExitLatency      : 16;        // Worst case latency of U2->U0, mks
-};
+typedef struct {
+    UINT32  U1DevExitLatency    : 8;    // Worst case latency of U1->U0, mks
+    UINT32  Rsvd                : 8;    
+    UINT32  U2DevExitLatency    : 16;   // Worst case latency of U2->U0, mks
+} HCSPARAMS3;
 
-typedef struct _HCCPARAMS1 HCCPARAMS1;
-struct _HCCPARAMS1{
-    UINT32  Ac64          : 1;    // 64-bit Addressing Capability
-    UINT32  Bnc           : 1;    // Bandwidth Negotiation Capability
-    UINT32  Csz           : 1;    // Context data structures width (32 or 64 bit)
-    UINT32  Ppc           : 1;    // Power Port Control
-    UINT32  Pind          : 1;    // Port Indicators
-    UINT32  Lhrc          : 1;    // Light HC Reset Capability
-    UINT32  Ltc           : 1;    // Latency Tolerance Capability
-    UINT32  Nss           : 1;    // No Secondary SID Support
-    UINT32  Pae           : 1;    // Parse All Event Data
-    UINT32  Spc           : 1;    // Stopped - Short Packet Capability
-    UINT32  Sec           : 1;    // Stopped EDTLA Capability
-    UINT32  Cfc           : 1;    // Contiguous Frame ID Capability
-    UINT32  MaxPsaSize    : 4;    // Maximum Primary Stream Array Size
-    UINT32  Xecp          : 16;   // xHCI Extended Capabilities Pointer
-};
+typedef struct {
+    UINT32  Ac64        : 1;    // 64-bit Addressing Capability
+    UINT32  Bnc         : 1;    // Bandwidth Negotiation Capability
+    UINT32  Csz         : 1;    // Context data structures width (32 or 64 bit)
+    UINT32  Ppc         : 1;    // Power Port Control
+    UINT32  Pind        : 1;    // Port Indicators
+    UINT32  Lhrc        : 1;    // Light HC Reset Capability
+    UINT32  Ltc         : 1;    // Latency Tolerance Capability
+    UINT32  Nss         : 1;    // No Secondary SID Support
+    UINT32  Pae         : 1;    // Parse All Event Data
+    UINT32  Spc         : 1;    // Stopped - Short Packet Capability
+    UINT32  Sec         : 1;    // Stopped EDTLA Capability
+    UINT32  Cfc         : 1;    // Contiguous Frame ID Capability
+    UINT32  MaxPsaSize  : 4;    // Maximum Primary Stream Array Size
+    UINT32  Xecp        : 16;   // xHCI Extended Capabilities Pointer
+} HCCPARAMS1;
 
-typedef struct _HCCPARAMS2 HCCPARAMS2;
-struct _HCCPARAMS2{
-    UINT32  U3c           : 1;    // U3 Entry Capability
-    UINT32  Cmc           : 1;    // Configure Endpoint Command Max Exit Latency Too Large Capability
-    UINT32  Fsc           : 1;    // Force Save Context Capability
-    UINT32  Ctc           : 1;    // Compliance Transition Capability
-    UINT32  Lec           : 1;    // Large ESIT Payload Capability
-    UINT32  Cic           : 1;    // Configuration Information Capability
-    UINT32  Rsvd          : 26;
-};
+typedef struct {
+    UINT32  U3c         : 1;    // U3 Entry Capability
+    UINT32  Cmc         : 1;    // Configure Endpoint Command Max Exit Latency Too Large Capability
+    UINT32  Fsc         : 1;    // Force Save Context Capability
+    UINT32  Ctc         : 1;    // Compliance Transition Capability
+    UINT32  Lec         : 1;    // Large ESIT Payload Capability
+    UINT32  Cic         : 1;    // Configuration Information Capability
+    UINT32  Rsvd        : 26;
+} HCCPARAMS2;
 
-typedef struct _XHCI_HC_CAP_REGS XHCI_HC_CAP_REGS;
-struct _XHCI_HC_CAP_REGS{
-    UINT8           CapLength;       // 00
-    UINT8           Rsvd;            // 01
-    UINT16          HciVersion;      // 02
-    HCSPARAMS1      HcsParams1;      // 04
-    HCSPARAMS2      HcsParams2;      // 08
-    HCSPARAMS3      HcsParams3;      // 0C
+typedef struct {
+    UINT8           CapLength;      // 00
+    UINT8           Rsvd;           // 01
+    UINT16          HciVersion;     // 02
+    HCSPARAMS1      HcsParams1;     // 04
+    HCSPARAMS2      HcsParams2;     // 08
+    HCSPARAMS3      HcsParams3;     // 0C
     HCCPARAMS1      HccParams1;      // 10
-    UINT32          DbOff;           // 14
-    UINT32          RtsOff;          // 18
-    HCCPARAMS2      HccParams2;      // 1C
-};
+    UINT32          DbOff;          // 14
+    UINT32          RtsOff;         // 18
+    HCCPARAMS2      HccParams2;     // 1C
+} XHCI_HC_CAP_REGS;
 
 //
 // Capability registers offset
 //
-#define XHCI_CAPLENGTH_OFFSET               0x00   // Capability Register length
-#define XHCI_HCIVERSION_OFFSET              0x02   // Interface Version Number
-#define XHCI_HCSPARAMS1_OFFSET              0x04   // Structural Parameters 1
-#define XHCI_HCSPARAMS2_OFFSET              0x08   // Structural Parameters 2
-#define XHCI_HCSPARAMS3_OFFSET              0x0c   // Structural Parameters 3
-#define XHCI_HCCPARAMS1_OFFSET              0x10   // Capability Parameters 1
-#define XHCI_DBOFF_OFFSET                   0x14   // Doorbell Offset
-#define XHCI_RTSOFF_OFFSET                  0x18   // Runtime Register Space Offset
-#define XHCI_HCCPARAMS2_OFFSET              0x1C   // Capability Parameters 2
+#define XHCI_CAPLENGTH_OFFSET               0x00 // Capability Register length
+#define XHCI_HCIVERSION_OFFSET              0x02 // Interface Version Number
+#define XHCI_HCSPARAMS1_OFFSET              0x04 // Structural Parameters 1
+#define XHCI_HCSPARAMS2_OFFSET              0x08 // Structural Parameters 2
+#define XHCI_HCSPARAMS3_OFFSET              0x0c // Structural Parameters 3
+#define XHCI_HCCPARAMS1_OFFSET              0x10 // Capability Parameters 1
+#define XHCI_DBOFF_OFFSET                   0x14 // Doorbell Offset
+#define XHCI_RTSOFF_OFFSET                  0x18 // Runtime Register Space Offset
+#define XHCI_HCCPARAMS2_OFFSET              0x1C // Capability Parameters 2
 
 //-----------------------------------------------------------
 // Host Controller Operational Registers
-// USB Command Register Bit definitions (USBCMD)
 //-----------------------------------------------------------
-typedef struct _XHCI_USBCMD XHCI_USBCMD;
-struct _XHCI_USBCMD{
+typedef struct {
     union {
         UINT32  AllBits;    // can be used for clearing status
         struct {
-            UINT32      RunStop : 1;    // RunStop
+            UINT32      RunStop : 1;
             UINT32      HcRst   : 1;    // HC Reset
             UINT32      Inte    : 1;    // Interrupter Enable
             UINT32      HsEe    : 1;    // Host System Error Enable
-            UINT32      Rsvd    : 3;    // Reserved
+            UINT32      Rsvd    : 3;
             UINT32      LhcRst  : 1;    // Light Host Controller Reset
             UINT32      Css     : 1;    // Controller Save State
             UINT32      Crs     : 1;    // Controller Restore State
@@ -147,25 +140,24 @@ struct _XHCI_USBCMD{
             UINT32      Rsvd1   : 20;
         } Field;
     };
-};
+} XHCI_USBCMD;
 
-#define XHCI_CMD_RS         BIT0       // RunStop bit
-#define XHCI_CMD_HCRST      BIT1       // HC Reset bit bit
-#define XHCI_CMD_INTE       BIT2       // Interrupter Enable bit
-#define XHCI_CMD_HSEE       BIT3       // Host system error enable bit
-#define XHCI_CMD_LHCRST     BIT4       // Light host controller reset
+#define XHCI_CMD_RS         BIT0
+#define XHCI_CMD_HCRST      BIT1
+#define XHCI_CMD_INTE       BIT2
+#define XHCI_CMD_HSEE       BIT3
+#define XHCI_CMD_LHCRST     BIT4
 
-typedef struct _XHCI_USBSTS XHCI_USBSTS;
-struct _XHCI_USBSTS{
+typedef struct {
     union {
         UINT32  AllBits;    // can be used for clearing status
         struct {
-            UINT32      HcHalted    : 1;    // Host controller Halted
-            UINT32      Rsvd1       : 1;    // Reserved
+            UINT32      HcHalted    : 1;
+            UINT32      Rsvd1       : 1;
             UINT32      Hse         : 1;    // Host System Error
             UINT32      Eint        : 1;    // Event Interrupt
             UINT32      Pcd         : 1;    // Port Change Detect
-            UINT32      Rsvd2       : 3;    // Reserved
+            UINT32      Rsvd2       : 3;
             UINT32      Sss         : 1;    // Save State Status
             UINT32      Rss         : 1;    // Restore State Status
             UINT32      Sre         : 1;    // Save/Restore Error
@@ -174,7 +166,7 @@ struct _XHCI_USBSTS{
             UINT32      Rsvd3       : 19;
         } Field;
     };
-};
+} XHCI_USBSTS;
 
 #define XHCI_STS_HALTED                 BIT0
 #define XHCI_STS_HOSTSYSTEM_ERROR       BIT2
@@ -186,62 +178,51 @@ struct _XHCI_USBSTS{
 #define XHCI_STS_CNR                    BIT11
 #define XHCI_STS_HCE                    BIT12
 
-
-typedef struct _XHCI_CRCR XHCI_CRCR;
-struct _XHCI_CRCR{
+typedef struct {
     UINT32      Rcs         : 1;    // Ring Cycle State
     UINT32      Cs          : 1;    // Command Stop
     UINT32      Ca          : 1;    // Command Abort
     UINT32      Crr         : 1;    // Command Ring Running
-    UINT32      Rsvd        : 2;    // Reserved
+    UINT32      Rsvd        : 2;
     UINT32      CrPointer   : 26;   // Command Ring Pointer
-};
+} XHCI_CRCR;
 
-#define XHCI_PORT_CONNECT     BIT0
-#define XHCI_PORT_ENABLE      BIT1
-#define XHCI_PORT_RESET       BIT4
-#define XHCI_PORT_RESET_CHG   BIT21
+#define XHCI_PORT_CONNECT   BIT0
+#define XHCI_PORT_ENABLE    BIT1
+#define XHCI_PORT_RESET     BIT4
+#define XHCI_PORT_RESET_CHG BIT21
 
 
 // Port speed definitions as read from PortSpeed field of PORTSC
-#define XHCI_DEVSPEED_UNDEFINED             0
-#define XHCI_DEVSPEED_FULL                  1
-#define XHCI_DEVSPEED_LOW                   2
-#define XHCI_DEVSPEED_HIGH                  3
-#define XHCI_DEVSPEED_SUPER                 4
-#define XHCI_DEVSPEED_SUPER_PLUS            5
+#define XHCI_DEVSPEED_UNDEFINED         0
+#define XHCI_DEVSPEED_FULL              1
+#define XHCI_DEVSPEED_LOW               2
+#define XHCI_DEVSPEED_HIGH              3
+#define XHCI_DEVSPEED_SUPER             4
+#define XHCI_DEVSPEED_SUPER_PLUS        5
 
 // Port link definitions
-#define  XHCI_PORT_LINK_U0                   0
-#define  XHCI_PORT_LINK_U1                   1
-#define  XHCI_PORT_LINK_U2                   2
-#define  XHCI_PORT_LINK_U3                   3
-#define  XHCI_PORT_LINK_DISABLED             4
-#define  XHCI_PORT_LINK_RXDETECT             5
-#define  XHCI_PORT_LINK_INACTIVE             6
-#define  XHCI_PORT_LINK_POLLING              7
-#define  XHCI_PORT_LINK_RECOVERY             8
-#define  XHCI_PORT_LINK_HOT_RESET            9
-#define  XHCI_PORT_LINK_COMPLIANCE_MODE     10
-#define  XHCI_PORT_LINK_TEST_MODE           11
-#define  XHCI_PORT_LINK_RESUME              15
+#define	XHCI_PORT_LINK_U0				0
+#define	XHCI_PORT_LINK_U1				1
+#define	XHCI_PORT_LINK_U2				2
+#define	XHCI_PORT_LINK_U3				3
+#define	XHCI_PORT_LINK_DISABLED			4
+#define	XHCI_PORT_LINK_RXDETECT			5
+#define	XHCI_PORT_LINK_INACTIVE			6
+#define	XHCI_PORT_LINK_POLLING			7
+#define	XHCI_PORT_LINK_RECOVERY			8
+#define	XHCI_PORT_LINK_HOT_RESET		9
+#define	XHCI_PORT_LINK_COMPLIANCE_MODE	10
+#define	XHCI_PORT_LINK_TEST_MODE		11
+#define	XHCI_PORT_LINK_RESUME			15
 
-#define XHCI_PORT_LINK_INACTIVE_TIMEOUT     12
-#define XHCI_PORT_LINK_POLLING_TIMEOUT     500
-#define XHCI_PORT_LINK_RECOVERY_TIMEOUT    200
-#define XHCI_PCS_PR_TIMEOUT                200
-
-#define XHCI_PCS_PLS_OFFSET 5
-#define XHCI_PCS_PORT_SPEED_OFFSET  10
-
-typedef struct _XHCI_PORTSC XHCI_PORTSC;
-struct _XHCI_PORTSC{
+typedef struct {
     union {
         UINT32  AllBits;    // can be used for clearing status
         struct {
             UINT32      Ccs         : 1;    // 0 Current Connect Status - RO
             UINT32      Ped         : 1;    // 1 Port Enabled/Disabled  - RW1CS
-            UINT32      RsvdZ1      : 1;    // 2 Reserved
+            UINT32      RsvdZ1      : 1;    // 2
             UINT32      Oca         : 1;    // 3 Over-current Active     - RO
             UINT32      Pr          : 1;    // 4 Port Reset              - RW1S
             UINT32      Pls         : 4;    // 5..8 Port Link State      - RWS
@@ -256,34 +237,29 @@ struct _XHCI_PORTSC{
             UINT32      Prc         : 1;    // 21 Port Reset Change      - RW1CS
             UINT32      Plc         : 1;    // 22 Port Link State Change - RW1CS
             UINT32      Cec         : 1;    // 23 Port Config Error Change  - RW1CS/RsvdZ
-            UINT32      Cas         : 1;    // 24 Cold Attach Status     - RO
+            UINT32      Cas      	: 1;    // 24 Cold Attach Status     - RO
             UINT32      Wce         : 1;    // 25 Wake on Connect Enable      - RWS
             UINT32      Wde         : 1;    // 26 Wake on Disconnect Enable   - RWS
             UINT32      Woe         : 1;    // 27 Wake on Over-current Enable - RWS
-            UINT32      RsvdZ2      : 2;    // 28..29 Reserved
+            UINT32      RsvdZ2      : 2;    // 28..29
             UINT32      Dr          : 1;    // 30 Device Removable (0 removable) - RO
             UINT32      Wpr         : 1;    // 31 Warm Port Reset - RW1S/RsvdZ
         } Field;
     };
-};
+} XHCI_PORTSC;
 
 #define XHCI_PCS_CCS    BIT0
 #define XHCI_PCS_PED    BIT1
 #define XHCI_PCS_OCA    BIT3
 #define XHCI_PCS_PR     BIT4
-#define XHCI_PCS_PLS    (BIT5 | BIT6 | BIT7 | BIT8)
 #define XHCI_PCS_PP     BIT9
-#define XHCI_PCS_PORT_SPEED (BIT10 | BIT11 | BIT12 | BIT13)
 #define XHCI_PCS_LWS    BIT16
 #define XHCI_PCS_CSC    BIT17
-#define XHCI_PCS_PEC    BIT18
 #define XHCI_PCS_WRC    BIT19
-#define XHCI_PCS_OCC    BIT20
 #define XHCI_PCS_PRC    BIT21
 #define XHCI_PCS_WPR    BIT31
 
-typedef struct _XHCI_HC_OP_REGS XHCI_HC_OP_REGS;
-struct _XHCI_HC_OP_REGS{
+typedef struct {
     XHCI_USBCMD UsbCmd;     // 00
     XHCI_USBSTS UsbSts;     // 04
     UINT32      PageSize;   // 08
@@ -293,7 +269,7 @@ struct _XHCI_HC_OP_REGS{
     UINT8       Rsvd2[16];  // 20
     UINT64      DcbAap;     // 30 Device Context Base Address Array Pointer
     UINT32      Config;     // 38 Max Device Slots Enabled
-};
+} XHCI_HC_OP_REGS;
 
 //
 // Operational registers offset
@@ -308,60 +284,43 @@ struct _XHCI_HC_OP_REGS{
 #define XHCI_PORTSC_OFFSET                  0x0400 // Port Status and Control Register Offset
 
 
-#define   CRCR_RING_CYCLE_STATE   BIT0
-#define   CRCR_COMMAND_STOP       BIT1
-#define   CRCR_COMMAND_ABORT      BIT2
-#define   CRCR_COMMAND_RUNNING    BIT3
+#define CRCR_RING_CYCLE_STATE	BIT0
+#define	CRCR_COMMAND_STOP		BIT1
+#define	CRCR_COMMAND_ABORT		BIT2
+#define CRCR_COMMAND_RUNNING	BIT3
 
-//
-// Event Ring Segment Table Entry (spec 6.5)
-//
-typedef struct _XHCI_ER_SEGMENT_ENTRY XHCI_ER_SEGMENT_ENTRY;
-struct _XHCI_ER_SEGMENT_ENTRY{
+// 6.5
+typedef struct {
     UINT64      RsBase;
     UINT16      RsSize;
     UINT16      Rsvd1;
     UINT32      Rsvd2;
-};
+} XHCI_ER_SEGMENT_ENTRY;
 
 // Interrupt Moderation Interval (5.5.2.2)
 // Minimum inter-interrupt interval, in 250ns units. The value of 4000 makes 1ms interval.
 #define XHCI_IMODI 4000
-#define XHCI_KEYREPEAT_IMODI_16MS     REPEAT_INTERVAL_16MS * 4000
-#define XHCI_KEYREPEAT_IMODC_16MS     REPEAT_INTERVAL_16MS * 4000
-#define XHCI_KEYREPEAT_IMODI_8MS      REPEAT_INTERVAL_8MS * 4000
-#define XHCI_KEYREPEAT_IMODC_8MS      REPEAT_INTERVAL_8MS * 4000
+#define XHCI_KEYREPEAT_IMODI        REPEAT_INTERVAL * 4000
+#define XHCI_KEYREPEAT_IMODC        REPEAT_INTERVAL * 4000
 
 // Note: the following structure defines 32-bit and 64-bits fields 
 // without detailing; this MMIO data must be accessed using Dword
 // access for 32-bit fields and Qword access for 64-bit, Section 5.5.
-typedef struct _XHCI_INTERRUPTER_REGS XHCI_INTERRUPTER_REGS;
-struct _XHCI_INTERRUPTER_REGS{
-    UINT32  IMan;     // Interrupter Management
-    UINT32  IMod;     // Interrupter Moderation
-    UINT32  Erstz;    // Event Ring Segment Table Size
-    UINT32  RsrvP;    // Reserved
-    UINT64  Erstba;   // Event Ring Segment Table Base Address
-    UINT64  Erdp;     // Event Ring Dequeue Pointer
-};
+typedef struct {
+    UINT32  IMan;   // Interrupter Management
+    UINT32  IMod;   // Interrupter Moderation
+    UINT32  Erstz;  // Event Ring Segment Table Size
+    UINT32  RsrvP;
+    UINT64  Erstba; // Event Ring Segment Table Base Address
+    UINT64  Erdp;   // Event Ring Dequeue Pointer
+} XHCI_INTERRUPTER_REGS;
 
+typedef struct {
+    UINT32                  MfIndex;
+    UINT32                  Reserved[7];
+    XHCI_INTERRUPTER_REGS   IntRegs[1024];
+} XHCI_HC_RT_REGS;
 
-//
-// Host Controller Runtime Registers (spec 5.5)
-//
-typedef struct _XHCI_HC_RT_REGS XHCI_HC_RT_REGS;
-struct _XHCI_HC_RT_REGS{
-    UINT32                  MfIndex;            //Microframe Index
-    UINT32                  Reserved[7];        //Reserved
-    XHCI_INTERRUPTER_REGS   IntRegs[1024];      //Interrupter Register
-};
-
-
-//
-//TRB Type (Spec6.4.6)
-//TRB Types fall into three categories; Command, Event, or Transfer.
-//These categories relate to the TRB Ring that specific TRB(s) may appear on.
-//
 typedef enum {
     XhciTNormal = 1,
     XhciTSetupStage, // 2
@@ -400,8 +359,7 @@ typedef enum {
 //---------------------------------------------------------
 // Slot context definitions, Section 6.2.2
 //---------------------------------------------------------
-typedef struct _XHCI_SLOT_CONTEXT XHCI_SLOT_CONTEXT;
-struct _XHCI_SLOT_CONTEXT{
+typedef struct {
     UINT32  RouteString     : 20;
     UINT32  Speed           : 4;
     UINT32  RsvdZ1          : 1;
@@ -424,7 +382,7 @@ struct _XHCI_SLOT_CONTEXT{
     UINT32  SlotState       : 5;
 
     UINT32  RsvdO[4];
-};
+} XHCI_SLOT_CONTEXT;
 
 // XHCI_SLOT_CONTEXT.DW3.SlotState definitions
 #define XHCI_SLOT_STATE_DISABLED    0
@@ -448,9 +406,7 @@ struct _XHCI_SLOT_CONTEXT{
 #define XHCI_EPTYPE_BULK_IN     6
 #define XHCI_EPTYPE_INT_IN      7
 
-
-typedef struct _XHCI_EP_CONTEXT XHCI_EP_CONTEXT;
-struct _XHCI_EP_CONTEXT{
+typedef struct {
     UINT32  EpState             : 3;
     UINT32  RsvdZ1              : 5;
     UINT32  Mult                : 2;
@@ -470,7 +426,7 @@ struct _XHCI_EP_CONTEXT{
     UINT16  AvgTrbLength;
     UINT16  MaxEsitPayloadLo;
     UINT32  RsvdO[3];
-};
+} XHCI_EP_CONTEXT;
 
 // XHCI_EP_CONTEXT.DW0.State definitions
 #define XHCI_EP_STATE_DISABLED  0
@@ -492,13 +448,12 @@ struct _XHCI_EP_CONTEXT{
 //---------------------------------------------------------
 // Device context definition
 //---------------------------------------------------------
-typedef struct _XHCI_DEVICE_CONTEXT XHCI_DEVICE_CONTEXT;
-struct _XHCI_DEVICE_CONTEXT{
+typedef struct {
     XHCI_SLOT_CONTEXT   Slot;
     XHCI_EP_CONTEXT     Ep[31];
-};
+} XHCI_DEVICE_CONTEXT;
 
-#define  XHCI_DEVICE_CONTEXT_ENTRIES  32
+#define	XHCI_DEVICE_CONTEXT_ENTRIES	32
 
 // TRB completion codes Table 130
 #define XHCI_TRB_INVALID 0
@@ -542,24 +497,26 @@ struct _XHCI_DEVICE_CONTEXT{
 // Transfer Descriptor Block (TRB) definitions, section 4.11
 //---------------------------------------------------------
 // TRB Template
-typedef struct _XHCI_TRB XHCI_TRB;
-struct _XHCI_TRB{
+typedef struct {
     UINT32  Param1;
     UINT32  Param2;
+
     UINT32  RsvdZ1          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ2      : 9;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ3      : 16;
-};
+} XHCI_TRB;
 
 // Event TRB types, Section 6.4.2
-typedef struct _XHCI_TRANSFER_EVT_TRB XHCI_TRANSFER_EVT_TRB;
-struct _XHCI_TRANSFER_EVT_TRB{
+typedef struct {
     UINT64  TrbPtr;
+
     UINT32  TransferLength  : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ1      : 1;
     UINT32  EventData   : 1;
@@ -568,95 +525,104 @@ struct _XHCI_TRANSFER_EVT_TRB{
     UINT32  EndpointId  : 5;
     UINT32  RzvdZ3      : 3;
     UINT32  SlotId      : 8;
-};
+} XHCI_TRANSFER_EVT_TRB;
 
-typedef struct _XHCI_CMDCOMPLETE_EVT_TRB XHCI_CMDCOMPLETE_EVT_TRB;
-struct _XHCI_CMDCOMPLETE_EVT_TRB{
+typedef struct {
     UINT64  CmdTrbPtr;
+
     UINT32  RsvdZ1          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ2      : 9;
     UINT32  TrbType     : 6;
     UINT32  VfId        : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_CMDCOMPLETE_EVT_TRB;
 
-typedef struct _XHCI_PORTSTSCHG_EVT_TRB XHCI_PORTSTSCHG_EVT_TRB;
-struct _XHCI_PORTSTSCHG_EVT_TRB {
+typedef struct {
     UINT32  RsvdZ1      : 24;
     UINT32  PortId      : 8;
+
     UINT32  RsvdZ2;
+
     UINT32  RsvdZ3          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ4      : 9;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ5      : 16;
-};
+} XHCI_PORTSTSCHG_EVT_TRB;
 
-typedef struct _XHCI_BANDWIDTHRQ_EVT_TRB XHCI_BANDWIDTHRQ_EVT_TRB;
-struct _XHCI_BANDWIDTHRQ_EVT_TRB{
+typedef struct {
     UINT32  RsvdZ1[2];
+
     UINT32  RsvdZ2          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ3      : 9;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ4      : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_BANDWIDTHRQ_EVT_TRB;
 
-typedef struct _XHCI_DORBELL_EVT_TRB XHCI_DORBELL_EVT_TRB;
-struct _XHCI_DORBELL_EVT_TRB {
+typedef struct {
     UINT32  DbReason    : 5;
     UINT32  RsvdZ1      : 27;
+
     UINT32  Rsvd2;
+
     UINT32  RsvdZ3          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ4      : 9;
     UINT32  TrbType     : 6;
     UINT32  VfId        : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_DORBELL_EVT_TRB;
 
-typedef struct _XHCI_HC_EVT_TRB XHCI_HC_EVT_TRB;
-struct _XHCI_HC_EVT_TRB{
+typedef struct {
     UINT32  RsvdZ1[2];
+
     UINT32  RsvdZ2          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ3      : 9;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ4      : 16;
-};
+} XHCI_HC_EVT_TRB;
 
-typedef struct _XHCI_DEVNOTIFY_EVT_TRB XHCI_DEVNOTIFY_EVT_TRB;
-struct _XHCI_DEVNOTIFY_EVT_TRB{
+typedef struct {
     UINT8   RsvdZ1      : 4;
     UINT8   NtfType     : 4;
+
     UINT8   DevNtfData[7];
+
     UINT32  RsvdZ2          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ3      : 9;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ4      : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_DEVNOTIFY_EVT_TRB;
 
-typedef struct _XHCI_MFINDXWRAP_EVT_TRB XHCI_MFINDXWRAP_EVT_TRB;
-struct _XHCI_MFINDXWRAP_EVT_TRB{
+typedef struct {
     UINT32  RsvdZ[2];
+
     UINT32  RsvdZ2          : 24;
     UINT32  CompletionCode  : 8;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ3      : 9;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ4      : 16;
-};
-
+} XHCI_MFINDXWRAP_EVT_TRB;
 
 typedef union {
     XHCI_TRANSFER_EVT_TRB       TransferEvt;
@@ -670,17 +636,16 @@ typedef union {
 } XHCI_EVENT_TRB;
 
 // Command TRB types, Section 6.4.3
-typedef struct _XHCI_COMMON_CMD_TRB XHCI_COMMON_CMD_TRB;
-struct _XHCI_COMMON_CMD_TRB{
+typedef struct {
     UINT32  RsvdZ1[3];
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ2      : 9;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ3      : 16;
-};
+} XHCI_COMMON_CMD_TRB;
 
-typedef struct _XHCI_DISABLESLOT_CMD_TRB XHCI_DISABLESLOT_CMD_TRB;
-struct _XHCI_DISABLESLOT_CMD_TRB{
+typedef struct {
     UINT32  RsvdZ1[3];
 
     UINT32  CycleBit    : 1;
@@ -688,10 +653,9 @@ struct _XHCI_DISABLESLOT_CMD_TRB{
     UINT32  TrbType     : 6;
     UINT32  RsvdZ3      : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_DISABLESLOT_CMD_TRB;
 
-typedef struct _XHCI_ADDRESSDEV_CMD_TRB XHCI_ADDRESSDEV_CMD_TRB;
-struct _XHCI_ADDRESSDEV_CMD_TRB{
+typedef struct {
     UINT64  InpCtxAddress;
     UINT32  RsvdZ1;
     UINT32  CycleBit    : 1;
@@ -700,10 +664,9 @@ struct _XHCI_ADDRESSDEV_CMD_TRB{
     UINT32  TrbType     : 6;
     UINT32  RsvdZ3      : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_ADDRESSDEV_CMD_TRB;
 
-typedef struct _XHCI_CONFIGURE_EP_CMD_TRB XHCI_CONFIGURE_EP_CMD_TRB;
-struct _XHCI_CONFIGURE_EP_CMD_TRB{
+typedef struct {
     UINT64  InpCtxAddress;
     UINT32  RsvdZ1;
     UINT32  CycleBit    : 1;
@@ -712,10 +675,9 @@ struct _XHCI_CONFIGURE_EP_CMD_TRB{
     UINT32  TrbType     : 6;
     UINT32  RsvdZ3      : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_CONFIGURE_EP_CMD_TRB;
 
-typedef struct _XHCI_EVALUATE_CONTEXT_CMD_TRB XHCI_EVALUATE_CONTEXT_CMD_TRB;
-struct _XHCI_EVALUATE_CONTEXT_CMD_TRB{
+typedef struct {
     UINT64  InpCtxAddress;
     UINT32  RsvdZ1;
     UINT32  CycleBit    : 1;
@@ -723,11 +685,11 @@ struct _XHCI_EVALUATE_CONTEXT_CMD_TRB{
     UINT32  TrbType     : 6;
     UINT32  RsvdZ3      : 8;
     UINT32  SlotId      : 8;
-};
+} XHCI_EVALUATE_CONTEXT_CMD_TRB;
 
-typedef struct _XHCI_RESET_EP_CMD_TRB XHCI_RESET_EP_CMD_TRB;
-struct _XHCI_RESET_EP_CMD_TRB{
+typedef struct {
     UINT32  RsvdZ1[3];
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ2      : 8;
     UINT32  Tsp         : 1;
@@ -735,24 +697,25 @@ struct _XHCI_RESET_EP_CMD_TRB{
     UINT32  EndpointId  : 5;
     UINT32  RsvdZ3      : 3;
     UINT32  SlotId      : 8;
-};
+} XHCI_RESET_EP_CMD_TRB;
 
-typedef struct _XHCI_SET_TRPTR_CMD_TRB XHCI_SET_TRPTR_CMD_TRB;
-struct _XHCI_SET_TRPTR_CMD_TRB{
+typedef struct {
     UINT64  TrPointer;
+
     UINT32  RsvdZ1      :16;
     UINT32  StreamId    :16;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ2      : 9;
     UINT32  TrbType     : 6;
     UINT32  EndpointId  : 5;
     UINT32  RsvdZ3      : 3;
     UINT32  SlotId      : 8;
-};
-
-typedef struct _XHCI_STOP_EP_CMD_TRB XHCI_STOP_EP_CMD_TRB;
-struct _XHCI_STOP_EP_CMD_TRB{
+} XHCI_SET_TRPTR_CMD_TRB;
+										//(EIP54300+)>
+typedef struct {
     UINT32  RsvdZ1[3];
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ2      : 9;
     UINT32  TrbType     : 6;
@@ -760,8 +723,8 @@ struct _XHCI_STOP_EP_CMD_TRB{
     UINT32  RsvdZ3      : 2;
     UINT32  Suspend     : 1;
     UINT32  SlotId      : 8;
-};
-
+} XHCI_STOP_EP_CMD_TRB;
+										//<(EIP54300+)
 typedef union {
     XHCI_COMMON_CMD_TRB         GenericCmdTrb;
     XHCI_COMMON_CMD_TRB         NoOpCmdTrb;
@@ -772,12 +735,14 @@ typedef union {
 } XHCI_CMD_TRB;
 
 // Transfer TRB types, Section 6.4.1
-typedef struct _XHCI_NORMAL_XFR_TRB XHCI_NORMAL_XFR_TRB;
-struct _XHCI_NORMAL_XFR_TRB{
+
+typedef struct {
     UINT64  DataBuffer;
+
     UINT32  XferLength  : 17;
     UINT32  TdSize      : 5;
     UINT32  Interrupter : 10;
+
     UINT32  CycleBit    : 1;
     UINT32  EvalNext    : 1;
     UINT32  Isp         : 1;
@@ -786,41 +751,43 @@ struct _XHCI_NORMAL_XFR_TRB{
     UINT32  Ioc         : 1;
     UINT32  Idt         : 1;
     UINT32  RsvdZ1      : 2;
-    UINT32  Bei         : 1;
+	UINT32	Bei			: 1;
     UINT32  TrbType     : 6;
     UINT32  Rsvd2       : 16;
-};
+} XHCI_NORMAL_XFR_TRB;
 
-#define  XHCI_XFER_TYPE_NO_DATA     0
-#define  XHCI_XFER_TYPE_DATA_OUT    2
-#define  XHCI_XFER_TYPE_DATA_IN     3
+#define	XHCI_XFER_TYPE_NO_DATA		0
+#define	XHCI_XFER_TYPE_DATA_OUT		2
+#define	XHCI_XFER_TYPE_DATA_IN		3
 
-typedef struct _XHCI_SETUP_XFR_TRB XHCI_SETUP_XFR_TRB;
-struct _XHCI_SETUP_XFR_TRB{
+typedef struct {
     UINT8   bmRequestType;
     UINT8   bRequest;
     UINT16  wValue;
     UINT16  wIndex;
     UINT16  wLength;
+
     UINT32  XferLength  : 17;
     UINT32  RsvdZ1      : 5;
     UINT32  Interrupter : 10;
+
     UINT32  CycleBit    : 1;
     UINT32  RsvdZ2      : 4;
     UINT32  Ioc         : 1;
     UINT32  Idt         : 1;
     UINT32  RsvdZ3      : 3;
     UINT32  TrbType     : 6;
-    UINT32  Trt         : 2;
+	UINT32	Trt			: 2;
     UINT32  RsvdZ4      : 14;
-};
+} XHCI_SETUP_XFR_TRB;
 
-typedef struct _XHCI_DATA_XFR_TRB XHCI_DATA_XFR_TRB;
-struct _XHCI_DATA_XFR_TRB{
+typedef struct {
     UINT64  DataBuffer;
+
     UINT32  XferLength  : 17;
     UINT32  TdLength    : 5;
     UINT32  Interrupter : 10;
+
     UINT32  CycleBit    : 1;
     UINT32  EvalNext    : 1;
     UINT32  Isp         : 1;
@@ -832,13 +799,14 @@ struct _XHCI_DATA_XFR_TRB{
     UINT32  TrbType     : 6;
     UINT32  Dir         : 1;
     UINT32  Rsvd2       : 15;
-};
+} XHCI_DATA_XFR_TRB;
 
-typedef struct _XHCI_STATUS_XFR_TRB XHCI_STATUS_XFR_TRB;
-struct _XHCI_STATUS_XFR_TRB{
+typedef struct {
     UINT64  RsvdZ1;
+
     UINT32  RsvdZ2      : 22;
     UINT32  Interrupter : 10;
+
     UINT32  CycleBit    : 1;
     UINT32  EvalNext    : 1;
     UINT32  RsvdZ3      : 2;
@@ -848,15 +816,15 @@ struct _XHCI_STATUS_XFR_TRB{
     UINT32  TrbType     : 6;
     UINT32  Dir         : 1;
     UINT32  Rsvd2       : 15;
-};
+} XHCI_STATUS_XFR_TRB;
 
-typedef struct _XHCI_ISOCH_XFR_TRB XHCI_ISOCH_XFR_TRB;
-struct _XHCI_ISOCH_XFR_TRB{
+typedef struct {
     UINT64  DataBuffer;
 
     UINT32  XferLength  : 17;
     UINT32  TdLength    : 5;
     UINT32  Interrupter : 10;
+
     UINT32  CycleBit    : 1;
     UINT32  EvalNext    : 1;
     UINT32  Isp         : 1;
@@ -870,13 +838,14 @@ struct _XHCI_ISOCH_XFR_TRB{
     UINT32  Rsvd2       : 4;
     UINT32  FrameId     : 11;
     UINT32  Sia         : 1;
-};
+} XHCI_ISOCH_XFR_TRB;
 
-typedef struct _XHCI_NOOP_XFR_TRB XHCI_NOOP_XFR_TRB;
-struct _XHCI_NOOP_XFR_TRB{
+typedef struct {
     UINT64  RsvdZ1;
+
     UINT32  RsvdZ2      : 22;
     UINT32  Interrupter : 10;
+
     UINT32  CycleBit    : 1;
     UINT32  EvalNext    : 1;
     UINT32  RsvdZ3      : 2;
@@ -885,7 +854,7 @@ struct _XHCI_NOOP_XFR_TRB{
     UINT32  RsvdZ4      : 4;
     UINT32  TrbType     : 6;
     UINT32  Rsvd2       : 16;
-};
+} XHCI_NOOP_XFR_TRB;
 
 typedef union {
     XHCI_NORMAL_XFR_TRB     NormalXfrTrb;
@@ -898,8 +867,7 @@ typedef union {
 
 
 // Other TRB types
-typedef struct _XHCI_LINK_TRB XHCI_LINK_TRB;
-struct _XHCI_LINK_TRB{
+typedef struct {
     UINT64  NextSegPtr;
 
     UINT32  RsvdZ1      : 22;
@@ -913,22 +881,16 @@ struct _XHCI_LINK_TRB{
     UINT32  RsvdZ3      : 4;
     UINT32  TrbType     : 6;
     UINT32  RsvdZ4      : 16;
-};
+} XHCI_LINK_TRB;
 
-typedef struct _TRB_RING TRB_RING;
-struct _TRB_RING{
+typedef struct {
     XHCI_TRB    *Base;
     UINT32      Size;   // #of TRBs in the ring
     XHCI_TRB*   LastTrb;
     XHCI_TRB*   QueuePtr;
     UINT8       CycleBit;
     UINT8       Pad[27-3*sizeof(VOID*)];    // Make size 32 Bytes
-};
-
-#define INPUT_CONTEXT_OFFSET    0x940
-#define TRANSFER_RING_OFFSET    0x6400
-#define END_POINTS_PADDED       0x20
-#define TRB_RING_PADDED_SIZE    0x20
+} TRB_RING;
 
 // The following definition fixes the size of ring
 // segment to TRBS_PER_SEGMENT * sizeof(XHCI_TRB)
@@ -983,20 +945,18 @@ struct _TRB_RING{
 //---------------------------------------------------------
 // Input context definition
 //---------------------------------------------------------
-typedef struct _XHCI_INPUT_CONTROL_CONTEXT XHCI_INPUT_CONTROL_CONTEXT;  
-struct _XHCI_INPUT_CONTROL_CONTEXT{
+typedef struct {
     UINT32  DropContextFlags;
     UINT32  AddContextFlags;
     UINT32  RzvdZ[6];
-};
+} XHCI_INPUT_CONTROL_CONTEXT;
 
-typedef struct _XHCI_INPUT_CONTEXT XHCI_INPUT_CONTEXT;  
-struct _XHCI_INPUT_CONTEXT{
+typedef struct {
     XHCI_INPUT_CONTROL_CONTEXT  CtlCtx;
     XHCI_DEVICE_CONTEXT         DevCtx;
-};
+} XHCI_INPUT_CONTEXT;
 
-#define  XHCI_INPUT_CONTEXT_ENTRIES  33
+#define	XHCI_INPUT_CONTEXT_ENTRIES	33
 
 //---------------------------------------------------------
 // Extended Capabilities
@@ -1007,31 +967,29 @@ struct _XHCI_INPUT_CONTEXT{
 #define XHCI_EXT_CAP_IO_VIRTUALIZATION          4
 #define XHCI_EXT_CAP_USB_DEBUG_PORT             10
 
-typedef struct _XHCI_EXT_CAP XHCI_EXT_CAP ; 
-struct _XHCI_EXT_CAP{
-    UINT32       CapId:8;       // Capability ID
-    UINT32       NextCapPtr:8;  // Next xHCI Extended Capability Pointer
-    UINT32       Cap:16;        // Capability Specific
-};
+typedef struct {
+    UINT32       CapId:8;		// Capability ID
+    UINT32       NextCapPtr:8;	// Next xHCI Extended Capability Pointer
+    UINT32       Cap:16;		// Capability Specific
+} XHCI_EXT_CAP;
 
 #define XHCI_LEGACY_CTRL_STS_REG        4
 
-#define XHCI_BIOS_OWNED_SEMAPHORE    BIT16
-#define XHCI_OS_OWNED_SEMAPHORE      BIT24
+#define XHCI_BIOS_OWNED_SEMAPHORE		BIT16
+#define XHCI_OS_OWNED_SEMAPHORE			BIT24
 
-typedef struct _XHCI_LEGSUP XHCI_LEGSUP ; 
-struct _XHCI_LEGSUP{
-  UINT32    CapId:8;
-  UINT32    NextCapPtr:8;
-  UINT32    HcBiosOwned:1;
-  UINT32    RsvdP1:7;
-  UINT32    HcOsOwned:1;
-  UINT32    RsvdP2:7;
-};
+typedef struct {
+	UINT32		CapId:8;
+	UINT32		NextCapPtr:8;
+	UINT32		HcBiosOwned:1;
+	UINT32		RsvdP1:7;
+	UINT32		HcOsOwned:1;
+	UINT32		RsvdP2:7;
+} XHCI_LEGSUP;
 
 #define XHCI_SMI_ENABLE                         BIT0
 #define XHCI_SMI_HOST_ERROR_ENABLE              BIT4
-#define XHCI_SMI_OWNERSHIP_CHANGE_ENABLE        BIT13
+#define XHCI_SMI_OWNERSHIP_CHANGE_ENABLE		BIT13
 #define XHCI_SMI_PCI_CMD_ENABLE                 BIT14
 #define XHCI_SMI_PCI_BAR_ENABLE                 BIT15
 #define XHCI_SMI_EVENT_INT                      BIT16
@@ -1041,63 +999,49 @@ struct _XHCI_LEGSUP{
 #define XHCI_SMI_PCI_BAR                        BIT31
 
 typedef union {
-  UINT32    AllBits;
-  struct {
-      UINT32      UsbSmiEnable:1;
-      UINT32      RsvdP1:3;
-      UINT32      UsbHostErrorSmiEnable:1;
-      UINT32      RsvdP2:8;
-      UINT32      UsbOwnershipChangeSmiEnable:1;
-      UINT32      UsbPciCmdSmiEnable:1;
-      UINT32      UsbPciBarSmiEnable:1;
-      UINT32      UsbEventInterruptSmi:1;
-      UINT32      RsvdP3:3;
-      UINT32      UsbHostErrorSmi:1;
-      UINT32      RsvdP4:8;
-      UINT32      UsbOwnershipChangeSmi:1;
-      UINT32      UsbPciCmdSmi:1;
-      UINT32      UsbPciBarSmi:1;
-  };
+	UINT32		AllBits;
+	struct {
+	    UINT32      UsbSmiEnable:1;
+	    UINT32      RsvdP1:3;
+	    UINT32      UsbHostErrorSmiEnable:1;
+	    UINT32      RsvdP2:8;
+	    UINT32      UsbOwnershipChangeSmiEnable:1;
+	    UINT32      UsbPciCmdSmiEnable:1;
+	    UINT32      UsbPciBarSmiEnable:1;
+	    UINT32      UsbEventInterruptSmi:1;
+	    UINT32      RsvdP3:3;
+	    UINT32      UsbHostErrorSmi:1;
+	    UINT32      RsvdP4:8;
+	    UINT32      UsbOwnershipChangeSmi:1;
+	    UINT32      UsbPciCmdSmi:1;
+	    UINT32      UsbPciBarSmi:1;
+	};
 } XHCI_LEGCTLSTS;
 
+typedef struct {
+	XHCI_LEGSUP		LegSup;
+	XHCI_LEGCTLSTS	LegCtlSts;
+} XHCI_EXT_LEG_CAP;
 
-typedef struct _XHCI_EXT_LEG_CAP XHCI_EXT_LEG_CAP;  
-struct _XHCI_EXT_LEG_CAP{
-  XHCI_LEGSUP     LegSup;
-  XHCI_LEGCTLSTS  LegCtlSts;
-};
+typedef struct {
+	struct {
+		UINT32		CapId:8;
+		UINT32		NextCapPtr:8;
+		UINT32		MinorRev:8;
+		UINT32		MajorRev:8;
+	};
 
-//---------------------------------------------------------
-// Extended Capabilities Protocol
-//---------------------------------------------------------
-#define XHCI_EXT_PROTOCOL_MAJOR_REV_02                 0x02
-#define XHCI_EXT_PROTOCOL_MAJOR_REV_03                 0x03
+	UINT32		NameString;
 
-#define XHCI_EXT_PROTOCOL_MINOR_REV_00                 0x00
-#define XHCI_EXT_PROTOCOL_MINOR_REV_01                 0x01
-#define XHCI_EXT_PROTOCOL_MINOR_REV_10                 0x10
-#define XHCI_EXT_PROTOCOL_MINOR_REV_20                 0x20
-
-typedef struct _XHCI_EXT_PROTOCOL XHCI_EXT_PROTOCOL;  
-struct _XHCI_EXT_PROTOCOL{
-  struct {
-      UINT32    CapId:8;
-      UINT32    NextCapPtr:8;
-      UINT32    MinorRev:8;
-      UINT32    MajorRev:8;
-  };
-
-  UINT32    NameString;
-
-  struct {
-      UINT32    PortOffset:8;
-      UINT32    PortCount:8;
-      UINT32    L1c:1;    // L1 Capability
-      UINT32    Hso:1;    // High-speed Only
-      UINT32    Ihi:1;    // Integrated Hub Implemented
-      UINT32    RsvdZ:13;
-  };
-};
+	struct {
+		UINT32		PortOffset:8;
+		UINT32		PortCount:8;
+		UINT32		L1c:1;		// L1 Capability
+		UINT32		Hso:1;		// High-speed Only
+		UINT32		Ihi:1;		// Integrated Hub Implemented
+		UINT32		RsvdZ:13;
+	};
+} XHCI_EXT_PROTOCOL;
 
 #define XHCI_DB_CAP_DCCTRL_REG      0x20
 
@@ -1105,70 +1049,68 @@ struct _XHCI_EXT_PROTOCOL{
 
 #pragma pack(pop)
 
+										//(EIP60460)>
+#define XHCI_FL100X_VID 0x1b73
+#define XHCI_FL1000_DID 0x1000
+#define XHCI_FL1009_DID 0x1009
+										//<(EIP60460)
+										//(EIP58979+)>
+#define	XHCI_TUSB73X0_VID	0x104C
+#define	XHCI_TUSB73X0_DID	0x8241
+										//<(EIP58979+)
+										//(EIP60327+)>
+#define XHCI_VL800_VID	0x1106
+#define XHCI_VL800_DID	0x3432
+										//<(EIP60327+)
+#define XHCI_EJ168A_VID	0x1B6F
+#define XHCI_EJ168A_DID	0x7023
 
-#define XHCI_FL100X_VID  0x1b73
-#define XHCI_FL1000_DID  0x1000
-#define XHCI_FL1009_DID  0x1009
-
-#define  XHCI_TUSB73X0_VID  0x104C
-#define  XHCI_TUSB73X0_DID  0x8241
-
-#define XHCI_VL800_VID  0x1106
-#define XHCI_VL800_DID  0x3432
-
-#define XHCI_EJ168A_VID  0x1B6F
-#define XHCI_EJ168A_DID  0x7023
-
-#define XHCI_AMD_SB900_VID  0x1022
-#define XHCI_AMD_SB900_DID  0x7812
+#define XHCI_AMD_SB900_VID	0x1022
+#define XHCI_AMD_SB900_DID	0x7812
 
 #define XHCI_NEC_VID 0x1033
 #define XHCI_NEC_200_DID 0x0194
 
 #define XHCI_INTEL_VID  0x8086
 
-typedef struct _XHCI_PENDING_POLLING  XHCI_PENDING_INTERRUPT_TRANSFER;
-struct _XHCI_PENDING_POLLING{
+typedef struct _XHCI_PENDING_POLLING{
     XHCI_NORMAL_XFR_TRB         *Trb;
     UINT16                       TransferredLength;
-};
+}XHCI_PENDING_INTERRUPT_TRANSFER;
 
-typedef struct _USB3_HOST_CONTROLLER  USB3_HOST_CONTROLLER;
-struct _USB3_HOST_CONTROLLER {
+typedef struct _USB3_HOST_CONTROLLER {
     EFI_HANDLE              Controller;
     XHCI_HC_CAP_REGS        CapRegs;
     XHCI_HC_OP_REGS         *OpRegs;
     XHCI_HC_RT_REGS         *RtRegs;
-    UINT32                  UsbLegSupOffSet;
-    XHCI_EXT_PROTOCOL       Usb2Protocol;
-    XHCI_EXT_PROTOCOL       Usb3Protocol;
-    VOID                    *Usb3xProtocol;
+	UINT32                  UsbLegSupOffSet;
+	XHCI_EXT_PROTOCOL		Usb2Protocol;
+	XHCI_EXT_PROTOCOL		Usb3Protocol;
+    XHCI_EXT_PROTOCOL		Usb31Protocol;
     UINT32                  DbCapOffset;
     UINT16                  Vid;
     UINT16                  Did;
     EFI_USB_HC_STATE        HcState;
     UINT32                  PageSize4K;
     UINT8                   SBRN;
-    UINT8                   ContextSize;
+	UINT8					ContextSize;
     XHCI_DCBAA              *DcbaaPtr;
     TRB_RING                CmdRing;
     TRB_RING                EvtRing;
     TRB_RING                *XfrRings;
     UINTN                   XfrTrbs;
-    VOID                    *DeviceContext;
-    VOID                    *InputContext;
+    VOID					*DeviceContext;
+    VOID					*InputContext;
     UINT64                  *ScratchBufEntry;
     XHCI_PENDING_INTERRUPT_TRANSFER PendingInterruptTransfer[XHCI_MAX_PENDING_INTERRUPT_TRANSFER];
-    UINT8                   Usb3xProtocolCount;
-    UINTN                   DcbaaPages;
-};
+} USB3_HOST_CONTROLLER;
 
 #endif
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

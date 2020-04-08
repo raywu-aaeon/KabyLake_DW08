@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -21,20 +21,20 @@
 #define _USBBUS_INC_
 
 #include "Tree.h"
-#include <AmiDef.h>
-#include <UsbDef.h>
+#include "Rt/UsbDef.h"
 #include <Protocol/UsbHc.h>
 #include <Protocol/UsbIo.h>
 #include <Protocol/DevicePath.h>
+#if USB_IAD_PROTOCOL_SUPPORT
 #include <Protocol/AmiUsbIad.h>
+#endif
 
 
 #define USB_MAXLANID          16
 #define USB_MAXCHILDREN       8
 #define USB_MAXCONTROLLERS    4
-#define USB_NAME_STRING_128   128
 
-#define USB_US_LAND_ID        0x0409
+#define USB_US_LAND_ID   0x0409
 
 #pragma pack(push, 1)
 
@@ -72,6 +72,7 @@ typedef struct _USBBUS_HC_T {
 
 #define COMPRESS_EP_ADR(a)              ( a & 0xF )
 
+#if USB_IAD_PROTOCOL_SUPPORT
 
 typedef struct _USBIAD_DATA_T {
     EFI_HANDLE  Handle;
@@ -79,13 +80,14 @@ typedef struct _USBIAD_DATA_T {
 } USBIAD_DATA_T;
 
 typedef struct _IAD_DETAILS {
-    UINT8                                       ConfigIndex;
+    UINT8       ConfigIndex;
     AMI_USB_INTERFACE_ASSOCIATION_DESCRIPTOR    *Descriptor;
-    EFI_HANDLE                                  IadHandle;
-    AMI_USB_IAD_PROTOCOL                        Iad;
-    USBIAD_DATA_T                               *Data;
+    EFI_HANDLE              IadHandle;
+    AMI_USB_IAD_PROTOCOL    Iad;
+    USBIAD_DATA_T           *Data;
 } IAD_DETAILS;
 
+#endif
 
 typedef struct _DEVGROUP_T {
     int                                 type;
@@ -100,16 +102,18 @@ typedef struct _DEVGROUP_T {
     EFI_USB_STRING_DESCRIPTOR           *SerialNumberStrDesc;
     EFI_USB_DEVICE_DESCRIPTOR           dev_desc;
     EFI_USB_CONFIG_DESCRIPTOR           **configs;
-    EFI_USB_ENDPOINT_DESCRIPTOR         *endpoints[0x20];
-    EFI_USB_ENDPOINT_DESCRIPTOR         *a2endpoint[0x20];
+    EFI_USB_ENDPOINT_DESCRIPTOR*        endpoints[0x20];
+    EFI_USB_ENDPOINT_DESCRIPTOR*        a2endpoint[0x20];
     int                                 endpoint_count;
 
     int                                 active_config; // index in configs
     int                                 config_count;
     int                                 f_DevDesc;
     TREENODE_T                          node;
+#if USB_IAD_PROTOCOL_SUPPORT
     UINT8                               iad_count;
     IAD_DETAILS                         *iad_details;
+#endif
 } DEVGROUP_T;
 
 #define USB_MAX_ALT_IF 16
@@ -121,54 +125,52 @@ typedef struct _USBDEV_T {
     EFI_USB2_HC_PROTOCOL                *hc; //USB_HC_ that the controller is attached to
     DEV_INFO                            *dev_info;
     HC_STRUC                            *hc_info;
-    CHAR16                              *name;
+    //UINT8                             toggle; //toggle param for bulk transfer
+    CHAR16*                             name;
     int                                 f_connected; //was ConnectControllers successful?
     int                                 first_endpoint[USB_MAX_ALT_IF];
     int                                 end_endpoint[USB_MAX_ALT_IF];
-    EFI_USB_INTERFACE_DESCRIPTOR        *descIF[USB_MAX_ALT_IF];
+    EFI_USB_INTERFACE_DESCRIPTOR*       descIF[USB_MAX_ALT_IF];
     UINT32                              LoadedAltIfMap;
     UINT8                               speed;
     EFI_USB_IO_PROTOCOL                 io;
     TREENODE_T                          node;
-    int                                 async_endpoint;
+	int									async_endpoint;
 } USBDEV_T;
 
 EFI_STATUS 
 EFIAPI
 UsbBusSupported (
-  EFI_DRIVER_BINDING_PROTOCOL     *This,
+  EFI_DRIVER_BINDING_PROTOCOL     *pThis,
   EFI_HANDLE                      controller,
-  EFI_DEVICE_PATH_PROTOCOL        *DevicePathProtocol
-  );
+  EFI_DEVICE_PATH_PROTOCOL        * );
 
 EFI_STATUS
 EFIAPI
 UsbBusStart (
-  EFI_DRIVER_BINDING_PROTOCOL     *This,
+  EFI_DRIVER_BINDING_PROTOCOL     *pThis,
   EFI_HANDLE                      controller,
-  EFI_DEVICE_PATH_PROTOCOL        *DevicePathProtocol
-  );
+  EFI_DEVICE_PATH_PROTOCOL        * );
 
 EFI_STATUS
 EFIAPI
 UsbBusStop (
-  EFI_DRIVER_BINDING_PROTOCOL     *This,
+  EFI_DRIVER_BINDING_PROTOCOL     *pThis,
   EFI_HANDLE                      controller,
   UINTN                           NumberOfChildren,
-  EFI_HANDLE                      *ChildHandleBuffer
-  );
+  EFI_HANDLE                      *ChildHandleBuffer );
 
-//EFI_STATUS UsbBusInit(EFI_HANDLE  ImageHandle,EFI_HANDLE  ServiceHandle);
+EFI_STATUS UsbBusInit(EFI_HANDLE  ImageHandle,EFI_HANDLE  ServiceHandle);
 
-USBDEV_T    *UsbIo2Dev(EFI_USB_IO_PROTOCOL  *p);
-DEVGROUP_T  *UsbDevGetGroup(USBDEV_T  *Dev);
-DEV_INFO    *FindDevStruc(EFI_HANDLE Controller);
+USBDEV_T* UsbIo2Dev(EFI_USB_IO_PROTOCOL* p);
+DEVGROUP_T* UsbDevGetGroup(USBDEV_T* Dev);
+DEV_INFO* FindDevStruc(EFI_HANDLE Controller);
 
 UINT8*
 UsbSmiGetDescriptor(
-    HC_STRUC  *Hc,
-    DEV_INFO  *Dev,
-    UINT8     *Buf,
+    HC_STRUC* Hc,
+    DEV_INFO* Dev,
+    UINT8*    Buf,
     UINT16    Len,
     UINT8     DescType,
     UINT8     DescIndex
@@ -176,8 +178,8 @@ UsbSmiGetDescriptor(
 
 UINT16
 UsbSmiControlTransfer (
-    HC_STRUC    *HCStruc,
-    DEV_INFO    *DevInfo,
+    HC_STRUC*   HCStruc,
+    DEV_INFO*   DevInfo,
     UINT16      Request,
     UINT16      Index,
     UINT16      Value,
@@ -197,40 +199,40 @@ UsbSmiIsocTransfer(
 
 UINT8
 UsbResetAndReconfigDev(
-    HC_STRUC    *HostController,
-    DEV_INFO    *Device
+    HC_STRUC*   HostController,
+    DEV_INFO*   Device
 );
 
 UINT8
 UsbDevDriverDisconnect(
-    HC_STRUC    *HostController,
-    DEV_INFO    *Device
+    HC_STRUC*   HostController,
+    DEV_INFO*   Device
 );
 
 UINT8
 UsbSmiActivatePolling (
-    HC_STRUC    *HostController,
-    DEV_INFO    *DevInfo
+    HC_STRUC* HostController,
+    DEV_INFO* DevInfo 
 );
 
 UINT8
 UsbSmiDeactivatePolling (
-    HC_STRUC    *HostController,
-    DEV_INFO    *DevInfo
+    HC_STRUC* HostController,
+    DEV_INFO* DevInfo 
 );
 
-#define GETBIT(Bitarray, Value, Bit) \
-    ((Value) = (UINT8)(((Bitarray) & (1 << (Bit))) >> (Bit)))\
+#define GETBIT(bitarray,value,bit) \
+    ((value) =  (UINT8)(((bitarray) & (1 << (bit)))>>(bit)))\
 
-#define SETBIT(Bitarray, Value, Bit) \
-    (Bitarray) = (((Bitarray) & ~(1 << (Bit))) | (((Value) & 1) << (Bit)) )\
+#define SETBIT(bitarray,value,bit) \
+    (bitarray) =  (((bitarray) & ~(1 << (bit))) | (((value)&1) << (bit)) )\
 
-#define IsSlow(Dev) Dev->speed
-#define GetSpeed(Dev) Dev->speed
+#define IsSlow(dev) dev->speed
+#define GetSpeed(dev) dev->speed
 
 VOID InstallDevice(DEV_INFO* DevInfo);
 int eUninstallDevice(VOID* Node, VOID* Context);
-EFI_STATUS RemoveDevInfo(DEV_INFO* DevInfo);
+EFI_STATUS RemoveDevInfo(DEV_INFO* pDevInfo);
 
 
 #endif //_USBBUS_INC_
@@ -238,7 +240,7 @@ EFI_STATUS RemoveDevInfo(DEV_INFO* DevInfo);
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

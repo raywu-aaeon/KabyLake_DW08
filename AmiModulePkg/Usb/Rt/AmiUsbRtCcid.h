@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -20,8 +20,9 @@
 #ifndef _EFI_CCID_RT_H
 #define _EFI_CCID_RT_H
 
+#include    <Token.h>
 #include    "UsbDef.h"
-
+#include    <AmiDxeLib.h>
 
 //CCID APIs
 #define    USB_CCID_SMARTCLASSDESCRIPTOR   0x000
@@ -118,7 +119,7 @@ typedef     struct  _ATR_DATA ATR_DATA;
 #define SCARD_AM_CARD                     0x0002 // Exclusive access to card
 
 // Codes for card action
-#define SCARD_CA_NORESET                  0x0000 // Do not reset card
+#define SCARD_CA_NORESET                  0x0000 // Don’t reset card
 #define SCARD_CA_COLDRESET                0x0001 // Perform a cold reset
 #define SCARD_CA_WARMRESET                0x0002 // Perform a warm reset
 #define SCARD_CA_UNPOWER                  0x0003 // Power off the card
@@ -196,15 +197,6 @@ typedef enum {
 
 #pragma pack(push, 1)
 
-typedef struct _CCID_DEV_INFO CCID_DEV_INFO;
-
-struct _CCID_DEV_INFO {
-    VOID        *CcidDescriptor;   // Ptr to CCID descriptor
-    UINT32      *DataRates;           // List of DataRates supported by CCID  
-    UINT32      *ClockFrequencies;    // List of Frequencies suported by CCID
-    LIST_ENTRY  IccDeviceList;        // Linked list of ICC devices. :Linked to "ICCDeviceLink"
-};
-
 struct    _ATR_DATA {
     UINT8        TS;                 
     UINT8        T0;                 
@@ -238,7 +230,7 @@ struct    _ATR_DATA {
 #define ICC_DEVICE_SIG       SIGNATURE_32('I','C','C','D') 
 
 struct _ICC_DEVICE {
-    LIST_ENTRY      Link;                   // Linked to ICCDeviceList
+
     UINT32          Signature;
     EFI_HANDLE      ChildHandle;
     EFI_HANDLE      SCardChildHandle;
@@ -304,13 +296,13 @@ struct _ICC_DEVICE {
 
     BOOLEAN         T1CharCmdDataPhase; // TRUE for Cmd Phase/False for Data Phase
 
-    //LIST_ENTRY      ICCDeviceLink;       // Linked to ICCDeviceList
+    DLINK           ICCDeviceLink;       // Linked to ICCDeviceList
     
 };
 
 struct _SMARTCLASS_DESC{
-    UINT8           DescLength;
-    UINT8           DescType;
+    UINT8           bDescLength;
+    UINT8           bDescType;
     UINT16          bcdCCID;
     UINT8           bMaxSlotIndex;
     UINT8           bVoltageSupport;
@@ -566,48 +558,48 @@ USBCCIDInitialize(
 
 UINT8
 USBCCIDCheckForDevice (
-    DEV_INFO    *FpDevInfo,
-    UINT8       BaseClass,
-    UINT8       SubClass,
-    UINT8       Protocol
+    DEV_INFO    *fpDevInfo,
+    UINT8       bBaseClass,
+    UINT8       bSubClass,
+    UINT8       bProtocol
 );
 
 UINT8
 USBCCIDDisconnectDevice (
-    DEV_INFO    *FpDevInfo
+    DEV_INFO    *fpDevInfo
 );
 
 DEV_INFO*
 USBCCIDConfigureDevice (
-    HC_STRUC        *FpHCStruc,
-    DEV_INFO        *FpDevInfo,
-    UINT8           *FpDesc,
-    UINT16          StartOffset,
-    UINT16          EndOffset
+    HC_STRUC        *fpHCStruc,
+    DEV_INFO        *fpDevInfo,
+    UINT8           *fpDesc,
+    UINT16          wStart,
+    UINT16          wEnd
 );
 
 UINT32
 USBCCIDIssueBulkTransfer (
-    DEV_INFO*   FpDevInfo, 
-    UINT8       XferDir,
-    UINT8*      CmdBuffer, 
-    UINT32      Size
+    DEV_INFO*   fpDevInfo, 
+    UINT8       bXferDir,
+    UINT8*      fpCmdBuffer, 
+    UINT32      dSize
 );
 
 UINT32
 USBCCIDIssueControlTransfer(
-    DEV_INFO*   FpDevInfo,     
-    UINT16      Request,
-    UINT16      Index,
-    UINT16      Value,
-    UINT8       *FpBuffer,
-    UINT16      Length
+    DEV_INFO*   fpDevInfo,     
+    UINT16      wRequest,
+    UINT16      wIndex,
+    UINT16      wValue,
+    UINT8       *fpBuffer,
+    UINT16      wLength
 );
 
 EFI_STATUS
 PCToRDRXfrBlock (
-    IN DEV_INFO             *FpDevInfo,
-    IN ICC_DEVICE           *FpICCDevice,
+    IN DEV_INFO             *fpDevInfo,
+    IN ICC_DEVICE           *fpICCDevice,
     IN UINT32               CmdLength,
     IN UINT8                *CmdBuffer,
     IN UINT8                BlockWaitingTime,
@@ -617,21 +609,21 @@ PCToRDRXfrBlock (
 
 EFI_STATUS
 ConstructBlockFrame(
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice,
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice,
     IN UINT8            Nad,
     IN UINT8            PCB,
     IN UINT32           InfLength,
     IN UINT8            *InfBuffer,
-    OUT UINT8           *LevelParameter,
+    OUT UINT8           *wLevelParameter,
     OUT UINT32          *BlockFrameLength,
     OUT UINT8           **BlockFrame
 );
 
 UINT8   
 HandleReceivedBlock (
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice,
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice,
     IN UINT32           OriginalBlockFrameLength,
     IN UINT8            *OriginalBlockFrame,
     IN UINT32           SentBlockFrameLength,
@@ -641,8 +633,8 @@ HandleReceivedBlock (
 
 EFI_STATUS
 TxRxT1TDPUChar (
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice,
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice,
     IN UINT32           CmdLength,
     IN UINT8            *CmdBuffer,
     IN UINT8            ISBlock,
@@ -652,8 +644,8 @@ TxRxT1TDPUChar (
 
 EFI_STATUS
 TxRxT1Adpu (
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice,
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice,
     IN UINT32           CmdLength,
     IN UINT8            *CmdBuffer,
     OUT UINT32          *ResponseLength,
@@ -662,46 +654,46 @@ TxRxT1Adpu (
 
 EFI_STATUS
 PCToRDRGetSlotStatus(
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice
 );
 
 EFI_STATUS
 RDRToPCSlotStatus(
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice
 );
 
 EFI_STATUS
 PCToRDRGetParameters(
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice
 );
 
 EFI_STATUS
 RDRToPCParameters(
-    IN DEV_INFO           *FpDevInfo,
-    IN ICC_DEVICE        *FpICCDevice
+    IN DEV_INFO           *fpDevInfo,
+    IN ICC_DEVICE        *fpICCDevice
 );
 
 EFI_STATUS
 RDRToPCDataBlock(
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice,
-    IN OUT UINT32       *Length,
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice,
+    IN OUT UINT32       *dwLength,
     OUT UINT8           *Buffer
 
 );
 
 EFI_STATUS
 ICCInsertEvent(
-    DEV_INFO    *FpDevInfo,
+    DEV_INFO    *fpDevInfo,
     UINT8       Slot
 );
 
 EFI_STATUS
 ICCRemovalEvent(
-    IN DEV_INFO    *FpDevInfo,
+    IN DEV_INFO    *fpDevInfo,
     IN UINT8        Slot
 );
 
@@ -716,7 +708,7 @@ PrintPCParameters(
 );
 
 TRANSMISSION_PROTOCOL GetDefaultProtocol (
-    IN ICC_DEVICE        *FpICCDevice
+    IN ICC_DEVICE        *fpICCDevice
 );
 
 VOID
@@ -727,98 +719,98 @@ CalculateLRCChecksum (
 
 EFI_STATUS
 PCtoRDRIccPowerOff(
-    IN DEV_INFO         *FpDevInfo,
-    IN ICC_DEVICE       *FpICCDevice
+    IN DEV_INFO         *fpDevInfo,
+    IN ICC_DEVICE       *fpICCDevice
 );
 
 VOID
 PrintDescriptorInformation (
-    SMARTCLASS_DESC *FpCCIDDesc
+    SMARTCLASS_DESC *fpCCIDDesc
 );
 
 VOID
 USBCCIDAPISmartClassDescriptorSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBCCIDAPIAtrSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBCCIDAPIPowerupSlotSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 
 );
 
 VOID
 USBCCIDAPIPowerDownSlotSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 
 );
 
 VOID
 USBCCIDAPIGetSlotStatusSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBCCIDAPIXfrBlockSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBCCIDAPIGetParametersSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 
 );
 
 EFI_STATUS
 ConfigureCCID(
-    DEV_INFO          *FpDevInfo,
-    ICC_DEVICE        *FpICCDevice
+    DEV_INFO          *fpDevInfo,
+    ICC_DEVICE        *fpICCDevice
 );
 
 VOID
 USBSCardReaderAPIConnectSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBSCardReaderAPIDisConnectSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBSCardReaderAPIStatusSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBSCardReaderAPITransmitSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBSCardReaderAPIControlSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 VOID
 USBSCardReaderAPIGetAttribSMM (
-    IN OUT URP_STRUC *Urp
+    IN OUT URP_STRUC *fpURP
 );
 
 ICC_DEVICE*
 GetICCDevice(
-    DEV_INFO        *FpDevInfo, 
+    DEV_INFO        *fpDevInfo, 
     UINT8            Slot
 );
 
 VOID
 PrintTimingInfo(
-    ICC_DEVICE    *FpICCDevice
+    ICC_DEVICE    *fpICCDevice
 );
 
 VOID
@@ -836,7 +828,7 @@ FindNumberOfTs(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

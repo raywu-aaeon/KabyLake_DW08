@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -171,7 +171,7 @@ EhciPeiUsbEntryPoint (
     // Initialize the EFI_PEI_STALL_PPI interface
     //-------------------------------------------
     Status = (**PeiServices).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid,
-        0, NULL, (VOID**)&StallPpi );
+        0, NULL, &StallPpi );
     if ( EFI_ERROR( Status ) ) {
         return EFI_UNSUPPORTED;
     }
@@ -352,12 +352,12 @@ EhciInitHC (
     pstEHCIDescPtrs = &(EhciDevPtr->stEHCIDescPtrs);
 
     MemPages = (( 5 * sizeof (EHCI_QTD) ) + (6 * sizeof(EHCI_QH) )) / 0x1000 + 1;
-
-    Status = (**PeiServices).AllocatePages(PeiServices, EfiBootServicesData, MemPages, &TempPtr);
-    ASSERT(Status == EFI_SUCCESS);
-    if (EFI_ERROR(Status)) {
-        return;
-    }
+    Status = (**PeiServices).AllocatePages(
+        PeiServices,
+        EfiBootServicesData,
+        MemPages,
+        &TempPtr
+             );
 
     pPtr = (UINT8 *) ( (UINTN) TempPtr );
     if (pPtr == NULL) {
@@ -579,7 +579,7 @@ EhciHcActivatePolling(
 
     // Allocate QH and qTD, making allocation 64-Bytes aligned
     Status = (**PeiServices).AllocatePool( PeiServices,
-        sizeof(EHCI_QH)+sizeof(EHCI_QTD)+64, (VOID**)&Ptr );
+        sizeof(EHCI_QH)+sizeof(EHCI_QTD)+64, &Ptr );
     
     ZeroMem(Ptr, sizeof(EHCI_QH) + sizeof(EHCI_QTD) + 64);
 
@@ -824,6 +824,7 @@ EhciHcGetRootHubPortStatus(
 {
     PEI_EHCI_DEV    *EhciDevPtr = PEI_RECOVERY_USB_EHCI_DEV_FROM_THIS( This );
 	EHCI_PORTSC		*PortScReg = &EhciDevPtr->EhciHcOpReg->PortSC[PortNumber - 1];
+	UINT8			i = 0;
 
     if (PortNumber > EhciDevPtr->bNumPorts) {
         return EFI_INVALID_PARAMETER;
@@ -1454,7 +1455,7 @@ EFIAPI
 EhciHcControlTransfer(
     IN EFI_PEI_SERVICES            **PeiServices,
     IN PEI_USB_HOST_CONTROLLER_PPI *This,
-    IN UINT8                       DeviceAddress,
+    IN UINT8                       bDeviceAddress,
     IN UINT8                       DeviceSpeed,
     IN UINT8                       MaximumPacketLength,
     IN UINT16                      TransactionTranslator    OPTIONAL,
@@ -1467,62 +1468,66 @@ EhciHcControlTransfer(
 )
 {
     UINT16            WordRequest;
+    UINT16            WordIndex;
+    UINT16            WordValue;
     EFI_STATUS        Status = EFI_SUCCESS;
-    PEI_EHCI_DEV        *EhciDevPtr = PEI_RECOVERY_USB_EHCI_DEV_FROM_THIS(This);
+
+
+    PEI_EHCI_DEV        *EhciDevPtr = PEI_RECOVERY_USB_EHCI_DEV_FROM_THIS( This );
     EHCI_HC_OPER_REG    *HcOpReg = EhciDevPtr->EhciHcOpReg;
     EHCI_DESC_PTRS      *DescPtrs = &EhciDevPtr->stEHCIDescPtrs;
-    UINT16              Length = (DataLength != NULL)? (UINT16) *DataLength : 0;
-    EHCI_QH             *QhCtl;
-    EHCI_QTD            *QtdCtlSetup;
-    EHCI_QTD            *QtdCtlData;
-    EHCI_QTD            *QtdCtlStatus;
-    UINT32              Tmp;
-    UINT32              Tmp1;
+    UINT16              wLength = (DataLength != NULL)? (UINT16) *DataLength : 0;
+    EHCI_QH             *fpQHCtl;
+    EHCI_QTD            *fpQTDCtlSetup, *fpQTDCtlData, *fpQTDCtlStatus;
+
+    UINT32              dTmp, dTmp1;
 
     *TransferResult = EFI_USB_NOERROR;
 
     WordRequest = (Request->Request << 8) | Request->RequestType;
+    WordValue = Request->Value;
+    WordIndex = Request->Index;
 
     //
     // Intialize the queue head with null pointers
     //
-    QhCtl = DescPtrs->fpQHControl;
-    EHCIInitializeQueueHead(QhCtl);
+    fpQHCtl = DescPtrs->fpQHControl;
+    EHCIInitializeQueueHead(fpQHCtl);
 
     //
     // Assume as a high speed device
     //
-    Tmp = QH_HIGH_SPEED;   // 10b - High speed
+    dTmp = QH_HIGH_SPEED;   // 10b - High speed
 
     if (DeviceSpeed != USB_HIGH_SPEED_DEVICE && TransactionTranslator != 0)
     {
-        // Low/Full speed device OR device is connected to a root port
+		// Low/Full speed device OR device is connected to a root port
         // DeviceSpeed = 1 (low) or 2 (full)
-        Tmp = (UINT32)((DeviceSpeed & 1) << 12);    // Bit 12 = full/low speed flag
-        Tmp |= QH_CONTROL_ENDPOINT;
+        dTmp = (UINT32)((DeviceSpeed & 1) << 12);    // Bit 12 = full/low speed flag
+        dTmp |= QH_CONTROL_ENDPOINT;
         //
         // Set the hub address and port number
         //
-        Tmp1 = (TransactionTranslator << 16) | (BIT10+BIT11+BIT12);    // Split complete Xaction
-        QhCtl->dEndPntCap |= Tmp1;
+        dTmp1 = (TransactionTranslator << 16) | (BIT10+BIT11+BIT12);    // Split complete Xaction
+        fpQHCtl->dEndPntCap |= dTmp1;
     }
 
-    Tmp |= (QH_USE_QTD_DT | QH_HEAD_OF_LIST);
-    Tmp |= (UINT32)DeviceAddress;
+    dTmp |= (QH_USE_QTD_DT | QH_HEAD_OF_LIST);
+    dTmp |= (UINT32)bDeviceAddress;
 
     //
     // dTmp[Bits 6:0] = Dev. Addr
     // dTmp[Bit7] = I bit(0)
     // dTmp[Bits11:8] = Endpoint (0)
     //
-    Tmp1 = MaximumPacketLength;
-    Tmp |= (Tmp1 << 16);  // Tmp[Bits26:16] = device's packet size
-    QhCtl->dEndPntCharac = Tmp;
+    dTmp1 = MaximumPacketLength;
+    dTmp |= (dTmp1 << 16);  // Tmp[Bits26:16] = device's packet size
+    fpQHCtl->dEndPntCharac = dTmp;
 
     //
     // Fill in various fields in the qTDControlSetup.
     //
-    QtdCtlSetup = DescPtrs->fpqTDControlSetup;
+    fpQTDCtlSetup = DescPtrs->fpqTDControlSetup;
 
     //
     // The token field will be set so
@@ -1537,19 +1542,19 @@ EhciHcControlTransfer(
     //   be sent/received or to the qTDControlStatus if no data is expected.
     // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
     //
-    QtdCtlSetup->dToken = QTD_SETUP_TOKEN | QTD_SETUP_TOGGLE | QTD_IOC_BIT |
+    fpQTDCtlSetup->dToken = QTD_SETUP_TOKEN | QTD_SETUP_TOGGLE | QTD_IOC_BIT |
                 QTD_NO_ERRORS | QTD_DO_OUT | QTD_ACTIVE | 
                 (8 << 16);  // Data size
 
     //
     // Update buffer pointers
     //
-    EHCISetQTDBufferPointers(QtdCtlSetup,
+    EHCISetQTDBufferPointers(fpQTDCtlSetup,
             (UINT8*)Request,
             8);
-    QtdCtlData = DescPtrs->fpqTDControlData;
+    fpQTDCtlData = DescPtrs->fpqTDControlData;
 
-    if (Length != 0 && DataBuffer != NULL)    // br if no data to transfer
+    if (wLength != 0 && DataBuffer != NULL)    // br if no data to transfer
     {
         //
         // Fill in various fields in the qTDControlData
@@ -1565,12 +1570,12 @@ EhciHcControlTransfer(
         // The dNextqTDPtr field will point to the qTDControlSetup
         // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
         //
-        QtdCtlData->dToken = QTD_IN_TOKEN |
+        fpQTDCtlData->dToken = QTD_IN_TOKEN |
                 QTD_DATA1_TOGGLE | QTD_IOC_BIT |
                 QTD_NO_ERRORS | QTD_ACTIVE;
         if ((WordRequest & BIT7) == 0) // Br if host sending data to device (OUT)
         {
-            QtdCtlData->dToken    = QTD_OUT_TOKEN |
+            fpQTDCtlData->dToken    = QTD_OUT_TOKEN |
                 QTD_DATA1_TOGGLE | QTD_IOC_BIT |
                 QTD_NO_ERRORS | QTD_DO_OUT | QTD_ACTIVE;
         }
@@ -1578,20 +1583,20 @@ EhciHcControlTransfer(
         //
         // Set length
         //
-        QtdCtlData->dToken |= ((UINT32)Length << 16);
+        fpQTDCtlData->dToken |= ((UINT32)wLength << 16);
 
         //
         // Update buffer pointers
         //
-        EHCISetQTDBufferPointers(QtdCtlData,
+        EHCISetQTDBufferPointers(fpQTDCtlData,
                 (UINT8*)DataBuffer,
-                (UINT32)Length);
+                (UINT32)wLength);
     }
 
     //
     // Fill in various fields in the qTDControlStatus
     //
-    QtdCtlStatus = DescPtrs->fpqTDControlStatus;
+    fpQTDCtlStatus = DescPtrs->fpqTDControlStatus;
 
     //
     // The token field will be set so
@@ -1607,46 +1612,46 @@ EhciHcControlTransfer(
     // For OUT control transfer status should be IN and
     // for IN cotrol transfer, status should be OUT
     //
-    QtdCtlStatus->dToken = QTD_IN_TOKEN | 
+    fpQTDCtlStatus->dToken = QTD_IN_TOKEN | 
                 QTD_DATA1_TOGGLE | QTD_IOC_BIT |
                 QTD_NO_ERRORS | QTD_ACTIVE;
     if((WordRequest & BIT7) != 0)
     {
-        QtdCtlStatus->dToken  = QTD_OUT_TOKEN |
+        fpQTDCtlStatus->dToken  = QTD_OUT_TOKEN |
                 QTD_DATA1_TOGGLE | QTD_IOC_BIT |
                 QTD_NO_ERRORS | QTD_DO_OUT | QTD_ACTIVE;
     }
 
-    EHCISetQTDBufferPointers(QtdCtlStatus, NULL, 0);
+    EHCISetQTDBufferPointers(fpQTDCtlStatus, NULL, 0);
 
     //
     // Link the qTD formed now and connect them with the control queue head
     //
-    QhCtl->fpFirstqTD     = QtdCtlSetup;
-    QhCtl->dNextqTDPtr    = (UINT32)(UINTN)QtdCtlSetup;
+    fpQHCtl->fpFirstqTD     = fpQTDCtlSetup;
+    fpQHCtl->dNextqTDPtr    = (UINT32)(UINTN)fpQTDCtlSetup;
 
-    if (Length != 0)
+    if (wLength != 0)
     {
-        QtdCtlSetup->dNextqTDPtr  = (UINT32)(UINTN)QtdCtlData;
-        QtdCtlData->dNextqTDPtr   = (UINT32)(UINTN)QtdCtlStatus;
+        fpQTDCtlSetup->dNextqTDPtr  = (UINT32)(UINTN)fpQTDCtlData;
+        fpQTDCtlData->dNextqTDPtr   = (UINT32)(UINTN)fpQTDCtlStatus;
     }
     else
     {
-        QtdCtlSetup->dNextqTDPtr  = (UINT32)(UINTN)QtdCtlStatus;
+        fpQTDCtlSetup->dNextqTDPtr  = (UINT32)(UINTN)fpQTDCtlStatus;
     }
 
-    QtdCtlStatus->dNextqTDPtr = EHCI_TERMINATE;
+    fpQTDCtlStatus->dNextqTDPtr = EHCI_TERMINATE;
 
     //
     // Set the ASYNCLISTADDR register to point to the QHControl
     //
-    HcOpReg->AsyncListAddr = (UINT32)(UINTN)QhCtl;
+    HcOpReg->AsyncListAddr = (UINT32)(UINTN)fpQHCtl;
 
     //
     // Set next QH pointer to itself (circular link)
     //
-    QhCtl->dLinkPointer = (UINT32)((UINTN)QhCtl | EHCI_QUEUE_HEAD);
-    QhCtl->bActive = TRUE;
+    fpQHCtl->dLinkPointer = (UINT32)((UINTN)fpQHCtl | EHCI_QUEUE_HEAD);
+    fpQHCtl->bActive = TRUE;
 
     //
     // Now put the control setup, data and status into the HC's schedule by
@@ -1655,7 +1660,7 @@ EhciHcControlTransfer(
     //
     EHCIStartAsyncSchedule(HcOpReg);
 
-    EHCIWaitForAsyncTransferComplete(PeiServices, EhciDevPtr, QhCtl, TimeOut);
+    EHCIWaitForAsyncTransferComplete(PeiServices, EhciDevPtr, fpQHCtl, TimeOut);
 
     //
     // Stop the Async transfer
@@ -1665,9 +1670,9 @@ EhciHcControlTransfer(
     //
     // Check whether the QH stopped or timed out
     //
-    if (QhCtl->bActive == TRUE) {
+    if (fpQHCtl->bActive == TRUE) {
 
-        QhCtl->bActive = FALSE;
+        fpQHCtl->bActive = FALSE;
         Status = EFI_TIMEOUT;
         *TransferResult |= EFI_USB_ERR_TIMEOUT;
     }
@@ -1675,7 +1680,7 @@ EhciHcControlTransfer(
     //
     // Check for the stall condition
     //
-    if (QhCtl->bErrorStatus & QTD_HALTED) {
+    if (fpQHCtl->bErrorStatus & QTD_HALTED) {
         //
         // Command stalled set the error bit appropriately
         //
@@ -1683,8 +1688,8 @@ EhciHcControlTransfer(
         *TransferResult |= EFI_USB_ERR_STALL;
     }
 
-    QhCtl->fpFirstqTD     = 0;
-    QhCtl->dNextqTDPtr    = EHCI_TERMINATE;
+    fpQHCtl->fpFirstqTD     = 0;
+    fpQHCtl->dNextqTDPtr    = EHCI_TERMINATE;
 
     return  Status;
 }
@@ -2017,7 +2022,7 @@ DwordWriteMem(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

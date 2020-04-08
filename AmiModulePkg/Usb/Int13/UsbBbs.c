@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -16,7 +16,7 @@
 
 **/
 
-#include <Library/UefiBootServicesTableLib.h>
+#include <AmiDxeLib.h>
 #include <Protocol/AmiUsbController.h>
 
 /**
@@ -32,7 +32,7 @@ CollectUsbBbsDevices (
     EFI_STATUS  Status;
     EFI_USB_PROTOCOL        *AmiUsb;
 
-    Status = gBS->LocateProtocol(&gEfiUsbProtocolGuid, NULL, (VOID**)&AmiUsb);
+    Status = pBS->LocateProtocol(&gEfiUsbProtocolGuid, NULL, &AmiUsb);
     if (EFI_ERROR(Status)) {
         return;
     }
@@ -43,7 +43,7 @@ CollectUsbBbsDevices (
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

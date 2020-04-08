@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -54,14 +54,13 @@
 //OHCIHCCA      ENDS
 #pragma pack(push, 1)
 
-typedef struct _OHCI_HCCA_PTRS  OHCI_HCCA_PTRS; 
-struct _OHCI_HCCA_PTRS {
+typedef struct {
     UINT32      aInterruptList[OHCI_FRAME_LIST_SIZE];
     UINT16      wHccaFrameNumber;
     UINT16      wHccaPad1;
     UINT32      dHccaDoneHead;
     UINT8       aResHcca[120];
-};
+} OHCI_HCCA_PTRS;
 
 /**
     OHCI general transfer descriptor structure. This structure is
@@ -99,20 +98,20 @@ OHCI_TD     STRUC
     SetupData       DB  8 dup (?) ; Used for setup packet
 
 OHCI_TD     ENDS*/
-typedef struct _OHCI_TD OHCI_TD;  
-struct _OHCI_TD {
+
+typedef struct {
     UINT32      dControlStatus;         // Control and status fields
     UINT32      fpCurrentBufferPointer; // Current buffer pointer
     UINT32      fpLinkPointer;          // Pointer to the next TD
     UINT32      fpBufferEnd;            // End pointer of data buffer
 
     UINT32      dCSReloadValue;         // Control status reload value
-    UINT8       CallBackIndex;         // Index of the routine to call on completion
+    UINT8       bCallBackIndex;         // Index of the routine to call on completion
     UINT8       bActiveFlag;            // Routine to call on completion
     UINT8       bDeviceAddr;            // Device Address
     UINT8       bResvd;
     UINT8       aSetupData[8];          // Used for setup packet
-};
+} OHCI_TD;
 
 
 /**
@@ -130,15 +129,15 @@ struct _OHCI_TD {
       aReserved   ARRAY   16 bytes of reserved data
 
 **/
-typedef struct _OHCI_ED OHCI_ED; 
-struct _OHCI_ED {
+
+typedef struct _OHCI_ED {
     UINT32      dControl;               //  ED control fields
     UINT32      fpTailPointer;          // TD queue tail pointer
     UINT32      fpHeadPointer;          // TD queue head pointer
     UINT32      fpEDLinkPointer;    // Pointer to next ED
     UINT8       Interval;
     UINT8       aReserved[15];
-};
+} OHCI_ED;
 
 #pragma pack(pop)
 
@@ -152,10 +151,10 @@ typedef struct
 
 // AMI defined fields
     UINT32          dCSReload;  // Control status reload value
-    UINT8           CallBackIndex;
+    UINT8           bCallBackIndex;
     UINT8           bActiveFlag;
-    UINT8           DevAddr;
-    UINT8           Reserved;
+    UINT8           bDevAddr;
+    UINT8           bReserved;
     UINT8           aDataArea[8];
 } OHCI_GTD, _FAR_ *FPOHCI_GTD;
 */
@@ -213,8 +212,8 @@ OHCIDescriptors     STRUC
     TDBulkData      DW  ?
 OHCIDescriptors     ENDS
 */
-typedef struct _OHCI_DESC_PTRS  OHCI_DESC_PTRS;  
-struct _OHCI_DESC_PTRS {
+
+typedef struct {
     OHCI_ED     *PeriodicEd;
 // Do not change the following order of EDRepeat and TDRepeat
     OHCI_ED     *fpEDRepeat;
@@ -230,7 +229,7 @@ struct _OHCI_DESC_PTRS {
 
     OHCI_ED     *fpEDBulk;
     OHCI_TD     *fpTDBulkData;
-};
+} OHCI_DESC_PTRS;
 
 #define USB_OHCI_DESCRIPTOR_SIZE_BLK    ((size of OHCIDescriptors + USB_MEM_BLK_SIZE - 1) >> USB_MEM_BLK_SIZE_SHIFT)
 
@@ -516,7 +515,7 @@ struct _OHCI_DESC_PTRS {
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

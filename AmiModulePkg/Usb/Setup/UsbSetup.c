@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,15 +17,13 @@
 
 **/
 
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <AmiLib.h>
 #include <AmiDxeLib.h>
 #include <Setup.h>
 #include <Protocol/AmiUsbController.h>
 #include <Protocol/UsbPolicy.h>
+
 #define MAX_DEVS_LINE_LENGTH 80
 #define MAX_DEVICE_NUMBER_LENGTH 10
 #define MAX_DEVICE_AMOUNT 127
@@ -35,13 +33,10 @@ static EFI_GUID gEfiSetupGuid = SETUP_GUID;
 /**
     This function retrieves the information about connected
     USB devices.
-    @param  DevNumStr         Pointer to Device Number String
-    @param  ControllerNumStr  Pointer to Controller Number String
-    @param  UsbProtocol       Pointer to EFI USB Protocol
-    @param  Devs              Pointer to Number of Connected USB Devices
 
-    @retval EFI_STATUS Status of the operation
-
+    @retval returns TRUE if device connection status has changed since this
+        function is called last time; otherwise FALSE.
+    @note  When FALSE is returned, none of the output parameters are valid.
 **/
 
 EFI_STATUS
@@ -52,51 +47,51 @@ GetConnectedDevices(
     CONNECTED_USB_DEVICES_NUM       *Devs
 )
 {
-    CHAR16  StrMassStorage[] = L"Drive";
-    CHAR16  StrKeyboard[] = L"Keyboard";
-    CHAR16  StrMouse[] = L"Mouse";
-    CHAR16  StrPoint[] = L"Point";    //(EIP38434+)
-    CHAR16  StrMice[] = L"Mice";
-    CHAR16  StrHub[] = L"Hub";
-    CHAR16  StrCcid[] = L"SmartCard Reader";
-    CHAR16  StrUhci[] = L"UHCI";
-    CHAR16  StrOhci[] = L"OHCI";
-    CHAR16  StrEhci[] = L"EHCI";
-    CHAR16  StrXhci[] = L"XHCI";
-    CHAR16  Name[MAX_DEVS_LINE_LENGTH];
-    CHAR16  *StrPtr = Name;
-    CHAR16  NumberToString [MAX_DEVICE_NUMBER_LENGTH];
-    UINTN   NumSize;
-    CHAR16  Comma[] = L", ";
-    CHAR16  Space[] = L" ";
-    CHAR16  LeadingSpace[] = L"      None";
-    UINT8   MassStorageNumber;
-    UINT8   KeyboardNumber; 
-    UINT8   MouseNumber;
-    UINT8   PointNumber; 
-    UINT8   HubNumber; 
-    UINT8   CcidNumber;  //(EIP38434)
-    UINT8   UhciNumber;
+    CHAR16 	StrMassStorage[] = L"Drive";
+    CHAR16 	StrKeyboard[] = L"Keyboard";
+    CHAR16 	StrMouse[] = L"Mouse";
+    CHAR16 	StrPoint[] = L"Point"; 		//(EIP38434+)
+    CHAR16 	StrMice[] = L"Mice";
+    CHAR16 	StrHub[] = L"Hub";
+	CHAR16 	StrCcid[] = L"SmartCard Reader";
+    CHAR16 	StrUhci[] = L"UHCI";
+    CHAR16 	StrOhci[] = L"OHCI";
+    CHAR16 	StrEhci[] = L"EHCI";
+    CHAR16 	StrXhci[] = L"XHCI";
+    CHAR16 	Name[MAX_DEVS_LINE_LENGTH];
+    CHAR16 	*StrPtr = Name;
+    CHAR16 	NumberToString [MAX_DEVICE_NUMBER_LENGTH];
+    UINTN 	NumSize;
+    CHAR16 	Comma[] = L", ";
+    CHAR16 	Space[] = L" ";
+    CHAR16 	LeadingSpace[] = L"      None";
+	UINT8	MassStorageNumber;
+	UINT8 	KeyboardNumber; 
+	UINT8	MouseNumber;
+	UINT8	PointNumber; 
+	UINT8	HubNumber; 
+	UINT8	CcidNumber;	//(EIP38434)
+	UINT8   UhciNumber;
     UINT8   OhciNumber;
     UINT8   EhciNumber;
     UINT8   XhciNumber;
-    BOOLEAN Is1stItem = TRUE;
+    BOOLEAN	Is1stItem = TRUE;
 
     UsbProtocol->UsbReportDevices(Devs);
     MassStorageNumber = Devs->NumUsbMass;
     KeyboardNumber = Devs->NumUsbKbds;
-    MouseNumber  = Devs->NumUsbMice;
+    MouseNumber	 = Devs->NumUsbMice;
     PointNumber = Devs->NumUsbPoint;
     HubNumber = Devs->NumUsbHubs;
-    CcidNumber = Devs->NumUsbCcids;
+	CcidNumber = Devs->NumUsbCcids;
     UhciNumber = Devs->NumUhcis;
     OhciNumber = Devs->NumOhcis;
     EhciNumber = Devs->NumEhcis;
     XhciNumber = Devs->NumXhcis;
 
     // Form the string
-    SetMem(StrPtr, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16), 0);
-    CopyMem(StrPtr, LeadingSpace, 10 * sizeof(CHAR16)); 
+    pBS->SetMem(StrPtr, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16), 0);
+    pBS->CopyMem(StrPtr, LeadingSpace, 10 * sizeof(CHAR16)); 
     StrPtr += 6;  // leave string pointer at "None"
 
     // Drive/Drives
@@ -104,14 +99,14 @@ GetConnectedDevices(
         ItowEx(MassStorageNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
+        pBS->CopyMem(StrPtr, Space, 2);
         StrPtr += 1;
 
-        CopyMem(StrPtr, StrMassStorage, 10); 
-        StrPtr += 5;             // L"Drive"
+        pBS->CopyMem(StrPtr, StrMassStorage, 10); 
+        StrPtr += 5;		        // L"Drive"
         if (MassStorageNumber > 1) {
           *StrPtr++ = L's';   // L"Drives"
         }
@@ -121,20 +116,20 @@ GetConnectedDevices(
     // Keyboard/Keyboards
     if ((KeyboardNumber) && (KeyboardNumber < MAX_DEVICE_AMOUNT)) {
         if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4); 
+            pBS->CopyMem(StrPtr, Comma, 4); 
             StrPtr += 2;    // L" ,"
         }
         ItowEx(KeyboardNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
+        pBS->CopyMem(StrPtr, Space, 2);
         StrPtr += 1;
 
-        CopyMem(StrPtr, StrKeyboard, 16); 
+        pBS->CopyMem(StrPtr, StrKeyboard, 16); 
         StrPtr += 8;    // L"Keyboard"
         if (KeyboardNumber > 1) {
           *StrPtr++ = L's'; // L"Keyboards"
@@ -145,106 +140,106 @@ GetConnectedDevices(
     // Mouse/Mice
     if ((MouseNumber) && (MouseNumber < MAX_DEVICE_AMOUNT)) {
         if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4);
+            pBS->CopyMem(StrPtr, Comma, 4);
             StrPtr += 2;    // L" ,"
         }
         ItowEx(MouseNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
+        pBS->CopyMem(StrPtr, Space, 2);
         StrPtr += 1;
 
         if (MouseNumber == 1) {
-            CopyMem(StrPtr, StrMouse, 10);
+            pBS->CopyMem(StrPtr, StrMouse, 10);
             StrPtr += 5;        // L"Mouse"
         } else {
-            CopyMem(StrPtr, StrMice, 8);
+            pBS->CopyMem(StrPtr, StrMice, 8);
             StrPtr += 4;        // L"Mice"
         }
         Is1stItem = FALSE;
     }
-                                      //(EIP38434+)>
+										//(EIP38434+)>
     // Point/Points
     if ((PointNumber) && (PointNumber < MAX_DEVICE_AMOUNT)) {
         if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4);
+            pBS->CopyMem(StrPtr, Comma, 4);
             StrPtr += 2;    // L" ,"
         }
         ItowEx(PointNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
+        pBS->CopyMem(StrPtr, Space, 2);
         StrPtr += 1;
 
-        CopyMem(StrPtr, StrPoint, 10);
+        pBS->CopyMem(StrPtr, StrPoint, 10);
         StrPtr += 5;            // L"Point"
         if (PointNumber > 1) {
           *StrPtr++ = L's';     // L"Points"
         }
         Is1stItem = FALSE;
     } 
-                                      //<(EIP38434+)
+										//<(EIP38434+)
     // Hub/Hubs
     if ((HubNumber) && (HubNumber < MAX_DEVICE_AMOUNT)) {
         if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4);
+            pBS->CopyMem(StrPtr, Comma, 4);
             StrPtr += 2;    // L" ,"
         }
         ItowEx(HubNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
+        pBS->CopyMem(StrPtr, Space, 2);
         StrPtr += 1;
-        CopyMem(StrPtr, StrHub, 6);
+        pBS->CopyMem(StrPtr, StrHub, 6);
         StrPtr += 3;            // L"Hub"
         if (HubNumber > 1) {
             *StrPtr++ = L's';   // L"Hubs"
         }
         Is1stItem = FALSE;
     }
-    // Ccid/Ccids
-    if (CcidNumber) {
-        if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4);
-            StrPtr += 2;    // L" ,"
-        }
+	// Ccid/Ccids
+	if (CcidNumber) {
+		if (!Is1stItem) {
+			pBS->CopyMem(StrPtr, Comma, 4);
+            StrPtr += 2;	// L" ,"
+		}
         ItowEx(CcidNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
 
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
-        StrPtr += 1;  //  L" "
+        pBS->CopyMem(StrPtr, Space, 2);
+        StrPtr += 1;	//	L" "
 
-        CopyMem(StrPtr, StrCcid, 32); 
+		pBS->CopyMem(StrPtr, StrCcid, 32); 
         StrPtr += 16;           // L"SmartCard Reader"
-        if (CcidNumber > 1) {
-            *StrPtr++ = L's';   // L'SmartCard Readers'
-        }
-        Is1stItem = FALSE;
-    }
+		if (CcidNumber > 1) {
+			*StrPtr++ = L's';   // L'SmartCard Readers'
+		}
+		Is1stItem = FALSE;
+	}
 
-    CopyMem(DevNumStr, Name, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16));
+    pBS->CopyMem(DevNumStr, Name, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16));
 
     Is1stItem = TRUE;
     StrPtr = Name;
     // Form the string
-    SetMem(StrPtr, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16), 0);
-    CopyMem(StrPtr, LeadingSpace, 10 * sizeof(CHAR16)); 
+    pBS->SetMem(StrPtr, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16), 0);
+    pBS->CopyMem(StrPtr, LeadingSpace, 10 * sizeof(CHAR16)); 
     StrPtr += 6;  // leave string pointer at "None"
 
     // Drive/Drives
@@ -252,92 +247,93 @@ GetConnectedDevices(
         ItowEx(UhciNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
+        pBS->CopyMem(StrPtr, Space, 2);
         StrPtr += 1;
 
-        CopyMem(StrPtr, StrUhci, 8); 
-        StrPtr += 4;          // L"UHCI"
+        pBS->CopyMem(StrPtr, StrUhci, 8); 
+        StrPtr += 4;		  // L"UHCI"
         if (UhciNumber > 1) {
           *StrPtr++ = L's';   // L"UHCIs"
         }
         Is1stItem = FALSE;
     }
 
-    if (OhciNumber) {
-        if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4);
-            StrPtr += 2;    // L" ,"
-        }
+	if (OhciNumber) {
+		if (!Is1stItem) {
+			pBS->CopyMem(StrPtr, Comma, 4);
+            StrPtr += 2;	// L" ,"
+		}
         ItowEx(OhciNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
 
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
-        StrPtr += 1;    //  L" "
+        pBS->CopyMem(StrPtr, Space, 2);
+        StrPtr += 1;	//	L" "
 
-        CopyMem(StrPtr, StrOhci, 8); 
+		pBS->CopyMem(StrPtr, StrOhci, 8); 
         StrPtr += 4;            // L"OHCI"
-        if (OhciNumber > 1) {
-            *StrPtr++ = L's';   // L'OHCIs'
-        }
-        Is1stItem = FALSE;
-    }
+		if (OhciNumber > 1) {
+			*StrPtr++ = L's';   // L'OHCIs'
+		}
+		Is1stItem = FALSE;
+	}
 
-    if (EhciNumber) {
-        if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4);
-            StrPtr += 2;    // L" ,"
-        }
+	if (EhciNumber) {
+		if (!Is1stItem) {
+			pBS->CopyMem(StrPtr, Comma, 4);
+            StrPtr += 2;	// L" ,"
+		}
         ItowEx(EhciNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
 
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
-        StrPtr += 1;    //  L" "
+        pBS->CopyMem(StrPtr, Space, 2);
+        StrPtr += 1;	//	L" "
 
-        CopyMem(StrPtr, StrEhci, 8); 
+		pBS->CopyMem(StrPtr, StrEhci, 8); 
         StrPtr += 4;            // L"EHCI"
-        if (EhciNumber > 1) {
-            *StrPtr++ = L's';   // L'EHCIs'
-        }
-        Is1stItem = FALSE;
-    }
+		if (EhciNumber > 1) {
+			*StrPtr++ = L's';   // L'EHCIs'
+		}
+		Is1stItem = FALSE;
+	}
 
-    if (XhciNumber) {
-        if (!Is1stItem) {
-            CopyMem(StrPtr, Comma, 4);
-            StrPtr += 2;    // L" ,"
-        }
+	if (XhciNumber) {
+		if (!Is1stItem) {
+			pBS->CopyMem(StrPtr, Comma, 4);
+            StrPtr += 2;	// L" ,"
+		}
         ItowEx(XhciNumber, NumberToString, 10, FALSE);
         NumSize = Wcslen(NumberToString);
 
         // move pointer 1 more space then string length
-        CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
+        pBS->CopyMem(StrPtr, NumberToString, (NumSize * sizeof (CHAR16)));
         StrPtr += NumSize;
 
         // move pointer 1 more space
-        CopyMem(StrPtr, Space, 2);
-        StrPtr += 1;    //  L" "
+        pBS->CopyMem(StrPtr, Space, 2);
+        StrPtr += 1;	//	L" "
 
-        CopyMem(StrPtr, StrXhci, 8); 
+		pBS->CopyMem(StrPtr, StrXhci, 8); 
         StrPtr += 4;            // L"XHCI"
-        if (XhciNumber > 1) {
-            *StrPtr++ = L's';   // L'XHCIs'
-        }
-    }
+		if (XhciNumber > 1) {
+			*StrPtr++ = L's';   // L'XHCIs'
+		}
+		Is1stItem = FALSE;
+	}
 
-    CopyMem(ControllerNumStr, Name, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16));
+    pBS->CopyMem(ControllerNumStr, Name, MAX_DEVS_LINE_LENGTH * sizeof(CHAR16));
 
     return EFI_SUCCESS;
 }
@@ -377,19 +373,10 @@ GetMassDeviceName(
     the Setup.
 
 **/
-/**
-    This function is eLink'ed with the chain executed right before
-    the Setup.
-    @param  HiiHandle    HII handle
-    @param  Class        Class of Form Set
-
-    @retval None
-
-**/
 
 VOID
 InitUSBStrings(
-    EFI_HII_HANDLE  HiiHandle,
+    EFI_HII_HANDLE HiiHandle,
     UINT16          Class
 )
 {
@@ -397,7 +384,7 @@ InitUSBStrings(
     CHAR16  ControllerNumStr[MAX_DEVS_LINE_LENGTH];
     CHAR16  MassStr[MAX_DEVS_LINE_LENGTH];
     UINT8   NextDev;
-    UINT16  MassDev[MAX_USB_MASS_STORAGE] = {
+    UINT16  MassDev[16] = {
         STRING_TOKEN(STR_USB_MASS_DEVICE1),
         STRING_TOKEN(STR_USB_MASS_DEVICE2),
         STRING_TOKEN(STR_USB_MASS_DEVICE3),
@@ -413,33 +400,17 @@ InitUSBStrings(
         STRING_TOKEN(STR_USB_MASS_DEVICE13),
         STRING_TOKEN(STR_USB_MASS_DEVICE14),
         STRING_TOKEN(STR_USB_MASS_DEVICE15),
-        STRING_TOKEN(STR_USB_MASS_DEVICE16),
-        STRING_TOKEN(STR_USB_MASS_DEVICE17),
-        STRING_TOKEN(STR_USB_MASS_DEVICE18),
-        STRING_TOKEN(STR_USB_MASS_DEVICE19),
-        STRING_TOKEN(STR_USB_MASS_DEVICE20),
-        STRING_TOKEN(STR_USB_MASS_DEVICE21),
-        STRING_TOKEN(STR_USB_MASS_DEVICE22),
-        STRING_TOKEN(STR_USB_MASS_DEVICE23),
-        STRING_TOKEN(STR_USB_MASS_DEVICE24),
-        STRING_TOKEN(STR_USB_MASS_DEVICE25),
-        STRING_TOKEN(STR_USB_MASS_DEVICE26),
-        STRING_TOKEN(STR_USB_MASS_DEVICE27),
-        STRING_TOKEN(STR_USB_MASS_DEVICE28),
-        STRING_TOKEN(STR_USB_MASS_DEVICE29),
-        STRING_TOKEN(STR_USB_MASS_DEVICE30),
-        STRING_TOKEN(STR_USB_MASS_DEVICE31),
-        STRING_TOKEN(STR_USB_MASS_DEVICE32)
+        STRING_TOKEN(STR_USB_MASS_DEVICE16)
 
     };
-    UINT8               MassDevValid[MAX_USB_MASS_STORAGE];
-    UINT8               Index;
+    UINT8               MassDevValid[16];
+    UINT8               i;
     UINTN               VariableSize;
     USB_MASS_DEV_NUM    SetupData;
     EFI_STATUS          Status;
     EFI_USB_PROTOCOL    *UsbProtocol;
     EFI_GUID            UsbProtocolGuid = EFI_USB_PROTOCOL_GUID;
-    CONNECTED_USB_DEVICES_NUM       DevNum;
+	CONNECTED_USB_DEVICES_NUM       DevNum;
     UINT32              VariableAttributes = EFI_VARIABLE_BOOTSERVICE_ACCESS;
     USB_CONTROLLER_NUM  UsbControllerNum;
 
@@ -455,7 +426,8 @@ InitUSBStrings(
     InitString(HiiHandle, STRING_TOKEN(STR_USB_MODULE_VER), L"%02d", USB_DRIVER_MAJOR_VER);
                                         //<(EIP102493+)
 
-    Status = gBS->LocateProtocol(&UsbProtocolGuid, NULL, (VOID**)&UsbProtocol);
+    Status = pBS->LocateProtocol(&UsbProtocolGuid, NULL, &UsbProtocol);
+//####  ASSERT_EFI_ERROR(Status);
     if (EFI_ERROR(Status)) {
         return;
     }
@@ -471,39 +443,35 @@ InitUSBStrings(
     InitString(HiiHandle, STRING_TOKEN(STR_USB_CONTROLLERS_ENABLED_LIST), L"%s", ControllerNumStr);
 
     // Mass storage device names
-    for (Index = 0, NextDev = 0; Index < MAX_USB_MASS_STORAGE; Index++) {
+    for (i = 0, NextDev = 0; i < 16; i++) {
         NextDev = GetMassDeviceName(MassStr, NextDev, UsbProtocol);
         if (NextDev == 0xFF) {
             break;    // No more devices
         }
-        InitString(HiiHandle, MassDev[Index], L"%s", MassStr);
+        InitString(HiiHandle, MassDev[i], L"%s", MassStr);
         if (NextDev & 0x80) {
             break;     // Last device
         }
     }
 
-    for (Index = 0; Index < MAX_USB_MASS_STORAGE; Index++) {
-        if (Index < DevNum.NumUsbMass) {
-            MassDevValid[Index] = 1;
+    for (i = 0; i < 16; i++) {
+        if (i < DevNum.NumUsbMass) {
+            MassDevValid[i] = 1;
         } else {
-            MassDevValid[Index] = 0;
+            MassDevValid[i] = 0;
         }
     }
 
     VariableSize = sizeof(USB_MASS_DEV_VALID);
 
-    Status = gRT->SetVariable(L"UsbMassDevValid",
+    Status = pRS->SetVariable(L"UsbMassDevValid",
         &gEfiSetupGuid,
         VariableAttributes,
         VariableSize,
         &MassDevValid);
-    
-    if (EFI_ERROR(Status)) {
-        return;
-    }
 
     VariableSize = sizeof(SetupData);
-    Status = gRT->GetVariable(L"UsbMassDevNum",
+    Status = pRS->GetVariable(L"UsbMassDevNum",
         &gEfiSetupGuid,
         NULL,
         &VariableSize,
@@ -516,18 +484,14 @@ InitUSBStrings(
     SetupData.IsInteractionAllowed = 0;
     SetupData.UsbMassDevNum = DevNum.NumUsbMass;
 
-    Status = gRT->SetVariable(L"UsbMassDevNum",
+    Status = pRS->SetVariable(L"UsbMassDevNum",
         &gEfiSetupGuid,
         VariableAttributes,
         VariableSize,
         &SetupData);
-    
-    if (EFI_ERROR(Status)) {
-        return;
-    }
 
     VariableSize = sizeof(UsbControllerNum);
-    Status = gRT->GetVariable(L"UsbControllerNum",
+    Status = pRS->GetVariable(L"UsbControllerNum",
         &gEfiSetupGuid,
         NULL,
         &VariableSize,
@@ -542,7 +506,7 @@ InitUSBStrings(
     UsbControllerNum.EhciNum = DevNum.NumEhcis;
     UsbControllerNum.XhciNum = DevNum.NumXhcis;
 
-    Status = gRT->SetVariable(L"UsbControllerNum",
+    Status = pRS->SetVariable(L"UsbControllerNum",
         &gEfiSetupGuid,
         VariableAttributes,
         VariableSize,
@@ -555,7 +519,7 @@ InitUSBStrings(
 
 **/
 
-EFI_STATUS
+VOID
 UpdateUSBStrings(
     EFI_HII_HANDLE HiiHandle,
     UINT16          Class,
@@ -563,8 +527,8 @@ UpdateUSBStrings(
     UINT16          Key
 )
 {
-    UINT8       MassDevValid[MAX_USB_MASS_STORAGE];
-    UINT8       Index;
+    UINT8       MassDevValid[16];
+    UINT8       i;
     UINT8       NextDev;
     UINTN       VariableSize;
     EFI_GUID    UsbProtocolGuid = EFI_USB_PROTOCOL_GUID;
@@ -576,7 +540,7 @@ UpdateUSBStrings(
     CHAR16      DevNumStr[MAX_DEVS_LINE_LENGTH];
     CHAR16      ControllerNumStr[MAX_DEVS_LINE_LENGTH];
     CHAR16      MassStr[MAX_DEVS_LINE_LENGTH];
-    UINT16      MassDev[MAX_USB_MASS_STORAGE] = {
+    UINT16      MassDev[16] = {
                     STRING_TOKEN(STR_USB_MASS_DEVICE1),
                     STRING_TOKEN(STR_USB_MASS_DEVICE2),
                     STRING_TOKEN(STR_USB_MASS_DEVICE3),
@@ -592,39 +556,15 @@ UpdateUSBStrings(
                     STRING_TOKEN(STR_USB_MASS_DEVICE13),
                     STRING_TOKEN(STR_USB_MASS_DEVICE14),
                     STRING_TOKEN(STR_USB_MASS_DEVICE15),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE16),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE17),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE18),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE19),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE20),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE21),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE22),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE23),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE24),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE25),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE26),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE27),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE28),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE29),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE30),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE31),
-                    STRING_TOKEN(STR_USB_MASS_DEVICE32)
+                    STRING_TOKEN(STR_USB_MASS_DEVICE16)
                 };
-    CALLBACK_PARAMETERS *Callback;
-
-    Callback = GetCallbackParameters();
-    if(!Callback) {
-        return EFI_UNSUPPORTED;
-    } else if (Callback->Action != EFI_BROWSER_ACTION_CHANGING) {
-        return EFI_UNSUPPORTED;
-    }
     
     if (Key == USB_DEVICES_ENABLED_REFRESH_KEY) {
         
-        Status = gBS->LocateProtocol(&UsbProtocolGuid, NULL, (VOID**)&UsbProtocol);
+        Status = pBS->LocateProtocol(&UsbProtocolGuid, NULL, &UsbProtocol);
 
         if (EFI_ERROR(Status)) {
-            return Status;
+            return;
         }
 
         // Number of connected devices
@@ -633,71 +573,67 @@ UpdateUSBStrings(
         InitString(HiiHandle, STRING_TOKEN(STR_USB_DEVICES_ENABLED_LIST), L"%s", DevNumStr);
 
         // Mass storage device names
-        for (Index = 0, NextDev = 0; Index < MAX_USB_MASS_STORAGE; Index++) {
+        for (i = 0, NextDev = 0; i < 16; i++) {
             NextDev = GetMassDeviceName(MassStr, NextDev, UsbProtocol);
             if (NextDev == 0xFF) {
                 break;    // No more devices
             }
-            InitString(HiiHandle, MassDev[Index], L"%s", MassStr);
+            InitString(HiiHandle, MassDev[i], L"%s", MassStr);
             if (NextDev & 0x80) {
                 break;     // Last device
             }
         }
 
         VariableSize = sizeof(MassDevValid);
-
-        Status = HiiLibGetBrowserData(
+    	   
+    	Status = HiiLibGetBrowserData(
                     &VariableSize, &MassDevValid,
                     &gEfiSetupGuid, L"UsbMassDevValid");
         
         if (EFI_ERROR(Status)) {
-            return Status;
+            return;
         }
-
-        for (Index = 0; Index < MAX_USB_MASS_STORAGE; Index++) {
-            if (Index < DevNum.NumUsbMass) {
-                MassDevValid[Index] = 1;
+        	   	   	    
+        for (i = 0; i < 16; i++) {
+            if (i < DevNum.NumUsbMass) {
+                MassDevValid[i] = 1;
             } else {
-                MassDevValid[Index] = 0;
+                MassDevValid[i] = 0;
             }
         }
 
-        Status = HiiLibSetBrowserData(
+    	Status = HiiLibSetBrowserData(
                     VariableSize, &MassDevValid,
                     &gEfiSetupGuid, L"UsbMassDevValid");
              
         if (EFI_ERROR(Status)) {
-            return Status;
+            return;
         }
 
         VariableSize = sizeof(MassDevNumData);
 
-        Status = HiiLibGetBrowserData(
+    	Status = HiiLibGetBrowserData(
                     &VariableSize, &MassDevNumData,
                     &gEfiSetupGuid, L"UsbMassDevNum");
         
         if (EFI_ERROR(Status)) {
-            return Status;
+            return;
         }
 
         MassDevNumData.UsbMassDevNum = DevNum.NumUsbMass;
 
-        Status = HiiLibSetBrowserData(
+    	Status = HiiLibSetBrowserData(
                     VariableSize, &MassDevNumData,
                     &gEfiSetupGuid, L"UsbMassDevNum");
-
-        if (EFI_ERROR(Status)) {
-            return Status;
-        }
         
         VariableSize = sizeof(UsbControllerNum);
 
-        Status = HiiLibGetBrowserData(
+    	Status = HiiLibGetBrowserData(
                     &VariableSize, &UsbControllerNum,
                     &gEfiSetupGuid, L"UsbControllerNum");
         
         if (EFI_ERROR(Status)) {
-            return Status;
+            return;
         }
 
         UsbControllerNum.UhciNum = DevNum.NumUhcis;
@@ -705,19 +641,18 @@ UpdateUSBStrings(
         UsbControllerNum.EhciNum = DevNum.NumEhcis;
         UsbControllerNum.XhciNum = DevNum.NumXhcis;
 
-        Status = HiiLibSetBrowserData(
+    	Status = HiiLibSetBrowserData(
                     VariableSize, &UsbControllerNum,
                     &gEfiSetupGuid, L"UsbControllerNum");
-        return Status;
-
-    }
-    return EFI_UNSUPPORTED;
+        
+    }	
+    
 }
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

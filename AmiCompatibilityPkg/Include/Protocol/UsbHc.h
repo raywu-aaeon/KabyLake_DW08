@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2015, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -16,8 +16,8 @@
 
 **/
 
-#ifndef __USB_HC_H
-#define __USB_HC_H
+#ifndef _USBHC_INC_
+#define _USBHC_INC_
 
 #include <Protocol/UsbIo.h>
 
@@ -26,7 +26,7 @@ typedef enum {
     EfiUsbPortSuspend = 2,
     EfiUsbPortReset = 4,
     EfiUsbPortPower = 8,
-    EfiUsbPortOwner = 13,               //(EIP57663+)
+	EfiUsbPortOwner = 13,				//(EIP57663+)
     EfiUsbPortConnectChange = 16,
     EfiUsbPortEnableChange = 17,
     EfiUsbPortSuspendChange = 18,
@@ -35,8 +35,8 @@ typedef enum {
 } EFI_USB_PORT_FEATURE;
 
 typedef struct{
-        UINT16 PortStatus;
-        UINT16 PortChangeStatus;
+	UINT16 PortStatus;
+	UINT16 PortChangeStatus;
 } EFI_USB_PORT_STATUS;
 
 //**************************************************
@@ -67,13 +67,13 @@ typedef struct{
   { \
     0xf5089266, 0x1aa0, 0x4953, 0x97, 0xd8, 0x56, 0x2f, 0x8a, 0x73, 0xb5, 0x19 \
   }
-
+GUID_VARIABLE_DECLARATION(gEfiUsbHcProtocolGuid, EFI_USB_HC_PROTOCOL_GUID);
 
 #define EFI_USB2_HC_PROTOCOL_GUID \
   { \
     0x3e745226, 0x9818, 0x45b6, 0xa2, 0xac, 0xd7, 0xcd, 0xe, 0x8b, 0xa2, 0xbc \
   }
-
+GUID_VARIABLE_DECLARATION(gEfiUsb2HcProtocolGuid, EFI_USB2_HC_PROTOCOL_GUID);
 
 #ifndef GUID_VARIABLE_DEFINITION
 
@@ -119,7 +119,7 @@ EFI_STATUS
 (EFIAPI *EFI_USB_HC_PROTOCOL_CONTROL_TRANSFER) (
   IN EFI_USB_HC_PROTOCOL            *This,
   IN     UINT8                      DeviceAddress,
-  IN     UINT8                      IsSlowDevice,
+  IN     UINT8		                IsSlowDevice,
   IN     UINT8                      MaximumPacketLength,
   IN     EFI_USB_DEVICE_REQUEST     *Request,
   IN     EFI_USB_DATA_DIRECTION     TransferDirection,
@@ -231,7 +231,7 @@ EFI_STATUS
   IN EFI_USB_PORT_FEATURE           PortFeature
   );
 
-struct _EFI_USB_HC_PROTOCOL {  
+typedef struct _EFI_USB_HC_PROTOCOL {  
   EFI_USB_HC_PROTOCOL_RESET                       Reset;
   EFI_USB_HC_PROTOCOL_GET_STATE                   GetState;
   EFI_USB_HC_PROTOCOL_SET_STATE                   SetState;
@@ -252,6 +252,7 @@ struct _EFI_USB_HC_PROTOCOL {
 //
 // Forward reference for pure ANSI compatability
 //
+//EFI_FORWARD_DECLARATION (EFI_USB2_HC_PROTOCOL);
 
 #define EFI_USB_HC_RESET_GLOBAL_WITH_DEBUG 0x0004
 #define EFI_USB_HC_RESET_HOST_WITH_DEBUG   0x0008
@@ -426,7 +427,7 @@ EFI_STATUS
   IN EFI_USB_PORT_FEATURE    PortFeature
   );
 
-struct _EFI_USB2_HC_PROTOCOL {
+typedef struct _EFI_USB2_HC_PROTOCOL {
   EFI_USB2_HC_PROTOCOL_GET_CAPABILITY              GetCapability;
   EFI_USB2_HC_PROTOCOL_RESET                       Reset;
   EFI_USB2_HC_PROTOCOL_GET_STATE                   GetState;
@@ -444,16 +445,13 @@ struct _EFI_USB2_HC_PROTOCOL {
   UINT16                                           MinorRevision;
 };
 
-extern EFI_GUID gEfiUsbHcProtocolGuid;
-extern EFI_GUID gEfiUsb2HcProtocolGuid;
-
 #endif // GUID_VARIABLE_DEFINITION
-#endif // __USB_HC_H
+#endif // _USBHC_INC_
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2015, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

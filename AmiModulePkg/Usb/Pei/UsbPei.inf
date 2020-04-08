@@ -1,7 +1,7 @@
 #**********************************************************************
 #**********************************************************************
 #**                                                                  **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 #**                                                                  **
 #**                       All Rights Reserved.                       **
 #**                                                                  **
@@ -52,8 +52,7 @@
   BaseMemoryLib
   IoLib
   DebugLib
-  PcdLib
-
+ 
 [Ppis]
   gPeiUsbIoPpiGuid
   gPeiUsbHostControllerPpiGuid
@@ -63,18 +62,13 @@
   gEfiPeiVirtualBlockIoPpiGuid
   gEfiPeiStallPpiGuid
   gEfiPeiBootInRecoveryModePpiGuid
-  gEdkiiIoMmuPpiGuid
   
  [Packages]
   AmiModulePkg/AmiModulePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  AmiModulePkg/Usb/AmiUsbPkg.dec
-
-[PcdEx]
-  gAmiUsbPkgTokenSpaceGuid.AmiPcdUsbPeiEdkiiIommuPpiSupport
-
+  
 [Depex]
   gEfiPeiMemoryDiscoveredPpiGuid AND
   gEfiPeiDecompressPpiGuid AND
@@ -84,7 +78,7 @@
 #**********************************************************************
 #**********************************************************************
 #**                                                                  **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 #**                                                                  **
 #**                       All Rights Reserved.                       **
 #**                                                                  **

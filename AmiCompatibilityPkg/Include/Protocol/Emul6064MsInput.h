@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -12,51 +12,52 @@
 //**********************************************************************
 //**********************************************************************
 
-/** @file UsbSb.c
-    USB South Bridge Porting Hooks
+/** @file Emul6064MsInput.h
+    Protocol used for 6064 USB mouse emulation
 
 **/
 
-#include <AmiUsb.h>
-#include <Library/SmmServicesTableLib.h>
-#include <Library/AmiUsbSmmGlobalDataValidationLib.h>
-#include <Library/DxeSmmUsbSbLib.h>
+#ifndef _EMUL6064MSINPUT_PROTOCOL_H_
+#define _EMUL6064MSINPUT_PROTOCOL_H_
+
+EFI_FORWARD_DECLARATION (EFI_EMUL6064MSINPUT_PROTOCOL);
+
+#define EFI_EMUL6064MSINPUT_PROTOCOL_GUID \
+  { 0x7578b307, 0xb25b, 0x44f9, 0x89, 0x2e, 0x20, 0x9b, 0x0e, 0x39, 0x93, 0xc6 }
+
+#define PS2MSFLAGS_LBUTTON			0x01
+#define PS2MSFLAGS_RBUTTON			0x02
+#define PS2MSFLAGS_XSIGN			0x10
+#define PS2MSFLAGS_YSIGN			0x20
+#define PS2MSFLAGS_XO				0x40
+#define PS2MSFLAGS_YO				0x80
+
+typedef struct {
+	UINT8 flags;
+	UINT8 x;
+	UINT8 y;
+} PS2MouseData;
 
 
-
-/**
-    This function is for enable/disable Timer SMI.
-    @param  EnableSmi        TRUE: Enable timer SMI; otherwise, disable timer SMI.
-    @retval EFI_STATUS       Status of the operation
-**/
-
+typedef
 EFI_STATUS
-EFIAPI
-SettingTimerSMI(
-  IN BOOLEAN  EnableSmi
-){
-   EFI_STATUS Status = EFI_SUCCESS;
-   //
-   //  You can use gUsbIntTimerHandle to get  PeriodicTime handle.
-   //
-   if (EnableSmi){
-       //
-       // Re-enable Periodic Timer SMI 
-       //
-   } else{        
-       //
-       // Disable Periodic Timer SMI
-       //
-   }
-   
-  return  Status;
-}
+(EFIAPI *EFI_EMUL6064MSINPUT_PROTOCOL_SEND) (
+  IN EFI_EMUL6064MSINPUT_PROTOCOL           * This,
+  IN PS2MouseData*					 data
+  );
 
+typedef struct _EFI_EMUL6064MSINPUT_PROTOCOL {
+	EFI_EMUL6064MSINPUT_PROTOCOL_SEND Send;
+};
+
+extern EFI_GUID gEmul6064MsInputProtocolGuid;
+
+#endif
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

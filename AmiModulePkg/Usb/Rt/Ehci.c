@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -16,10 +16,18 @@
     AMI USB EHCI support
 
 **/
+
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "AmiUsb.h"
 #include "UsbKbd.h"
-#include <Library/AmiUsbHcdLib.h>
-#include "../UsbDevDriverElinks.h"
+#include <Library/BaseMemoryLib.h>
+#if !USB_RT_DXE_DRIVER
+#include <Library/AmiBufferValidationLib.h>
+#endif
+#include <UsbDevDriverElinks.h>
+
+#if EHCI_SUPPORT
 
 UINT8   EHCI_Start (HC_STRUC*);
 UINT8   EHCI_Stop (HC_STRUC*);
@@ -39,7 +47,7 @@ UINT8   EHCI_ActivatePolling (HC_STRUC*,DEV_INFO*);
 UINT8   EHCI_DisableKeyRepeat (HC_STRUC*);
 UINT8   EHCI_EnableKeyRepeat (HC_STRUC*);
 UINT8   EHCI_ResetRootHub (HC_STRUC*,UINT8);
-UINT8   EHCI_GlobalSuspend (HC_STRUC*); 
+UINT8   EHCI_GlobalSuspend (HC_STRUC*);	//(EIP54018+)
 UINT8   EhciSmiControl(HC_STRUC*, BOOLEAN);
 
 UINT8   EHCIResetHC(HC_STRUC*);
@@ -58,68 +66,63 @@ UINT8   EhciAddPeriodicQh(HC_STRUC*,EHCI_QH*);
 VOID    EhciAddIsochTDs(HC_STRUC*);
 UINT8   EhciRemovePeriodicQh(HC_STRUC*,EHCI_QH*);
 VOID    ProcessOwnerShipChangeSMI(HC_STRUC*);
-VOID    ProcessSmiChangeToEhcd(HC_STRUC*);
-VOID    ProcessSmiChangeToBios(HC_STRUC*);
-UINT8   EFIAPI EHCIGetLegacySupportOffset(HC_STRUC*, UINT16);
-UINT8   EhciPollingTDCallback(HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
-UINT8   EhciRepeatTDCallback(HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
-UINT32  DwordReadMem(UINT32, UINT32);
-UINT32  EFIAPI HcReadPciReg(HC_STRUC*, UINT32);
-VOID    EFIAPI HcWritePciReg(HC_STRUC*, UINT32, UINT32);
-UINT32  EFIAPI HcReadHcMem(HC_STRUC*, UINT32);
-VOID    EFIAPI HcWriteHcMem(HC_STRUC*, UINT32, UINT32);
-UINT32  HcReadOpReg(HC_STRUC*, UINT32);
-VOID    HcWriteOpReg(HC_STRUC*, UINT32, UINT32);
-VOID    HcClearOpReg(HC_STRUC*, UINT32, UINT32);
-VOID    HcSetOpReg(HC_STRUC*, UINT32, UINT32);
-UINT32  EhciReadDebugReg(HC_STRUC*, UINT8, UINT32);
+VOID    ProcessSmiChangeToEHCD(HC_STRUC*);
+VOID    ProcessSmiChangeToBIOS(HC_STRUC*);
+UINT8   EHCIGetLegacySupportOffset(HC_STRUC*, UINT16);
+//VOID    EHCIRemoveQHFromAsyncList(HC_STRUC*, EHCI_QH*);
+UINT8	EhciPollingTDCallback(HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
+UINT8	EhciRepeatTDCallback(HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
+
+UINT32  DwordReadMem(UINT32, UINT16);
+
+UINT32	HcReadPciReg(HC_STRUC*, UINT32);
+VOID	HcWritePciReg(HC_STRUC*, UINT32, UINT32);
+UINT32	HcReadHcMem(HC_STRUC*, UINT32);
+VOID	HcWriteHcMem(HC_STRUC*, UINT32, UINT32);
+UINT32	HcReadOpReg(HC_STRUC*, UINT32);
+VOID	HcWriteOpReg(HC_STRUC*, UINT32, UINT32);
+VOID	HcClearOpReg(HC_STRUC*, UINT32, UINT32);
+VOID	HcSetOpReg(HC_STRUC*, UINT32, UINT32);
+UINT32	EhciReadDebugReg(HC_STRUC*, UINT8, UINT32);
 VOID*   EhciMemGetPhyAddr(HC_STRUC*, VOID*);
 VOID*   EhciMemGetHostAddr(HC_STRUC*, VOID*);
-VOID*   EhciMemAlloc(HC_STRUC*, UINT16);
-VOID    EhciMemFree(HC_STRUC*, VOID*, UINT16);
-UINT8   EFIAPI HcDmaMap(HC_STRUC*, UINT8, UINT8*, UINT32, UINT8**, VOID**);
-UINT8   EFIAPI HcDmaUnmap(HC_STRUC*, VOID*);
+VOID*	EhciMemAlloc(HC_STRUC*, UINT16);
+VOID	EhciMemFree(HC_STRUC*, VOID*, UINT16);
+UINT8	HcDmaMap(HC_STRUC*, UINT8, UINT8*, UINT32, UINT8**, VOID**);
+UINT8	HcDmaUnmap(HC_STRUC*, VOID*);
 BOOLEAN EhciIsHalted(HC_STRUC*);
 UINT16  EhciTranslateInterval(UINT8, UINT8);
+
 UINT8   USBCheckPortChange (HC_STRUC*, UINT8, UINT8);
 UINT8   USBLogError(UINT16);
-UINT8   UsbGetDataToggle(DEV_INFO*,UINT8);
-VOID    UsbUpdateDataToggle(DEV_INFO*, UINT8, UINT8);
+UINT8	UsbGetDataToggle(DEV_INFO*,UINT8);
+VOID	UsbUpdateDataToggle(DEV_INFO*, UINT8, UINT8);
+
 VOID    USB_InitFrameList (HC_STRUC*, UINT32);
 VOID    FixedDelay(UINTN);
+
 VOID*   USB_MemAlloc (UINT16);
 UINT8   USB_MemFree (VOID _FAR_ *, UINT16);
 UINT8   USB_DisconnectDevice (HC_STRUC*, UINT8, UINT8);
 DEV_INFO*   USB_GetDeviceInfoStruc(UINT8, DEV_INFO*, UINT8, HC_STRUC*);
 UINT8   USB_StopDevice (HC_STRUC*,  UINT8, UINT8);
 UINT32  USB_GetHubPortStatus(HC_STRUC*, UINT8, UINT8, BOOLEAN);
-UINT8   USB_InstallCallBackFunction (CALLBACK_FUNC);
-VOID    USBKeyRepeat(HC_STRUC*, UINT8);
-VOID    USBKBDPeriodicInterruptHandler(HC_STRUC*);
+UINT8	USB_InstallCallBackFunction (CALLBACK_FUNC);
+VOID	USBKeyRepeat(HC_STRUC*, UINT8);
 
+#if USB_DEV_KBD
+VOID    USBKBDPeriodicInterruptHandler(HC_STRUC*);
+#endif
 
 
 extern  USB_GLOBAL_DATA     *gUsbData;
-extern  BOOLEAN             gCheckUsbApiParameter;
-extern  USB_DATA_LIST       *gUsbDataList;
-extern HC_STRUC             **gHcTable;
+extern  BOOLEAN gCheckUsbApiParameter;
 
-
-typedef VOID (EHCI_GET_ROOT_HUB_PORT_SPEED_FUNS)( 
+typedef	VOID (EHCI_GET_ROOT_HUB_PORT_SPEED_FUNS)( 
     HC_STRUC    *HcStruc,
     UINT8       PortNum,
     UINT8       *PortSpeed
 );
-
-/**
- *  This function calculates Isochronous TD buffer addresses
- */
-typedef struct _ITD_PG_ADDRESS ITD_PG_ADDRESS;  
-struct _ITD_PG_ADDRESS{
-    UINT32 TrBuffer;
-    BOOLEAN NewPgNeeded;
-};
-
 extern EHCI_GET_ROOT_HUB_PORT_SPEED_FUNS EHCI_GET_ROOT_HUB_PORT_SPEED_ELINK_LIST EndOfGetRootHubPortSpeedList;
 EHCI_GET_ROOT_HUB_PORT_SPEED_FUNS*EhciGetRootHubPortSpeedFunctions[] = {
     EHCI_GET_ROOT_HUB_PORT_SPEED_ELINK_LIST NULL};
@@ -128,10 +131,10 @@ EHCI_GET_ROOT_HUB_PORT_SPEED_FUNS*EhciGetRootHubPortSpeedFunctions[] = {
     This function fills the host controller driver
     routine pointers
 
-    @param HcdHeader       Pointer to the host controller header structure
+    @param fpHCDHeader     Ptr to the host controller header structure
 
-    @retval USB_SUCCESS    Success
-    @retval USB_ERROR      Failure
+    @retval Status: USB_SUCCESS = Success
+        USB_ERROR = Failure
 
 **/
 
@@ -140,30 +143,30 @@ EHCI_FillHCDEntries(
     HCD_HEADER *HcdHeader
 )
 {
-    HcdHeader->FnHcdStart                = EHCI_Start;
-    HcdHeader->FnHcdStop                 = EHCI_Stop;
-    HcdHeader->FnHcdEnumeratePorts       = EHCI_EnumeratePorts;
-    HcdHeader->FnHcdDisableInterrupts    = EHCI_DisableInterrupts;
-    HcdHeader->FnHcdEnableInterrupts     = EHCI_EnableInterrupts;
-    HcdHeader->FnHcdProcessInterrupt     = EHCI_ProcessInterrupt;
-    HcdHeader->FnHcdGetRootHubStatus     = EHCI_GetRootHubStatus;
-    HcdHeader->FnHcdDisableRootHub       = EHCI_DisableRootHub;
-    HcdHeader->FnHcdEnableRootHub        = EHCI_EnableRootHub;
-    HcdHeader->FnHcdControlTransfer      = EHCI_ControlTransfer;
-    HcdHeader->FnHcdBulkTransfer         = EHCI_BulkTransfer;
-    HcdHeader->FnHcdIsocTransfer         = EHCI_IsocTransfer;
-    HcdHeader->FnHcdInterruptTransfer    = EHCI_InterruptTransfer;
-    HcdHeader->FnHcdDeactivatePolling    = EHCI_DeactivatePolling;
-    HcdHeader->FnHcdActivatePolling      = EHCI_ActivatePolling;
-    HcdHeader->FnHcdDisableKeyRepeat     = EHCI_DisableKeyRepeat;
-    HcdHeader->FnHcdEnableKeyRepeat      = EHCI_EnableKeyRepeat;
-    HcdHeader->FnHcdEnableEndpoints      = UsbHcdEnableEndpointsDummy;
-    HcdHeader->FnHcdInitDeviceData       = UsbHcdInitDeviceDataDummy;
-    HcdHeader->FnHcdDeinitDeviceData     = UsbHcdDeinitDeviceDataDummy;
-    HcdHeader->FnHcdResetRootHub         = EHCI_ResetRootHub;
-    HcdHeader->FnHcdClearEndpointState  = UsbHcdClearEndpointStateDummy;
-    HcdHeader->FnHcdGlobalSuspend        = EHCI_GlobalSuspend;
-    HcdHeader->FnHcdSmiControl           = EhciSmiControl;
+    HcdHeader->pfnHCDStart                = EHCI_Start;
+    HcdHeader->pfnHCDStop                 = EHCI_Stop;
+    HcdHeader->pfnHCDEnumeratePorts       = EHCI_EnumeratePorts;
+    HcdHeader->pfnHCDDisableInterrupts    = EHCI_DisableInterrupts;
+    HcdHeader->pfnHCDEnableInterrupts     = EHCI_EnableInterrupts;
+    HcdHeader->pfnHCDProcessInterrupt     = EHCI_ProcessInterrupt;
+    HcdHeader->pfnHCDGetRootHubStatus     = EHCI_GetRootHubStatus;
+    HcdHeader->pfnHCDDisableRootHub       = EHCI_DisableRootHub;
+    HcdHeader->pfnHCDEnableRootHub        = EHCI_EnableRootHub;
+    HcdHeader->pfnHCDControlTransfer      = EHCI_ControlTransfer;
+    HcdHeader->pfnHCDBulkTransfer         = EHCI_BulkTransfer;
+    HcdHeader->pfnHCDIsocTransfer         = EHCI_IsocTransfer;
+    HcdHeader->pfnHCDInterruptTransfer    = EHCI_InterruptTransfer;
+    HcdHeader->pfnHCDDeactivatePolling    = EHCI_DeactivatePolling;
+    HcdHeader->pfnHCDActivatePolling      = EHCI_ActivatePolling;
+    HcdHeader->pfnHCDDisableKeyRepeat     = EHCI_DisableKeyRepeat;
+    HcdHeader->pfnHCDEnableKeyRepeat      = EHCI_EnableKeyRepeat;
+    HcdHeader->pfnHCDEnableEndpoints      = USB_EnableEndpointsDummy;
+    HcdHeader->pfnHCDInitDeviceData       = USB_InitDeviceDataDummy;
+    HcdHeader->pfnHCDDeinitDeviceData     = USB_DeinitDeviceDataDummy;
+    HcdHeader->pfnHCDResetRootHub         = EHCI_ResetRootHub;
+    HcdHeader->pfnHCDClearEndpointState	  = 0;	//(EIP54283+)
+    HcdHeader->pfnHCDGlobalSuspend        = EHCI_GlobalSuspend;	//(EIP54018+)
+    HcdHeader->pfnHCDSmiControl           = EhciSmiControl;
 
     USB_InstallCallBackFunction(EhciRepeatTDCallback);
     USB_InstallCallBackFunction(EhciPollingTDCallback);
@@ -179,11 +182,10 @@ EHCI_FillHCDEntries(
     EHCI runtime routines about debug port presence and prevent
     any unwanted reset/reconfiguration of this port.
 
-    @param HcStruc   Pointer to the host controller structure
-                     HcStruc->DebugPort is updated if Debug Port is active on
-                     this controller; otherwise it will remain 0.
-                     
-    @retval None
+    @param HcStruc   Ptr to the host controller structure
+
+    @retval fpHCStruc->DebugPort is updated if Debug Port is active on
+        this controller; otherwise it will remain 0.
 
 **/
 
@@ -192,10 +194,10 @@ EhciIsolateDebugPort(
     HC_STRUC *HcStruc
 )
 {
-    UINT32 HcsParams = HcStruc->HcsParams;   // Host Controller Structural Parameters
+    UINT32 HcsParams = HcStruc->dHCSParams;   // Host Controller Structural Parameters
     UINT8  DebugPortNo;
     UINT32 NextCap;
-    UINT8  DebugPortBarIndex;
+	UINT8  DebugPortBarIndex;
     UINT16 DebugPortOffset;
 
     //
@@ -203,6 +205,7 @@ EhciIsolateDebugPort(
     //
     DebugPortNo = (UINT8)((HcsParams & (EHCI_DEBUG_N)) >> 20);
 
+    //ASSERT(DebugPortNo); // No debug port implemented
     HcStruc->DebugPort = 0;
     if (DebugPortNo == 0) return;
 
@@ -232,17 +235,17 @@ EhciIsolateDebugPort(
         //ASSERT(FALSE);  // Debug capabilities not found
         return;
     }
-    DebugPortBarIndex = (UINT8)((NextCap >> 29) - 1);
+	DebugPortBarIndex = (UINT8)((NextCap >> 29) - 1);
     DebugPortOffset = (UINT16)((NextCap >> 16) & 0x1FFF);
-    ASSERT(DebugPortBarIndex <= 5); // Wrong BAR
-    if (!(DebugPortBarIndex <= 5)) return;
+    ASSERT(DebugPortBarIndex >= 0 && DebugPortBarIndex <= 5); // Wrong BAR
+    if (!(DebugPortBarIndex >= 0 && DebugPortBarIndex <= 5)) return;
     //
     // See whether Debug Port is acquired by other software
     //
-    if (EhciReadDebugReg(HcStruc, DebugPortBarIndex, DebugPortOffset) & BIT28) {
-      HcStruc->DebugPort = DebugPortNo;
-      USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC Debug Port #%d enabled.\n", DebugPortNo);
-    }
+	if (EhciReadDebugReg(HcStruc, DebugPortBarIndex, DebugPortOffset) & BIT28) {
+	    HcStruc->DebugPort = DebugPortNo;
+        USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC Debug Port #%d enabled.\n", DebugPortNo);
+	}
 }
 
 
@@ -251,10 +254,10 @@ EhciIsolateDebugPort(
     The input to the routine is the pointer to the HC structure
     that defines this host controller
 
-    @param HcStruc   Pointer to the host controller structure
+    @param HcStruc   Ptr to the host controller structure
 
-    @retval USB_SUCCESS      On success
-    @retval USB_ERROR        Failure
+    @retval Status: USB_SUCCESS = Success
+        USB_ERROR = Failure
 
 **/
 
@@ -263,102 +266,108 @@ EHCI_Start(
     HC_STRUC* HcStruc
 )
 {
-    UINT32      Temp;
-    UINT32      Index;          
-    BOOLEAN     SetPortPower = FALSE;
-    UINT16      PortReg;
-    EFI_STATUS  Status;
-    UINT32      UsbHcClassCode;
+    UINT32  Temp;
+//#if EHCI_ASYNC_BELL_SUPPORT
+//    EHCI_QH *QhAsyncXfer;
+//#endif
+	EHCI_QH     *QhRepeat = NULL;
+	EHCI_QTD    *QtdRepeat = NULL;
+	UINT32	i;							//(EIP55960+)
+	BOOLEAN	SetPortPower = FALSE;
+    UINT16  PortReg;
+    EHCI_DESC_PTRS      *DescPtr = NULL;
+    EFI_STATUS  EfiStatus = EFI_SUCCESS;
 
-    Status = UsbHcStrucValidation(HcStruc);
+    EfiStatus = UsbHcStrucValidation(HcStruc);
     
-    if (EFI_ERROR(Status)) {
-      return USB_ERROR;
-    }
-
-    // The address offset of class code register is in 09-0Bh, we get the value
-    // from offset 08h for alignment and shift right 8 bits.
-    UsbHcClassCode = HcReadPciReg(HcStruc, USB_REG_REVISION_ID);
-    UsbHcClassCode = UsbHcClassCode >> 8;
-    if (UsbHcClassCode != EHCI_CLASS_CODE) {
-        USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "EHCI HC Class Code is wrong: %x\n", UsbHcClassCode);
+    if (EFI_ERROR(EfiStatus)) {
         return USB_ERROR;
     }
 
+/*
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "Enabling MEM/BM for EHCI HC %02X\n", HcStruc->wBusDevFuncNum);
+
+    //
+    // Enable IO access and Bus Mastering
+    //
+    WordWritePCIConfig((UINT16)HcStruc->wBusDevFuncNum, 4, BIT1 + BIT2);
+*/
     //
     // Get memory base address of the HC and store it in the HCStruc
     //
     HcStruc->BaseAddress = HcReadPciReg(HcStruc, USB_MEM_BASE_ADDRESS) & 0xFFFFFFF0;
+
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC Mem Addr: %X\n", HcStruc->BaseAddress);
     
-    Status = AmiUsbValidateMmioBuffer((VOID*)HcStruc->BaseAddress, HcStruc->BaseAddressSize);
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
-      USB_DEBUG(DEBUG_ERROR, 3, "Usb Mmio address is invalid, it is in SMRAM\n");
-      return USB_ERROR;
+#if !USB_RT_DXE_DRIVER
+    EfiStatus = AmiValidateMmioBuffer((VOID*)HcStruc->BaseAddress, HcStruc->BaseAddressSize);
+    if (EFI_ERROR(EfiStatus)) {
+        USB_DEBUG(DEBUG_ERROR, 3, "Usb Mmio address is invalid, it is in SMRAM\n");
+        return USB_ERROR;
     }
-    Status = AmiUsbValidateMemoryBuffer((VOID*)HcStruc->FrameList, 0x1000);
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
-      return USB_ERROR;
+    EfiStatus = AmiValidateMmioBuffer((VOID*)HcStruc->fpFrameList, 0x1000);
+    if (EFI_ERROR(EfiStatus)) {
+        return USB_ERROR;
     }
+#endif
 
     //
     // Get the number of ports supported by the host controller (Offset 4)
     // and store it in HCStruc
     //
-    HcStruc->HcsParams = HcReadHcMem(HcStruc, EHCI_HCSPARAMS);
-    HcStruc->NumPorts = (UINT8)(HcStruc->HcsParams & EHCI_N_PORTS);
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC Number of ports: %d\n", HcStruc->NumPorts);
+    HcStruc->dHCSParams = HcReadHcMem(HcStruc, EHCI_HCSPARAMS);
+    HcStruc->bNumPorts = (UINT8)(HcStruc->dHCSParams & EHCI_N_PORTS);
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC Number of ports: %d\n", HcStruc->bNumPorts);
 
-    EhciIsolateDebugPort(HcStruc);
+	EhciIsolateDebugPort(HcStruc);
 
     //
     // Read the Capability Registers Length to find the Offset address for the
     // beginning of the operational registers
     //
-    HcStruc->OpRegOffset = (UINT8)HcReadHcMem(HcStruc, EHCI_VERCAPLENGTH);
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC Operational Registers Offset: %d\n", HcStruc->OpRegOffset);
+    HcStruc->bOpRegOffset = (UINT8)HcReadHcMem(HcStruc, EHCI_VERCAPLENGTH);
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC Operational Registers Offset: %d\n", HcStruc->bOpRegOffset);
 
     //
     // Read and store the HCCPARAMS value
     //
-    HcStruc->HccParams = HcReadHcMem(HcStruc, EHCI_HCCPARAMS);
+    HcStruc->dHCCParams = HcReadHcMem(HcStruc, EHCI_HCCPARAMS);
+    //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI HC HCPARAMS: %x\n", gUsbData->dHCCParams);
 
     //
     // Get PCI register offset for the legacy support in EHCI controller
     // and store it in HC_STRUC
     //
-    HcStruc->ExtCapPtr = EHCIGetLegacySupportOffset(
+    HcStruc->bExtCapPtr = EHCIGetLegacySupportOffset(
                         HcStruc,
-                        HcStruc->BusDevFuncNum);
+                        HcStruc->wBusDevFuncNum);
 
-
-    if ((gUsbData->UsbFeature & USB_EHCI_64_BIT_DATA_STRUCTURE) == 0){
-      //
-      // 64bit data structures are not enabled. So check whether this host controller
-      // needs 64bit data structure or not.
-      //
-      if (HcStruc->HccParams & EHCI_64BIT_CAP) {
+#if EHCI_64BIT_DATA_STRUCTURE == 0
+    //
+    // 64bit data structures are not enabled. So check whether this host controller
+    // needs 64bit data structure or not.
+    //
+    if (HcStruc->dHCCParams & EHCI_64BIT_CAP) {
         //
         // Engineer has to enable the 64bit capability. Post an error message
         //
         USBLogError(ERRUSB_EHCI_64BIT_DATA_STRUC);
         ASSERT(FALSE);
-        
+
         //
         // Connect all ports to the classic host controller
         //
         HcClearOpReg(HcStruc, EHCI_CONFIGFLAG, BIT0);
         return  USB_ERROR;
-        }
     }
+#endif
 
-    if ((gUsbData->UsbFeature & USB_HIDE_HISPEED_SETUP_QUESTION) == 0){
-      if ((gUsbDataList->UsbSetupData->UsbHiSpeedSupport == 0) && ((HcStruc->HcsParams & EHCI_N_CC) != 0)) {
-        HcClearOpReg(HcStruc, EHCI_CONFIGFLAG, BIT0);
-        return USB_ERROR;
-       }
-    }
-
+#if	HIDE_USB_HISPEED_SUPPORT_SETUP_QUESTION == 0
+	if ((gUsbData->UsbHiSpeedSupport == 0) && ((HcStruc->dHCSParams & EHCI_N_CC) != 0)) {
+		HcClearOpReg(HcStruc, EHCI_CONFIGFLAG, BIT0);
+		return USB_ERROR;
+	}
+#endif
 
 //----------------------------------------------------------------------------
 // Note: after this point any access to the operational registers is through
@@ -366,27 +375,30 @@ EHCI_Start(
 // capability registers is through the macro USBPORT_DWORD_READ_MEM and
 // there is no macro to write to the registers
 //----------------------------------------------------------------------------
+										//(EIP55960)>
+	if ((HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) == 0) {
+	    // Turn HC off and wait for the Halted bit to get set
+	    HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
 
-    if ((HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) == 0) {
-      // Turn HC off and wait for the Halted bit to get set
-      HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
-
-      // The Host Controller must halt within 16 micro-frames after 
-      // software clears the Run bit. 
-      for (Index = 0; Index < 16; Index++) {
-        if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
-          break;
-        }
-        FixedDelay(125);   // 125 us delay
-      }
-    }
+		// The Host Controller must halt within 16 micro-frames after 
+		// software clears the Run bit. 
+		for (i = 0; i < 16; i++) {
+			if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
+				break;
+			}
+            FixedDelay(125);	  // 125 us delay
+		}
+		//while ((DwordReadMem(dMemAddr, EHCI_USBSTS) & EHCI_HCHALTED) == 0) {};
+	}
+										//<(EIP55960)
+// /* EIP#23479
     //
     // Reset the host controller (HC must be halted)
     //
     if (EHCIResetHC(HcStruc) == USB_ERROR) {
-      return  USB_ERROR;  // HC reset error, error log is updated
+        return  USB_ERROR;  // HC reset error, error log is updated
     }
-
+//*/
     //
     // Get the frame list size from the EHCI command register
     //
@@ -399,13 +411,13 @@ EHCI_Start(
     //
     switch (Temp) {
         case 0: 
-            HcStruc->AsyncListSize   = 1024;
+            HcStruc->wAsyncListSize   = 1024;
             break;
         case 1: 
-            HcStruc->AsyncListSize   = 512;
+            HcStruc->wAsyncListSize   = 512;
             break;
         case 2: 
-            HcStruc->AsyncListSize   = 256;
+            HcStruc->wAsyncListSize   = 256;
             break;
         case 3: 
         default:
@@ -413,12 +425,12 @@ EHCI_Start(
 
     }
 
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI AsyncListSize: %d\n", HcStruc->AsyncListSize);
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI AsyncListSize: %d\n", HcStruc->wAsyncListSize);
 
     //
     // Set the max bulk data size
     //
-    HcStruc->MaxBulkDataSize = MAX_EHCI_DATA_SIZE;
+    HcStruc->dMaxBulkDataSize = MAX_EHCI_DATA_SIZE;
 
     //
     // Initialize the frame list pointers
@@ -429,20 +441,154 @@ EHCI_Start(
     // Write the base address of the Periodic Frame List to the PERIODIC BASE
     // register
     //
-
-    if (HcStruc->FrameListPhyAddr && HcStruc->FrameListMapping) {
+#if !USB_RUNTIME_DRIVER_IN_SMM
+    if (HcStruc->FrameListPhyAddr) {
         HcWriteOpReg(HcStruc, EHCI_PERIODICLISTBASE, (UINT32)(UINTN)HcStruc->FrameListPhyAddr);
     } else {
-        HcWriteOpReg(HcStruc, EHCI_PERIODICLISTBASE, (UINT32)(UINTN)HcStruc->FrameList);
+        HcWriteOpReg(HcStruc, EHCI_PERIODICLISTBASE, (UINT32)(UINTN)HcStruc->fpFrameList);
     }
-
+#else
+    HcWriteOpReg(HcStruc, EHCI_PERIODICLISTBASE, (UINT32)(UINTN)HcStruc->fpFrameList);
+#endif
 
     //
     // Initialize the periodic schedule
     //
     EHCIInitializePeriodicSchedule(HcStruc, (UINT32)HcStruc->BaseAddress);
+/*
+#if EHCI_ASYNC_BELL_SUPPORT
+    //
+    // Allocate and initialize an queue head for Async transfer
+    // Set the QHDummy as Async list head
+    //
+    QhAsyncXfer = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT_STRUC(EHCI_QH));
 
-    EhciEnableLegacyKeyRepeat(HcStruc);
+    if (!QhAsyncXfer) {
+        return  USB_ERROR;
+    }
+
+    gUsbData->fpQHAsyncXfer        = QhAsyncXfer;
+
+    QhAsyncXfer->dEndPntCap       = QH_ONE_XFER;
+    QhAsyncXfer->fpFirstqTD       = 0;
+    QhAsyncXfer->dAltNextqTDPtr   = EHCI_TERMINATE;
+    QhAsyncXfer->dNextqTDPtr      = EHCI_TERMINATE;
+
+    //
+    // Assume as a high speed device
+    //
+    Temp = QH_HIGH_SPEED;  // 10b - High speed
+
+    //
+    // Use data toggle from qTD and this QH is the head of the queue
+    //
+    Temp |= (QH_USE_QTD_DT | QH_HEAD_OF_LIST | DUMMY_DEVICE_ADDR); // Endpoint is 0
+
+    //
+    // dTemp[6:0] = Dev. Addr, dTemp[7] = I bit(0) & dTemp[11:8] = Endpoint (0)
+    //
+    QhAsyncXfer->dEndPntCharac    = Temp;
+
+    //
+    // Set the ASYNCLISTADDR register to point to the QHDummy
+    //
+    HcWriteOpReg(HcStruc, EHCI_ASYNCLISTADDR, (UINT32)(UINTN)QhAsyncXfer);
+
+    //
+    // Set next QH pointer to itself (circular link)
+    //
+    QhAsyncXfer->dLinkPointer = (UINT32)(UINTN)QhAsyncXfer | EHCI_QUEUE_HEAD;
+    QhAsyncXfer->bActive = TRUE;
+#endif  //  EHCI_ASYNC_BELL_SUPPORT
+*/
+
+#if !USB_RT_DXE_DRIVER
+	// Check whether no companion host controllers
+	if (!(HcStruc->dHCFlag & HC_STATE_EXTERNAL) &&
+		(HcStruc->dHCSParams & EHCI_N_CC) == 0) {
+		//
+		// Allocate a QH/qTD for QHRepeat/qTDRepeat
+		//
+	    QhRepeat = EhciMemAlloc(HcStruc,
+						GET_MEM_BLK_COUNT(sizeof(EHCI_QH)+sizeof(EHCI_QTD)));
+
+		if (!QhRepeat) {
+			return	USB_ERROR;	// Memory allocation error
+		}
+        DescPtr = HcStruc->stDescPtrs.fpEHCIDescPtrs;
+		DescPtr->fpQHRepeat = QhRepeat;
+		QtdRepeat = (EHCI_QTD*)((UINT32)QhRepeat + sizeof(EHCI_QH));
+		DescPtr->fpqTDRepeat = QtdRepeat;
+//
+// Setup QHRepeat and qTDRepeat.  It will run a interrupt transaction to a
+// nonexistant dummy device.  This will have the effect of generating
+// a periodic interrupt used to generate keyboard repeat.  This QH/qTD
+// is normally inactive,  and is only activated when a key is pressed.
+//
+		//
+		// Set the first qTD pointer
+		//
+		QhRepeat->fpFirstqTD = QtdRepeat;
+
+		//QhRepeat->fpDevInfoPtr = (UINT8*)fpDevInfo;
+		QhRepeat->dNextqTDPtr = (UINT32)QtdRepeat;
+
+		//
+		// Intialize the queue head
+		//
+		QhRepeat->dAltNextqTDPtr = EHCI_TERMINATE;
+		QhRepeat->dLinkPointer = EHCI_TERMINATE;
+
+		//
+		// Set max packet size, address, endpoint and high speed
+		// Update the AH's endpoint characteristcs field with the data formed
+		//
+		QhRepeat->dEndPntCharac |= ((0x40 << 16) | DUMMY_DEVICE_ADDR |
+									QH_HIGH_SPEED);
+
+		//
+		// Set a bit in interrupt mask
+		//
+		QhRepeat->dEndPntCap	= (BIT0 | QH_ONE_XFER);
+		QhRepeat->Interval = REPEAT_INTERVAL;
+
+//
+// Fill the repeat qTD with relevant information
+// The token field will be set so
+//	 Direction PID = QTD_IN_TOKEN,
+//	 Size = size of the data,
+//	 Data Toggle = QTD_DATA0_TOGGLE,
+//	 Error Count = QTD_NO_ERRORS,
+//	 Status code = QTD_ACTIVE
+// The buffer pointers field will point to the fpBuffer buffer
+//	 which was before initialized to contain a DeviceRequest struc.
+// The dNextqTDPtr field will point to the qTDControlSetup
+// The dAltNextqTDPtr field will be set to EHCI_TERMINATE
+//
+		QhRepeat->dTokenReload = ((UINT32)8 << 16) | QTD_IN_TOKEN | QTD_ONE_ERROR;
+		QtdRepeat->dToken = ((UINT32)8 << 16) | QTD_IN_TOKEN | QTD_ONE_ERROR;
+
+		EHCISetQTDBufferPointers(QtdRepeat,
+			&QhRepeat->aDataBuffer[0], 8);
+
+		//
+		// Update next & alternate next qTD pointers
+		//
+		QtdRepeat->dNextqTDPtr = EHCI_TERMINATE;
+		QtdRepeat->dAltNextqTDPtr = EHCI_TERMINATE;
+
+		//
+		// Schedule the QHRepeat to 8ms schedule
+		//
+        EhciAddPeriodicQh(HcStruc,QhRepeat);
+
+        QhRepeat->bCallBackIndex = USB_InstallCallBackFunction(EhciRepeatTDCallback);
+        QhRepeat->bActive = FALSE;
+
+		USBKeyRepeat(HcStruc, 0);
+	}
+#endif
+
     //
     // Clear status register - all R/WC bits
     //
@@ -456,15 +602,15 @@ EHCI_Start(
     //
     // Program the HC BIOS owned bit and return the legacy support register offset
     //
-    if (HcStruc->ExtCapPtr) {
-      EHCIProgramLegacyRegisters(HcStruc, 1);  // Set HC BIOS owned semaphore
+    if (HcStruc->bExtCapPtr) {
+		EHCIProgramLegacyRegisters(HcStruc, 1);  // Set HC BIOS owned semaphore
 
         //
         // Enable USB SMI, SMI on port change and SMI on ownership change
         //
-      Temp = EHCI_SMI + EHCI_PORT_CHANGE_SMI + EHCI_OWNERSHIP_CHANGE_SMI;
+		Temp = EHCI_SMI + EHCI_PORT_CHANGE_SMI + EHCI_OWNERSHIP_CHANGE_SMI;
 
-      HcWritePciReg(HcStruc, HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Temp);
+		HcWritePciReg(HcStruc, HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Temp);
     }
 
     //
@@ -474,26 +620,26 @@ EHCI_Start(
         (EHCI_RUNSTOP | EHCI_PER_SCHED_ENABLE));
 
     // Wait for halt bit get cleared
-    for (Index = 0; Index < 20; Index++) {
-      if (!(HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED)) {
-        break;
-      }
-      FixedDelay(100);   // 100 us delay
+    for (i = 0; i < 20; i++) {
+        if (!(HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED)) {
+            break;
+        }
+        FixedDelay(100);	  // 100 us delay
     }
 
     //
     // If the port has the power switch then enable the port. Otherwise 
     // Power for the port is already present. So don't need to enable the power.
     // ( Refer EHCI Spec 2.2.3 HCSPARAMS Structural Parameters Bit 4 (PPC) )
-    if (HcStruc->HcsParams & EHCI_PPC) {
+    if (HcStruc->dHCSParams & EHCI_PPC) {
         //
         // Enable port power
         //
-        for (Index = 1, PortReg = EHCI_PORTSC; Index <= HcStruc->NumPorts; Index++, PortReg += 4) {
+        for (i = 1, PortReg = EHCI_PORTSC; i <= HcStruc->bNumPorts; i++, PortReg += 4) {
             //
             // Skip enabling DebugPort
             //
-            if (HcStruc->DebugPort && HcStruc->DebugPort == Index) continue;
+            if (HcStruc->DebugPort && HcStruc->DebugPort == i) continue;
     
             if (HcReadOpReg(HcStruc, PortReg) & EHCI_PORTPOWER) {
                 continue;
@@ -511,21 +657,21 @@ EHCI_Start(
     }
 
     // Set HC flag as running
-    HcStruc->HcFlag |= HC_STATE_RUNNING;
+    HcStruc->dHCFlag |= HC_STATE_RUNNING;
 
     // Set USB_FLAG_DRIVER_STARTED flag when HC is running.
-    if (!(gUsbData->UsbStateFlag & USB_FLAG_DRIVER_STARTED)) {
-        gUsbData->UsbStateFlag |= USB_FLAG_DRIVER_STARTED;
+    if (!(gUsbData->dUSBStateFlag & USB_FLAG_DRIVER_STARTED)) {
+        gUsbData->dUSBStateFlag |= USB_FLAG_DRIVER_STARTED;
     }
 
     //
     // Disconnect all ports from companion HC (if any) and route them to EHCI
     //
-    HcSetOpReg(HcStruc, EHCI_CONFIGFLAG, BIT0);  
+    HcSetOpReg(HcStruc, EHCI_CONFIGFLAG, BIT0);		//(EIP59663-) //(EIP80307+)
 
-    if (HcStruc->HcFlag & HC_STATE_SPECIFIC_CONTROLLER) {
+    if (HcStruc->dHCFlag & HC_STATE_CONTROLLER_WITH_RMH) {
         // Wait for port change detect bit set
-        for (Index = 0; Index < 50; Index++) {
+        for (i = 0; i < 50; i++) {
             if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_PORT_CHANGE_DETECT) {
                 break;
             }
@@ -535,22 +681,86 @@ EHCI_Start(
         FixedDelay(100);    // 100 us delay
     }
 
+#if !USB_RT_DXE_DRIVER
+    //
+    // Register the USB HW SMI handler
+    //
+    if (!(HcStruc->dHCFlag & HC_STATE_IRQ)) {
+        if (!(HcStruc->dHCFlag & HC_STATE_EXTERNAL)) {
+            UsbInstallHwSmiHandler(HcStruc);
+        } else {
+            USBSB_InstallUsbIntTimerHandler();
+        }
+    }
+#endif
+
     return  USB_SUCCESS;
 
 }
+
+
+/**
+    This function returns the PCI register offset for the legacy
+    support in EHCI controller
+
+    @param HcStruc   - HCStruc pointer
+        wPciAddr    - PCI address of the EHCI host controller
+
+    @retval 0   If the feature is not present
+        <>0 Legacy support capability offset
+
+**/
+
+UINT8
+EHCIGetLegacySupportOffset(
+    HC_STRUC*   HcStruc,
+    UINT16      PciAddr
+)
+{
+    UINT8   Ptr = 0;
+    UINT32  Data = 0;
+
+    if (HcStruc->dHCFlag & HC_STATE_IRQ) {
+        return 0;
+    }
+
+#if !USB_RT_DXE_DRIVER
+
+    if (HcStruc->dHCFlag & HC_STATE_EXTERNAL) {
+        return 0;
+    }
+
+    //
+    // Get EHCI Extended Capabilities Pointer
+    //
+    Ptr = (UINT8)((HcStruc->dHCCParams >> 8) & 0xFF);
+
+    if (!Ptr) {
+        return 0;   // No extended capabilities are implemented.
+    }
+
+    Data = HcReadPciReg(HcStruc, Ptr);
+    if (!((UINT8)Data & 1)) {
+        return 0;
+    }
+#endif
+    return Ptr;
+
+}
+
 
 /**
     This function programs the EHCI legacy registers as per the
     input. Also this routine returns the PCI register offset
     for the legacy support in EHCI controller
 
-    @param HcStruc   Pointer to the host controller structure
-    @param SetReset: Set owned semaphore bit.
-                       0   Reset HC BIOS owned bit
-                       1   Set HC BIOS owned bit
+    @param HcStruc   HCStruc pointer
+           SetReset:
+              0   Reset HC BIOS owned bit
+              1   Set HC BIOS owned bit
 
-    @retval 0      If the feature is not present
-    @retval Others Legacy support capability offset
+    @retval 0   If the feature is not present
+        <>0 Legacy support capability offset
 
 **/
 
@@ -565,14 +775,14 @@ EHCIProgramLegacyRegisters(
     //
     // Check whether EHCI extended capabilities  pointer is present
     //
-    if (!HcStruc->ExtCapPtr) {
+    if (!HcStruc->bExtCapPtr) {
         return 0;  // No extended capabilities are implemented.
     }
 
     //
     // Program 'HC BIOS owned semaphore bit'
     //
-    Temp = HcReadPciReg(HcStruc, HcStruc->ExtCapPtr);
+    Temp = HcReadPciReg(HcStruc, HcStruc->bExtCapPtr);
     Temp &= ~BIT16;
 
     if (SetReset) {
@@ -580,21 +790,21 @@ EHCIProgramLegacyRegisters(
     }
 
                                         // (USB_S4_RESUME_ISSUE, EIP#20084)>
-    if (gUsbData->UsbStateFlag & USB_FLAG_RUNNING_UNDER_EFI) {
+    if (gUsbData->dUSBStateFlag & USB_FLAG_RUNNING_UNDER_EFI) {
         Temp &= ~BIT24;
     }
                                         // <(USB_S4_RESUME_ISSUE, EIP#20084)
 
-    HcWritePciReg(HcStruc, HcStruc->ExtCapPtr, Temp);
+    HcWritePciReg(HcStruc, HcStruc->bExtCapPtr, Temp);
 
     //
     // Reset all enable bits and clear the status
     //
     Temp = 0xE0000000 | EHCI_OWNERSHIP_CHANGE_SMI;
 
-    HcWritePciReg(HcStruc, HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Temp);
+    HcWritePciReg(HcStruc, HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Temp);
 
-    return HcStruc->ExtCapPtr;
+    return HcStruc->bExtCapPtr;
 
 }
 
@@ -602,10 +812,10 @@ EHCIProgramLegacyRegisters(
 /**
     This procedure clear EHCI legacy support status.
 
-    @param HcStruc   Pointer to the host controller structure
-    @param Status    Legacy status to clear
+    @param HcStruc   - HCStruc pointer
+           Status    - Legacy status to clear
 
-    @retval None
+    @retval VOID
 
 **/
 VOID
@@ -616,7 +826,7 @@ ClearEECPstatus(
 {
     UINT32  Temp;
 
-    if (!HcStruc->ExtCapPtr) {
+    if (!HcStruc->bExtCapPtr) {
         return; // No extended capabilities are implemented.
     }
 
@@ -624,13 +834,13 @@ ClearEECPstatus(
     // Read control and status register
     //
     Temp = HcReadPciReg(HcStruc,
-                HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG);
+                HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG);
 
     //
     // Keep enable bits and set clear status bit
     //
     Temp = (Temp & 0xFFFF) | ((UINT32)Status << 16);
-    HcWritePciReg(HcStruc, HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Temp);
+    HcWritePciReg(HcStruc, HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Temp);
     
 }
 
@@ -639,10 +849,10 @@ ClearEECPstatus(
     This routine return USBLEGSUP register content. It could be
     used to check EHCI semaphore owened by BIOS or OS.
 
-    @param HcStruc   Pointer to the host controller structure
+    @param HcStruc   HCStruc pointer
 
-    @retval Temp         Legacy support extended capability register content.
-            0xFFFFFFFF   If no extended capabilities are implemented.
+    @retval UINT32  Legacy support extended capability register content.
+        -1 if no extended capabilities are implemented.
 
 **/
 
@@ -656,14 +866,14 @@ GetEhciUSBLEGSUP(
     //
     // Check whether EHCI extended capabilities  pointer is present
     //
-    if (!HcStruc->ExtCapPtr) {
+    if (!HcStruc->bExtCapPtr) {
         return 0xFFFFFFFF;  // No extended capabilities are implemented.
     }
 
     //
     // Read Legacy support register
     //
-    Temp = HcReadPciReg(HcStruc, HcStruc->ExtCapPtr);
+    Temp = HcReadPciReg(HcStruc, HcStruc->bExtCapPtr);
 
     return Temp;
 }
@@ -672,10 +882,10 @@ GetEhciUSBLEGSUP(
 /**
     This function enumerates the HC ports for devices
 
-    @param HcStruc   Pointer to the host controller structure
+    @param HcStruc   Host controller's HCStruc structure
 
-    @retval USB_SUCCESS  Finish to enumerates the HC ports.
-    @retval Others       Fail to enumerates these ports.
+    @retval VOID
+
 **/
 
 UINT8
@@ -683,6 +893,7 @@ EHCI_EnumeratePorts(
     HC_STRUC* HcStruc
 )
 {
+    UINT16  PortCtl = EHCI_PORTSC;  // Port Status and Control Register (44h)
     UINT8   HcNumber;
     UINT8   PortNum;
     EFI_STATUS  EfiStatus;
@@ -693,15 +904,15 @@ EHCI_EnumeratePorts(
         return USB_ERROR;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return USB_ERROR;
     }
 
-    if (EhciIsHalted(HcStruc)) {
-      return USB_ERROR;
-    }
+	if (EhciIsHalted(HcStruc)) {
+		return USB_ERROR;
+	}
 
-    HcNumber = (UINT8)(HcStruc->HcNumber | BIT7);
+    HcNumber = (UINT8)(HcStruc->bHCNumber | BIT7);
     
 
     //
@@ -710,9 +921,9 @@ EHCI_EnumeratePorts(
     // Check whether enumeration flag is set by us or by somebody else by checking
     // local enum flag.
     //
-    if (gUsbData->EnumFlag == FALSE) {
-        gUsbData->IgnoreConnectStsChng    = TRUE;
-        gUsbData->EnumFlag                = TRUE;
+    if (gUsbData->bEnumFlag == FALSE) {
+        gUsbData->bIgnoreConnectStsChng    = TRUE;
+        gUsbData->bEnumFlag                = TRUE;
                                         //(EIP122174+)>
         do {
             //
@@ -724,7 +935,7 @@ EHCI_EnumeratePorts(
             // Check the root hub ports to see if a device is connected.  If so, then
             // call USBCheckPortChange to handle the attachment of a new device.
             //
-            for (PortNum = 1; PortNum <= HcStruc->NumPorts; PortNum++) {
+            for (PortNum = 1; PortNum <= HcStruc->bNumPorts; PortNum++) {
                 //
                 // Skip DebugPort enumeration
                 //
@@ -739,12 +950,12 @@ EHCI_EnumeratePorts(
             }
         } while ((HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_PORT_CHANGE_DETECT));
                                         //<(EIP122174+)
-        gUsbData->IgnoreConnectStsChng = FALSE;
+        gUsbData->bIgnoreConnectStsChng = FALSE;
 
         //
         // Reset enumeration flag and enable hub enumeration
         //
-        gUsbData->EnumFlag = FALSE;
+        gUsbData->bEnumFlag = FALSE;
     }
 
     //
@@ -759,10 +970,10 @@ EHCI_EnumeratePorts(
     This function checks whether the host controller is still
     under BIOS
 
-    @param HcStruc  Pointer to the host controller structure
+    @param HcStruc   - Host controller's HCStruc structure
 
-    @retval USB_SUCCESS    If the control is with the BIOS
-    @retval USB_ERROR      If the control is not with the BIOS
+    @retval USB_SUCCESS If the control is with the BIOS
+    @retval USB_ERROR If the control is not with the BIOS
 
 **/
 
@@ -789,18 +1000,24 @@ EHCICheckHCStatus(
     // Read the base address of the Periodic Frame List to the PERIODIC BASE
     // register and compare with stored value
     //
-    if (HcStruc->FrameListPhyAddr && HcStruc->FrameListMapping) {
+#if !USB_RUNTIME_DRIVER_IN_SMM
+    if (HcStruc->FrameListPhyAddr) {
         if ((UINTN)HcStruc->FrameListPhyAddr ==
             (HcReadOpReg(HcStruc, EHCI_PERIODICLISTBASE) & 0xFFFFF000)) {
             return USB_SUCCESS;    // Control is with BIOS
         }
     } else {
-        if ((UINTN)HcStruc->FrameList ==
+        if ((UINTN)HcStruc->fpFrameList ==
             (HcReadOpReg(HcStruc, EHCI_PERIODICLISTBASE) & 0xFFFFF000)) {
             return USB_SUCCESS;    // Control is with BIOS
         }
     }
-
+#else
+    if ((UINTN)HcStruc->fpFrameList == 
+        (HcReadOpReg(HcStruc, EHCI_PERIODICLISTBASE) & 0xFFFFF000)) {
+        return USB_SUCCESS;    // Control is with BIOS
+    }
+#endif
     return USB_ERROR;  // HC is controlled by someone else
 }
 
@@ -808,10 +1025,9 @@ EHCICheckHCStatus(
 /**
     This function stops the EHCI controller.
 
-    @param HcStruc        Pointer to the host controller structure
+    @param HcStruc   Host controller's HCStruc structure
 
-    @retval USB_SUCCESS   Success to stop EHCI controller.
-    @retval USB_ERROR     Fail to stop EHCI controller.
+    @retval VOID
 
 **/
 
@@ -820,120 +1036,128 @@ EHCI_Stop(
     HC_STRUC* HcStruc
 )
 {
-    UINT8   PortNum;
+    UINT8   PortNum;					//(EIP26685+)
     UINT8   Status;
-    UINT8   Index;
+	UINT8	i;							//(EIP55960+)
     EHCI_DESC_PTRS  *DescPtr;
     EFI_STATUS  EfiStatus;
-    UINT8       *MemBlockEnd = (UINT8*)((UINTN)gUsbDataList->MemBlockStart + (gUsbData->MemPages << 12));
+    UINT8       *MemBlockEnd = gUsbData->fpMemBlockStart + (gUsbData->MemPages << 12);
 
-    EfiStatus = UsbHcStrucValidation(HcStruc);    
+    EfiStatus = UsbHcStrucValidation(HcStruc);
+    
     if (EFI_ERROR(EfiStatus)) {
-      return USB_ERROR;
+        return USB_ERROR;
     }
 
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
-      return USB_ERROR;
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
+        return USB_ERROR;
     }
 
-    DescPtr = HcStruc->DescPtrs.EhciDescPtrs;
+    DescPtr = HcStruc->stDescPtrs.fpEHCIDescPtrs;
 
-    if (((UINTN)DescPtr < (UINTN)gUsbDataList->MemBlockStart) ||
-        (((UINTN)DescPtr + sizeof(EHCI_DESC_PTRS)) > (UINTN)MemBlockEnd)) {
-      return USB_ERROR;
+#if USB_RUNTIME_DRIVER_IN_SMM
+    if (((UINT8*)DescPtr < gUsbData->fpMemBlockStart) ||
+        ((UINT8*)(DescPtr + sizeof(EHCI_DESC_PTRS)) > MemBlockEnd)) {
+        return USB_ERROR;
     }
-
+#endif
     
     //
     // Check whether the control is with BIOS or not
     //
-    if (EHCICheckHCStatus(HcStruc) == USB_SUCCESS) {    // Controlled by BIOS
-      if (((gUsbData->UsbFeature & USB_SPECIFIC_EHCI_OWNERSHIP_CHANGE_MECHANISM) == 
-            USB_SPECIFIC_EHCI_OWNERSHIP_CHANGE_MECHANISM) && 
-            ((HcStruc->HcFlag & HC_STATE_OWNERSHIP_CHANGE_IN_PROGRESS) == 
-            HC_STATE_OWNERSHIP_CHANGE_IN_PROGRESS)){
-         UINT16  PortReg;
-         UINT32  PortSts;
-         UINT32  Data32;
-                
-         // Disconnect all the devices connected to its ports
-         for (PortNum = 1; PortNum <= HcStruc->NumPorts; PortNum++) {
-           USB_StopDevice(HcStruc, (UINT8)(HcStruc->HcNumber | BIT7), PortNum);
-         }
-                
-         // Stop the asynchronous schedule
-         EHCIStopAsyncSchedule(HcStruc);
-                
-         // Stop the periodic schedule
-         EHCIStopPeriodicSchedule(HcStruc);
-                
-         for (PortNum = 1; PortNum <= HcStruc->NumPorts; PortNum++) {
-           PortReg = (UINT16)((PortNum - 1) * 4 + EHCI_PORTSC);
-           PortSts = HcReadOpReg(HcStruc, PortReg);               
-           if (!(PortSts & EHCI_PORTENABLE)) {
-             continue;
-             }
-           HcWriteOpReg(HcStruc, PortReg, PortSts | EHCI_SUSPEND);
-          }
-          FixedDelay(250);      // 250 us delay
-                
-          // Stop the host controller (Reset bit 0)
-          HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
-                
-         // The Host Controller must halt within 16 micro-frames after 
-         // software clears the Run bit. 
-         for (Index = 0; Index < 16; Index++) {
-           if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
-             break;
-            }
-           FixedDelay(125);          // 125 us delay
-         }
-                
-         // Clear the SMI enable bits
-         if (HcStruc->ExtCapPtr) {
-           Data32 = HcReadPciReg(HcStruc, 
-                                 HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG
-                                 );
-                
-           HcWritePciReg(HcStruc,
-                         HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Data32 & ~(0x3F));
-                }
-                
-           // Clear the USBSTS register bits
-           HcWriteOpReg(HcStruc, EHCI_USBSTS, HcReadOpReg(HcStruc, EHCI_USBSTS));
-                
-           // Clear the Configure Flag bit
-           HcClearOpReg(HcStruc, EHCI_CONFIGFLAG, BIT0);
-         } else {                                                                                       
-             //
-             // Disconnect all the devices connected to its ports
-             //
-             for (PortNum = 1; PortNum <= HcStruc->NumPorts; PortNum++) {
-               USB_DisconnectDevice(HcStruc,
-               (UINT8)(HcStruc->HcNumber | BIT7), PortNum);
-             }
-             if (HcStruc->DebugPort == 0) {
-               //
-               // Stop the host controller (Reset bit 0)
-               //
-                HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);                                                                                              
-                 // The Host Controller must halt within 16 micro-frames after 
-                 // software clears the Run bit. 
-                 for (Index = 0; Index < 16; Index++) {
-                   if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
-                     break;
-                     }
-                   FixedDelay(125);      // 125 us delay
-                 }
-                                                                                                
-                 //
-                 // Reset the host controller
-                 //
-                 Status = EHCIResetHC(HcStruc);
-                 ASSERT(Status == USB_SUCCESS);
-              }
-        }
+    if (EHCICheckHCStatus(HcStruc) == USB_SUCCESS)    // Controlled by BIOS
+    {
+#if PCH_EHCI_OWNERSHIP_CHANGE_MECHANISM
+		if (HcStruc->dHCFlag & HC_STATE_OWNERSHIP_CHANGE_IN_PROGRESS) {
+			UINT16  PortReg;
+			UINT32	PortSts;
+			UINT32	Data32;
+
+			// Disconnect all the devices connected to its ports
+			for (PortNum = 1; PortNum <= HcStruc->bNumPorts; PortNum++) {
+				USB_StopDevice(HcStruc, (UINT8)(HcStruc->bHCNumber | BIT7), PortNum);
+			}
+	
+			// Stop the asynchronous schedule
+			EHCIStopAsyncSchedule(HcStruc);
+
+			// Stop the periodic schedule
+			EHCIStopPeriodicSchedule(HcStruc);
+	
+			for (PortNum = 1; PortNum <= HcStruc->bNumPorts; PortNum++) {
+				PortReg = (UINT16)((PortNum - 1) * 4 + EHCI_PORTSC);
+				PortSts = HcReadOpReg(HcStruc, PortReg);
+	
+				if (!(PortSts & EHCI_PORTENABLE)) {
+					continue;
+				}
+				HcWriteOpReg(HcStruc, PortReg, PortSts | EHCI_SUSPEND);
+			}
+			FixedDelay(250);      // 250 us delay
+	
+			// Stop the host controller (Reset bit 0)
+			HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
+	
+			// The Host Controller must halt within 16 micro-frames after 
+			// software clears the Run bit. 
+			for (i = 0; i < 16; i++) {
+				if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
+					break;
+				}
+                FixedDelay(125);	  // 125 us delay
+			}
+	
+			// Clear the SMI enable bits
+			if (HcStruc->bExtCapPtr) {
+				Data32 = HcReadPciReg(HcStruc, 
+							HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG);
+	
+				HcWritePciReg(HcStruc,
+					HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, Data32 & ~(0x3F));
+			}
+	
+			// Clear the USBSTS register bits
+			HcWriteOpReg(HcStruc, EHCI_USBSTS, HcReadOpReg(HcStruc, EHCI_USBSTS));
+	
+			// Clear the Configure Flag bit
+			HcClearOpReg(HcStruc, EHCI_CONFIGFLAG, BIT0);
+		} else 
+#endif
+		{
+											//(EIP26685+)>
+	        //
+	        // Disconnect all the devices connected to its ports
+	        //
+	        for (PortNum = 1; PortNum <= HcStruc->bNumPorts; PortNum++) {
+	            USB_DisconnectDevice(HcStruc,
+	                    (UINT8)(HcStruc->bHCNumber | BIT7), PortNum);
+	        }
+											//<(EIP26685+)
+
+	        if (HcStruc->DebugPort == 0) {
+	            //
+	            // Stop the host controller (Reset bit 0)
+	            //
+	            HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
+												//(EIP55960)>
+				// The Host Controller must halt within 16 micro-frames after 
+				// software clears the Run bit. 
+				for (i = 0; i < 16; i++) {
+	            	if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
+						break;
+	            	}
+                    FixedDelay(125);      // 125 us delay
+				}
+												//<(EIP55960)
+	            //
+	            // Reset the host controller
+	            //
+//  EIP#23479          EHCIResetHC(HcStruc); // ERROR CONDITION RETURNED IS NOT TAKEN CARE
+	            Status = EHCIResetHC(HcStruc);
+	            ASSERT(Status == USB_SUCCESS);
+	        }
+		}
         //
         // Program the HC BIOS owned bit and return the legacy
         // support register offset
@@ -949,10 +1173,10 @@ EHCI_Stop(
         //
         // Disable TD schedule and free the data structures
         //
-        if (DescPtr->fpQHRepeat) {
-            EhciMemFree(HcStruc, DescPtr->fpQHRepeat,
-                GET_MEM_BLK_COUNT(sizeof(EHCI_QH) + sizeof(EHCI_QTD) ));
-        }
+		if (DescPtr->fpQHRepeat) {
+			EhciMemFree(HcStruc, DescPtr->fpQHRepeat,
+							GET_MEM_BLK_COUNT(sizeof(EHCI_QH) + sizeof(EHCI_QTD) ));
+		}
 
         //
         // Free the scheduling QHs
@@ -966,7 +1190,14 @@ EHCI_Stop(
         EhciMemFree(HcStruc, DescPtr,
                         GET_MEM_BLK_COUNT_STRUC(EHCI_DESC_PTRS));
 
-        USBKeyRepeat(HcStruc, 3);
+//#if EHCI_ASYNC_BELL_SUPPORT
+        //
+        // Free the Async transfer QH
+        //
+//        EhciMemFree(HcStruc, gUsbData->fpQHAsyncXfer, GET_MEM_BLK_COUNT_STRUC(EHCI_QH));
+//#endif
+
+		USBKeyRepeat(HcStruc, 3);
     }
     else    // not controlled by BIOS
     {
@@ -980,7 +1211,7 @@ EHCI_Stop(
     //
     // Set the HC state to stopped
     //
-    HcStruc->HcFlag  &= ~(HC_STATE_RUNNING);
+    HcStruc->dHCFlag  &= ~(HC_STATE_RUNNING);
 
     CheckBiosOwnedHc();
 
@@ -991,10 +1222,10 @@ EHCI_Stop(
 /**
     This function disables the HC interrupts
 
-    @param HcStruc        Pointer to the host controller structure
-    
-    @retval USB_SUCCESS   Success to disable HC interrupts.
-    @retval Others        Fail to disable HC interrupts.
+    @param HcStruc   Pointer to the HCStruc structure
+
+    @retval USB_ERROR   On error
+        USB_SUCCESS On success
 
 **/
 
@@ -1028,10 +1259,10 @@ EHCI_DisableInterrupts (
 /**
     This function enables the HC interrupts
 
-    @param HcStruc        Pointer to the host controller structure
+    @param HcStruc   Pointer to the HCStruc structure
 
-    @retval USB_SUCCESS   Success to enable HC interrupt.
-    @retval Others        Fail to enable HC interrupt.
+    @retval USB_ERROR   On error
+        USB_SUCCESS On success
 
 **/
 
@@ -1065,10 +1296,8 @@ EHCI_EnableInterrupts (
 /**
     Root hub change processing code
 
-    @param HcStruc        Pointer to the host controller structure
-    
-    @retval USB_SUCCESS   Success to check port changes(Enumeration).
-    @retval Others        Fail to check port changes(Enumeration).
+    @param HcStruc   Pointer to the HCStruc structure
+
 
 **/
 
@@ -1080,9 +1309,9 @@ ProcessRootHubChanges(
     UINT8   PortNum;
 
     //
-    // Check EnumFlag before enumerating devices behind root hub
+    // Check bEnumFlag before enumerating devices behind root hub
     //
-    if ((gUsbData->EnumFlag) == TRUE) {
+    if ((gUsbData->bEnumFlag) == TRUE) {
         return USB_ERROR;
     }
 
@@ -1102,9 +1331,9 @@ ProcessRootHubChanges(
     //
     // Set enumeration flag and avoid hub port enumeration
     //
-    gUsbData->EnumFlag = TRUE;
+    gUsbData->bEnumFlag = TRUE;
 
-    for (PortNum = 1; PortNum <= HcStruc->NumPorts; PortNum++) {
+    for (PortNum = 1; PortNum <= HcStruc->bNumPorts; PortNum++) {
         if (HcStruc->DebugPort && HcStruc->DebugPort == PortNum) {
             continue;
         }
@@ -1113,13 +1342,13 @@ ProcessRootHubChanges(
         // Note: port connect status is cleared while processing
         // connect/disconnect (EHCIGetRootHubStatus)
         //
-        USBCheckPortChange(HcStruc, (UINT8)(HcStruc->HcNumber | BIT7), PortNum);
+        USBCheckPortChange(HcStruc, (UINT8)(HcStruc->bHCNumber | BIT7), PortNum);
     }
 
     //
     // Reset enumeration flag and enable hub enumeration
     //
-    gUsbData->EnumFlag = FALSE;
+    gUsbData->bEnumFlag = FALSE;
     return USB_SUCCESS;
 }
 
@@ -1129,10 +1358,10 @@ ProcessRootHubChanges(
     find out completed TDs and call their respective call
     back functions
 
-    @param HcStruc       Pointer to the host controller structure
+    @param HcStruc   Pointer to the HCStruc structure
 
-    @retval USB_ERROR    Need more Interrupt processing
-    @retval USB_SUCCESS  No interrupts pending
+    @retval USB_ERROR Need more Interrupt processing
+    @retval USB_SUCCESS No interrupts pending
 
 **/
 
@@ -1146,21 +1375,28 @@ EHCI_ProcessInterrupt(
     UINT16  Status;
     EFI_STATUS  EfiStatus;
 
-    EfiStatus = UsbHcStrucValidation(HcStruc);    
+    EfiStatus = UsbHcStrucValidation(HcStruc);
+    
     if (EFI_ERROR(EfiStatus)) {
         return USB_ERROR;
     }
+                                        //(EIP71067-)>
+//#if (EHCI_ASYNC_BELL_SUPPORT==0)
+//    EHCI_QH *fpQH;
+//#endif
+                                        //<(EIP71067-)
+
     //
     // If EHCI extended capabilities  pointer is present,
     // then service OwnerShipChange SMI
     //
-    if (HcStruc->ExtCapPtr) {
+    if (HcStruc->bExtCapPtr) {
         //
         // Read control and status register
         //
         Temp = HcReadPciReg(
                 HcStruc,
-                HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG);
+                HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG);
         Status = (UINT16)Temp;
         Status &= (UINT16)(Temp >> 16);   // "And" enable and status bits
         if (Status & EHCI_OWNERSHIP_CHANGE_SMI_STS) {
@@ -1180,27 +1416,27 @@ EHCI_ProcessInterrupt(
         // Control is not with us anymore, we should disable SMI generation
         // and come out.
         //
-        if (HcStruc->ExtCapPtr) {
+        if (HcStruc->bExtCapPtr) {
             //
             // Read control and status register
             //
             Temp = HcReadPciReg(
                         HcStruc,
-                        HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG);
+                        HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG);
         
             //
             // Leave only Ownership SMI active.
             //
             Temp &= 0xE0002000; 
-            HcWritePciReg(HcStruc, HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG,
+            HcWritePciReg(HcStruc, HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG,
                             Temp);
         }
         return USB_SUCCESS;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
-      return USB_SUCCESS;
-    }
+	if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
+		return USB_SUCCESS;
+	}
 
     while (TRUE) {
         //
@@ -1210,18 +1446,18 @@ EHCI_ProcessInterrupt(
 
         //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "-->> %x <<--\n", Sts);
 
-        if (Sts & EHCI_HOST_SYSTEM_ERROR) {
-          gUsbData->UsbStateFlag &= (~USB_FLAG_ENABLE_BEEP_MESSAGE);
-          EHCI_Start(HcStruc);
-          EHCI_EnumeratePorts(HcStruc);
-          gUsbData->UsbStateFlag |= USB_FLAG_ENABLE_BEEP_MESSAGE;
-          continue;
-         }
+		if (Sts & EHCI_HOST_SYSTEM_ERROR) {
+			gUsbData->dUSBStateFlag &= (~USB_FLAG_ENABLE_BEEP_MESSAGE);
+			EHCI_Start(HcStruc);
+			EHCI_EnumeratePorts(HcStruc);
+			gUsbData->dUSBStateFlag |= USB_FLAG_ENABLE_BEEP_MESSAGE;
+			continue;
+		}
 
         if (Sts & EHCI_HCHALTED) {
-          // Clear the USBSTS register bits
-          HcWriteOpReg(HcStruc, EHCI_USBSTS, HcReadOpReg(HcStruc, EHCI_USBSTS));
-          break;
+			// Clear the USBSTS register bits
+			HcWriteOpReg(HcStruc, EHCI_USBSTS, HcReadOpReg(HcStruc, EHCI_USBSTS));
+            break;
         }
         
         //
@@ -1254,6 +1490,38 @@ EHCI_ProcessInterrupt(
                     EHCIProcessPeriodicList(HcStruc);
                 }
             }
+
+            //
+            // Check for Asynchronous schedule completion
+            //
+/*                                        //(EIP71067-)>
+            if (dSts & EHCI_ASYNC_SCHED_STATUS) {
+                dTmp = DwordReadMem(dMemAddr, EHCI_USBCMD);
+                if (dTmp & EHCI_ASYNC_SCHED_ENABLE) {
+                    //
+                    // Check and process Async. QH
+                    //
+#if EHCI_ASYNC_BELL_SUPPORT
+                    EHCIProcessQH(HcStruc, HcStruc->stDescPtrs.fpEHCIDescPtrs->fpQHControl);
+                    EHCIProcessQH(HcStruc, HcStruc->stDescPtrs.fpEHCIDescPtrs->fpQHBulk);
+#else
+                    //
+                    // Get the Async list address
+                    //
+                    fpQH = (EHCI_QH*)(UINTN)DwordReadMem(dMemAddr, EHCI_ASYNCLISTADDR);
+                    if (EHCIProcessQH(HcStruc, fpQH) == USB_ERROR) {
+                        //continue;
+                        //return    USB_SUCCESS;
+                    } else {
+                        //
+                        // Async list processed; stop the Async transfer
+                        //
+                        EHCIStopAsyncSchedule(HcStruc);
+                    }
+#endif
+                }
+            }
+*/                                      //<(EIP71067-)
             continue;
         }
 
@@ -1274,9 +1542,9 @@ EHCI_ProcessInterrupt(
 /**
     This procedure process EHCI OwnerShipChange SMI.
 
-    @param HcStruc   Pointer to the host controller structure
+    @param HcStruc   HCStruc pointer
 
-    @retval None
+    @retval VOID
 
 **/
 VOID
@@ -1286,29 +1554,29 @@ ProcessOwnerShipChangeSMI(
 {
     UINT32 Temp = GetEhciUSBLEGSUP(HcStruc);
     
-    HcStruc->HcFlag |= HC_STATE_OWNERSHIP_CHANGE_IN_PROGRESS;
+	HcStruc->dHCFlag |= HC_STATE_OWNERSHIP_CHANGE_IN_PROGRESS;
     if (Temp & EHCI_HC_OS) {
-        gUsbData->UsbStateFlag &= (~USB_FLAG_ENABLE_BEEP_MESSAGE);
-        ProcessSmiChangeToEhcd(HcStruc);
+        gUsbData->dUSBStateFlag &= (~USB_FLAG_ENABLE_BEEP_MESSAGE);
+        ProcessSmiChangeToEHCD(HcStruc);
     }
     else {
-        gUsbData->UsbStateFlag |= USB_FLAG_ENABLE_BEEP_MESSAGE;
-        ProcessSmiChangeToBios(HcStruc);
+        gUsbData->dUSBStateFlag |= USB_FLAG_ENABLE_BEEP_MESSAGE;
+        ProcessSmiChangeToBIOS(HcStruc);
     }
-   HcStruc->HcFlag &= ~(HC_STATE_OWNERSHIP_CHANGE_IN_PROGRESS);
+	HcStruc->dHCFlag &= ~(HC_STATE_OWNERSHIP_CHANGE_IN_PROGRESS);
 }
 
 
 /**
     This procedure process OwnerShipChange for BIOS -> EHCD.
 
-    @param HcStruc   Pointer to the host controller structure
+    @param HcStruc   HCStruc pointer
 
-    @retval None
+    @retval VOID
 
 **/
 VOID
-ProcessSmiChangeToEhcd(
+ProcessSmiChangeToEHCD(
     HC_STRUC* HcStruc
 )
 {
@@ -1319,14 +1587,14 @@ ProcessSmiChangeToEhcd(
 /**
     This procedure process OwnerShipChange for EHCD -> BIOS.
 
-    @param  HcStruc   HCStruc pointer
+    @param SI  HCStruc pointer
 
-    @retval None
+    @retval VOID
 
 **/
 
 VOID
-ProcessSmiChangeToBios (
+ProcessSmiChangeToBIOS (
     HC_STRUC    *HcStruc
 )
 {
@@ -1335,16 +1603,17 @@ ProcessSmiChangeToBios (
     DEV_INFO    *Device;
 
     // Stop UHCI devices connected to the companions
-    for (Count = 1; Count < gUsbData->MaxDevCount; Count++) {
-        Device = &gUsbDataList->DevInfoTable[Count];
+    // Core8 executes this under MKF_PCCHECK_PATCH==1 condition, EIP10272
+    for (Count = 1; Count < MAX_DEVICES; Count++) {
+        Device = &gUsbData->aDevInfoTable[Count];
         
         if ((Device->Flag & DEV_INFO_VALIDPRESENT) != DEV_INFO_VALIDPRESENT) {
-          continue;
-        }
+			continue;
+		}
         
-        Hc = gHcTable[Device->HcNumber - 1];
+        Hc = gUsbData->HcTable[Device->bHCNumber - 1];
 
-        if (Hc->HcType != USB_HC_UHCI) {
+        if (Hc->bHCType != USB_HC_UHCI) {
             continue;   // Not UHCI
         }
 
@@ -1352,13 +1621,13 @@ ProcessSmiChangeToBios (
             continue;    // Not valid
         }
 
-        if ((Hc->BusDevFuncNum & 0xfff8) !=
-            (HcStruc->BusDevFuncNum & 0xfff8)) {
+        if ((Hc->wBusDevFuncNum & 0xfff8) !=
+            (HcStruc->wBusDevFuncNum & 0xfff8)) {
             continue; // Not a companion
         }
 
         // Found a device connected to UHCI companion controller. Stop it.
-        USB_StopDevice(Hc, Device->HubDeviceNumber, Device->HubPortNumber);
+        USB_StopDevice(Hc, Device->bHubDeviceNumber, Device->bHubPortNumber);
     }
 
     EHCI_Start(HcStruc);  // Reinitialize EHCI host controller
@@ -1367,26 +1636,25 @@ ProcessSmiChangeToBios (
 
 /**
 
-    @param HcStruc           Pointer to the host controller structure
-    @param PortNum           Port in the HC whose status is requested
+    @param HcStruc   - Pointer to HCStruc of the host controller
+        PortNum   - Port in the HC whose status is requested
 
-    @retval USB_SUCCESS      On success
-    @retval USB_ERROR        Failure 
+    @retval 
 
 **/
 
 UINT8
 EHCI_ReleasePortOwner(
-    HC_STRUC* HcStruc,
-    UINT8  PortNum
+    HC_STRUC*	HcStruc,
+    UINT8		PortNum
 )
 {
     UINT16  PortReg = (UINT16)((PortNum - 1) * 4 + EHCI_PORTSC);
-    UINT16  Index;
+    UINT16  i;
 
-    if ((HcStruc->HcsParams & EHCI_N_CC) == 0) {
-      return USB_SUCCESS;
-    }
+	if ((HcStruc->dHCSParams & EHCI_N_CC) == 0) {
+		return USB_SUCCESS;
+	}
 
     if (!(HcReadOpReg(HcStruc, PortReg) & EHCI_CURRENTCONNECTSTATUS)) {
         return USB_ERROR;
@@ -1397,7 +1665,7 @@ EHCI_ReleasePortOwner(
 
     // Loop until Full speed device disconnect event process done.
     // This change is done in sync with Core8 except the extra 400mS delay
-    for (Index = 0; Index < 200; Index++) {
+    for (i = 0; i < 200; i++) {
         if (HcReadOpReg(HcStruc, PortReg) & EHCI_CONNECTSTATUSCHANGE) {
             break;
         }
@@ -1406,17 +1674,17 @@ EHCI_ReleasePortOwner(
 
     HcSetOpReg(HcStruc, PortReg, EHCI_CONNECTSTATUSCHANGE);
 
-    return USB_SUCCESS; 
+	return USB_SUCCESS;	
 }
 
 /**
-    This function returns the port connect status for the root hub port.
+    This function returns the port connect status for the
+    root hub port
 
-    @param HcStruc          Pointer to the host controller structure
-    @param PortNum          Port in the HC whose status is requested
-    @param ClearChangeBits  If true, set connect status change.
-    
-    @retval Status          Port status flags (see USB_PORT_STAT_XX equates)
+    @param HcStruc   - Pointer to HCStruc of the host controller
+        bPortNum    - Port in the HC whose status is requested
+
+    @retval Port status flags (see USB_PORT_STAT_XX equates)
 
 **/
 
@@ -1448,18 +1716,18 @@ EHCI_GetRootHubStatus(
     // Read the status of the port
     //
     Tmp = HcReadOpReg(HcStruc, PortReg);
-    USB_DEBUG(DEBUG_INFO, 3, "Ehci port[%d] status: %08x\n", PortNum, Tmp);
+	USB_DEBUG(DEBUG_INFO, 3, "Ehci port[%d] status: %08x\n", PortNum, Tmp);
 
-    // Detect the high-speed device.
-    // In case of low-speed or full-speed change the ownership to a
-    // companion 1.1 controller (if any)
-    if (Tmp & EHCI_CURRENTCONNECTSTATUS) {
-      // Analyze Line Status
-      if ((Tmp & EHCI_LINE_STATUS) == EHCI_DMINUSBIT) { // Low speed device connected
-        EHCI_ReleasePortOwner(HcStruc, PortNum);
-        Tmp = HcReadOpReg(HcStruc, PortReg);
-      }
-    }
+	// Detect the high-speed device.
+	// In case of low-speed or full-speed change the ownership to a
+	// companion 1.1 controller (if any)
+	if (Tmp & EHCI_CURRENTCONNECTSTATUS) {
+    	// Analyze Line Status
+    	if ((Tmp & EHCI_LINE_STATUS) == EHCI_DMINUSBIT) {	// Low speed device connected
+    		EHCI_ReleasePortOwner(HcStruc, PortNum);
+    		Tmp = HcReadOpReg(HcStruc, PortReg);
+    	}
+	}
 
     //
     // Check the connect status change bit
@@ -1473,23 +1741,23 @@ EHCI_GetRootHubStatus(
         //
         // Wait 20ms for host controller could report accurate port status properly.
         //
-        //FixedDelay(gUsbDataList->UsbTimingPolicy->EhciPortConnect * 1000);   // 20ms delay
+        //FixedDelay(gUsbData->UsbTimingPolicy.EhciPortConnect * 1000);   // 20ms delay
 
         //
         // Read the status of the port
         //
         //dTmp = HcReadOpReg(HcStruc, wPortReg);
 
-        // Clear connect status change
+		// Clear connect status change
         if (ClearChangeBits == TRUE) {
-          HcSetOpReg(HcStruc, PortReg, EHCI_CONNECTSTATUSCHANGE);  //(EIP61030+)
+            HcSetOpReg(HcStruc, PortReg, EHCI_CONNECTSTATUSCHANGE);		//(EIP61030+)
         }
     }
 
     if (Tmp & EHCI_CURRENTCONNECTSTATUS) {
         Status |= USB_PORT_STAT_DEV_CONNECTED;
 
-        if (Tmp & EHCI_PORTENABLE) {
+		if (Tmp & EHCI_PORTENABLE) {
             PortSpeed = AMI_USB_PORT_STAT_HIGH_SPEED;
             for (Index = 0; EhciGetRootHubPortSpeedFunctions[Index]; Index++) {
                 EhciGetRootHubPortSpeedFunctions[Index](HcStruc, PortNum, &PortSpeed);
@@ -1509,14 +1777,14 @@ EHCI_GetRootHubStatus(
                     break;
             }
             Status |= USB_PORT_STAT_DEV_ENABLED;
-        } else {
-            if (gUsbData->IgnoreConnectStsChng == TRUE) {
-              if (!(Tmp & EHCI_CONNECTSTATUSCHANGE)) {
-                Status |= USB_PORT_STAT_DEV_CONNECT_CHANGED;
-              }
-            }
-        }
-    }
+		} else {
+			if (gUsbData->bIgnoreConnectStsChng == TRUE) {
+				if (!(Tmp & EHCI_CONNECTSTATUSCHANGE)) {
+				    Status |= USB_PORT_STAT_DEV_CONNECT_CHANGED;
+				}
+			}
+		}
+	}
 
     if (Tmp & EHCI_PORTOWNER) {
         Status &= ~USB_PORT_STAT_DEV_OWNER;
@@ -1540,18 +1808,18 @@ EHCI_GetRootHubStatus(
         Status |= USB_PORT_STAT_DEV_OVERCURRENT_CHANGED;
     }
 
-    return Status;
+	return Status;
 }
 
 
 /**
     This function disables the EHCI HC Ruoot hub port.
 
-    @param HcStruc    Pointer to the host controller structure
-    @param PortNum    Port in the HC to disable
+    @param HcStruc   - Pointer to HCStruc of the host controller
+        bPortNum    - Port in the HC to disable
 
-    @retval USB_SUCCESS   Success to disable the root hub port.
-    @retval Others        Fail to disable the root hub port.
+    @retval USB_SUCCESS on success
+        USB_ERROR   on error
 
 **/
 
@@ -1561,8 +1829,9 @@ EHCI_DisableRootHub(
     UINT8       PortNum
 )
 {
+										//(EIP58108+)>
     UINT16  PortReg = (UINT16)((PortNum - 1) * 4 + EHCI_PORTSC);
-    UINT32 Count;
+	UINT32	i;
     EFI_STATUS  EfiStatus;
 
     EfiStatus = UsbHcStrucValidation(HcStruc);
@@ -1575,17 +1844,18 @@ EHCI_DisableRootHub(
         return USB_SUCCESS;
     }
 
-    if (!(HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE)) {
-      return USB_SUCCESS;
-    }
+	if (!(HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE)) {
+		return USB_SUCCESS;
+	}
     HcClearOpReg(HcStruc, PortReg, EHCI_PORTENABLE);
 
-    for (Count = 0; Count < 100; Count++) {
-       if ((HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE) == 0) {
-         break;
-    }
-     FixedDelay(100);
- }
+	for (i = 0; i < 100; i++) {
+		if ((HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE) == 0) {
+			break;
+		}
+		FixedDelay(100);
+	}
+										//<(EIP58108+)
     return USB_SUCCESS;
 }
 
@@ -1593,11 +1863,11 @@ EHCI_DisableRootHub(
 /**
     This function enables the EHCI HC Root hub port.
 
-    @param HcStruc     Pointer to the host controller structure
-    @param PortNum     Port in the HC to enable.
+    @param HcStruc   - Pointer to HCStruc of the host controller
+        bPortNum    - Port in the HC to enable
 
-    @retval USB_SUCCESS Success to enable the root hub port.
-    @retval Others      Fail to enable the root hub port.
+    @retval USB_SUCCESS on success
+        USB_ERROR   on error
 
 **/
 
@@ -1617,22 +1887,22 @@ EHCI_EnableRootHub(
 /**
     This function resets the EHCI HC Root hub port.
 
-    @param HcStruc      Pointer to the host controller structure
-    @param PortNum      Port in the HC to enable
+    @param HcStruc   - Pointer to HCStruc of the host controller
+        PortNum    - Port in the HC to enable
 
-    @retval USB_SUCCESS Success to reset the root hub port.
-    @retval Others      Fail to reset the root hub port.
+    @retval USB_SUCCESS on success
+        USB_ERROR   on error
 
 **/
 
 UINT8
 EHCI_ResetRootHub(
-    HC_STRUC* HcStruc,
-    UINT8  PortNum
+    HC_STRUC*	HcStruc,
+    UINT8		PortNum
 )
 {
     UINT16  PortReg = (UINT16)((PortNum - 1) * 4 + EHCI_PORTSC);
-    UINT32 Count;
+	UINT32	i;
     EFI_STATUS  EfiStatus;
 
     EfiStatus = UsbHcStrucValidation(HcStruc);
@@ -1641,77 +1911,66 @@ EHCI_ResetRootHub(
         return USB_ERROR;
     }
 
-    // Disable the port if it is enabled
-    if (HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE) {
-        HcClearOpReg(HcStruc, PortReg, EHCI_PORTENABLE);
- 
-        // There may be a delay in disabling or enabling a port due to other 
-        // host controller and bus events.
-        for (Count = 0; Count < 100; Count++) {
-            if ((HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE) == 0) {
-                break;
-            }
-            FixedDelay(100);    // 100 us delay
-        }
-    }
+	// Disable the port if it is enabled
+	if (HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE) {
+		HcClearOpReg(HcStruc, PortReg, EHCI_PORTENABLE);
+	
+		// There may be a delay in disabling or enabling a port due to other 
+		// host controller and bus events.
+		for (i = 0; i < 100; i++) {
+			if ((HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE) == 0) {
+				break;
+			}
+			FixedDelay(100);    // 100 us delay
+		}
+	}
 
-    // Reset the port
-    HcSetOpReg(HcStruc, PortReg, EHCI_PORTRESET);
+	// Reset the port
+	HcSetOpReg(HcStruc, PortReg, EHCI_PORTRESET);
 
-    if ((HcStruc->HcFlag & HC_STATE_SPECIFIC_CONTROLLER) && (PortNum == 1)) {
-        FixedDelay(3 * 1000);  // 3 ms delay
+    if ((HcStruc->dHCFlag & HC_STATE_CONTROLLER_WITH_RMH) && (PortNum == 1)) {
+        FixedDelay(3 * 1000);	 // 3 ms delay
     } else {
-        // Wait til port disable is complete (Tdrstr=50ms Ref 7.1.7.5 of USB Spec 2.0)
-        FixedDelay(50 * 1000);  // 50 ms delay        
+    	// Wait til port disable is complete (Tdrstr=50ms Ref 7.1.7.5 of USB Spec 2.0)
+    	FixedDelay(50 * 1000);	 // 50 ms delay        
     }
 
-     HcClearOpReg(HcStruc, PortReg, EHCI_PORTRESET); // Terminate reset
+	HcClearOpReg(HcStruc, PortReg, EHCI_PORTRESET);	// Terminate reset
 
     if (!(HcReadOpReg(HcStruc, PortReg) & EHCI_CURRENTCONNECTSTATUS)) {
         return USB_ERROR;
     }
 
-    // if the port detects that the attached device is high-speed during reset, 
-    // then the host controller must have the port in the enabled state within 2ms 
-    // of software writing this bit to a zero.
-    for (Count = 0; Count < 20; Count++) {
-        if ((HcReadOpReg(HcStruc, PortReg) & (EHCI_PORTRESET | 
-            EHCI_PORTENABLE)) == EHCI_PORTENABLE) {
-            break;
-        }
-        FixedDelay(100);  // 100 us delay
-    }
+	// if the port detects that the attached device is high-speed during reset, 
+	// then the host controller must have the port in the enabled state within 2ms 
+	// of software writing this bit to a zero.
+	for (i = 0; i < 20; i++) {
+		if ((HcReadOpReg(HcStruc, PortReg) & (EHCI_PORTRESET | 
+			EHCI_PORTENABLE)) == EHCI_PORTENABLE) {
+			break;
+		}
+        FixedDelay(100);	 // 100 us delay
+	}
 
-    if (HcReadOpReg(HcStruc, PortReg) & EHCI_PORTRESET) {  // Reset failed
-        USBLogError(USB_ERR_PORT_RESET_FAILED);
-        return USB_ERROR;
-    }
+	if (HcReadOpReg(HcStruc, PortReg) & EHCI_PORTRESET) {	 // Reset failed
+		USBLogError(USB_ERR_PORT_RESET_FAILED);
+		return USB_ERROR;
+	}
 
-    if (!(HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE)) {
+	if (!(HcReadOpReg(HcStruc, PortReg) & EHCI_PORTENABLE)) {
         if (!(HcReadOpReg(HcStruc, PortReg) & EHCI_CURRENTCONNECTSTATUS)) {
-          return USB_ERROR;
+            return USB_ERROR;
         } else {
-           EHCI_ReleasePortOwner(HcStruc, PortNum);
-           return USB_ERROR;
+		    EHCI_ReleasePortOwner(HcStruc, PortNum);
+		    return USB_ERROR;
         }
-    }
+	}
 
-    FixedDelay(1 * 1000);  // 1 ms delay
+	FixedDelay(1 * 1000);	 // 1 ms delay
 
     return USB_SUCCESS;
 }
 
-/**
-    This function is call to control SMI enable/disable for EHCI.
-
-    @param HcStruc      Pointer to the host controller structure
-    @param Enable       If true, enable SMI(EHCI_SMI|EHCI_PORT_CHANGE_SMI|EHCI_OWNERSHIP_CHANGE_SMI).
-                        If false, reset all enable bits and clear the status.
-                        
-    @retval USB_SUCCESS Success to set SMI enable/disable.
-    @retval Others      Fail to set SMI enable/disable.
-
-**/
 UINT8
 EhciSmiControl(
     HC_STRUC* HcStruc,
@@ -1727,7 +1986,7 @@ EhciSmiControl(
         return USB_ERROR;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return USB_ERROR;
     }
 
@@ -1738,36 +1997,34 @@ EhciSmiControl(
     if (Enable == TRUE) {
         LegCtlStsReg = EHCI_SMI + EHCI_PORT_CHANGE_SMI + EHCI_OWNERSHIP_CHANGE_SMI;
 
-        HcWritePciReg(HcStruc, HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, LegCtlStsReg);
+		HcWritePciReg(HcStruc, HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, LegCtlStsReg);
     } else {
         //
         // Reset all enable bits and clear the status
         //
         LegCtlStsReg = 0xE0000000;
 
-        HcWritePciReg(HcStruc, HcStruc->ExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, LegCtlStsReg);
+        HcWritePciReg(HcStruc, HcStruc->bExtCapPtr + EHCI_LEGACY_CTRL_STS_REG, LegCtlStsReg);
     }
 
     return USB_SUCCESS;
 }
 
+                                        //(EIP54018+)>
 /**
     This function suspend the EHCI HC.
-    @param HcStruc      Pointer to the host controller structure
-    
-    @retval USB_SUCCESS Success to suspend the EHCI HC.
-    @retval Others      Fail to suspend the EHCI HC.
+
 **/
 
 UINT8
 EHCI_GlobalSuspend(
-    HC_STRUC* HcStruc
+    HC_STRUC*	HcStruc
 )
 {
     UINT16  PortReg;
-    UINT32 PortSts;
+	UINT32	PortSts;
     UINT8   PortNum;
-    UINT8   Count;
+    UINT8   i;
     EFI_STATUS  EfiStatus;
 
     EfiStatus = UsbHcStrucValidation(HcStruc);
@@ -1776,15 +2033,15 @@ EHCI_GlobalSuspend(
         return USB_ERROR;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return USB_ERROR;
     }
     
-    if (EhciIsHalted(HcStruc)) {
-      return USB_ERROR;
-    }
+	if (EhciIsHalted(HcStruc)) {
+		return USB_ERROR;
+	}
 
-    for (PortNum = 1; PortNum <= HcStruc->NumPorts; PortNum++) {
+    for (PortNum = 1; PortNum <= HcStruc->bNumPorts; PortNum++) {
         PortReg = (UINT16)(EHCI_PORTSC + (PortNum - 1) * 4 );
         PortSts = HcReadOpReg(HcStruc, PortReg );
         USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3,"EHCI PortSts[%x] %x \n",
@@ -1796,12 +2053,12 @@ EHCI_GlobalSuspend(
                             EHCI_WKOC_E | EHCI_WKDSCNNT_E | EHCI_WKCNNT_E);
             HcSetOpReg(HcStruc, PortReg, EHCI_SUSPEND);
             // Read PortSc until port shows suspended. 
-            for (Count = 0; Count < 100; Count++) {
+     	    for (i = 0; i < 100; i++) {
                 if (HcReadOpReg(HcStruc, PortReg) & EHCI_SUSPEND) {
                     break;
                 }
                 FixedDelay(100);      // 100 us delay
-            } 
+	        } 
         }
     }
 
@@ -1809,21 +2066,21 @@ EHCI_GlobalSuspend(
     HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
     // The Host Controller must halt within 16 micro-frames after 
     // software clears the Run bit. 
-    for (Count = 0; Count < 16; Count++) {
+	for (i = 0; i < 16; i++) {
         if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
             break;
         }
         FixedDelay(125);      // 125 us delay
-    }
+	}
 
     EHCIProgramLegacyRegisters(HcStruc, 0); // Reset HC BIOS owned semaphore
 
-    HcStruc->HcFlag &= ~(HC_STATE_RUNNING);
-    HcStruc->HcFlag |= HC_STATE_SUSPEND;
+    HcStruc->dHCFlag &= ~(HC_STATE_RUNNING);
+    HcStruc->dHCFlag |= HC_STATE_SUSPEND;
 
     return USB_SUCCESS;
 }
-
+                                        //<(EIP54018+)
 
 /**
     This function gets the hi-speed hub's device and port number
@@ -1831,9 +2088,9 @@ EHCI_GlobalSuspend(
     through its parents until it finds the correct device. This
     information is used for split transaction
 
-    @param DevInfo    Device info pointer of the device
+    @param fpDevInfo   - Device info pointer of the device
 
-    @retval RetCode   Device/port number of the hi-speed hub
+    @retval UINT16 Device/port number of the hi-speed hub
 
     @note  This low/full speed device may be behind different hubs as
           shown below. In any case this routine will get the device
@@ -1878,11 +2135,11 @@ EHCI_GetHiSpeedHubPortNumber(
     //
     for(;;) {
         ParentHubDev = USB_GetDeviceInfoStruc(USB_SRCH_DEV_ADDR,
-                                0, HubDev->HubDeviceNumber, 0);
+                                0, HubDev->bHubDeviceNumber, 0);
         if (!ParentHubDev) {
             return 0; // Error. Exit !
         }
-        if (((ParentHubDev->EndpointSpeed << USB_PORT_STAT_DEV_SPEED_MASK_SHIFT)
+        if (((ParentHubDev->bEndpointSpeed << USB_PORT_STAT_DEV_SPEED_MASK_SHIFT)
              & USB_PORT_STAT_DEV_SPEED_MASK) == 0) {
              break;
         }
@@ -1892,8 +2149,8 @@ EHCI_GetHiSpeedHubPortNumber(
     // The first USB 2.0 hub found as fpHubDev to which the low/full speed
     // device is connected
     //
-    RetCode = (UINT16)((HubDev->HubPortNumber << 7) |
-                                HubDev->HubDeviceNumber);
+    RetCode = (UINT16)((HubDev->bHubPortNumber << 7) |
+                                HubDev->bHubDeviceNumber);
 
     return RetCode;
 }
@@ -1902,36 +2159,53 @@ EHCI_GetHiSpeedHubPortNumber(
     This function insert the requested QH to asynchronous schedule
     and waits until the QH completes or the transaction time-out.
 
-    @param HcStruc    Pointer to the host controller structure
-    @param XferQh     Pointer to the QH which has to be completed
+    @param HcStruc   - Pointer to HCStruc of the host controller
+        XferQh    - Pointer to the QH which has to be completed
 
-    @retval USB_SUCCESS On success.
-    @retval Others      On fail.
+    @retval USB_ERROR   On error
+        USB_SUCCESS On success
 
 **/
 
 UINT16
 EhciExexuteAsyncSchedule(
-    HC_STRUC *HcStruc,
-    EHCI_QH  *XferQh
+	HC_STRUC	*HcStruc,
+	EHCI_QH 	*XferQh
 )
 {
-    UINT16  Status = USB_SUCCESS;
-    UINT32  Count;
-    UINT32  TimeOut = gUsbData->UsbReqTimeOutValue * 100; // in 10 microsecond unit
+	UINT16	Status = USB_SUCCESS;
+	UINT32	Count;
+    UINT32  TimeOut = gUsbData->wTimeOutValue * 100; // in 10 microsecond unit
     EHCI_QH *XferQhPhyAddr;
-    //
-    // Set the ASYNCLISTADDR register to point to the Control/Bulk QH
-    //
-    XferQhPhyAddr = EhciMemGetPhyAddr(HcStruc, XferQh);
+/*
+#if EHCI_ASYNC_BELL_SUPPORT
+	UINT32	Tmp;
+
+	XferQh->dLinkPointer = EHCI_TERMINATE;
+	XferQh->bActive = TRUE;
+
+	//
+	// Insert the Control/Bulk QH into the Async list
+	//
+	Tmp = gUsbData->fpQHAsyncXfer->dLinkPointer;
+	gUsbData->fpQHAsyncXfer->dLinkPointer = (UINT32)XferQh | EHCI_QUEUE_HEAD;
+	XferQh->dLinkPointer = Tmp;
+#else
+*/
+	//
+	// Set the ASYNCLISTADDR register to point to the Control/Bulk QH
+	//
+	XferQhPhyAddr = EhciMemGetPhyAddr(HcStruc, XferQh);
     HcWriteOpReg(HcStruc, EHCI_ASYNCLISTADDR, (UINT32)(UINTN)XferQhPhyAddr);
 
-    //
-    // Set next QH pointer to itself (circular link)
-    //
-    XferQh->dLinkPointer = (UINT32)((UINTN)XferQhPhyAddr | EHCI_QUEUE_HEAD);
-    XferQh->bActive = TRUE;
-    //
+	//
+	// Set next QH pointer to itself (circular link)
+	//
+	XferQh->dLinkPointer = (UINT32)((UINTN)XferQhPhyAddr | EHCI_QUEUE_HEAD);
+	XferQh->bActive = TRUE;
+//#endif
+
+	//
     // Now put the Control/Bulk QH into the HC's schedule by
     // setting the Async. schedule enabled field of USBCMD register
     // This will cause the HC to execute the transaction in the next active frame.
@@ -1942,30 +2216,37 @@ EhciExexuteAsyncSchedule(
         return Status;
     }
 
-    // Wait for tansfer complete
-    for (Count = 0; !TimeOut || Count < TimeOut; Count++) {
-        EHCIProcessQH(HcStruc, XferQh);
-        if (XferQh->bActive == FALSE) {
-            break;
-        }
-        FixedDelay(10);  // 10 microsec
-    }
+	// Wait for tansfer complete
+	for (Count = 0; !TimeOut || Count < TimeOut; Count++) {
+		EHCIProcessQH(HcStruc, XferQh);
+		if (XferQh->bActive == FALSE) {
+			break;
+		}
+		FixedDelay(10);  // 10 microsec
+	}
 
+//#if EHCI_ASYNC_BELL_SUPPORT
     //
-    // Stop the Async transfer
+    // Disconnect Control/Bulk QH from the Async list
     //
-    EHCIStopAsyncSchedule(HcStruc);
+//    EHCIRemoveQHFromAsyncList(HcStruc, XferQh);
+//#else
+	//
+	// Stop the Async transfer
+	//
+	EHCIStopAsyncSchedule(HcStruc);
+//#endif
 
-    if (XferQh->bActive == TRUE) {
-        XferQh->bActive = FALSE;
-        Status = USB_ERROR;
-        USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "EHCI Time-Out\n");
-    }
- 
-    // Service all interrupts
-    EHCI_ProcessInterrupt(HcStruc);
+	if (XferQh->bActive == TRUE) {
+		XferQh->bActive = FALSE;
+		Status = USB_ERROR;
+		USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "EHCI Time-Out\n");
+	}
+	
+	// Service all interrupts
+	EHCI_ProcessInterrupt(HcStruc);
 
-    return Status;
+	return Status;
 }
 
 /**
@@ -1978,32 +2259,38 @@ EhciExexuteAsyncSchedule(
     request either completes successfully or completes in error
     (due to time out, etc.)
 
-    @param HcStruc   Pointer to the host controller structure
-    @param DevInfo    DeviceInfo structure (if available else 0)
-    @param Request    Request type (low byte)
-           Bit 7   : Data direction
-                     0 = Host sending data to device
-                     1 = Device sending data to host
-           Bit 6-5 : Type
-                     00 = Standard USB request
-                     01 = Class specific
-                     10 = Vendor specific
-                     11 = Reserved
-           Bit 4-0 : Recipient
-                     00000 = Device
-                     00001 = Interface
-                     00010 = Endpoint
-                     00100 - 11111 = Reserved
-    @param Request   A one byte code describing the actual device request to be executed.
-                     (ex: Get Configuration, Set Address etc)
-    @param Index     wIndex request parameter (meaning varies)
-    @param Value     wValue request parameter (meaning varies)
-    @param Buffer    Buffer containing data to be sent to the device or buffer to be used to receive data.
-    @param Length    wLength request parameter, number of bytes of data to be transferred in or out of the host controller.
+    @param HcStruc   Pointer to HCStruc of the host controller
+        pDevInfo    DeviceInfo structure (if available else 0)
+        wRequest    Request type (low byte)
+        Bit 7   : Data direction
+        0 = Host sending data to device
+        1 = Device sending data to host
+        Bit 6-5 : Type
+        00 = Standard USB request
+        01 = Class specific
+        10 = Vendor specific
+        11 = Reserved
+        Bit 4-0 : Recipient
+        00000 = Device
+        00001 = Interface
+        00010 = Endpoint
+        00100 - 11111 = Reserved
+        Request code, a one byte code describing
+        the actual device request to be executed
+        (ex: Get Configuration, Set Address etc)
+        wIndex      wIndex request parameter (meaning varies)
+        wValue      wValue request parameter (meaning varies)
+        fpBuffer    Buffer containing data to be sent to the
+        device or buffer to be used to receive data
+        wLength     wLength request parameter, number of bytes
+        of data to be transferred in or out
+        of the host controller
 
-    @retval Length   Number of bytes actually transferred
+
+    @retval Number of bytes actually transferred
 
 **/
+
 UINT16
 EHCI_ControlTransfer(
     HC_STRUC    *HcStruc,
@@ -2027,53 +2314,58 @@ EHCI_ControlTransfer(
     UINT8       *BufPhyAddr = NULL;
     VOID        *BufferMapping = NULL;
     UINT8       *DevRequestPhyAddr = NULL;
+    UINT8       *QhCtlPhyAddr = NULL;
     UINT8       *QtdCtlSetupPhyAddr = NULL;
     UINT8       *QtdCtlDataPhyAddr = NULL;
     UINT8       *QtdCtlStatusPhyAddr = NULL;
-    EFI_STATUS  Status;
+    EFI_STATUS  EfiStatus = EFI_SUCCESS;
     
-    Status = UsbHcStrucValidation(HcStruc);
+    EfiStatus = UsbHcStrucValidation(HcStruc);
     
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
 
-    Status = UsbDevInfoValidation(DevInfo);
+    EfiStatus = UsbDevInfoValidation(DevInfo);
 
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
 
+#if !USB_RT_DXE_DRIVER
     if (gCheckUsbApiParameter) {
         if (Length != 0) {
-            Status = AmiUsbValidateMemoryBuffer((VOID*)Buffer, Length);
-            if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+            EfiStatus = AmiValidateMemoryBuffer((VOID*)Buffer, Length);
+            if (EFI_ERROR(EfiStatus)) {
                 USB_DEBUG(DEBUG_ERROR, 3, "Ehci ControlTransfer Invalid Pointer, Buffer is in SMRAM.\n");
                 return 0;
             }
         }
         gCheckUsbApiParameter = FALSE;
     }
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+#endif
+
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return 0;
     }
 
-    if (EhciIsHalted(HcStruc)) {
-        return 0;
-    }
+	if (EhciIsHalted(HcStruc)) {
+		return 0;
+	}
 
     if (!VALID_DEVINFO(DevInfo)) {
         return 0;
     }
     
-    gUsbData->UsbLastCommandStatusExtended = 0; 
+    gUsbData->dLastCommandStatusExtended = 0;	//(EIP84790+)
 
+    //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI_ControlTransfer..\n");
     //
     // Build the device request in the data area of the control setup qTD
     //
     DevRequest = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT(sizeof(DEV_REQ)));
     
-    ASSERT(DevRequest);
+	ASSERT(DevRequest);
     
     if (DevRequest == NULL) {
         return 0;
@@ -2081,18 +2373,18 @@ EHCI_ControlTransfer(
 
     DevRequestPhyAddr = EhciMemGetPhyAddr(HcStruc, DevRequest);
 
-    DevRequest->RequestType = Request;
-    DevRequest->Index       = Index;
-    DevRequest->Value       = Value;
-    DevRequest->DataLength  = Length;
+    DevRequest->wRequestType = Request;
+    DevRequest->wIndex       = Index;
+    DevRequest->wValue       = Value;
+    DevRequest->wDataLength  = Length;
 
 //
 // The QH endpoint characteristic field will be set so
 //   Function address & Endpoint number = From DeviceInfo structure,
 //   Direction = From TD,
-//   Speed = DeviceInfo.EndpointSpeed,
+//   Speed = DeviceInfo.bEndpointSpeed,
 //   Skip = 1, Format = 0,
-//   Max packet size  = DeviceInfo.Endp0MaxPacket
+//   Max packet size  = DeviceInfo.wEndp0MaxPacket
 // The dNextqTDPtr field will be set to qTDControlSetup
 // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
 // The dCurrentqTDPtr field will be set to 0
@@ -2101,7 +2393,7 @@ EHCI_ControlTransfer(
     // Intialize the queue head with null pointers
     //
     QhCtl = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT((1 * sizeof(EHCI_QH))+
-                (3 * sizeof(EHCI_QTD))));
+                                             			(3 * sizeof(EHCI_QTD))));
 
     if (!QhCtl) {
         return 0;
@@ -2110,13 +2402,15 @@ EHCI_ControlTransfer(
     QtdCtlSetup = (EHCI_QTD*)((UINTN)QhCtl + sizeof(EHCI_QH));
     QtdCtlData = (EHCI_QTD*)((UINTN)QtdCtlSetup + sizeof(EHCI_QTD));
     QtdCtlStatus = (EHCI_QTD*)((UINTN)QtdCtlData + sizeof(EHCI_QTD));
+
+    QhCtlPhyAddr = EhciMemGetPhyAddr(HcStruc, QhCtl);
     QtdCtlSetupPhyAddr = EhciMemGetPhyAddr(HcStruc, QtdCtlSetup);
     QtdCtlDataPhyAddr = EhciMemGetPhyAddr(HcStruc, QtdCtlData);
     QtdCtlStatusPhyAddr = EhciMemGetPhyAddr(HcStruc, QtdCtlStatus);
 
     EHCIInitializeQueueHead(QhCtl);
 
-    EndpointSpeed = DevInfo->EndpointSpeed; // 00/01/10 for HI/LO/FULL
+    EndpointSpeed = DevInfo->bEndpointSpeed; // 00/01/10 for HI/LO/FULL
 
     //
     // Assume as a high speed device
@@ -2134,7 +2428,7 @@ EHCI_ControlTransfer(
         // Get the Hispeed hub port number & device number
         //
         Tmp1 = (UINT32)EHCI_GetHiSpeedHubPortNumber(DevInfo);
-        Tmp1 = (Tmp1 << 16);  // Split complete Xaction
+        Tmp1 = (Tmp1 << 16);		// Split complete Xaction
         QhCtl->dEndPntCap |= Tmp1;
     }
 
@@ -2143,26 +2437,30 @@ EHCI_ControlTransfer(
     //
     // Use data toggle from qTD and this QH is the head of the queue
     //
+//#if EHCI_ASYNC_BELL_SUPPORT
+//    Tmp |= QH_USE_QTD_DT;
+//#else
     Tmp |= QH_USE_QTD_DT;
     // Do not set QH_HEAD_OF_LIST bit on VIA controller
     if (HcStruc->Vid != 0x1106) {
         Tmp |= QH_HEAD_OF_LIST;
     }
-    Tmp |= (UINT32)DevInfo->DeviceAddress;
+//#endif
+    Tmp |= (UINT32)DevInfo->bDeviceAddress;
     //
     // dTmp[Bits 6:0] = Dev. Addr
     // dTmp[Bit7] = I bit(0)
     // dTmp[Bits11:8] = Endpoint (0)
     //
 
-    Tmp1 = (UINT32)DevInfo->Endp0MaxPacket;
+    Tmp1 = (UINT32)DevInfo->wEndp0MaxPacket;
     Tmp |= (Tmp1 << 16);  // Tmp[Bits26:16] = device's packet size
     QhCtl->dEndPntCharac  = Tmp;
 
     //
     // Fill in various fields in the qTDControlSetup.
     //
-    //fpQTDCtlSetup = HcStruc->DescPtrs.EhciDescPtrs->fpqTDControlSetup; //(EIP71067-)
+    //fpQTDCtlSetup = HcStruc->stDescPtrs.fpEHCIDescPtrs->fpqTDControlSetup;	//(EIP71067-)
 
     //
     // The token field will be set so
@@ -2178,15 +2476,15 @@ EHCI_ControlTransfer(
     // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
     //
     QtdCtlSetup->dToken = QTD_SETUP_TOKEN |
-                          QTD_SETUP_TOGGLE | QTD_IOC_BIT |
-                          QTD_THREE_ERRORS | QTD_DO_OUT | QTD_ACTIVE |
-                          (8 << 16);  // Data size
+                QTD_SETUP_TOGGLE | QTD_IOC_BIT |
+                QTD_THREE_ERRORS | QTD_DO_OUT | QTD_ACTIVE |
+                (8 << 16);  // Data size
 
     //
     // Update buffer pointers
     //
     EHCISetQTDBufferPointers(QtdCtlSetup, (UINT8*)DevRequestPhyAddr, 8);
-    //fpQTDCtlData = HcStruc->DescPtrs.EhciDescPtrs->fpqTDControlData; //(EIP71067-)
+    //fpQTDCtlData = HcStruc->stDescPtrs.fpEHCIDescPtrs->fpqTDControlData;	//(EIP71067-)
 
     if (Length) {      // br if no data to transfer
         //
@@ -2198,7 +2496,7 @@ EHCI_ControlTransfer(
         //   Data Toggle = QTD_DATA1_TOGGLE,
         //   Error Count = QTD_THREE_ERRORS,
         //   Status code = QTD_DO_OUT(if it is out) + QTD_ACTIVE
-        // The buffer pointers field will point to the FpBuffer buffer
+        // The buffer pointers field will point to the fpBuffer buffer
         //   which was before initialized to contain a DeviceRequest struc.
         // The dNextqTDPtr field will point to the qTDControlSetup
         // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
@@ -2218,8 +2516,8 @@ EHCI_ControlTransfer(
         //
         QtdCtlData->dToken |= ((UINT32)Length << 16);
 
-        HcDmaMap(HcStruc, (UINT8)(Request & BIT7), Buffer, Length, 
-                 &BufPhyAddr, &BufferMapping);
+		HcDmaMap(HcStruc, (UINT8)(Request & BIT7), Buffer, Length, 
+			&BufPhyAddr, &BufferMapping);
         
         //
         // Update buffer pointers
@@ -2232,7 +2530,7 @@ EHCI_ControlTransfer(
     //
     // Fill in various fields in the qTDControlStatus
     //
-    //fpQTDCtlStatus = HcStruc->DescPtrs.EhciDescPtrs->fpqTDControlStatus; 
+    //fpQTDCtlStatus = HcStruc->stDescPtrs.fpEHCIDescPtrs->fpqTDControlStatus;	//(EIP71067-)
 
     //
     // The token field will be set so
@@ -2249,12 +2547,12 @@ EHCI_ControlTransfer(
     // for IN cotrol transfer, status should be OUT
     //
     QtdCtlStatus->dToken = QTD_IN_TOKEN |
-                           QTD_DATA1_TOGGLE | QTD_IOC_BIT |
-                           QTD_THREE_ERRORS | QTD_ACTIVE;
+                QTD_DATA1_TOGGLE | QTD_IOC_BIT |
+                QTD_THREE_ERRORS | QTD_ACTIVE;
     if (Request & BIT7) {
         QtdCtlStatus->dToken  = QTD_OUT_TOKEN |
-                                QTD_DATA1_TOGGLE | QTD_IOC_BIT |
-                                QTD_THREE_ERRORS | QTD_DO_OUT | QTD_ACTIVE;
+                QTD_DATA1_TOGGLE | QTD_IOC_BIT |
+                QTD_THREE_ERRORS | QTD_DO_OUT | QTD_ACTIVE;
     }
 
     EHCISetQTDBufferPointers(QtdCtlStatus, NULL, 0);
@@ -2274,43 +2572,43 @@ EHCI_ControlTransfer(
 
     QtdCtlStatus->dNextqTDPtr = EHCI_TERMINATE;
 
-    RetCode = EhciExexuteAsyncSchedule(HcStruc, QhCtl);
-    QhCtl->fpFirstqTD     = 0;
-    QhCtl->dNextqTDPtr    = EHCI_TERMINATE;
+	RetCode = EhciExexuteAsyncSchedule(HcStruc, QhCtl);
+	QhCtl->fpFirstqTD     = 0;
+	QhCtl->dNextqTDPtr    = EHCI_TERMINATE;
 
-    if (Length) {
-        HcDmaUnmap(HcStruc, BufferMapping);
+	if (Length) {
+		HcDmaUnmap(HcStruc, BufferMapping);
         Length = Length - (UINT16)((QtdCtlData->dToken & ~(QTD_DATA_TOGGLE)) >> 16);
-    }
+	}
 
     //
     // Clear the stalled condition flag
     //
-    gUsbData->UsbLastCommandStatus &= ~USB_CONTROL_STALLED;
+    gUsbData->bLastCommandStatus &= ~USB_CONTROL_STALLED;
 
     //
     // Check whether the QH stopped or timed out
     //
     if (RetCode != USB_SUCCESS) {
-        gUsbData->UsbLastCommandStatusExtended |= USB_TRNSFR_TIMEOUT; 
-        Length = 0;                    
-    }
+        gUsbData->dLastCommandStatusExtended |= USB_TRNSFR_TIMEOUT;	//(EIP84790+)
+		Length = 0;                    //(EIP71067)
+	}
 
-    if (QhCtl->bErrorStatus & QTD_HALTED) {
+	if (QhCtl->bErrorStatus & QTD_HALTED) {
         //
         // Command stalled set the error bit appropriately
         //
-        gUsbData->UsbLastCommandStatus   |= USB_CONTROL_STALLED;
-        gUsbData->UsbLastCommandStatusExtended  |= USB_CONTROL_STALLED;
-        Length = 0;                    
+        gUsbData->bLastCommandStatus   |= USB_CONTROL_STALLED;
+        gUsbData->dLastCommandStatusExtended  |= USB_CONTROL_STALLED;
+		Length = 0;                    //(EIP71067)
     }
-                                       
+                                        //(EIP71067+)>
     EhciMemFree(HcStruc, QhCtl, GET_MEM_BLK_COUNT((1 * sizeof(EHCI_QH))+
                                            (3 * sizeof(EHCI_QTD))));
-                                       
-    EhciMemFree(HcStruc, DevRequest, GET_MEM_BLK_COUNT(sizeof(DEV_REQ)));
+                                        //<(EIP71067+)
+	EhciMemFree(HcStruc, DevRequest, GET_MEM_BLK_COUNT(sizeof(DEV_REQ)));
 
-    return Length;
+	return Length;
 }
 
 
@@ -2318,26 +2616,26 @@ EHCI_ControlTransfer(
     This function executes a bulk transaction on the USB. The
     transfer may be either DATA_IN or DATA_OUT packets containing
     data sent from the host to the device or vice-versa. This
-    function will not return until the request either completes
+    function wil not return until the request either completes
     successfully or completes with error (due to time out, etc.)
     @note  Make sure that amount of bytes to transfer should not
               exceed MAX_EHCI_DATA_SIZE
 
-    @param HcStruc    Pointer to the host controller structure
-    @param DevInfo    DeviceInfo structure (if available else 0)
-    @param XferDir    Transfer direction
-                      Bit 7   : Data direction
-                                 0 Host sending data to device
-                                 1 Device sending data to host
-                      Bit 6-0 : Reserved
-    @param Buffer     Buffer containing data to be sent to the
-                      device or buffer to be used to receive data
-                      value in Segment:Offset format
-    @param Length     dwLength request parameter, number of bytes
-                      of data to be transferred in or out
-                      of the host controller
+    @param pHCStruc    Pointer to HCStruc of the host controller
+        pDevInfo    DeviceInfo structure (if available else 0)
+        bXferDir    Transfer direction
+        Bit 7: Data direction
+        0 Host sending data to device
+        1 Device sending data to host
+        Bit 6-0 : Reserved
+        fpBuffer    Buffer containing data to be sent to the
+        device or buffer to be used to receive data
+        value in Segment:Offset format
+        dwLength    dwLength request parameter, number of bytes
+        of data to be transferred in or out
+        of the host controller
 
-    @retval BytesTransferred  Amount of data transferred
+    @retval Amount of data transferred
 
 **/
 
@@ -2357,7 +2655,7 @@ EHCI_BulkTransfer(
     EHCI_QTD    *QtdBulkData;
     UINT32      Tmp;
     UINT32      Tmp1;
-    UINT16      EhciCmdStatus;
+    UINT16      Status;
     UINT32      BytesToTransfer;
     UINT32      BytesRemaining;
     UINT32      BytesTransferred;
@@ -2366,37 +2664,38 @@ EHCI_BulkTransfer(
     UINT8       *TempBuffer = NULL;
     UINT8       *QhBulkPhyAddr;
     UINT8       *QtdBulkDataPhyAddr;
-    EFI_STATUS  Status;
+    EFI_STATUS  EfiStatus = EFI_SUCCESS;
 
-    Status = UsbHcStrucValidation(HcStruc);
+    EfiStatus = UsbHcStrucValidation(HcStruc);
     
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
 
-    Status = UsbDevInfoValidation(DevInfo);
+    EfiStatus = UsbDevInfoValidation(DevInfo);
 
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
 
+#if !USB_RT_DXE_DRIVER
     if (gCheckUsbApiParameter) {
-        Status = AmiUsbValidateMemoryBuffer((VOID*)Buffer, Length);
-        if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+        EfiStatus = AmiValidateMemoryBuffer((VOID*)Buffer, Length);
+        if (EFI_ERROR(EfiStatus)) {
             USB_DEBUG(DEBUG_ERROR, 3, "Ehci BulkTransfer Invalid Pointer, Buffer is in SMRAM.\n");
             return 0;
         }
         gCheckUsbApiParameter = FALSE;
     }
+#endif
 
-
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return 0;
     }
 
-    if (EhciIsHalted(HcStruc)) {
-      return 0;
-      }
+	if (EhciIsHalted(HcStruc)) {
+		return 0;
+	}
 
     if (!VALID_DEVINFO(DevInfo)) {
         return 0;
@@ -2408,37 +2707,37 @@ EHCI_BulkTransfer(
     
     if ((HcStruc->Vid == 0x10EC) && (HcStruc->Did == 0x816D)) {
         if ((UINTN)Buffer & (BIT0 | BIT1)) {
-            if (Length < gUsbData->HighSpeedMaxBulkDataSize) {
+            if (Length < HIGHSPEED_MAX_BULK_DATA_SIZE) {
                 TempBuffer = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT((UINT16)Length));
             } else {
-                TempBuffer = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT(gUsbData->HighSpeedMaxBulkDataSize));  
+                TempBuffer = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT(HIGHSPEED_MAX_BULK_DATA_SIZE));  
             }
         }
     }
 
     //clear HW source of error
-    gUsbData->UsbLastCommandStatusExtended = 0;
+    gUsbData->dLastCommandStatusExtended = 0;
 
 
     BytesRemaining     = Length;
     BytesTransferred   = 0;
-
-    //
-    // Get Bulk IN/OUT enpoint number, data sync value & max packet size
-    //
-    if (XferDir & BIT7) {
-        MaxPkt = DevInfo->BulkInMaxPkt;
-        Endp   = DevInfo->BulkInEndpoint;
+		
+	//
+	// Get Bulk IN/OUT enpoint number, data sync value & max packet size
+	//
+	if (XferDir & BIT7) {
+        MaxPkt = DevInfo->wBulkInMaxPkt;
+        Endp   = DevInfo->bBulkInEndpoint;
     } else {
-        MaxPkt = DevInfo->BulkOutMaxPkt;
-        Endp   = DevInfo->BulkOutEndpoint;
+        MaxPkt = DevInfo->wBulkOutMaxPkt;
+        Endp   = DevInfo->bBulkOutEndpoint;
     }
     if (MaxPkt == 0) {
         return 0;
     }
 
     QhBulk = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT((1 * sizeof(EHCI_QH))+
-                                                     (1 * sizeof(EHCI_QTD))));
+                                              		(1 * sizeof(EHCI_QTD))));
 
     if (!QhBulk) {
         return 0;
@@ -2449,17 +2748,26 @@ EHCI_BulkTransfer(
     QhBulkPhyAddr = EhciMemGetPhyAddr(HcStruc, QhBulk);
     QtdBulkDataPhyAddr = EhciMemGetPhyAddr(HcStruc, QtdBulkData);
 
-    HcDmaMap(HcStruc, XferDir, Buffer, Length, &BufPhyAddr, &BufferMapping);
+	HcDmaMap(HcStruc, XferDir, Buffer, Length, &BufPhyAddr, &BufferMapping);
 
     while (BytesRemaining) {
         BytesToTransfer = 
-             (BytesRemaining < gUsbData->HighSpeedMaxBulkDataSize)?
-                    BytesRemaining : gUsbData->HighSpeedMaxBulkDataSize;
-  
+             (BytesRemaining < HIGHSPEED_MAX_BULK_DATA_SIZE)?
+                    BytesRemaining : HIGHSPEED_MAX_BULK_DATA_SIZE;
+		
+		//
+		// Get data toggle value
+		//
+    	DatToggle = UsbGetDataToggle(DevInfo, Endp | XferDir);
+
         //
-        // Get data toggle value
+        // Set the QH's dNextqTDPtr field to bulk data qTD and dAltqTDPtr field to
+        // EHCI_TERMINATE. Also set QH's link pointer to itself
         //
-        DatToggle = UsbGetDataToggle(DevInfo, Endp | XferDir);
+                                        //(EIP71067-)>
+        //fpQHBulk        = HcStruc->stDescPtrs.fpEHCIDescPtrs->fpQHBulk;
+        //fpQTDBulkData   = HcStruc->stDescPtrs.fpEHCIDescPtrs->fpqTDBulkData;
+                                        //<(EIP71067-)
         //
         // Intialize the queue head
         //
@@ -2475,7 +2783,7 @@ EHCI_BulkTransfer(
         //
         // Device address & Endpoint
         //
-        Tmp = (UINT32)(DevInfo->DeviceAddress | (Endp << 8));
+        Tmp = (UINT32)(DevInfo->bDeviceAddress | (Endp << 8));
     
         //
         // Set max packet size
@@ -2485,18 +2793,21 @@ EHCI_BulkTransfer(
         //
         // Set the data toggle control
         //
-
+//    #if EHCI_ASYNC_BELL_SUPPORT
+//        Tmp |= QH_USE_QTD_DT;
+//    #else
         Tmp |= QH_USE_QTD_DT;
         // Do not set QH_HEAD_OF_LIST bit on VIA controller
         if (HcStruc->Vid != 0x1106) {
             Tmp |= QH_HEAD_OF_LIST;
         }
+//    #endif
     
         //
         // Set the device speed
         // Reset the device speed bits
         //
-        Tmp1 = (UINT32)DevInfo->EndpointSpeed;    // 00/01/10 for HI/LO/FULL
+        Tmp1 = (UINT32)DevInfo->bEndpointSpeed;    // 00/01/10 for HI/LO/FULL
     
         //
         // Assume as a high speed device
@@ -2514,12 +2825,12 @@ EHCI_BulkTransfer(
             // Set the hub address and port number
             //
             Tmp1   = (UINT32)EHCI_GetHiSpeedHubPortNumber(DevInfo);
-            Tmp1   = (Tmp1 << 16);     // Hispeed hub port number & device number
+            Tmp1   = (Tmp1 << 16);    	// Hispeed hub port number & device number
             QhBulk->dEndPntCap    |= Tmp1;   // Split complete Xaction
         }
     
         //
-        // Update the endpoint characteristics field with the data formed
+        // Update the endpoint characteristcs field with the data formed
         //
         QhBulk->dEndPntCharac = Tmp;
     
@@ -2531,7 +2842,7 @@ EHCI_BulkTransfer(
         //   Data Toggle = bDatToggle,
         //   Error Count = QTD_THREE_ERRORS,
         //   Status code = QTD_DO_OUT(if it is out) + QTD_ACTIVE
-        // The buffer pointers field will point to the FpBuffer buffer
+        // The buffer pointers field will point to the fpBuffer buffer
         //   which was before initialized to contain a DeviceRequest struc.
         // The dNextqTDPtr field will point to the qTDControlSetup
         // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
@@ -2580,43 +2891,43 @@ EHCI_BulkTransfer(
         //
         // Set bulk condition as not stalled
         //
-        gUsbData->UsbLastCommandStatus &= ~(USB_BULK_STALLED + USB_BULK_TIMEDOUT);
+        gUsbData->bLastCommandStatus &= ~(USB_BULK_STALLED + USB_BULK_TIMEDOUT);
     
         //
         // Now wait for bulk transaction to be complete
         // the EHCIProcessInterrupt will set its active flag to FALSE.
         // Now wait for the bulk transfer to complete
         //
-        EhciCmdStatus = EhciExexuteAsyncSchedule(HcStruc, QhBulk);
+		Status = EhciExexuteAsyncSchedule(HcStruc, QhBulk);
 
-        QhBulk->fpFirstqTD = 0;
-        QhBulk->dNextqTDPtr = EHCI_TERMINATE;
+		QhBulk->fpFirstqTD	= 0;
+		QhBulk->dNextqTDPtr	= EHCI_TERMINATE;
 
-        if (EhciCmdStatus != USB_SUCCESS) {
-            //
+		if (Status != USB_SUCCESS) {
+			//
             // Set time out status
             //
-            gUsbData->UsbLastCommandStatus |= USB_BULK_TIMEDOUT;
-            gUsbData->UsbLastCommandStatusExtended  |= USB_TRNSFR_TIMEOUT;
-            break;
-        }
+            gUsbData->bLastCommandStatus |= USB_BULK_TIMEDOUT;
+            gUsbData->dLastCommandStatusExtended  |= USB_TRNSFR_TIMEOUT;
+			break;
+		}
 
-        if (QhBulk->bErrorStatus & QTD_HALTED) {
-           //
-           // Stall condition
-           //
-            gUsbData->UsbLastCommandStatus   &= ~(USB_BULK_TIMEDOUT);
-            gUsbData->UsbLastCommandStatus   |= USB_BULK_STALLED;
-            gUsbData->UsbLastCommandStatusExtended  |= USB_TRSFR_STALLED;
-          break;
-        }
+		if (QhBulk->bErrorStatus & QTD_HALTED) {
+			//
+			// Stall condition
+			//
+            gUsbData->bLastCommandStatus   &= ~(USB_BULK_TIMEDOUT);
+            gUsbData->bLastCommandStatus   |= USB_BULK_STALLED;
+            gUsbData->dLastCommandStatusExtended  |= USB_TRSFR_STALLED;
+			break;
+		}
 
         //
         // Update the data toggle value into the mass info structure
         //
         DatToggle =
             (UINT8)(((QhBulk->dToken & QH_DATA_TOGGLE) >> 31) & 1);
-        UsbUpdateDataToggle(DevInfo, Endp | XferDir, DatToggle);
+		UsbUpdateDataToggle(DevInfo, Endp | XferDir, DatToggle);
 
         //
         // Get the size of data transferred
@@ -2647,15 +2958,16 @@ EHCI_BulkTransfer(
         BufPhyAddr += Tmp;
     }
 
-    HcDmaUnmap(HcStruc, BufferMapping);
+	HcDmaUnmap(HcStruc, BufferMapping);
+                                        //(EIP71067+)>
     EhciMemFree(HcStruc, QhBulk, GET_MEM_BLK_COUNT( (1 * sizeof(EHCI_QH)) +
-                                                    (1 * sizeof(EHCI_QTD))));
-
+                                             	    (1 * sizeof(EHCI_QTD))));
+                                        //<(EIP71067+)
     if (TempBuffer != NULL) {
-        if (Length < gUsbData->HighSpeedMaxBulkDataSize) {
+        if (Length < HIGHSPEED_MAX_BULK_DATA_SIZE) {
             EhciMemFree(HcStruc, TempBuffer, GET_MEM_BLK_COUNT((UINT16)Length));     
         } else {
-            EhciMemFree(HcStruc, TempBuffer, GET_MEM_BLK_COUNT(gUsbData->HighSpeedMaxBulkDataSize));
+            EhciMemFree(HcStruc, TempBuffer, GET_MEM_BLK_COUNT(HIGHSPEED_MAX_BULK_DATA_SIZE));
         }
     }
     
@@ -2663,58 +2975,38 @@ EHCI_BulkTransfer(
 
 }
 
-
 /**
-    This function calculates Isochronous TD buffer addresses
-    
-    @param ItdAddress    Pointer to Isochronous TD buffer addresses
-    @param Address       Address
+ *  This function calculates Isochronous TD buffer addresses
+ */
+typedef struct _ITD_PG_ADDRESS {
+    UINT32 TrBuffer;
+    BOOLEAN NewPgNeeded;
+} ITD_PG_ADDRESS;
 
-    @retval EFI_SUCCESS  On success
-
-**/
-EFI_STATUS
-CalculateItdBuffers (
-    ITD_PG_ADDRESS  *ItdAddress,
-    UINT32          *Address
-)
+EFI_STATUS CalculateItdBuffers(ITD_PG_ADDRESS* ItdAddress, UINT32* Address)
 {
-    UINT8 Index;
+    UINT8 i;
     UINT32 ItdTrOffset;
     BOOLEAN NewPgNeeded;
 
-    for (Index = 0; Index < 8; Index++)
+    for (i = 0; i < 8; i++)
     {
-        ItdAddress[Index].TrBuffer = *Address;
+        ItdAddress[i].TrBuffer = *Address;
         ItdTrOffset = *Address & 0xfff;
         NewPgNeeded = ItdTrOffset >= EHCI_ITD_PAGE_MAX_OFFSET;
-        ItdAddress[Index].NewPgNeeded = NewPgNeeded;
+        ItdAddress[i].NewPgNeeded = NewPgNeeded;
         *Address += USB_ISOC_XFER_MEM_LENGTH;
     }
     // can't have a new page on 7th TR record; however if the record can hold the data we also return success
     return (NewPgNeeded && ItdTrOffset != EHCI_ITD_PAGE_MAX_OFFSET)? EFI_INVALID_PARAMETER : EFI_SUCCESS;
 }
 
-
+/**
+ * This function creates ITDs for the isochronous transfer
+ */
 // Note: this function uses current frame index as input. Any delays in this
 // function (debug messages, stalls, etc.) affect async transfer since "current"
 // frame will not be current.
-/**
-    Create Isochronous TD buffer 
-    
-    @param Hc            Pointer to the host controller structure
-    @param Device        DeviceInfo structure (if available else 0)
-    @param Index         The index in FrameList.
-    @param Buffer        Itd buffer
-    @param Length        Length request parameter, number of bytes
-                         of data to be transferred in or out
-                         of the host controller                     
-    @param XferDir       Transfer direction
-    @param AsyncStatus   asynchronous indicator 
-                         
-    @retval FrameCount   Frame Count
-
-**/
 UINT16 CreateITDs(
     HC_STRUC    *Hc,
     DEV_INFO    *Device,
@@ -2725,7 +3017,7 @@ UINT16 CreateITDs(
     UINT8       *AsyncStatus
 )
 {
-    UINT16      Count;
+    UINT16      i;
     UINT8       Frame;
     UINT16      FrameCount = 1;
     volatile EHCI_ITD    *Itd;
@@ -2738,7 +3030,7 @@ UINT16 CreateITDs(
     UINT32      ScheduledDataLength = 0;
     EFI_STATUS  Status;
 
-    for (Count = 0; Count < Hc->AsyncListSize; Count++)
+    for (i = 0; i < Hc->wAsyncListSize; i++)
     {
         Status = CalculateItdBuffers(ItdAddress, &Address);
         if (EFI_ERROR(Status))
@@ -2746,16 +3038,13 @@ UINT16 CreateITDs(
             // can't have a new page on 7th TR record, adjust address and redo this iTD
             Address = (ItdAddress[0].TrBuffer & 0xfffff000) + 0x1000;
             Status = CalculateItdBuffers(ItdAddress, &Address);
-            // second call must be successful
-            if (EFI_ERROR (Status)) {
-                USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "Ehci Calculate Itd Buffers Staus %r\n", Status);
-            }
+            ASSERT_EFI_ERROR(Status);   // second call must be successful
         }
 
         // Fill the iTD
         Page = 0;
-        Itd = (EHCI_ITD*)(UINTN)Hc->FrameList[CurrentIndex++];
-        if (CurrentIndex == Hc->AsyncListSize) CurrentIndex = 0;
+        Itd = (EHCI_ITD*)(UINTN)Hc->fpFrameList[CurrentIndex++];
+        if (CurrentIndex == Hc->wAsyncListSize) CurrentIndex = 0;
 
         ASSERT_EFI_ERROR(Status);
         Itd->BufferPointer[0] = ItdAddress[0].TrBuffer & 0xfffff000;
@@ -2765,9 +3054,6 @@ UINT16 CreateITDs(
             Itd->ControlStatus[Frame] = (EHCI_ISOC_MAX_REC_DATA_SIZE << 16);    // transaction length
             Itd->ControlStatus[Frame] |= ItdAddress[Frame].TrBuffer & 0xfff;   // transaction offset
             Itd->ControlStatus[Frame] |= (Page << 12);        // page
-            if(AsyncStatus) {
-                Itd->ControlStatus[Frame] |= BIT15;   // Interrupt on completion
-            }
             if (ItdAddress[Frame].NewPgNeeded && (Frame != 7))
             {
                 Page++;
@@ -2777,7 +3063,7 @@ UINT16 CreateITDs(
             if (ScheduledDataLength >= Length) break;
         }
 
-        Itd->BufferPointer[0] |= (Device->DeviceAddress | ((UINT16)Endpoint << 8));
+        Itd->BufferPointer[0] |= (Device->bDeviceAddress | ((UINT16)Endpoint << 8));
         Itd->BufferPointer[1] |= Device->IsocDetails.EpMaxPkt;
         Itd->BufferPointer[2] |= Device->IsocDetails.EpMult;    // # of transaction per microframe
         if (XferDir != 0)
@@ -2791,6 +3077,7 @@ UINT16 CreateITDs(
     Device->IsocDetails.AsyncStatus = AsyncStatus;
     if (AsyncStatus)
     {
+        Itd->ControlStatus[Frame] |= BIT15;   // Interrupt on completion
         Device->IsocDetails.XferStart = (UINTN)Index;
         Device->IsocDetails.XferKey = (UINTN)Itd;
     }    
@@ -2798,17 +3085,8 @@ UINT16 CreateITDs(
 }
 
 /**
-    This function activates or deactivates the given range of ITDs
-
-    @param HcStruc    Pointer to the host controller structure
-    @param FrmNum     Frame number
-    @param FrameCount Frame Count
-    @param Frame      The target frame
-    @param Activate   If TRUE,  activate the given range of ITDs.
-                      If FALSE, deactivate the given range of ITDs.
-    @retval Itd       Return the ITD pointer.
-
-**/
+ * This function activates or deactivates the given range of ITDs
+ */
 EHCI_ITD* ActivateDeactivateITDs(
     HC_STRUC    *HcStruc,
     UINT16      FrmNum,
@@ -2820,25 +3098,25 @@ EHCI_ITD* ActivateDeactivateITDs(
     UINT16  FrameTotal = 0;
     UINT16  FrameNum = FrmNum;
     EHCI_ITD *Itd;
-    UINT8   Index;
+    UINT8   i;
 
     while (1)
     {
-        Itd = (EHCI_ITD*)(UINTN)HcStruc->FrameList[FrameNum++];
-        if (FrameNum == HcStruc->AsyncListSize) FrameNum = 0;
+        Itd = (EHCI_ITD*)(UINTN)HcStruc->fpFrameList[FrameNum++];
+        if (FrameNum == HcStruc->wAsyncListSize) FrameNum = 0;
 
-        for (Index = 0; Index < 8; Index++)
+        for (i = 0; i < 8; i++)
         {
             if (Activate)
-                Itd->ControlStatus[Index] |= 0x80000000;
+                Itd->ControlStatus[i] |= 0x80000000;
             else
-                Itd->ControlStatus[Index] &= 0x7fffffff;
+                Itd->ControlStatus[i] &= 0x7fffffff;
             
             FrameTotal++;
             if (FrameTotal == FrameCount)
             {
                 if (Frame != NULL)
-                    *Frame = Index;
+                    *Frame = i;
                 return Itd;
             }
         }
@@ -2847,14 +3125,11 @@ EHCI_ITD* ActivateDeactivateITDs(
 
 /**
  * This function returns the current frame index
- * 
- * @param HcStruc    Pointer to the host controller structure
- * @retval           The current frame index.
  */
-UINT16 GetCurrentFIndex(HC_STRUC* HcStruc)
+UINT16 GetCurrentFIndex(HC_STRUC* Hc)
 {
-    UINT32  Data = HcReadOpReg(HcStruc, EHCI_FRINDEX);
-    return (UINT16)((Data >> 3) & (HcStruc->AsyncListSize - 1));
+    UINT32  Data = HcReadOpReg(Hc, EHCI_FRINDEX);
+    return (UINT16)((Data >> 3) & (Hc->wAsyncListSize - 1));
 }
 
 
@@ -2862,13 +3137,6 @@ UINT16 GetCurrentFIndex(HC_STRUC* HcStruc)
     For a given range of micro-frames update the map of transfer size with
     the individual micro-frame transfer length. Return the total transfer
     data amount.
-    
-    @param HcStruc    Pointer to the host controller structure
-    @param Index      Frame index in FrameList
-    @param FrameCount Frame Count
-    @param FrameData  The total transfer data
-    
-    @retval TotalAmount    Total transfer data amount
 **/
 UINT32 FinalizeIsocXfer(
     HC_STRUC    *HcStruc,
@@ -2883,11 +3151,11 @@ UINT32 FinalizeIsocXfer(
     UINT8   ControlStatusIndex;
     UINT32  TotalAmount = 0;
     UINT32  FrameXferBytes;
-    UINT16  Count;
+    UINT16  i;
 
-    for (Count = 0; Count < HcStruc->AsyncListSize; Count++) {
-        Itd = (EHCI_ITD*)(UINTN)HcStruc->FrameList[Frame++];
-        if (Frame == HcStruc->AsyncListSize) Frame = 0;
+    for (i = 0; i < HcStruc->wAsyncListSize; i++) {
+        Itd = (EHCI_ITD*)(UINTN)HcStruc->fpFrameList[Frame++];
+        if (Frame == HcStruc->wAsyncListSize) Frame = 0;
 
         for (ControlStatusIndex = 0; ControlStatusIndex < 8; ControlStatusIndex++) {
             FrameXferBytes = 0;
@@ -2918,21 +3186,24 @@ UINT32 FinalizeIsocXfer(
     device or vice-versa. Depending on the value passed in AsyncIndicator this transfer
     would either be a blocking (synchronous) or non-blocking (asynchronous).
 
-    @param[in]  HcStruc         Pointer to HCStruc of the host controller
-    @param[in]  DevInfo         DeviceInfo structure (if available else 0)
-    @param[in]  XferDir         Transfer direction
-                                 Bit 7: Data direction
-                                   0 Host sending data to device
-                                   1 Device sending data to host
-                                  Bit 6-0 : Reserved
-    @param[in]  Buffer          32-bit buffer containing data to be sent to the device or buffer
-                                to be used to receive data
-    @param[in]  Length          Number of bytes of data to be transferred in or out
+    @param[in]  HcStruc    Pointer to HCStruc of the host controller
+    @param[in]  DevInfo    DeviceInfo structure (if available else 0)
+    @param[in]  XferDir    Transfer direction
+                  Bit 7: Data direction
+                          0 Host sending data to device
+                          1 Device sending data to host
+                  Bit 6-0 : Reserved
+    @param[in]  Buffer    32-bit buffer containing data to be sent to the device or buffer
+                      to be used to receive data
+    @param[in]  Length    Number of bytes of data to be transferred in or out
     @param[in]  AsyncIndicator  If NULL, the call is not returned until all data is transferred
                                 if not NULL, it points to the UINT8 data which will be updated
                                 when transfer is complete.
-    @retval TotalAmount         Total transfer data amount
-    
+
+    @param[out] For blocking transfer - amount of data transferred, for non-blocking transfer 0
+    @param[out] Transfer status is updated in gUsbData->bLastCommandStatus and in 
+                gUsbData->dLastCommandStatusExtended
+
     @note       Isochronous transfer implies no checking for the data transmission
           errors, i.e. transfer completes successfully when the last iTD becomes inactive.
 **/
@@ -2954,66 +3225,69 @@ EHCI_IsocTransfer(
     volatile    EHCI_ITD    *Itd;
     UINT16      Count;
     UINT32      TotalAmount;
-    EFI_STATUS  Status;
+    EFI_STATUS  EfiStatus = EFI_SUCCESS;
 
-    Status = UsbHcStrucValidation(HcStruc);
+    EfiStatus = UsbHcStrucValidation(HcStruc);
     
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
 
-    Status = UsbDevInfoValidation(DevInfo);
+    EfiStatus = UsbDevInfoValidation(DevInfo);
 
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
 
-
+#if !USB_RT_DXE_DRIVER
     if (gCheckUsbApiParameter) {
-        Status = AmiUsbValidateMemoryBuffer((VOID*)Buffer, Length);
-        if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+        EfiStatus = AmiValidateMemoryBuffer((VOID*)Buffer, Length);
+        if (EFI_ERROR(EfiStatus)) {
             USB_DEBUG(DEBUG_ERROR, 3, "Ehci IsocTransfer Invalid Pointer, Buffer is in SMRAM.\n");
             return 0;
         }
         if (AsyncIndicator) {
-            Status = AmiUsbValidateMemoryBuffer((VOID*)AsyncIndicator, sizeof(UINT8));
-            if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+            EfiStatus = AmiValidateMemoryBuffer((VOID*)AsyncIndicator, sizeof(UINT8));
+            if (EFI_ERROR(EfiStatus)) {
                 return 0;
             }
         }
         gCheckUsbApiParameter = FALSE;
     }
+#endif
 
-
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return 0;
     }
 
-    if (EhciIsHalted(HcStruc)) {
-      return 0;
-    }
+	if (EhciIsHalted(HcStruc)) {
+		return 0;
+	}
 
     if (HcStruc->IsocTds == NULL) {
         return 0;
     }
 
     // see if the requested length is acceptable
-    MaxXferLength = DevInfo->IsocDetails.EpMaxPkt * DevInfo->IsocDetails.EpMult * 8 * HcStruc->AsyncListSize;
-   
+    MaxXferLength = DevInfo->IsocDetails.EpMaxPkt * DevInfo->IsocDetails.EpMult * 8 * HcStruc->wAsyncListSize;
+
+//    USB_DEBUG(DEBUG_INFO, 3, "EHCI_IsochXfer: buffer %x length %x maxxferlength %x = isocmax(%x)*isocmult(%x)*asynclistsize(%x)\n", Buffer, Length, MaxXferLength,
+//            DevInfo->IsocDetails.EpMaxPkt, DevInfo->IsocDetails.EpMult, HcStruc->wAsyncListSize);
+    
     if (Length > MaxXferLength)
     {
         ASSERT(FALSE);
         return 0;   // too much to ask
     }
 
-    gUsbData->UsbLastCommandStatusExtended = 0;
+    gUsbData->dLastCommandStatusExtended = 0;
 
     // initialize and activate the necessary number of iTDs
 
     CurrentFIndex = GetCurrentFIndex(HcStruc);
     // advance by, say, one 1 ms frame to avoid losing first TD
     CurrentFIndex += 1;
-    if (CurrentFIndex == HcStruc->AsyncListSize)
+    if (CurrentFIndex == HcStruc->wAsyncListSize)
     {
         CurrentFIndex = 0;
     }
@@ -3036,16 +3310,18 @@ EHCI_IsocTransfer(
         if ((Itd->ControlStatus[Frame] & 0x80000000) == 0) break;
         FixedDelay(15);  // 15 microsec
     }
+#if !USB_RT_DXE_DRIVER
+    EfiStatus = AmiValidateMemoryBuffer((VOID*)DevInfo->IsocDetails.XferDetails, FrameCount * sizeof(UINT32));
+    if (EFI_ERROR(EfiStatus)) {
 
-    Status = AmiUsbValidateMemoryBuffer((VOID*)DevInfo->IsocDetails.XferDetails, FrameCount * sizeof(UINT32));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
         return 0;
     }
-
+#endif
     TotalAmount = FinalizeIsocXfer(HcStruc, CurrentFIndex, FrameCount, DevInfo->IsocDetails.XferDetails);
+    //USB_DEBUG(DEBUG_INFO, 3, "EHCI ISOC: %d uFrames %d Bytes\n", uFrameCount, TotalAmount);
     if (Count == TransferTimeout15us)
     {
-        gUsbData->UsbLastCommandStatusExtended |= USB_TRNSFR_TIMEOUT;
+        gUsbData->dLastCommandStatusExtended |= USB_TRNSFR_TIMEOUT;
     }
 
     return TotalAmount;
@@ -3058,16 +3334,18 @@ EHCI_IsocTransfer(
     function will not return until the request either completes
     successfully or completes in error (due to time out, etc.)
 
-    @param HcStruc         Pointer to the host controller structure
-    @param DevInfo         DeviceInfo structure (if available else 0)
-    @param EndpointAddress The destination USB device endpoint to which the device request is being sent.
-    @param MaxPktSize      Indicates the maximum packet size the target endpoint is capable 
-                           of sending or receiving.
-    @param Buffer          Buffer containing data to be sent to the
-                           device or buffer to be used to receive data
-    @param Length          wLength request parameter, number of bytes of data to be transferred in
+    @param HcStruc   Pointer to HCStruc of the host controller
+        DevInfo   DeviceInfo structure (if available else 0)
+        EndpointAddress The destination USB device endpoint to which the device request 
+                    is being sent.
+        MaxPktSize  Indicates the maximum packet size the target endpoint is capable 
+        of sending or receiving.
+        fpBuffer    Buffer containing data to be sent to the
+        device or buffer to be used to receive data
+        wLength     wLength request parameter, number of bytes
+        of data to be transferred in
 
-    @retval BytesTransferred  Number of bytes transferred
+    @retval Number of bytes transferred
 
 
     @note  DO NOT TOUCH THE LINK POINTER OF THE TDInterruptData. It is
@@ -3092,72 +3370,75 @@ EHCI_InterruptTransfer (
     UINT32      Tmp;
     UINT32      Tmp1;
     EHCI_QTD    *QtdIntData;
-    UINT32      Count;
-    UINT32      Timeout;
-    UINT32      BytesTransferred;
-    UINT8       *BufPhyAddr = NULL;
-    VOID        *BufferMapping = NULL;
-    EFI_STATUS  Status;
+	UINT32		Count;
+	UINT32		Timeout;
+	UINT32		BytesTransferred;
+	UINT8		*BufPhyAddr = NULL;
+	VOID		*BufferMapping = NULL;
+    EFI_STATUS  EfiStatus = EFI_SUCCESS;
 
-    Status = UsbHcStrucValidation(HcStruc);
+    EfiStatus = UsbHcStrucValidation(HcStruc);
     
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
 
-    Status = UsbDevInfoValidation(DevInfo);
+    EfiStatus = UsbDevInfoValidation(DevInfo);
 
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR(EfiStatus)) {
         return 0;
     }
+
+#if !USB_RT_DXE_DRIVER
     if (gCheckUsbApiParameter) {
-        Status = AmiUsbValidateMemoryBuffer((VOID*)Buffer, Length);
-        if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+        EfiStatus = AmiValidateMemoryBuffer((VOID*)Buffer, Length);
+        if (EFI_ERROR(EfiStatus)) {
             USB_DEBUG(DEBUG_ERROR, 3, "Ehci InterruptTransfer Invalid Pointer, Buffer is in SMRAM.\n");
             return 0;
         }
         gCheckUsbApiParameter = FALSE;
     }
+#endif
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return 0;
     }
 
-    if (EhciIsHalted(HcStruc)) {
-      return 0;
-    }
+	if (EhciIsHalted(HcStruc)) {
+		return 0;
+	}
 
-    gUsbData->UsbLastCommandStatusExtended = 0;
+	gUsbData->dLastCommandStatusExtended = 0;
 
-    DatToggle = UsbGetDataToggle(DevInfo, EndpointAddress);
+	DatToggle = UsbGetDataToggle(DevInfo, EndpointAddress);
 
     //
     // Get the QHInterrupt pointer
     //
     QhInt = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT((1 * sizeof(EHCI_QH))+
-                                               (1 * sizeof(EHCI_QTD))));
-    if (QhInt == NULL) {
-      return 0;
-     }
+                                             		(1 * sizeof(EHCI_QTD))));
+	if (QhInt == NULL) {
+		return 0;
+	}
 
-    QtdIntData = (EHCI_QTD*)((UINTN)QhInt + sizeof(EHCI_QH));
+	QtdIntData = (EHCI_QTD*)((UINTN)QhInt + sizeof(EHCI_QH));
 
-    //
-    // Intialize the queue head
-    //
-    EHCIInitializeQueueHead(QhInt);
+	//
+	// Intialize the queue head
+	//
+	EHCIInitializeQueueHead(QhInt);
 
-    //
-    // Set the first qTD pointer
-    //
-    QhInt->fpFirstqTD = QtdIntData;
-    QhInt->dNextqTDPtr = (UINT32)(UINTN)QtdIntData;
-    QhInt->dLinkPointer = EHCI_TERMINATE;
+	//
+	// Set the first qTD pointer
+	//
+	QhInt->fpFirstqTD	= QtdIntData;
+	QhInt->dNextqTDPtr	= (UINT32)(UINTN)QtdIntData;
+	QhInt->dLinkPointer	= EHCI_TERMINATE;
 
     //
     // Get Device address & Endpoint
     //
-    Tmp = (UINT32)DevInfo->DeviceAddress;
+    Tmp = (UINT32)DevInfo->bDeviceAddress;
     Tmp |= (UINT32)(EndpointAddress & 0xF) << 8;
 
     //
@@ -3168,7 +3449,7 @@ EHCI_InterruptTransfer (
     //
     // Set the device speed, reset the device speed bits
     //
-    Tmp1 = (UINT32)DevInfo->EndpointSpeed;  // 00/01/10 for HI/LO/FULL
+    Tmp1 = (UINT32)DevInfo->bEndpointSpeed;  // 00/01/10 for HI/LO/FULL
 
     //
     // Assume as a high speed device
@@ -3194,8 +3475,8 @@ EHCI_InterruptTransfer (
     //
     QhInt->dEndPntCharac = Tmp;
     QhInt->dEndPntCap |= (BIT0 | QH_ONE_XFER);    // Interrupt schedule mask
-    QhInt->Interval = EhciTranslateInterval(DevInfo->EndpointSpeed, 
-                            DevInfo->PollInterval);
+    QhInt->Interval = EhciTranslateInterval(DevInfo->bEndpointSpeed, 
+                            DevInfo->bPollInterval);
 
     //
     // Set the data toggle depending on the bDatToggle value
@@ -3216,19 +3497,19 @@ EHCI_InterruptTransfer (
 // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
 //
     QtdIntData->dToken = QTD_IOC_BIT | QTD_THREE_ERRORS | QTD_ACTIVE;
-    if (EndpointAddress & BIT7) {
-     QtdIntData->dToken |= QTD_IN_TOKEN;
-    } else {
-     QtdIntData->dToken |= QTD_OUT_TOKEN;
-    }
+	if (EndpointAddress & BIT7) {
+	    QtdIntData->dToken |= QTD_IN_TOKEN;
+	} else {
+	    QtdIntData->dToken |= QTD_OUT_TOKEN;
+	}
 
     //
     // Set length
     //
-    QtdIntData->dToken |= (UINT32)Length << 16;
- 
-    HcDmaMap(HcStruc, EndpointAddress & BIT7, Buffer, Length, 
-             &BufPhyAddr, &BufferMapping);
+	QtdIntData->dToken |= (UINT32)Length << 16;
+	
+	HcDmaMap(HcStruc, EndpointAddress & BIT7, Buffer, Length, 
+		&BufPhyAddr, &BufferMapping);
     //
     // Update buffer pointers
     //
@@ -3245,68 +3526,69 @@ EHCI_InterruptTransfer (
     //
     EhciAddPeriodicQh(HcStruc, QhInt);
 
-    // Set the QH as active
-    QhInt->bActive = TRUE;
+	// Set the QH as active
+	QhInt->bActive = TRUE;
 
     //
     // Now wait for interrupt transaction to be complete;
     // the EHCIProcessInterrupt will set its active flag to FALSE.
     //
-    Timeout = gUsbData->UsbReqTimeOutValue * 100; // makes it number of 10 microsecond units
+	Timeout = gUsbData->wTimeOutValue * 100; // makes it number of 10 microsecond units
 
-    for (Count = 0; Timeout == 0 || Count < Timeout; Count++) {
-      if (!(QtdIntData->dToken & QTD_ACTIVE)) {
-        break;
-      }
-      FixedDelay(10);  // 60 microsec
-    }
-    //Status = EHCIWaitForTransferComplete(HcStruc, fpQHInt, FpDevInfo);
+	for (Count = 0; Timeout == 0 || Count < Timeout; Count++) {
+		if (!(QtdIntData->dToken & QTD_ACTIVE)) {
+			break;
+		}
+		FixedDelay(10);  // 60 microsec
+	}
+    //Status = EHCIWaitForTransferComplete(HcStruc, fpQHInt, fpDevInfo);
 
-    // Remove the QH from periodic schedule
+	// Remove the QH from periodic schedule
     EhciRemovePeriodicQh(HcStruc,(EHCI_QH*)QhInt);
 
     //
     // Check whether the QH stopped or timed out
     //
     BytesTransferred = 0;
-    if (QtdIntData->dToken & QTD_ACTIVE) {
-       USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "EHCI Time-Out\n");
-       gUsbData->UsbLastCommandStatusExtended |= USB_TRNSFR_TIMEOUT;
-    } else if (QtdIntData->dToken & QTD_HALTED) {
-     gUsbData->UsbLastCommandStatusExtended  |= USB_TRSFR_STALLED;
-    } else {
-     BytesTransferred = (UINT16)(Length - ((QtdIntData->dToken &
-        ~(QTD_DATA_TOGGLE)) >> 16));
-     //
-     // Update the data toggle value into the mass info structure
-     //
-     DatToggle = (UINT8)(((QhInt->dToken & QH_DATA_TOGGLE) >> 31) & 1);
-     UsbUpdateDataToggle(DevInfo, EndpointAddress, DatToggle);
-    }
+	if (QtdIntData->dToken & QTD_ACTIVE) {
+	    USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "EHCI Time-Out\n");
+		gUsbData->dLastCommandStatusExtended |= USB_TRNSFR_TIMEOUT;
+	} else if (QtdIntData->dToken & QTD_HALTED) {
+		gUsbData->dLastCommandStatusExtended  |= USB_TRSFR_STALLED;
+	} else {
+		BytesTransferred = (UINT16)(Length - ((QtdIntData->dToken &
+								~(QTD_DATA_TOGGLE)) >> 16));
+		//
+		// Update the data toggle value into the mass info structure
+		//
+		DatToggle = (UINT8)(((QhInt->dToken & QH_DATA_TOGGLE) >> 31) & 1);
+		UsbUpdateDataToggle(DevInfo, EndpointAddress, DatToggle);
+	}
 
-    HcDmaUnmap(HcStruc, BufferMapping);
+	HcDmaUnmap(HcStruc, BufferMapping);
 
-    // Free the allocated QH and qTD
+	// Free the allocated QH and qTD
     EhciMemFree(HcStruc, QhInt, GET_MEM_BLK_COUNT((1 * sizeof(EHCI_QH)) +
-                                                  (1 * sizeof(EHCI_QTD))));
+                                            	  (1 * sizeof(EHCI_QTD))));
 
-    // Service all interrupts
-    EHCI_ProcessInterrupt(HcStruc);
+	// Service all interrupts
+	EHCI_ProcessInterrupt(HcStruc);
 
     return (UINT16)BytesTransferred;
 }
 
 
 /**
-    This function deactivates the polling QH for the requested
+    This function de-activates the polling QH for the requested
     device. The device may be a USB keyboard or USB hub
 
-    @param HcStruc   Pointer to the host controller structure
-    @param DevInfo   Pointer to the device information structure
+    @param HcStruc   - Pointer to the HC structure
+        fpDevInfo   - Pointer to the device information structure
 
-    @retval USB_SUCCESS   On success
-    @retval Others        On fail
+    @retval USB_ERROR on error, USB_SUCCESS on success
+
 **/
+
 UINT8
 EHCI_DeactivatePolling(
     HC_STRUC*       HcStruc,
@@ -3328,44 +3610,44 @@ EHCI_DeactivatePolling(
         return USB_ERROR;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return USB_ERROR;
     }
 
-    if (EhciIsHalted(HcStruc)) {
-        return USB_ERROR;
-    }
+	if (EhciIsHalted(HcStruc)) {
+		return USB_ERROR;
+	}
 
-    // Deactivate iTDs
-    if ((DevInfo->IsocDetails.Endpoint) && (HcStruc->IsocTds != NULL)) {
-        ActivateDeactivateITDs(HcStruc, 0, HcStruc->AsyncListSize * 8, NULL, FALSE);
-    }
+	// Deactivate iTDs
+	if ((DevInfo->IsocDetails.Endpoint) && (HcStruc->IsocTds != NULL)) {
+	    ActivateDeactivateITDs(HcStruc, 0, HcStruc->wAsyncListSize * 8, NULL, FALSE);
+	}
 
     //
     // Get a pointer to the device's QH from the poll QH pointer and remove
     // the polling ED from the schedule
     //
-    PollEd = DevInfo->PollEdPtr;
+    PollEd = DevInfo->fpPollEDPtr;
     if (!PollEd) {
         return USB_ERROR;
     }
 
-    ((EHCI_QH*)PollEd)->bActive = FALSE;
+	((EHCI_QH*)PollEd)->bActive = FALSE;
 
     EhciRemovePeriodicQh(HcStruc,(EHCI_QH*)PollEd); 
 
-    UsbUpdateDataToggle(DevInfo, DevInfo->IntInEndpoint, 
-    (UINT8)((((EHCI_QH*)PollEd)->dToken & QH_DATA_TOGGLE) >> 31));
+	UsbUpdateDataToggle(DevInfo, DevInfo->IntInEndpoint, 
+		(UINT8)((((EHCI_QH*)PollEd)->dToken & QH_DATA_TOGGLE) >> 31));
 
     EhciMemFree(HcStruc, PollEd, GET_MEM_BLK_COUNT(sizeof(EHCI_QH) + sizeof(EHCI_QTD)));
-    DevInfo->PollEdPtr  = NULL;
-    DevInfo->PollTdPtr  = NULL;
+    DevInfo->fpPollEDPtr  = NULL;
+	DevInfo->fpPollTDPtr	= NULL;
 
-    if (DevInfo->PollDataBuffer) {
-        EhciMemFree(HcStruc, DevInfo->PollDataBuffer, 
-                    GET_MEM_BLK_COUNT(DevInfo->PollingLength)); 
-        DevInfo->PollDataBuffer = 0;
-    }
+	if (DevInfo->fpPollDataBuffer) {
+		EhciMemFree(HcStruc, DevInfo->fpPollDataBuffer, 
+						GET_MEM_BLK_COUNT(DevInfo->PollingLength)); 
+    	DevInfo->fpPollDataBuffer = 0;
+	}
 
     return USB_SUCCESS;
 }
@@ -3375,11 +3657,10 @@ EHCI_DeactivatePolling(
     This function activates the polling QH for the requested
     device. The device may be a USB keyboard or USB hub
 
-    @param HcStruc   Pointer to the host controller structure
-    @param DevInfo   Pointer to the device information structure
+    @param HcStruc   - Pointer to the HC structure
+        fpDevInfo   - Pointer to the device information structure
 
-    @retval USB_SUCCESS Success to activate the polling.
-    @retval Others      Fail to activates the polling.
+    @retval USB_ERROR on error, USB_SUCCESS on success
 
     @note  For the keyboard device this routine allocates TDRepeat
               also, if it is not already allocated. This routine allocate
@@ -3387,6 +3668,7 @@ EHCI_DeactivatePolling(
               and to 1024ms schedule for hubs.
 
 **/
+
 UINT8
 EHCI_ActivatePolling(
     HC_STRUC* HcStruc,
@@ -3398,11 +3680,12 @@ EHCI_ActivatePolling(
     UINT32      Tmp;
     UINT32      Tmp1;
     EFI_STATUS  EfiStatus;
+    UINT8       *PolllEdPhyAddr;
     UINT8       *PollTdPhyAddr;
     UINT8       *PollDataBufferPhyAddr;
 
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "EHCI_AP dev type %d, adr %d, ep %x, maxp %x, speed %x, interval %d\n",
-        DevInfo->DeviceType, DevInfo->DeviceAddress, DevInfo->IntInEndpoint, DevInfo->IntInMaxPkt, DevInfo->EndpointSpeed, DevInfo->PollInterval);
+        DevInfo->bDeviceType, DevInfo->bDeviceAddress, DevInfo->IntInEndpoint, DevInfo->IntInMaxPkt, DevInfo->bEndpointSpeed, DevInfo->bPollInterval);
 
     EfiStatus = UsbHcStrucValidation(HcStruc);
     
@@ -3416,18 +3699,18 @@ EHCI_ActivatePolling(
         return USB_ERROR;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return USB_ERROR;
     }
     
-    if (EhciIsHalted(HcStruc)) {
-      return USB_ERROR;
-    }
+	if (EhciIsHalted(HcStruc)) {
+		return USB_ERROR;
+	}
 
     //
     // Allocate a QH/qTD for polling QH & qTD
     //
-    PollEd = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT(
+	PollEd = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT(
                                   sizeof(EHCI_QH)+sizeof(EHCI_QTD)));
     if (!PollEd)
     {
@@ -3437,10 +3720,11 @@ EHCI_ActivatePolling(
     //
     // Save the pointers in DeviceInfo structure
     //
-    DevInfo->PollEdPtr  = (UINT8*)PollEd;
+    DevInfo->fpPollEDPtr  = (UINT8*)PollEd;
     PollTd    = (EHCI_QTD*)((UINTN)PollEd + sizeof(EHCI_QH));
-    DevInfo->PollTdPtr  = (UINT8*)PollTd;
+    DevInfo->fpPollTDPtr  = (UINT8*)PollTd;
 
+    PolllEdPhyAddr = EhciMemGetPhyAddr(HcStruc, PollEd);
     PollTdPhyAddr = EhciMemGetPhyAddr(HcStruc, PollTd);
 
 //
@@ -3457,18 +3741,21 @@ EHCI_ActivatePolling(
     //
     PollEd->dAltNextqTDPtr    = EHCI_TERMINATE;
     PollEd->dLinkPointer      = EHCI_TERMINATE;
-  
-    PollEd->DevInfoIndex = ((UINTN)DevInfo - (UINTN)&gUsbDataList->DevInfoTable[0])/sizeof(DEV_INFO);
+
+    //
+    // Set the device info pointer in the QH
+    //
+    PollEd->fpDevInfoPtr  = (UINT8*)DevInfo;
 
     //
     // Get Device address & Endpoint
     //
-    Tmp = ((UINT32)DevInfo->DeviceAddress)  |
+    Tmp = ((UINT32)DevInfo->bDeviceAddress)  |
                     ((UINT32)(DevInfo->IntInEndpoint & 0xF) << 8);
 
-    Tmp |= ((UINT32)DevInfo->IntInMaxPkt) << 16; // Set max packet size 
+    Tmp |= ((UINT32)DevInfo->IntInMaxPkt) << 16; // Set max packet size	//(EIP54782)
 
-    Tmp1   = (UINT32)DevInfo->EndpointSpeed;    // 00/01/10 for HI/LO/FULL
+    Tmp1   = (UINT32)DevInfo->bEndpointSpeed;    // 00/01/10 for HI/LO/FULL
 
     //
     // Assume as a high speed device
@@ -3500,8 +3787,8 @@ EHCI_ActivatePolling(
     // Set a bit in interrupt mask
     //
     PollEd->dEndPntCap    |= (BIT0 + QH_ONE_XFER);
-    PollEd->Interval = EhciTranslateInterval(DevInfo->EndpointSpeed, 
-                                DevInfo->PollInterval);
+    PollEd->Interval = EhciTranslateInterval(DevInfo->bEndpointSpeed, 
+                                DevInfo->bPollInterval);
 
     //
     // Set the data toggle
@@ -3516,7 +3803,7 @@ EHCI_ActivatePolling(
 //   Data Toggle = QTD_DATA0_TOGGLE,
 //   Error Count = QTD_THREE_ERRORS,
 //   Status code = QTD_ACTIVE
-// The buffer pointers field will point to the FpBuffer buffer
+// The buffer pointers field will point to the fpBuffer buffer
 //   which was before initialized to contain a DeviceRequest struc.
 // The dNextqTDPtr field will point to the qTDControlSetup
 // The dAltNextqTDPtr field will be set to EHCI_TERMINATE
@@ -3529,11 +3816,11 @@ EHCI_ActivatePolling(
     // Set length
     //
     PollTd->dToken |= (UINT32)DevInfo->PollingLength << 16;
-    DevInfo->PollDataBuffer = EhciMemAlloc(HcStruc, 
-                                             GET_MEM_BLK_COUNT(DevInfo->PollingLength)); 
-    ASSERT(DevInfo->PollDataBuffer);
+    DevInfo->fpPollDataBuffer = EhciMemAlloc(HcStruc, 
+									GET_MEM_BLK_COUNT(DevInfo->PollingLength)); 
+	ASSERT(DevInfo->fpPollDataBuffer);
 
-    PollDataBufferPhyAddr = EhciMemGetPhyAddr(HcStruc, DevInfo->PollDataBuffer);
+    PollDataBufferPhyAddr = EhciMemGetPhyAddr(HcStruc, DevInfo->fpPollDataBuffer);
 
     //
     // Update buffer pointers
@@ -3549,7 +3836,7 @@ EHCI_ActivatePolling(
 
     EhciAddPeriodicQh(HcStruc,PollEd); 
 
-    PollEd->CallBackIndex = USB_InstallCallBackFunction(EhciPollingTDCallback);
+    PollEd->bCallBackIndex = USB_InstallCallBackFunction(EhciPollingTDCallback);
     PollEd->bActive = TRUE;
 
     return  USB_SUCCESS;
@@ -3557,22 +3844,24 @@ EHCI_ActivatePolling(
 
 
 /**
-    This function disables the keyboard repeat.
+    This function disables the keyboard repeat rate logic by
+    enabling the repeat TD
 
-    @param HcStruc        Pointer to the host controller structure
+    @param HcStruc   - Pointer to the HCStruc structure
 
-    @retval USB_SUCCESS   Success to disable keyboard repeat.
-    @retval Others        On fail.
+    @retval VOID
+
 **/
+
 UINT8
 EHCI_DisableKeyRepeat (
-   HC_STRUC *HcStruc
+	HC_STRUC	*HcStruc
 )
 {
     EHCI_DESC_PTRS  *DescPtr;
-    EHCI_QH         *RepeatQh;
+	EHCI_QH		    *RepeatQh;
     EFI_STATUS      EfiStatus;
-    UINT8           *MemBlockEnd = (UINT8*)((UINTN)gUsbDataList->MemBlockStart + (gUsbData->MemPages << 12));
+    UINT8           *MemBlockEnd = gUsbData->fpMemBlockStart + (gUsbData->MemPages << 12);
 
     EfiStatus = UsbHcStrucValidation(HcStruc);
     
@@ -3580,34 +3869,39 @@ EHCI_DisableKeyRepeat (
         return USB_ERROR;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return USB_ERROR;
     }
     
-   if (EhciIsHalted(HcStruc)) {
-     return USB_ERROR;
-   }
+	if (EhciIsHalted(HcStruc)) {
+		return USB_ERROR;
+	}
 
-    DescPtr = HcStruc->DescPtrs.EhciDescPtrs;
+    DescPtr = HcStruc->stDescPtrs.fpEHCIDescPtrs;
 
     if (DescPtr == NULL) {
         return USB_ERROR;
     }
 
-
-    if (((UINTN)DescPtr < (UINTN)gUsbDataList->MemBlockStart) ||
-        (((UINTN)DescPtr + sizeof(EHCI_DESC_PTRS)) > (UINTN)MemBlockEnd)) {
+#if USB_RUNTIME_DRIVER_IN_SMM
+    if (((UINT8*)DescPtr < gUsbData->fpMemBlockStart) ||
+        ((UINT8*)(DescPtr + sizeof(EHCI_DESC_PTRS)) > MemBlockEnd)) {
         return USB_ERROR;
     }
+#endif
+    
     RepeatQh = DescPtr->fpQHRepeat;
 
     if (RepeatQh == NULL) {
         return USB_ERROR;
     }
-    if (((UINTN)RepeatQh < (UINTN)gUsbDataList->MemBlockStart) ||
-        (((UINTN)RepeatQh + sizeof(EHCI_QH)) > (UINTN)MemBlockEnd)) {
+    
+#if USB_RUNTIME_DRIVER_IN_SMM
+    if (((UINT8*)RepeatQh < gUsbData->fpMemBlockStart) ||
+        ((UINT8*)(RepeatQh + sizeof(EHCI_QH)) > MemBlockEnd)) {
         return USB_ERROR;
     }
+#endif
 
     RepeatQh->dTokenReload = ((UINT32)8 << 16) | QTD_IN_TOKEN | QTD_ONE_ERROR;
     RepeatQh->bActive = FALSE;
@@ -3616,25 +3910,25 @@ EHCI_DisableKeyRepeat (
 }
 
 /**
-   This function enables the keyboard repeat.
-   
-    @param HcStruc        Pointer to the host controller structure
+    This function disables the keyboard repeat rate logic by
+    enabling the repeat TD
 
-    @retval USB_SUCCESS   Success to disable keyboard repeat.
-    @retval Others        On fail.
+    @param HcStruc   Pointer to the HCStruc structure
+
+    @retval USB_SUCCESS or USB_ERROR
 
 **/
 
 UINT8
 EHCI_EnableKeyRepeat (
-   HC_STRUC* HcStruc
+	HC_STRUC* HcStruc
 )
 {
     EHCI_DESC_PTRS      *DescPtr;
-    EHCI_QH             *RepeatQh;
-    EHCI_QTD            *RepeatQtd;
+	EHCI_QH		        *RepeatQh;
+	EHCI_QTD            *RepeatQtd;
     EFI_STATUS          EfiStatus;
-    UINT8               *MemBlockEnd = (UINT8*)((UINTN)gUsbDataList->MemBlockStart + (gUsbData->MemPages << 12));
+    UINT8               *MemBlockEnd = gUsbData->fpMemBlockStart + (gUsbData->MemPages << 12);
 
     EfiStatus = UsbHcStrucValidation(HcStruc);
     
@@ -3642,70 +3936,71 @@ EHCI_EnableKeyRepeat (
         return USB_ERROR;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_RUNNING)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_RUNNING)) {
         return USB_ERROR;
     }
+    
+	if (EhciIsHalted(HcStruc)) {
+		return USB_ERROR;
+	}
 
-    if (EhciIsHalted(HcStruc)) {
-        return USB_ERROR;
-    }
-
-    DescPtr = HcStruc->DescPtrs.EhciDescPtrs;
+    DescPtr = HcStruc->stDescPtrs.fpEHCIDescPtrs;
 
     if (DescPtr == NULL) {
         return USB_ERROR;
     }
 
-
-    if (((UINTN)DescPtr < (UINTN)gUsbDataList->MemBlockStart) ||
-        (((UINTN)DescPtr + sizeof(EHCI_DESC_PTRS)) > (UINTN)MemBlockEnd)) {
+#if USB_RUNTIME_DRIVER_IN_SMM
+    if (((UINT8*)DescPtr < gUsbData->fpMemBlockStart) ||
+        ((UINT8*)(DescPtr + sizeof(EHCI_DESC_PTRS)) > MemBlockEnd)) {
         return USB_ERROR;
     }
-
+#endif
 
     RepeatQh = DescPtr->fpQHRepeat;
 
-    if (RepeatQh == NULL) {
+	if (RepeatQh == NULL) {
+		return USB_ERROR;
+	}
+    
+#if USB_RUNTIME_DRIVER_IN_SMM
+    if (((UINT8*)RepeatQh < gUsbData->fpMemBlockStart) ||
+        (((UINT8*)RepeatQh + sizeof(EHCI_QH)) > MemBlockEnd)) {
         return USB_ERROR;
     }
+#endif
 
-    if (((UINTN)RepeatQh < (UINTN)gUsbDataList->MemBlockStart) ||
-        (((UINTN)RepeatQh + sizeof(EHCI_QH)) > (UINTN)MemBlockEnd)) {
-        return USB_ERROR;
-    }
-
-
-    if ((RepeatQh->dTokenReload & QTD_ACTIVE) == 0) {
-        RepeatQtd = DescPtr->fpqTDRepeat;
+	if ((RepeatQh->dTokenReload & QTD_ACTIVE) == 0) {
+		RepeatQtd = DescPtr->fpqTDRepeat;
         if (RepeatQtd == NULL) {
             return USB_ERROR;
         }
-
-        if (((UINTN)RepeatQtd < (UINTN)gUsbDataList->MemBlockStart) ||
-            (((UINTN)RepeatQtd + sizeof(EHCI_QTD)) > (UINTN)MemBlockEnd)) {
+#if USB_RUNTIME_DRIVER_IN_SMM
+        if (((UINT8*)RepeatQtd < gUsbData->fpMemBlockStart) ||
+            (((UINT8*)RepeatQtd + sizeof(EHCI_QTD)) > MemBlockEnd)) {
             return USB_ERROR;
         }
+#endif
+		RepeatQh->dTokenReload = ((UINT32)8 << 16) | QTD_IN_TOKEN | 
+								QTD_ONE_ERROR | QTD_IOC_BIT | QTD_ACTIVE;
 
-        RepeatQh->dTokenReload = ((UINT32)8 << 16) | QTD_IN_TOKEN | 
-                                  QTD_ONE_ERROR | QTD_IOC_BIT | QTD_ACTIVE;
+		// Update buffer pointers
+		EHCISetQTDBufferPointers(RepeatQtd,
+						&RepeatQh->aDataBuffer[0], 8);
+		
+		// Re-init the QH pointers
+		RepeatQh->dCurqTDPtr = 0;
+		RepeatQh->dAltNextqTDPtr = EHCI_TERMINATE;
+		RepeatQh->dNextqTDPtr = (UINT32)(UINTN)RepeatQtd;
+		
+		//
+		// Restart the qTD
+		//
+		RepeatQh->dToken = 0;
+		RepeatQtd->dToken = RepeatQh->dTokenReload;
 
-        // Update buffer pointers
-        EHCISetQTDBufferPointers(RepeatQtd,
-                                 &RepeatQh->aDataBuffer[0], 8);
-  
-        // Re-init the QH pointers
-        RepeatQh->dCurqTDPtr = 0;
-        RepeatQh->dAltNextqTDPtr = EHCI_TERMINATE;
-        RepeatQh->dNextqTDPtr = (UINT32)(UINTN)RepeatQtd;
-  
-        //
-        // Restart the qTD
-        //
-        RepeatQh->dToken = 0;
-        RepeatQtd->dToken = RepeatQh->dTokenReload;
-
-        RepeatQh->bActive = TRUE;
-    }
+		RepeatQh->bActive = TRUE;
+	}
     return USB_SUCCESS;
 }
 
@@ -3713,12 +4008,13 @@ EHCI_EnableKeyRepeat (
 /**
     This function resets the EHCI controller
 
-    @param HcStruc        Pointer to the host controller structure
+    @param Pointer to the HCStruc structure
 
-    @retval USB_SUCCESS   Success to reset the controller.
-    @retval Others        On fail.
+    @retval USB_SUCCESS     HC successfully reset
+        USB_ERROR       Error, error log is updated
 
 **/
+
 UINT8
 EHCIResetHC(
     HC_STRUC* HcStruc
@@ -3759,19 +4055,45 @@ EHCIResetHC(
     return  USB_ERROR;
 }
 
+/*
+void printlist(HC_STRUC *HcStruc)
+{
+    UINT16      Index;
+    UINT32      *PrevPtr;
+    UINT32      LinkPtr;
+    EHCI_QH     *Qh;
+
+    for (Index = 0; Index < HcStruc->wAsyncListSize; Index++) {
+        PrevPtr = &HcStruc->fpFrameList[Index];
+        LinkPtr = *PrevPtr;
+
+        USB_DEBUG(DEBUG_INFO, 3, "%04d: %x->", Index, PrevPtr);
+
+        while (!(LinkPtr & EHCI_TERMINATE)){
+            USB_DEBUG(DEBUG_INFO, 3, "%x->", LinkPtr);
+            Qh = (EHCI_QH*)(LinkPtr & EHCI_POINTER_MASK);
+            PrevPtr = &Qh->dLinkPointer;
+            LinkPtr = *PrevPtr; 
+        }
+        USB_DEBUG(DEBUG_INFO, 3, "%x\n", LinkPtr);
+    }
+} 
+*/
+
 /**
     This function initializes the periodic schedules for the
     EHCI host controller
 
-    @param HcStruc        Pointer to the host controller structure
-    @param MemBase        Memory base address
+    @param HcStruc   - HCStruc for the controller
+        dMemAddr    - Membase address
 
-    @retval USB_SUCCESS   Success to initialize the periodic schedules.
-    @retval Others        On fail.
+    @retval USB_ERROR   On error
+        USB_SUCCESS On success
 
     @note  This routine creates 8ms and 32ms schedules
 
 **/
+
 UINT8
 EHCIInitializePeriodicSchedule(
     HC_STRUC*   HcStruc,
@@ -3793,18 +4115,18 @@ EHCIInitializePeriodicSchedule(
     //
     // Save the value in the HC struc
     //
-    HcStruc->DescPtrs.EhciDescPtrs = DescPtr;
+    HcStruc->stDescPtrs.fpEHCIDescPtrs = DescPtr;
 
     EhciAddIsochTDs(HcStruc);    // This must be called before any other periodic scheduling
 
     // Allocate QH/qTD for PeriodicQh
     Ptr = EhciMemAlloc(HcStruc, GET_MEM_BLK_COUNT((1 * sizeof(EHCI_QH))+
-                                                  (0 * sizeof(EHCI_QTD))));
+													(0 * sizeof(EHCI_QTD))));
     if (Ptr == NULL) {
         USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_4, "Schedule of EHCI QH alloc failed.\n");
         return USB_ERROR;
     }
- 
+	
     // Save the 1 QH in appropriate location
     DescPtr->PeriodicQh = (EHCI_QH*)Ptr;
 
@@ -3826,10 +4148,12 @@ EHCIInitializePeriodicSchedule(
 /**
     This function initializes the queue head with default values
 
-    @param Qh    Pointer to queue head
-    @retval None
+    @param fpQH    Pointer to queue head
+
+    @retval VOID
 
 **/
+
 VOID
 EHCIInitializeQueueHead(
     EHCI_QH *Qh
@@ -3855,18 +4179,19 @@ EHCIInitializeQueueHead(
     This function starts the periodic schedule for the
     EHCI host controller
 
-    @param HcStruc         Pointer to the host controller structure
+    @param Pointer to HcStruc
 
-    @retval USB_SUCCESS    Success to start the periodic schedule
-    @retval Others         On fail
+    @retval USB_ERROR   On error
+            USB_SUCCESS On success
 
 **/
+
 UINT8
 EHCIStartPeriodicSchedule(
     HC_STRUC* HcStruc
 )
 {
-    UINT16  Count;
+    UINT16  i;
     //
     // Start periodic schedule
     //
@@ -3875,7 +4200,7 @@ EHCIStartPeriodicSchedule(
     //
     // Make sure the HC started the schedules
     //
-    for (Count = 0; Count < 1000; Count++) {
+    for (i = 0; i < 1000; i++) {
         if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_PER_SCHED_STATUS) {
             break;
         }
@@ -3892,10 +4217,10 @@ EHCIStartPeriodicSchedule(
     This function stops the periodic schedule for the
     EHCI USB host controller
 
-    @param HcStruc        Pointer to the host controller structure
+    @param HcStruc for the controller
 
-    @retval USB_SUCCESS   Success to stop the periodic schedule
-    @retval Others        On fail
+    @retval USB_ERROR   On error
+            USB_SUCCESS On success
 
 **/
 
@@ -3904,7 +4229,7 @@ EHCIStopPeriodicSchedule(
     HC_STRUC* HcStruc
 )
 {
-    UINT16  Count;
+    UINT16  i;
     //
     // Stop periodic schedule
     //
@@ -3913,7 +4238,7 @@ EHCIStopPeriodicSchedule(
     //
     // Make sure the HC stopped the schedules
     //
-    for (Count = 0; Count < 1000; Count++) {
+    for (i = 0; i < 1000; i++) {
         if (!(HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_PER_SCHED_STATUS)) {
             break;
         }
@@ -3929,11 +4254,10 @@ EHCIStopPeriodicSchedule(
 /**
     This function starts the asynchronous schedule
 
+    @param Pointer to HcStruc
 
-    @param HcStruc         Pointer to the host controller structure
-
-    @retval USB_SUCCESS    Success to start the asynchronous schedule
-    @retval Others         On fail
+    @retval USB_ERROR   On error
+            USB_SUCCESS On success
 
 **/
 
@@ -3942,7 +4266,7 @@ EHCIStartAsyncSchedule(
     HC_STRUC* HcStruc
 )
 {
-    UINT16  Count;
+    UINT16  i;
     //
     // Start the Async schedule
     //
@@ -3951,7 +4275,7 @@ EHCIStartAsyncSchedule(
     //
     // Make sure the HC started the async. execution
     //
-    for (Count = 0; Count < 1000; Count++) {
+    for (i = 0; i < 1000; i++) {
         if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_ASYNC_SCHED_STATUS) {
             break;
         }
@@ -3964,7 +4288,7 @@ EHCIStartAsyncSchedule(
         HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
         // The Host Controller must halt within 16 micro-frames after 
         // software clears the Run bit. 
-        for (Count = 0; Count < 16; Count++) {
+        for (i = 0; i < 16; i++) {
             if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
                 break;
             }
@@ -3981,10 +4305,10 @@ EHCIStartAsyncSchedule(
     This function stops the asynchronous transfer and sets the
     asynchronous pointer to null
 
-    @param HcStruc        Pointer to the host controller structure
+    @param Pointer to HcStruc
 
-    @retval USB_SUCCESS   Success to stop the asynchronous schedule
-    @retval Others        On fail
+    @retval USB_ERROR   On error
+            USB_SUCCESS On success
 
 **/
 
@@ -3993,11 +4317,11 @@ EHCIStopAsyncSchedule(
     HC_STRUC* HcStruc
 )
 {
-    UINT16  Count;
+    UINT16  i;
     
-    if (!(HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_ASYNC_SCHED_STATUS)) {
-      return USB_SUCCESS;
-    }
+	if (!(HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_ASYNC_SCHED_STATUS)) {
+	    return USB_SUCCESS;
+	}
 
     //
     // Stop periodic schedule
@@ -4007,7 +4331,7 @@ EHCIStopAsyncSchedule(
     //
     // Make sure the HC stopped the async. execution
     //
-    for (Count = 0; Count < 1000; Count++) {
+    for (i = 0; i < 1000; i++) {
         if (!(HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_ASYNC_SCHED_STATUS)) {
             break;
         }
@@ -4020,7 +4344,7 @@ EHCIStopAsyncSchedule(
         HcClearOpReg(HcStruc, EHCI_USBCMD, EHCI_RUNSTOP);
         // The Host Controller must halt within 16 micro-frames after 
         // software clears the Run bit. 
-        for (Count = 0; Count < 16; Count++) {
+        for (i = 0; i < 16; i++) {
             if (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) {
                 break;
             }
@@ -4032,12 +4356,51 @@ EHCIStopAsyncSchedule(
     return USB_SUCCESS;
 }
 
+
+//#if EHCI_ASYNC_BELL_SUPPORT
+/**
+    This function stops the asynchronous transfer and sets the
+    asynchronous pointer to null
+
+    @param Pointer to HCStruc
+        Pointer to the Queue head that has to be removed
+        from the asynchronous schedule
+
+    @retval VOID
+
+**/
+/*
+VOID
+EHCIRemoveQHFromAsyncList(
+    HC_STRUC    *HcStruc,
+    EHCI_QH     *Qh
+)
+{
+    //
+    // Stop the Async transfer
+    //
+    EHCIStopAsyncSchedule(HcStruc);
+
+    //
+    // Remove the queue head from the Async list
+    //
+    gUsbData->fpQHAsyncXfer->dLinkPointer = Qh->dLinkPointer;
+
+    //
+    // Pointer is advanced. The queue head is totally removed from the list!
+    //
+}
+*/
+//#endif
+
+
 /**
     This function adds Isochronous TDs to the frame list
 
-    @param HcStruc   Pointer to the host controller structure
+    @param Host Controller data structure
 
-    @retval None
+    @retval VOID
+
 **/
 VOID EhciAddIsochTDs(
     HC_STRUC *HcStruc
@@ -4055,9 +4418,9 @@ VOID EhciAddIsochTDs(
 
     USB_DEBUG(DEBUG_INFO, 3, "EHCI add ISOC TDs: ITD %x\n", Itd);
 
-    for (Index = 0; Index < HcStruc->AsyncListSize; Index++)
+    for (Index = 0; Index < HcStruc->wAsyncListSize; Index++)
     {
-        Ptr = (UINT8*)&HcStruc->FrameList[Index];
+        Ptr = (UINT8*)&HcStruc->fpFrameList[Index];
         Itd->NextLinkPointer = *((UINT32*)(UINTN)Ptr);
         *((UINT32*)(UINTN)Ptr) = (UINT32)(UINTN)Itd;
         Itd++;
@@ -4066,12 +4429,14 @@ VOID EhciAddIsochTDs(
 
 /**
     This function adds a QH to the frame list
-    @param HcStruc        Pointer to the host controller structure
-    @param NewQh          Pointer to the QH to be added        
 
-    @retval USB_SUCCESS   Success to add a QH to the frame list.
-    @retval Others        Fail to add a QH to the frame list.
+    @param Pointer to the QH to be added
+        Absolute pointer to the frame list
+
+    @retval VOID
+
 **/
+
 UINT8
 EhciAddPeriodicQh(
     HC_STRUC    *HcStruc,
@@ -4092,19 +4457,20 @@ EhciAddPeriodicQh(
 
     NewQhPhyAddr = EhciMemGetPhyAddr(HcStruc, NewQh);
  
-    for (Index = HcStruc->SplitPeriodicIndex; Index < HcStruc->AsyncListSize; Index += NewQh->Interval) {
-        PrevPtr = &HcStruc->FrameList[Index];
+    for (Index = HcStruc->SplitPeriodicIndex; Index < HcStruc->wAsyncListSize; Index += NewQh->Interval) {
+        PrevPtr = &HcStruc->fpFrameList[Index];
         if (HcStruc->IsocTds != NULL) {
             PrevPtr = (UINT32*)(UINTN)*PrevPtr; // leave ITD on the top of the list
         }
         LinkPtr = *PrevPtr; 
         while (!(LinkPtr & EHCI_TERMINATE)){
             Qh = (EHCI_QH*)(LinkPtr & EHCI_POINTER_MASK);
-
-            Status = AmiUsbValidateMemoryBuffer((VOID*)Qh, sizeof(EHCI_QH));
-            if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+            Status = AmiValidateMemoryBuffer((VOID*)Qh, sizeof(EHCI_QH));
+            if (EFI_ERROR(Status)) {
                 return USB_ERROR;
             }
+#endif
             QhHostAddr = EhciMemGetHostAddr(HcStruc, Qh);
             if (QhHostAddr->Interval <= NewQh->Interval) {
                 break;
@@ -4116,10 +4482,12 @@ EhciAddPeriodicQh(
         if (!(LinkPtr & EHCI_TERMINATE) && (QhHostAddr == NewQh)) {
             continue;
         }
-        Status = AmiUsbValidateMemoryBuffer((VOID*)PrevPtr, sizeof(UINT32));
-        if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+        Status = AmiValidateMemoryBuffer((VOID*)PrevPtr, sizeof(UINT32));
+        if (EFI_ERROR(Status)) {
             return USB_ERROR;
         }
+#endif
         NewQh->dLinkPointer = *PrevPtr;
         *PrevPtr = (UINT32)((UINTN)NewQhPhyAddr | EHCI_QUEUE_HEAD);
     }
@@ -4136,12 +4504,12 @@ EhciAddPeriodicQh(
 
 /**
     This function removes a QH from the frame list
-    
-    @param HcStruc        Pointer to the host controller structure
-    @param RetiredQh      Pointer to the QH to be removed
-    
-    @retval USB_SUCCESS   Success to remove the QH from the frame list.
-    @retval Others        Fail to remove the QH from the frame list.
+
+    @param Pointer to the QH to be added
+        Absolute pointer to the frame list
+
+    @retval VOID
+
 **/
 
 UINT8
@@ -4163,16 +4531,18 @@ EhciRemovePeriodicQh (
 
     EHCIStopPeriodicSchedule(HcStruc);
 
-    for (Index = 0; Index < HcStruc->AsyncListSize; Index++) {
-        PrevPtr = &HcStruc->FrameList[Index];
+    for (Index = 0; Index < HcStruc->wAsyncListSize; Index++) {
+        PrevPtr = &HcStruc->fpFrameList[Index];
         LinkPtr = *PrevPtr; 
  
         while (!(LinkPtr & EHCI_TERMINATE)){
             Qh = (EHCI_QH*)(LinkPtr & EHCI_POINTER_MASK);
-            Status = AmiUsbValidateMemoryBuffer((VOID*)Qh, sizeof(EHCI_QH));
-            if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+            Status = AmiValidateMemoryBuffer((VOID*)Qh, sizeof(EHCI_QH));
+            if (EFI_ERROR(Status)) {
                 return USB_ERROR;
             }
+#endif
             QhHostAddr = EhciMemGetHostAddr(HcStruc, Qh);
             if (QhHostAddr == RetiredQh) {
                 break;
@@ -4184,10 +4554,12 @@ EhciRemovePeriodicQh (
         if (LinkPtr & EHCI_TERMINATE) {
             continue;
         }
-        Status = AmiUsbValidateMemoryBuffer((VOID*)PrevPtr, sizeof(UINT32));
-        if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+        Status = AmiValidateMemoryBuffer((VOID*)PrevPtr, sizeof(UINT32));
+        if (EFI_ERROR(Status)) {
             return USB_ERROR;
         }
+#endif
         *PrevPtr = RetiredQh->dLinkPointer;
     }
 
@@ -4203,11 +4575,12 @@ EhciRemovePeriodicQh (
     This function will set the 5 buffer pointer in the qTD
     appropriately depending upon the input size
 
-    @param Qtd     Pointer to the qTD
-    @param Buf     32bit absolute buffer pointer
-    @param Size    Amount of data to be transferred
+    @param fpQtd   - Pointer to the qTD
+        fpBuf   - 32bit absolute buffer pointer
+        wSize   - Amount of data to be transferred
 
-    @retval None
+    @retval VOID
+
 **/
 
 VOID
@@ -4279,12 +4652,11 @@ EHCISetQTDBufferPointers(
     This function waits until the requested QH completes or
     the transaction time-out
 
-    @param HcStruc        Pointer to the host controller structure
-    @param Qh             Pointer to the QH which has to be completed
-    @param DevInfo        Pointer to the DevInfo structure
-    
-    @retval USB_SUCCESS   Success
-    @retval Others        On fail
+    @param HcStruc   - Pointer to HCStruc of the host controller
+        fpQH        - Pointer to the QH which has to be completed
+
+    @retval USB_ERROR   On error
+        USB_SUCCESS On success
 
 **/
 
@@ -4296,65 +4668,67 @@ EHCIWaitForTransferComplete(
 
 )
 {
-    UINT32 Count;
-    UINT32 CountLimit = gUsbData->UsbReqTimeOutValue * 100; // makes it number of microsecond units
-    UINT16 Status = USB_ERROR;
+    UINT32 Count ;
+    UINT32 CountLimit = gUsbData->wTimeOutValue * 100; // makes it number of microsecond units
+	UINT16 Status = USB_ERROR;
 
     //
     // Check status change loop iteration
     //
-    for (Count = 0; !CountLimit || Count < CountLimit; Count++) {
+    for(Count = 0; !CountLimit || Count < CountLimit; Count++)
+    {
         EHCIProcessQH(HcStruc, Qh);
         if (Qh->bActive == FALSE) {
             Status = USB_SUCCESS;
-            break;
+			break;
         }
         FixedDelay(10);  // 60 microsec
     }
 
-    if (Qh->bActive == TRUE) {
-       // Set the QH as in-active
-       Qh->bActive = FALSE;
-       Status = USB_ERROR;
-       USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "EHCI Time-Out\n");
-     }
+	if(Qh->bActive == TRUE) {
+		// Set the QH as in-active
+	    Qh->bActive = FALSE;
+		Status = USB_ERROR;
+    	USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "EHCI Time-Out\n");
+	}
 
-    // Service all interrupts
-    EHCI_ProcessInterrupt(HcStruc);
- 
+	// Service all interrupts
+	EHCI_ProcessInterrupt(HcStruc);
+	
     return Status;
 }
 
 
 /**
     This function whether all the TD's in the QH is completed
-    
-    @param HcStruc       Pointer to the host controller structure
-    @param Qh            Pointer to the QH which has to be completed
 
-    @retval USB_SUCCESS  On success
-    @retval Others       On fail
+    @param fpQH    - Pointer to the QH which has to be completed
+
+    @retval USB_ERROR   On error
+        USB_SUCCESS On success
 
 **/
+
 UINT8
 EHCIProcessQH(
-    HC_STRUC *HcStruc,
-    EHCI_QH  *Qh
+	HC_STRUC	*HcStruc,
+	EHCI_QH		*Qh
 )
 {
-    EHCI_QTD    *Qtd = Qh->fpFirstqTD;
+    EHCI_QTD *Qtd = Qh->fpFirstqTD;
     EFI_STATUS  Status = EFI_SUCCESS;
     EHCI_QTD    *QtdHostAddr;
-    DEV_INFO    *DevInfoInQh = NULL;
 
     for (;;) {
         if (Qtd == NULL) {
             return USB_ERROR;
         }
-        Status = AmiUsbValidateMemoryBuffer((VOID*)Qtd, sizeof(EHCI_QTD));
-        if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+        Status = AmiValidateMemoryBuffer((VOID*)Qtd, sizeof(EHCI_QTD));
+        if (EFI_ERROR(Status)) {
             return USB_ERROR;
         }
+#endif
         //
         // Check whether the qTD is active, if so. Exit!
         //
@@ -4374,7 +4748,7 @@ EHCIProcessQH(
             // Set the QH as in-active
             //
             Qh->bActive = FALSE;
-            break;
+			break;
         }
         //
         // qTD is not active and not halted. That is it is completed successfully
@@ -4396,59 +4770,46 @@ EHCIProcessQH(
         Qtd = QtdHostAddr;
     }
 
-    if ((Qh->CallBackIndex) && (Qh->CallBackIndex <= MAX_CALLBACK_FUNCTION)) {
-        if (gAmiUsbCallBackFunTbl[Qh->CallBackIndex - 1 + CALLBACK_FUNCTION_START]) {
-            if ((Qh->DevInfoIndex>0)&&(Qh->DevInfoIndex<gUsbData->MaxDevCount))
-                DevInfoInQh = &gUsbDataList->DevInfoTable[Qh->DevInfoIndex];
-            (*gAmiUsbCallBackFunTbl[Qh->CallBackIndex - 1 + CALLBACK_FUNCTION_START])
-                (HcStruc, DevInfoInQh, (UINT8*)Qh, NULL, 0);
-        }
-    }
+	if ((Qh->bCallBackIndex) && (Qh->bCallBackIndex <= MAX_CALLBACK_FUNCTION)) {
+		if (gUsbData->aCallBackFunctionTable[Qh->bCallBackIndex - 1 + CALLBACK_FUNCTION_START]) {
+            if ((gUsbData->aCallBackFunctionTable[Qh->bCallBackIndex - 1 + CALLBACK_FUNCTION_START]) 
+                != EhciRepeatTDCallback) {
+                Status = UsbDevInfoValidation((DEV_INFO*)Qh->fpDevInfoPtr);
 
-    return  USB_SUCCESS;
+                if (EFI_ERROR(Status)) {
+                    return USB_ERROR;
+                }
+            }
+			(*gUsbData->aCallBackFunctionTable[Qh->bCallBackIndex - 1 + CALLBACK_FUNCTION_START])
+							(HcStruc, (DEV_INFO*)Qh->fpDevInfoPtr, 
+							(UINT8*)Qh, NULL, 0);
+		}
+	}
+
+	return  USB_SUCCESS;
 }
 
-
-/**
-    Find specific Isochronous transfer descriptor
-    
-    @param  Itd     Pointer to the specific Isochronous transfer descriptor
-    @retval Index   Return the index number.
-
-**/
-UINT8
-EHCI_FindIOCuFrame (
-    EHCI_ITD  *Itd
-)
+UINT8 EHCI_FindIOCuFrame(EHCI_ITD *Itd)
 {
-    UINT8 Index;
+    UINT8 i;
 
-    for (Index = 0; Index < 8; Index++)
+    for (i = 0; i < 8; i++)
     {
-        if (Itd->ControlStatus[Index] & BIT15)
+        if (Itd->ControlStatus[i] & BIT15)
         {
             break;
         }
     }
-    return Index;
+    return i;
 }
 
-
-/**
-    Processing current Itd.
-    
-    @param  HcStruc   Pointer to the host controller structure
-    @retval None
-
-**/
-VOID
-EHCIProcessCurrentItd (
+VOID EHCIProcessCurrentItd(
     HC_STRUC *HcStruc
 )
 {
     UINT32      LinkPtr;
-    UINT8       Index;
-    UINT32      Count;
+    UINT8       i;
+    UINT32      j;
     UINT16      CurrentFIndex;
     EHCI_ITD    *Itd;
     UINT16      FrameCount;
@@ -4458,52 +4819,62 @@ EHCIProcessCurrentItd (
 
     // Check current and previous iTD for IOC
     CurrentFIndex = GetCurrentFIndex(HcStruc);
-    LinkPtr = HcStruc->FrameList[CurrentFIndex];
+    LinkPtr = HcStruc->fpFrameList[CurrentFIndex];
     Itd = (EHCI_ITD*)(LinkPtr & EHCI_POINTER_MASK);
-    Index = EHCI_FindIOCuFrame(Itd);
-    if (Index == 8)
+    i = EHCI_FindIOCuFrame(Itd);
+    if (i == 8)
     {
-        if (CurrentFIndex == 0) CurrentFIndex = HcStruc->AsyncListSize;
+        if (CurrentFIndex == 0) CurrentFIndex = HcStruc->wAsyncListSize;
         CurrentFIndex--;
-        LinkPtr = HcStruc->FrameList[CurrentFIndex];
+        LinkPtr = HcStruc->fpFrameList[CurrentFIndex];
         Itd = (EHCI_ITD*)(LinkPtr & EHCI_POINTER_MASK);
-        Index = EHCI_FindIOCuFrame(Itd);
-        if (Index == 8) return; // iTD was not the reason we are here
+        i = EHCI_FindIOCuFrame(Itd);
+        if (i == 8) return; // iTD was not the reason we are here
     }
 
-    Status = AmiUsbValidateMemoryBuffer((VOID*)Itd, sizeof(EHCI_ITD));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+    Status = AmiValidateMemoryBuffer((VOID*)Itd, sizeof(EHCI_ITD));
+    if (EFI_ERROR(Status)) {
         return;
     }
+#endif
     
     // Locate the device by matching iTD with DevInfo->IsocDetails.XferKey
-    for (Count = 1; Count < gUsbData->MaxDevCount; Count++) {
-        DevInfo = &gUsbDataList->DevInfoTable[Count];
+    for (j = 1; j < MAX_DEVICES; j++) {
+        DevInfo = &gUsbData->aDevInfoTable[j];
         if ((DevInfo->Flag & DEV_INFO_VALIDPRESENT) != DEV_INFO_VALIDPRESENT) {
             continue;
         }
         if (DevInfo->IsocDetails.XferKey == (UINTN)Itd) break;
     }
-    //ASSERT(j < gUsbData->MaxDevCount);
-    if (Count == gUsbData->MaxDevCount) return;   // device not found
+    //ASSERT(j < MAX_DEVICES);
+    if (j == MAX_DEVICES) return;   // device not found
     
-    Itd->ControlStatus[Index] &= ~BIT15;    // Clear IOC
+    Itd->ControlStatus[i] &= ~BIT15;    // Clear IOC
     // Count uFrames
     if (CurrentFIndex < (UINT16)DevInfo->IsocDetails.XferStart)
-        CurrentFIndex += HcStruc->AsyncListSize;
+        CurrentFIndex += HcStruc->wAsyncListSize;
     ASSERT(CurrentFIndex >= (UINT16)DevInfo->IsocDetails.XferStart);
-    FrameCount = ((CurrentFIndex - (UINT16)DevInfo->IsocDetails.XferStart) << 3) + Index + 1; // i is 0-based
-    Status = AmiUsbValidateMemoryBuffer((VOID*)DevInfo->IsocDetails.XferDetails, FrameCount * sizeof(UINT32));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+    FrameCount = ((CurrentFIndex - (UINT16)DevInfo->IsocDetails.XferStart) << 3) + i + 1; // i is 0-based
+#if !USB_RT_DXE_DRIVER
+    Status = AmiValidateMemoryBuffer((VOID*)DevInfo->IsocDetails.XferDetails, FrameCount * sizeof(UINT32));
+    if (EFI_ERROR(Status)) {
+
         return ;
-    }   
+    }
+#endif    
     TotalAmount = FinalizeIsocXfer(HcStruc, (UINT16)DevInfo->IsocDetails.XferStart,
             FrameCount, DevInfo->IsocDetails.XferDetails);
+    //USB_DEBUG(DEBUG_INFO, 3, "EHCI ISOC: frame #%d, %d uFrames, details ptr: %x, total %d Bytes\n",
+    //  DevInfo->IsocDetails.XferStart, uFrameCount, DevInfo->IsocDetails.XferDetails, TotalAmount);
 
-    Status = AmiUsbValidateMemoryBuffer((VOID*)DevInfo->IsocDetails.AsyncStatus, sizeof(UINT8));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+    // Indicate the completion of the transfer
+#if !USB_RT_DXE_DRIVER
+    Status = AmiValidateMemoryBuffer((VOID*)DevInfo->IsocDetails.AsyncStatus, sizeof(UINT8));
+    if (EFI_ERROR(Status)) {
         return;
     }
+#endif
     *DevInfo->IsocDetails.AsyncStatus = 1;
 }
 
@@ -4513,14 +4884,15 @@ EHCIProcessCurrentItd (
     call back function (in device info structure) and restarts
     the polling qTD
 
-    @param  HcStruc   Pointer to the host controller structure
+    @param HcStruc   - Pointer to HCStruc of the host controller
 
-    @retval None
+    @retval VOID
 
 **/
+
 VOID
 EHCIProcessPeriodicList(
-    HC_STRUC *HcStruc
+	HC_STRUC	*HcStruc
 )
 {
     UINT16      Index;
@@ -4543,21 +4915,24 @@ EHCIProcessPeriodicList(
     //
 
     for (Index = 0; Index <= MAX_SPLIT_PERIODIC_NUMBER; Index ++) {
-        PrevPtr = &HcStruc->FrameList[Index];
+        PrevPtr = &HcStruc->fpFrameList[Index];
         LinkPtr = *PrevPtr; 
 
-     while (!(LinkPtr & EHCI_TERMINATE)) {
-         Qh = (EHCI_QH*)(LinkPtr & EHCI_POINTER_MASK);
-            Status = AmiUsbValidateMemoryBuffer((VOID*)Qh, sizeof(EHCI_QH));
-            if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+	    while (!(LinkPtr & EHCI_TERMINATE)) {
+		    Qh = (EHCI_QH*)(LinkPtr & EHCI_POINTER_MASK);
+
+#if !USB_RT_DXE_DRIVER
+            Status = AmiValidateMemoryBuffer((VOID*)Qh, sizeof(EHCI_QH));
+            if (EFI_ERROR(Status)) {
                 return;
             }
+#endif
             QhHostAddr = EhciMemGetHostAddr(HcStruc, Qh);
 
-            // Process only QHeads, skip the other types
-            if ((QhHostAddr->dLinkPointer & 6) == EHCI_QUEUE_HEAD) {
+	        // Process only QHeads, skip the other types
+	        if ((QhHostAddr->dLinkPointer & 6) == EHCI_QUEUE_HEAD) {
 
-                // Check whether this QH is actived
+	            // Check whether this QH is actived
                 if (QhHostAddr->bActive == TRUE) {
                     OrgQhLinkPointer = QhHostAddr->dLinkPointer;
                     EHCIProcessQH(HcStruc, QhHostAddr);
@@ -4567,12 +4942,39 @@ EHCIProcessPeriodicList(
                         continue;
                     }
                 }
-             }
+	        }
 
-      LinkPtr = QhHostAddr->dLinkPointer;
-      }
+		    LinkPtr = QhHostAddr->dLinkPointer;
+	    }
 
     }
+/*
+	UINT32		LinkPtr;
+    EHCI_QH     *Qh = NULL;
+
+    EHCIProcessCurrentItd(HcStruc);
+
+    //
+    // Get the first entry in the periodic list. This QH list will link to all
+    // the periodic QH's
+    //
+
+	LinkPtr = HcStruc->fpFrameList[0];
+	while (!(LinkPtr & EHCI_TERMINATE)) {
+		Qh = (EHCI_QH*)(LinkPtr & EHCI_POINTER_MASK);
+
+		// Process only QHeads, skip the other types
+		if ((Qh->dLinkPointer & 6) == EHCI_QUEUE_HEAD) {
+    
+            // Check whether this QH is actived
+            if (Qh->bActive == TRUE) {			
+                EHCIProcessQH(HcStruc, Qh);
+            }
+		}
+		
+		LinkPtr = Qh->dLinkPointer;
+	}
+*/
 }
 
 /**
@@ -4582,59 +4984,59 @@ EHCIProcessPeriodicList(
     handle any errors, and then copy the TD's CSReloadValue field 
     into its control status field to put the TD back into service.
 
-    @param HcStruc       Pointer to the host controller structure
-    @param DevInfo       NULL (DevInfo is not valid)
-    @param QueueHead     Pointer to the QH that completed
-    @param Buffer        Not used
-    @param DataLength    Not used
-    @retval None
+    @param HcStruc   Pointer to the HCStruc structure
+        DevInfo   NULL (pDevInfo is not valid)
+        QueueHead Pointer to the QH that completed
+        Buffer    Not used
+
+    @retval VOID
 
 **/
 
 UINT8
 EhciPollingTDCallback(
-    HC_STRUC *HcStruc,
-    DEV_INFO *DevInfo,
-    UINT8  *QueueHead,
-    UINT8  *Buffer,
+    HC_STRUC	*HcStruc,
+    DEV_INFO	*DevInfo,
+    UINT8		*QueueHead,
+    UINT8		*Buffer,
     UINT16      DataLength
 )
 {
-    EHCI_QH*    PollQh = (EHCI_QH*)QueueHead;
-    EHCI_QTD    *PollQtd = PollQh->fpFirstqTD;
+	EHCI_QH*	PollQh = (EHCI_QH*)QueueHead;
+	EHCI_QTD    *PollQtd = PollQh->fpFirstqTD;
     UINT16      BytesTransferred;
     UINT32      PortStatus;
     UINT8       *PollDataBufferPhyAddr;
     UINT8       *PollQtdPhyAddr;
-    EFI_STATUS  Status;
+    EFI_STATUS  Status = EFI_SUCCESS;
 
-
-    Status = AmiUsbValidateMemoryBuffer((VOID*)PollQtd, sizeof(EHCI_QTD));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+    Status = AmiValidateMemoryBuffer((VOID*)PollQtd, sizeof(EHCI_QTD));
+    if (EFI_ERROR(Status)) {
         return USB_ERROR;
     }
+#endif
 
+	// Update datat toggle value
+	UsbUpdateDataToggle(DevInfo, DevInfo->IntInEndpoint, 
+		(UINT8)((PollQh->dToken & QH_DATA_TOGGLE) >> 31));
 
-    // Update datat toggle value
-    UsbUpdateDataToggle(DevInfo, DevInfo->IntInEndpoint, 
-    (UINT8)((PollQh->dToken & QH_DATA_TOGGLE) >> 31));
-
-    if (!(PollQh->dToken & QTD_STATUS_FIELD)) {
-        if ((DevInfo->CallBackIndex) && (DevInfo->CallBackIndex <= MAX_CALLBACK_FUNCTION)) {
-            if (gAmiUsbCallBackFunTbl[DevInfo->CallBackIndex - 1 + CALLBACK_FUNCTION_START]) {
+	if (!(PollQh->dToken & QTD_STATUS_FIELD)) {
+        if ((DevInfo->bCallBackIndex) && (DevInfo->bCallBackIndex <= MAX_CALLBACK_FUNCTION)) {
+            if (gUsbData->aCallBackFunctionTable[DevInfo->bCallBackIndex - 1 + CALLBACK_FUNCTION_START]) {
                 //
                 // Get the size of data transferred
                 //
                 BytesTransferred = DevInfo->PollingLength - (UINT16)((PollQtd->dToken & ~(QTD_DATA_TOGGLE)) >> 16);
-                (*gAmiUsbCallBackFunTbl[DevInfo->CallBackIndex - 1 + CALLBACK_FUNCTION_START])
-                        (HcStruc, DevInfo, (UINT8*)PollQtd, DevInfo->PollDataBuffer, BytesTransferred);
+                (*gUsbData->aCallBackFunctionTable[DevInfo->bCallBackIndex - 1 + CALLBACK_FUNCTION_START])
+                        (HcStruc, DevInfo, (UINT8*)PollQtd, DevInfo->fpPollDataBuffer, BytesTransferred);
             }
-      }
-     } else {
+		}
+	} else {
         if (PollQh->dToken & QTD_XACT_ERROR) {
             // When the device is disconnecting, the transaction may be error, 
             // check if the port status is enabled.
-            PortStatus = USB_GetHubPortStatus(HcStruc, DevInfo->HubDeviceNumber, DevInfo->HubPortNumber, FALSE);
+            PortStatus = USB_GetHubPortStatus(HcStruc, DevInfo->bHubDeviceNumber, DevInfo->bHubPortNumber, FALSE);
             if ((PortStatus == USB_ERROR) || (!(PortStatus & USB_PORT_STAT_DEV_ENABLED))) {
                 return USB_SUCCESS;
             }
@@ -4647,15 +5049,15 @@ EhciPollingTDCallback(
     //
     // Set length
     //
-    PollQtd->dToken |= (UINT32)DevInfo->PollingLength << 16;
+	PollQtd->dToken |= (UINT32)DevInfo->PollingLength << 16;
 
     //
     // Update buffer pointers
     //
-    PollDataBufferPhyAddr = EhciMemGetPhyAddr(HcStruc, DevInfo->PollDataBuffer);
+    PollDataBufferPhyAddr = EhciMemGetPhyAddr(HcStruc, DevInfo->fpPollDataBuffer);
     
-    EHCISetQTDBufferPointers(PollQtd,
-                             PollDataBufferPhyAddr, DevInfo->PollingLength);
+	EHCISetQTDBufferPointers(PollQtd,
+					PollDataBufferPhyAddr, DevInfo->PollingLength);
 
     //
     // Re-init the QH pointers
@@ -4680,8 +5082,8 @@ EhciPollingTDCallback(
     // Restart the qTD
     //
     PollQtd->dToken |= (QTD_IOC_BIT | QTD_THREE_ERRORS | QTD_ACTIVE);
-    PollQh->bActive = TRUE;
- 
+	PollQh->bActive = TRUE;
+	
     return  USB_SUCCESS;
 }
 
@@ -4693,48 +5095,48 @@ EhciPollingTDCallback(
     is used to generate keyboard repeat or update LED status.
 
     @param HcStruc   Pointer to the HCStruc structure
-    @param DevInfo   NULL (DevInfo is not valid)
-    @param QueueHead Pointer to the QH that completed
-    @param Buffer    Not used
-    @param DataLength    Not used
-    
-    @retval USB_SUCCESS On success
-    @retval Others      On fail
+        DevInfo   NULL (pDevInfo is not valid)
+        QueueHead Pointer to the QH that completed
+        Buffer    Not used
+
+    @retval VOID
 
 **/
 
 UINT8
 EhciRepeatTDCallback(
-     HC_STRUC    *HcStruc,
-     DEV_INFO    *DevInfo,
-     UINT8       *QueueHead,
-     UINT8       *Buffer,
-     UINT16      DataLength
+	HC_STRUC	*HcStruc,
+	DEV_INFO	*DevInfo,
+	UINT8		*QueueHead,
+	UINT8		*Buffer,
+	UINT16      DataLength
 )
 {
-    EHCI_QH     *RepeatQh = (EHCI_QH*)QueueHead;
-    EHCI_QTD    *RepeatQtd = RepeatQh->fpFirstqTD;
-    EFI_STATUS  Status;
+	EHCI_QH		*RepeatQh = (EHCI_QH*)QueueHead;
+	EHCI_QTD	*RepeatQtd = RepeatQh->fpFirstqTD;
+    EFI_STATUS  Status = EFI_SUCCESS;
 
-
-    Status = AmiUsbValidateMemoryBuffer((VOID*)RepeatQtd, sizeof(EHCI_QTD));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)){
+#if !USB_RT_DXE_DRIVER
+    Status = AmiValidateMemoryBuffer((VOID*)RepeatQtd, sizeof(EHCI_QTD));
+    if (EFI_ERROR(Status)) {
         return USB_ERROR;
     }
+#endif
 
-    if ((gUsbData->UsbDevSupport & USB_KB_DEV_SUPPORT) == USB_KB_DEV_SUPPORT)
-    USBKBDPeriodicInterruptHandler(HcStruc);
+#if USB_DEV_KBD
+	USBKBDPeriodicInterruptHandler(HcStruc);
+#endif
 
-    if (RepeatQh->dTokenReload & QTD_ACTIVE) {
-        //
-        // Update buffer pointers
-        //
-        EHCISetQTDBufferPointers(RepeatQtd,
-                                 &RepeatQh->aDataBuffer[0], 8);
+	if (RepeatQh->dTokenReload & QTD_ACTIVE) {
+		//
+		// Update buffer pointers
+		//
+		EHCISetQTDBufferPointers(RepeatQtd,
+						&RepeatQh->aDataBuffer[0], 8);
 
-        //
-        // Re-init the QH pointers
-        //
+		//
+		// Re-init the QH pointers
+		//
         RepeatQh->dToken &= QH_DATA_TOGGLE;
         RepeatQh->dCurqTDPtr = 0;
         RepeatQh->dAltNextqTDPtr = EHCI_TERMINATE;
@@ -4743,40 +5145,38 @@ EhciRepeatTDCallback(
         RepeatQh->dBufferPtr2 = 0;
         RepeatQh->dBufferPtr3 = 0;
         RepeatQh->dBufferPtr4 = 0;
-        RepeatQh->dNextqTDPtr = (UINT32)(UINTN)RepeatQtd;
+		RepeatQh->dNextqTDPtr = (UINT32)(UINTN)RepeatQtd;
 
-        //
-        // Restart the qTD
-        //
-        RepeatQh->dToken = 0;
-        RepeatQtd->dToken = RepeatQh->dTokenReload;
-        
-        RepeatQh->bActive = TRUE;
-    }
+	    //
+	    // Restart the qTD
+	    //
+		RepeatQh->dToken = 0;
+		RepeatQtd->dToken = RepeatQh->dTokenReload;
+		
+		RepeatQh->bActive = TRUE;
+	}
 
     return  USB_SUCCESS;
 }
 
 /**
     This function check whether HC is halted.
-    @param HcStruc  Pointer to the host controller structure
-    @retval TRUE    Ehci controller is halted
-    @retval FALSE   Ehci controller is not halted
+
 **/
+
 BOOLEAN
 EhciIsHalted (
-    HC_STRUC *HcStruc
+	HC_STRUC	*HcStruc
 )
 {
-    return (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) == EHCI_HCHALTED;
+	return (HcReadOpReg(HcStruc, EHCI_USBSTS) & EHCI_HCHALTED) == EHCI_HCHALTED;
 }
 
 /**
     This function calculates the polling rate in frames unit.
-    @param Speed          Link speed
-    @param Interval       Polling interval value
-    @retval PollingRate   Polling rate
+
 **/
+
 UINT16
 EhciTranslateInterval(
     UINT8   Speed,
@@ -4805,137 +5205,130 @@ EhciTranslateInterval(
     return (1 << (BitCount - 1));
 }
 
+UINT32
+EhciReadDebugReg(
+	HC_STRUC	*HcStruc,
+	UINT8		BarIndex,
+	UINT32		Offset
+)
+{
+#if !USB_RT_DXE_DRIVER
+	UINT8  BarOffset[6] = {0x10, 0x14, 0x18, 0x1C, 0x20, 0x24};
+	UINT32 DebugPortsMem;
 
-/**
-    Get physical memory address
+    DebugPortsMem = HcReadPciReg(HcStruc, BarOffset[BarIndex]);
+	return DwordReadMem(DebugPortsMem, Offset);
+#else
+	EFI_STATUS	Status;
+	UINT32		Data = 0;
+	EFI_PCI_IO_PROTOCOL	*PciIo = HcStruc->PciIo;
+	
+	Status = PciIo->Mem.Read(
+			 PciIo,
+			 EfiPciIoWidthUint32,
+			 BarIndex,
+			 Offset,
+			 1,
+			 &Data);
+	ASSERT_EFI_ERROR(Status);
+	return Data;
+#endif
+}
 
-    @param HcStruc Pointer to the host controller structure
-    @param MemPtr  Memory address   
-    @retval physical memory address
-**/
 VOID*
 EhciMemGetPhyAddr(
-    HC_STRUC  *HcStruc,
-    VOID      *MemPtr
+	HC_STRUC	*HcStruc,
+	VOID*		MemPtr
 )
 {
-
-    if (gUsbData->UsbRuntimeDriverInSmm) {
-        return MemPtr;
-    } else {
-        return (VOID*)(HcStruc->MemPoolPhyAddr + ((UINT8*)MemPtr - HcStruc->MemPool));
-    }
-
+#if USB_RUNTIME_DRIVER_IN_SMM
+	return MemPtr;
+#else
+    return (VOID*)(HcStruc->MemPoolPhyAddr + ((UINT8*)MemPtr - HcStruc->MemPool));
+#endif
 }
 
-/**
-    Get host controller address
-
-    @param HcStruc  Pointer to the host controller structure
-    @param  MemPtr  Memory address   
-    @retval MemPtr  Memory address  
-**/
 VOID*
 EhciMemGetHostAddr(
-    HC_STRUC  *HcStruc,
-    VOID      *MemPtr
+	HC_STRUC	*HcStruc,
+	VOID*		MemPtr
 )
 {
-
-    if (gUsbData->UsbRuntimeDriverInSmm) {
-        return MemPtr;
-    } else {
-        return (VOID*)(HcStruc->MemPool + ((UINT8*)MemPtr - HcStruc->MemPoolPhyAddr));
-    }
+#if USB_RUNTIME_DRIVER_IN_SMM
+	return MemPtr;
+#else
+    return (VOID*)(HcStruc->MemPool + ((UINT8*)MemPtr - HcStruc->MemPoolPhyAddr));
+#endif
 }
 
-/**
-    Allocate memory
-
-    @param HcStruc  Pointer to the host controller structure  
-    @param NumBlks  Block number
-    @retval None
-**/
 VOID*
 EhciMemAlloc(
-     HC_STRUC *HcStruc,
-     UINT16  NumBlks
+	HC_STRUC	*HcStruc,
+	UINT16		NumBlks
 )
 {
+#if USB_RUNTIME_DRIVER_IN_SMM
+	return USB_MemAlloc(NumBlks);
+#else
+	UINT32	SavedMemPages = gUsbData->MemPages;
+	UINT8	*SavedMemPool = gUsbData->fpMemBlockStart;
+	UINT32	SavedMemBlkStsBytes = gUsbData->MemBlkStsBytes;
+	UINT32	*SavedMemBlsSts = gUsbData->aMemBlkSts;
+	VOID*	MemPtr;
 
-    if (gUsbData->UsbRuntimeDriverInSmm){
-      return USB_MemAlloc(NumBlks);
+	gUsbData->MemPages = HcStruc->MemPoolPages;
+	gUsbData->fpMemBlockStart = HcStruc->MemPool;
+	gUsbData->MemBlkStsBytes = HcStruc->MemBlkStsBytes;
+	gUsbData->aMemBlkSts = HcStruc->MemBlkSts;
 
-    } else {
-    UINT32 SavedMemPages = gUsbData->MemPages;
-    UINT8 *SavedMemPool = gUsbDataList->MemBlockStart;
-    UINT32 SavedMemBlkStsBytes = gUsbData->MemBlkStsBytes;
-    UINT32 *SavedMemBlsSts = gUsbDataList->MemBlkSts;
-    VOID* MemPtr;
+	MemPtr = USB_MemAlloc(NumBlks);
 
-    gUsbData->MemPages = HcStruc->MemPoolPages;
-    gUsbDataList->MemBlockStart = HcStruc->MemPool;
-    gUsbData->MemBlkStsBytes = HcStruc->MemBlkStsBytes;
-    gUsbDataList->MemBlkSts = HcStruc->MemBlkSts;
+	gUsbData->MemPages = SavedMemPages;
+	gUsbData->fpMemBlockStart = SavedMemPool;
+	gUsbData->MemBlkStsBytes = SavedMemBlkStsBytes;
+	gUsbData->aMemBlkSts = SavedMemBlsSts;
 
-    MemPtr = USB_MemAlloc(NumBlks);
-
-    gUsbData->MemPages = SavedMemPages;
-    gUsbDataList->MemBlockStart = SavedMemPool;
-    gUsbData->MemBlkStsBytes = SavedMemBlkStsBytes;
-    gUsbDataList->MemBlkSts = SavedMemBlsSts;
-
-    return MemPtr;
-    }
-
+	return MemPtr;
+#endif
 }
 
-/**
-    Free memory
-
-    @param HcStruc  Pointer to the host controller structure
-    @param MemPtr   Memory address   
-    @param NumBlks  Block number
-    @retval None
-**/
 VOID
 EhciMemFree(
-    HC_STRUC *HcStruc,
-    VOID*  MemPtr,
-    UINT16  NumBlks
+	HC_STRUC	*HcStruc,
+	VOID*		MemPtr,
+	UINT16		NumBlks
 )
 {
+#if USB_RUNTIME_DRIVER_IN_SMM
+	USB_MemFree(MemPtr, NumBlks);
+#else
+	UINT32	SavedMemPages = gUsbData->MemPages;
+	UINT8	*SavedMemPool = gUsbData->fpMemBlockStart;
+	UINT32	SavedMemBlkStsBytes = gUsbData->MemBlkStsBytes;
+	UINT32	*SavedMemBlsSts = gUsbData->aMemBlkSts;
 
-    if (gUsbData->UsbRuntimeDriverInSmm){
-      USB_MemFree(MemPtr, NumBlks);
-    } else {
-    UINT32 SavedMemPages = gUsbData->MemPages;
-    UINT8 *SavedMemPool = gUsbDataList->MemBlockStart;
-    UINT32 SavedMemBlkStsBytes = gUsbData->MemBlkStsBytes;
-    UINT32 *SavedMemBlsSts = gUsbDataList->MemBlkSts;
+	gUsbData->MemPages = HcStruc->MemPoolPages;
+	gUsbData->fpMemBlockStart = HcStruc->MemPool;
+	gUsbData->MemBlkStsBytes = HcStruc->MemBlkStsBytes;
+	gUsbData->aMemBlkSts = HcStruc->MemBlkSts;
 
-    gUsbData->MemPages = HcStruc->MemPoolPages;
-    gUsbDataList->MemBlockStart = HcStruc->MemPool;
-    gUsbData->MemBlkStsBytes = HcStruc->MemBlkStsBytes;
-    gUsbDataList->MemBlkSts = HcStruc->MemBlkSts;
+	USB_MemFree(MemPtr, NumBlks);
 
-    USB_MemFree(MemPtr, NumBlks);
+	gUsbData->MemPages = SavedMemPages;
+	gUsbData->fpMemBlockStart = SavedMemPool;
+	gUsbData->MemBlkStsBytes = SavedMemBlkStsBytes;
+	gUsbData->aMemBlkSts = SavedMemBlsSts;
 
-    gUsbData->MemPages = SavedMemPages;
-    gUsbDataList->MemBlockStart = SavedMemPool;
-    gUsbData->MemBlkStsBytes = SavedMemBlkStsBytes;
-    gUsbDataList->MemBlkSts = SavedMemBlsSts;
-
-    return;
-    }
-
+	return;
+#endif
 }
 
+#endif
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

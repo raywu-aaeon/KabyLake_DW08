@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -16,22 +16,7 @@
     This file contains generic routines needed for USB recovery PEIM
 
 **/
-/**
-PEIM to produce gPeiUsbHostControllerPpiGuid based on gPeiUsbControllerPpiGuid
-which is used to enable recovery function from USB Drivers.
 
-Copyright (c) 2006 - 2016, Intel Corporation. All rights reserved. <BR>
-  
-This program and the accompanying materials
-are licensed and made available under the terms and conditions
-of the BSD License which accompanies this distribution.  The
-full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
-**/
 
 #include "UsbPei.h"
 #include "UhcPeim.h"
@@ -76,20 +61,20 @@ EFI_STATUS UhcPeimEntry (
     // Locate the PEI_CPU_IO_PPI interface
     if ( EFI_ERROR( (**PeiServices).LocatePpi(
                 PeiServices, &gEfiPeiCpuIoPpiInstalledGuid, 0, NULL,
-                (VOID**)&CpuIoPpi ) ) ) {
+                &CpuIoPpi ) ) ) {
         return EFI_UNSUPPORTED;
     }
 
     // Locate the PEI_STALL_PPI interface
     if ( EFI_ERROR( (**PeiServices).LocatePpi(
-                PeiServices, &gEfiPeiStallPpiGuid, 0, NULL, (VOID**)&StallPpi ) ) ) {
+                PeiServices, &gEfiPeiStallPpiGuid, 0, NULL, &StallPpi ) ) ) {
         return EFI_UNSUPPORTED;
     }
 
     // Locate the EFI_PEI_USB_CONTROLLER_PPI interface
     if ( EFI_ERROR( (**PeiServices).LocatePpi(
                 PeiServices, &gPeiUsbControllerPpiGuid, 0, NULL,
-                (VOID**)&ChipSetUsbControllerPpi ) ) ) {
+                &ChipSetUsbControllerPpi ) ) ) {
         return EFI_UNSUPPORTED;
     }
 
@@ -194,11 +179,7 @@ EFI_STATUS UhcPeimEntry (
 /**
     This function starts the periodic schedule for the interrupt endpoint-based
     devices (keyboard).
-    @param  PeiServices     An indirect pointer to the PEI Services Table
-                            published by the PEI Foundation.
-            UsbDev          Pointer to USB device
-            
-    @retval EFI_STATUS Status of the operation
+
 **/
 
 EFI_STATUS
@@ -210,23 +191,23 @@ UhciHcActivatePolling(
 {
     PEI_USB_DEVICE  *PeiUsbDev = (PEI_USB_DEVICE*)UsbDev;
     USB_UHC_DEV *UhcDev = PEI_RECOVERY_USB_UHC_DEV_FROM_UHCI_THIS ( PeiUsbDev->UsbHcPpi );
-    EFI_STATUS  Status;
+	EFI_STATUS  Status;
 
-    BOOLEAN     IsFirstTd;  
-    UINT8       PktId;
+    BOOLEAN     IsFirstTD;	
+	UINT8       PktID;
     UINT8       *Ptr;
     UINT8       MaximumPacketLength;
-    UINT8       DataToggle; 
+    UINT8       DataToggle;	
     UINT16      LoadFrameListIndex;
-    UINT32      Index;    
+    UINT32      i;    
     UINT32      StatusReg;
     UINT32      FrameNumReg;
     UINT32      DataLen;
 
-    QH_STRUCT   *PtrQh;
-    TD_STRUCT   *PtrFirstTd;
-    TD_STRUCT   *PtrTd;
-    TD_STRUCT   *PtrPreTd;
+    QH_STRUCT   *PtrQH;
+    TD_STRUCT   *PtrFirstTD;
+    TD_STRUCT   *PtrTD;
+    TD_STRUCT   *PtrPreTD;
 
     static UhciPollingStarted = FALSE;
 
@@ -250,23 +231,23 @@ UhciHcActivatePolling(
 
     ClearStatusReg ( UhcDev, StatusReg );
 
-    PktId = (PeiUsbDev->IntEndpoint & BIT7) ? INPUT_PACKET_ID: OUTPUT_PACKET_ID;
+    PktID = PeiUsbDev->IntEndpoint & BIT7 ? INPUT_PACKET_ID: OUTPUT_PACKET_ID;
     DataLen = (UINT32) PeiUsbDev->IntMaxPkt;
     Ptr = UhcDev->PollingData;
 
     //  create QH structure and init
-    Status = CreateQH ( UhcDev, &PtrQh );
-    if ( EFI_ERROR ( Status ) ) return Status;   
+    Status = CreateQH ( UhcDev, &PtrQH );
+	if ( EFI_ERROR ( Status ) ) return Status;   
    
-    for (Index = 0; Index < PeiUsbDev->InterfaceDesc->NumEndpoints; Index++)
+    for (i = 0; i < PeiUsbDev->InterfaceDesc->NumEndpoints; i++)
     {
-        if (PeiUsbDev->EndpointDesc[Index]->EndpointAddress == PeiUsbDev->IntEndpoint) 
+        if (PeiUsbDev->EndpointDesc[i]->EndpointAddress == PeiUsbDev->IntEndpoint) 
         {
             break;
         }
     }
 
-    if ( ( PeiUsbDev->DataToggle & (1 << Index) ) != 0 ) {
+    if ( ( PeiUsbDev->DataToggle & (1 << i) ) != 0 ) {
         DataToggle = 1;
     } else {
         DataToggle = 0;
@@ -274,57 +255,57 @@ UhciHcActivatePolling(
     
     MaximumPacketLength = (UINT8) PeiUsbDev->IntMaxPkt;
 
-    IsFirstTd = TRUE;
+	IsFirstTD = TRUE;
     while (DataLen > 0) {
-    
+	
         // create TD structures and link together
         UINT16 PktSize;
-    
+	
         PktSize = (UINT16) DataLen;
         if (DataLen > MaximumPacketLength) {
             PktSize = MaximumPacketLength;
         }
         
         GenDataTD ( UhcDev, PeiUsbDev->DeviceAddress, PeiUsbDev->IntEndpoint, Ptr,
-            PktSize, PktId, DataToggle, PeiUsbDev->DeviceSpeed, &PtrTd );
+            PktSize, PktID, DataToggle, PeiUsbDev->DeviceSpeed, &PtrTD );
     
-        if (IsFirstTd) {
-            PtrFirstTd = PtrTd;
-            PtrFirstTd->ptrNextTD = NULL;
-            IsFirstTd = FALSE;
+        if (IsFirstTD) {
+            PtrFirstTD = PtrTD;
+            PtrFirstTD->ptrNextTD = NULL;
+            IsFirstTD = FALSE;
         } else {
             // Link two TDs in vertical depth
-            LinkTDToTD( PtrPreTd, PtrTd );
+            LinkTDToTD( PtrPreTD, PtrTD );
         }
         
-        PtrPreTd = PtrTd;
-    
+        PtrPreTD = PtrTD;
+	
         DataToggle ^= 1;
         Ptr += PktSize;
         DataLen -= PktSize;
     }
 
     // link TD structures to QH structure
-    LinkTDToQH ( PtrQh, PtrFirstTd );
+    LinkTDToQH ( PtrQH, PtrFirstTD );
 
     LoadFrameListIndex = (UINT16)
                          ( ( GetCurrentFrameNumber( UhcDev,
                                 FrameNumReg ) ) % 1024 );
 
-    for (Index = 0; Index <= 1024; Index++) {
+    for (i = 0; i <= 1024; i++) {
 
-        if (Index % 8 == 0)
-        {
-            LinkQHToFrameList( UhcDev->FrameListEntry,
-                (UINT16) ( (LoadFrameListIndex + Index) % 1024 ), PtrQh);
-        }
+		if (i % 8 == 0)
+	    {
+        	LinkQHToFrameList( UhcDev->FrameListEntry,
+            	(UINT16) ( (LoadFrameListIndex + i) % 1024 ), PtrQH);
+	    }
 
         LoadFrameListIndex += 1;
         LoadFrameListIndex %= 1024;
     }
 
-    UhcDev->IntQH = PtrQh; 
-    UhcDev->IntTD = PtrFirstTd;
+    UhcDev->IntQH = PtrQH; 
+    UhcDev->IntTD = PtrFirstTD;
 
     return EFI_SUCCESS;
 }
@@ -1853,7 +1834,7 @@ EFI_STATUS AllocateTDStruct (
     USB_UHC_DEV *UhcDev,
     TD_STRUCT   **ppTDStruct )
 {
-    EFI_STATUS Status;
+    EFI_STATUS Status = EFI_SUCCESS;
 
     *ppTDStruct = NULL;
 
@@ -3729,7 +3710,7 @@ VOID DelinkMemoryBlock (
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

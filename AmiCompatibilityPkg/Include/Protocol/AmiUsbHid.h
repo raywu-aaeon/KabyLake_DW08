@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,8 +17,8 @@
 
 **/
 
-#ifndef _AMI_USB_HID_H_
-#define _AMI_USB_HID_H_
+#ifndef _AMIUSB_HID_PROTOCOL_H_
+#define _AMIUSB_HID_PROTOCOL_H_
 
 #define AMI_USB_HID_PROTOCOL_GUID \
     {0x1fede521, 0x31c, 0x4bc5, {0x80, 0x50, 0xf3, 0xd6, 0x16, 0x1e, 0x2e, 0x92}}
@@ -29,7 +29,6 @@ typedef struct _AMI_USB_HID_PROTOCOL AMI_USB_HID_PROTOCOL;
 #define HID_DEV_TYPE_MOUSE              BIT1
 #define HID_DEV_TYPE_POINT              BIT2
 #define HID_DEV_TYPE_U2F                BIT3
-#define HID_DEV_TYPE_CONSUMER           BIT4
 #define HID_DEV_TYPE_OEM                BIT63
 
 #define HID_BTYPE_KEYBOARD              0x1
@@ -43,7 +42,6 @@ typedef struct _AMI_USB_HID_PROTOCOL AMI_USB_HID_PROTOCOL;
 #define HID_UP_KEYBOARD                     0x07
 #define HID_UP_LED                          0x08
 #define HID_UP_BUTTON                       0x09
-#define HID_UP_CONSUMER                     0x0C
 #define HID_UP_DIGITIZER                    0x0D
 #define HID_UP_FIDO                         0xF1D0 //Fast IDentity Online Alliance
 
@@ -199,7 +197,7 @@ struct _AMI_USB_HID_PROTOCOL {
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

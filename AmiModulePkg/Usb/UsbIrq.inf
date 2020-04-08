@@ -1,7 +1,7 @@
 #*************************************************************************
 #*************************************************************************
 #**                                                                     **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**        (C)Copyright 1985-2015, American Megatrends, Inc.            **
 #**                                                                     **
 #**                       All Rights Reserved.                          **
 #**                                                                     **
@@ -31,18 +31,17 @@
   UsbIrq.c
 
 [Packages]
-  MdePkg/MdePkg.dec
+  MdePkg/MdePkg.dec   
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec 
   AmiModulePkg/AmiModulePkg.dec
-  AmiModulePkg/Usb/AmiUsbPkg.dec
-  AmiChipsetModulePkg/AmiChipsetModulePkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint
   BaseMemoryLib
   UefiLib
-  AmiShadowLib
+  AmiDxeLib
+  AmiCspLib
 
 [Protocols]
   gEfiLegacy8259ProtocolGuid
@@ -51,7 +50,6 @@
   gEfiUsb2HcProtocolGuid
   gEfiLegacyBiosProtocolGuid
   gEfiUsbProtocolGuid
-  gAmiUsbIsrProtocolGuid
 
 [Depex]
   gEfiLegacy8259ProtocolGuid AND
@@ -61,7 +59,7 @@
 #*************************************************************************
 #*************************************************************************
 #**                                                                     **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**        (C)Copyright 1985-2015, American Megatrends, Inc.            **
 #**                                                                     **
 #**                       All Rights Reserved.                          **
 #**                                                                     **

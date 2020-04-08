@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -141,8 +141,7 @@ typedef enum {
 #pragma pack(push, 1)
 
 // UHCI TD structure
-typedef struct _UHCI_TD UHCI_TD;  
-struct _UHCI_TD {
+typedef struct {
     UINT32          pLinkPtr;
     UINT32          dControlStatus;
     UINT32          dToken;
@@ -150,14 +149,13 @@ struct _UHCI_TD {
 
 // AMI defined fields
     UINT32          dCSReload;  // Control status reload value
-    UINT8           CallBackIndex;
+    UINT8           bCallBackIndex;
     UINT8           bActiveFlag;
     UINT16          wReserved;
     UINT8           aDataArea[8];
-};
+} UHCI_TD;
 
-typedef struct _UHCI_QH UHCI_QH;  
-struct _UHCI_QH{
+typedef struct {
     UINT32          pLinkPtr;
     UINT32          pElementPtr;
     UHCI_TD         *CurrentTd;
@@ -171,22 +169,22 @@ struct _UHCI_QH{
     BOOLEAN         ActiveFlag;
     VOID            *DevInfoPtr;
     UINT8           aReserved[47 - 3 * sizeof(VOID*) - sizeof(XFER_TYPE)];
-};
+} UHCI_QH;
 
 #pragma pack(pop)
-typedef struct _UHCI_DESC_PTRS UHCI_DESC_PTRS;  
-struct _UHCI_DESC_PTRS{
+
+typedef struct {
     UHCI_QH         *StaticQh;
-    UHCI_QH         *RootHubQh;
+  	UHCI_QH     	*RootHubQh;
     UHCI_QH         *RepeatQh;
-};
+} UHCI_DESC_PTRS;
 
 #endif      // __UHCI_H
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,6 +17,8 @@
 
 **/
 
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "Uhcd.h"
 #include "ComponentName.h"
 #include "UsbBus.h"
@@ -26,10 +28,14 @@
 
 #define USB_MOUSE_DEV_SIGNATURE   EFI_SIGNATURE_32('u','m','o','u')
 
+#ifndef CR
+#define CR(record, TYPE, field, signature) _CR(record, TYPE, field) 
+#endif
 #define USB_MOUSE_DEV_FROM_MOUSE_PROTOCOL(a,b) \
     CR(a, USB_MOUSE_DEV, b, USB_MOUSE_DEV_SIGNATURE)
 
-typedef struct {
+typedef struct
+{
     UINTN                           Signature;
     UINT8                           NumberOfButtons;
     INT32                           XLogicMax;
@@ -52,7 +58,7 @@ UsbMouseWaitForInput (
 EFI_STATUS
 UpdateUsbMouseData (
     EFI_SIMPLE_POINTER_PROTOCOL  *This, 
-        EFI_SIMPLE_POINTER_STATE        *State
+	EFI_SIMPLE_POINTER_STATE	*State
   );
 
 //
@@ -83,14 +89,16 @@ EFI_SIMPLE_POINTER_STATE        MsState;
 /**
     Initialize USB mouse device and all private data structures.
 
-    @retval EFI_SUCCESS   Success to init USB mouse data.
+    @param VOID
+
+    @retval EFI_SUCCESS or EFI_ERROR
 
 **/
 
 EFI_STATUS
 InitUSBMouse()
 {
-    SetMem (&MsState, sizeof(EFI_SIMPLE_POINTER_STATE), 0);
+    EfiZeroMem (&MsState, sizeof(EFI_SIMPLE_POINTER_STATE));
     ButtonsState = 0;
     StateChanged = FALSE; 
     return EFI_SUCCESS;
@@ -99,23 +107,23 @@ InitUSBMouse()
 /**
     Installs SimplePointerProtocol interface on a given controller.
 
-    @param Controller   controller handle to install interface on.
-    @param DevInfo      Ptr to UsbIo
-    @param DevInfo      Ptr to DEV_INFO
+    @param Controller - controller handle to install interface on.
+
+    @retval VOID
 
 **/
 VOID
 InstallUSBMouse(
-    EFI_HANDLE          Controller,
+    EFI_HANDLE Controller,
     EFI_USB_IO_PROTOCOL *UsbIo,
-    DEV_INFO            *DevInfo
+    DEV_INFO *DevInfo
 )
 {
     USB_MOUSE_DEV       *UsbMouse; 
     EFI_STATUS Status;
 
     Status = gBS->AllocatePool(EfiBootServicesData, sizeof(USB_MOUSE_DEV),
-                    (VOID**)&UsbMouse);
+                    &UsbMouse);
     
     ASSERT(Status == EFI_SUCCESS);
 
@@ -123,9 +131,7 @@ InstallUSBMouse(
         return;
     }
 
-
-    REPORT_STATUS_CODE(EFI_PROGRESS_CODE,(EFI_PERIPHERAL_MOUSE | EFI_P_PC_INIT));
-    SetMem(UsbMouse, sizeof(USB_MOUSE_DEV), 0);
+    EfiZeroMem(UsbMouse, sizeof(USB_MOUSE_DEV));
 
     //
     // Initialize UsbMouseDevice
@@ -149,15 +155,14 @@ InstallUSBMouse(
     UsbMouse->Endpoint = DevInfo->IntInEndpoint;
 
     UsbMouseReset(NULL, FALSE);
-
-    REPORT_STATUS_CODE(EFI_PROGRESS_CODE, (EFI_PERIPHERAL_MOUSE | EFI_P_PC_PRESENCE_DETECT));
+ 
     Status = gBS->CreateEvent (
-                    EFI_EVENT_NOTIFY_WAIT,
-                    TPL_NOTIFY,
-                    UsbMouseWaitForInput,
-                    UsbMouse,
-                    &((UsbMouse->SimplePointerProtocol).WaitForInput)
-                    );
+        EFI_EVENT_NOTIFY_WAIT,
+        EFI_TPL_NOTIFY,
+        UsbMouseWaitForInput,
+        UsbMouse,
+        &((UsbMouse->SimplePointerProtocol).WaitForInput)
+        );
     
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_4, "Mouse event is created, status = %r\n", Status);
     
@@ -167,65 +172,53 @@ InstallUSBMouse(
     // Install protocol interfaces for the USB mouse device
     //
     Status = gBS->InstallProtocolInterface(
-                    &Controller,
-                    &gEfiSimplePointerProtocolGuid,
-                    EFI_NATIVE_INTERFACE,
-                    &UsbMouse->SimplePointerProtocol);
+        &Controller,
+        &gEfiSimplePointerProtocolGuid,
+        EFI_NATIVE_INTERFACE,
+        &UsbMouse->SimplePointerProtocol);
 
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_4, "Mouse protocol is installed, status = %r\n", Status);
     
     ASSERT(Status == EFI_SUCCESS);
     
-    REPORT_STATUS_CODE(EFI_PROGRESS_CODE, (EFI_PERIPHERAL_MOUSE | EFI_P_PC_ENABLE));
 }
 
 /**
     Stops USB mouse device
-    
-    @param This                Pointer to driver binding protocol
-    @param Controller          Controller handle.
-    @param NumberOfChildren    Number of children in driver binding
-    @param Children            Pointer to children handle
-            
-    @retval EFI_STATUS         Status of the operation
+
 **/
 
 EFI_STATUS
 UninstallUSBMouse (
     EFI_DRIVER_BINDING_PROTOCOL *This,
-    EFI_HANDLE                  Controller,
-    UINTN                       NumberOfChildren,
-    EFI_HANDLE                  *Children
+    EFI_HANDLE Controller,
+    UINTN NumberOfChildren,
+    EFI_HANDLE *Children
 )
 {
-    EFI_STATUS                   Status;
-    EFI_SIMPLE_POINTER_PROTOCOL  *SimplePoint; 
-    USB_MOUSE_DEV                *UsbMouse = 0; 
+    EFI_STATUS Status;
+    EFI_SIMPLE_POINTER_PROTOCOL     *SimplePoint; 
+    USB_MOUSE_DEV       *UsbMouse = 0; 
  
 
     Status = gBS->OpenProtocol(Controller,
-                    &gEfiSimplePointerProtocolGuid,
-                    (VOID **)&SimplePoint,
-                    This->DriverBindingHandle,
-                    Controller,
-                    EFI_OPEN_PROTOCOL_GET_PROTOCOL); 
-    if (EFI_ERROR(Status)) {
-        return Status;
-    }
-    
-    REPORT_STATUS_CODE(EFI_PROGRESS_CODE, (EFI_PERIPHERAL_MOUSE | EFI_P_PC_DISABLE));
-    
+                                &gEfiSimplePointerProtocolGuid,
+                                (VOID **)&SimplePoint,
+                                This->DriverBindingHandle,
+                                Controller,
+                                EFI_OPEN_PROTOCOL_GET_PROTOCOL); 
+
     UsbMouse = USB_MOUSE_DEV_FROM_MOUSE_PROTOCOL(SimplePoint,SimplePointerProtocol);
     
     Status = gBS->UninstallProtocolInterface(Controller, &gEfiSimplePointerProtocolGuid,
-                    &UsbMouse->SimplePointerProtocol);
+                        &UsbMouse->SimplePointerProtocol);
     
     if (EFI_ERROR(Status)) {
         return Status;
     }
 
     Status = gBS->CloseEvent(
-                    (UsbMouse->SimplePointerProtocol).WaitForInput);
+            (UsbMouse->SimplePointerProtocol).WaitForInput);
     
     ASSERT(Status == EFI_SUCCESS);
 
@@ -245,12 +238,12 @@ UninstallUSBMouse (
     This routine is a part of SimplePointerProtocol implementation;
     it resets USB mouse.
 
-    @param This                  A pointer to the EFI_SIMPLE_POINTER_PROTOCOL instance.
-    @param ExtendedVerification  Indicates that the driver may perform
-                                 a more exhaustive verification operation of the device during
-                                 reset.
+    @param This - A pointer to the EFI_SIMPLE_POINTER_PROTOCOL instance.
+        ExtendedVerification - Indicates that the driver may perform
+        a more exhaustive verification operation of the device during
+        reset.
 
-    @retval EFI_SUCCESS          Success to reset USb mouse.
+    @retval EFI_SUCCESS or EFI_DEVICE_ERROR
 
 **/
 
@@ -261,11 +254,13 @@ UsbMouseReset(
     IN BOOLEAN                        ExtendedVerification
   )
 {
-    REPORT_STATUS_CODE(EFI_PROGRESS_CODE, (EFI_PERIPHERAL_MOUSE | EFI_P_PC_RESET));
-    SetMem (&MsState, sizeof(EFI_SIMPLE_POINTER_STATE), 0);
+    EfiZeroMem (
+        &MsState,
+        sizeof(EFI_SIMPLE_POINTER_STATE)
+        );
     StateChanged = FALSE;
     
-    SetMem (&gUsbData->MouseData, sizeof(MOUSE_DATA), 0);
+    EfiZeroMem (&gUsbData->MouseData, sizeof(MOUSE_DATA));
 
     return EFI_SUCCESS;
 }
@@ -275,16 +270,23 @@ UsbMouseReset(
     This routine is a part of SimplePointerProtocol implementation;
     it retrieves the current state of a pointer device.
 
-    @param This        A pointer to the EFI_SIMPLE_POINTER_PROTOCOL instance.
-    @param MouseState  A pointer to the state information on the pointer
-                       device.
- 
-    @retval EFI_SUCCESS    The state of the pointer device was returned
-                           in MouseState.
-    @retval EFI_NOT_READY  The state of the pointer device has not changed
-                           since the last call to GetMouseState().
+    @param This - A pointer to the EFI_SIMPLE_POINTER_PROTOCOL instance.
+        MouseState - A pointer to the state information on the pointer
+        device. Type EFI_SIMPLE_POINTER_STATE is defined as follows:
+        typedef struct {
+        INT32 RelativeMovementX;
+        INT32 RelativeMovementY;
+        INT32 RelativeMovementZ;
+        BOOLEAN LeftButton;
+        BOOLEAN RightButton;
+        } EFI_SIMPLE_POINTER_STATE;
+
+    @retval EFI_SUCCESS The state of the pointer device was returned
+        in MouseState.
+    @retval EFI_NOT_READY The state of the pointer device has not changed
+        since the last call to GetMouseState().
     @retval EFI_DEVICE_ERROR A device error occurred while attempting to
-                           retrieve the current state of mouse.
+        retrieve the pointer device’s current state.
 **/
 
 EFI_STATUS
@@ -314,24 +316,21 @@ GetMouseState(
 /**
     This routine updates current mouse data.
 
-    @param Data   pointer to the data area to be updated.
+    @param Data* - pointer to the data area to be updated.
 
-    @retval EFI_SUCCESS  Success to update usb mouse data
+    @retval EFI_SUCCESS
 
 **/
 
 EFI_STATUS
 UpdateUsbMouseData (
     EFI_SIMPLE_POINTER_PROTOCOL  *This,
-    EFI_SIMPLE_POINTER_STATE     *State
+	EFI_SIMPLE_POINTER_STATE	*State
 )
 {
-    BOOLEAN LeftButton;
-    BOOLEAN RightButton;
-    INT32   DataX;
-    INT32   DataY;
-    INT32   DataZ;
-    UINT8   Data;
+    BOOLEAN LeftButton, RightButton;
+    INT32   rX, rY, rZ;
+    UINT8   bData;
     EFI_STATUS  Status;
     UINT8   MouseData[4];
     UINTN   DataLength;
@@ -339,23 +338,23 @@ UpdateUsbMouseData (
     INT32   Coordinates;
     USB_MOUSE_DEV       *UsbMouse = 0; 
  
-    if ((gUsbData->UsbStateFlag & USB_FLAG_EFIMS_DIRECT_ACCESS) && (This != NULL) ){
+    if ((gUsbData->dUSBStateFlag & USB_FLAG_EFIMS_DIRECT_ACCESS) && (This != NULL) ){
         UsbMouse = USB_MOUSE_DEV_FROM_MOUSE_PROTOCOL(This,SimplePointerProtocol); 
         // Get the data from mouse
         DataLength = 4;
     
         Status = UsbMouse->UsbIo->UsbSyncInterruptTransfer(
-                                    UsbMouse->UsbIo,
-                                    UsbMouse->Endpoint | 0x80,    // IN
-                                    MouseData,
-                                    &DataLength,
-                                    0,  // Timeout
-                                   &UsbStatus
-                                   );
+            UsbMouse->UsbIo,
+            UsbMouse->Endpoint | 0x80,    // IN
+            MouseData,
+            &DataLength,
+            0,  // Timeout
+            &UsbStatus
+        );
 
-        if (EFI_ERROR(Status)) {
-            return EFI_DEVICE_ERROR;
-        }
+	    if (EFI_ERROR(Status)) {
+		    return EFI_DEVICE_ERROR;
+	    }
     
         gUsbData->MouseData.ButtonStatus = MouseData[0];
     
@@ -365,48 +364,48 @@ UpdateUsbMouseData (
         gUsbData->MouseData.MouseY += Coordinates;
      }
 
-    Data = gUsbData->MouseData.ButtonStatus & 7;
+    bData = gUsbData->MouseData.ButtonStatus & 7;
 
     //
     // Check mouse Data
     //
-    LeftButton=(BOOLEAN)(Data & 0x01)?TRUE:FALSE;
-    RightButton=(BOOLEAN)(Data & 0x02)?TRUE:FALSE;
-    
-    DataX = gUsbData->MouseData.MouseX;
-    DataY = gUsbData->MouseData.MouseY;
-    DataZ = - (gUsbData->MouseData.MouseZ);
-    
-    if (StateChanged == FALSE) {
-        if (DataX == 0 && DataY == 0 && DataZ == 0 && 
-            Data == ButtonsState) {
-            return EFI_NOT_READY;
-        }
+	LeftButton=(BOOLEAN)(bData & 0x01)?TRUE:FALSE;
+	RightButton=(BOOLEAN)(bData & 0x02)?TRUE:FALSE;
+
+    rX = gUsbData->MouseData.MouseX;
+    rY = gUsbData->MouseData.MouseY;
+    rZ = - (gUsbData->MouseData.MouseZ);
+
+	if (StateChanged == FALSE) {
+		if (rX == 0 && rY == 0 && rZ == 0 && 
+			bData == ButtonsState) {
+			return EFI_NOT_READY;
+		}
         StateChanged = TRUE;
-    }
+	}
 
     gUsbData->MouseData.MouseX=0;
     gUsbData->MouseData.MouseY=0;
     gUsbData->MouseData.MouseZ=0;
 
-    ButtonsState = Data;
+    ButtonsState = bData;
     MsState.LeftButton = LeftButton;
     MsState.RightButton = RightButton;
-    MsState.RelativeMovementX += DataX;
-    MsState.RelativeMovementY += DataY;
-    MsState.RelativeMovementZ += DataZ; 
+    MsState.RelativeMovementX += rX;
+    MsState.RelativeMovementY += rY;
+    MsState.RelativeMovementZ += rZ; 
 
 
-    if (State != NULL) {
-        CopyMem(State, &MsState, sizeof(EFI_SIMPLE_POINTER_STATE));
-        //
-        // Clear previous move state
-        //
+	if (State != NULL) {
+		EfiCopyMem(State, &MsState, sizeof(EFI_SIMPLE_POINTER_STATE));
+	    //
+	    // Clear previous move state
+	    //
         MsState.RelativeMovementX = 0;
         MsState.RelativeMovementY = 0;
         MsState.RelativeMovementZ = 0;  
         StateChanged = FALSE;
-    }
+	}
 
     return EFI_SUCCESS;
 }
@@ -416,8 +415,10 @@ UpdateUsbMouseData (
     Event notification function for SIMPLE_POINTER.WaitForInput
     event. Signal the event if there is input from mouse.
 
-    @param Event    event to signal in case of mouse activity
-    @param Context  data to pass along with the event.
+    @param Event - event to signal in case of mouse activity
+        Context - data to pass along with the event.
+
+    @retval VOID
 
 **/
 
@@ -428,13 +429,13 @@ UsbMouseWaitForInput (
     VOID        *Context
     )
 {
-    EFI_STATUS    Status;
-    USB_MOUSE_DEV *UsbMouse = (USB_MOUSE_DEV*)Context; 
+	EFI_STATUS Status;
+    USB_MOUSE_DEV       *UsbMouse = (USB_MOUSE_DEV*)Context; 
 
     Status = UpdateUsbMouseData (&UsbMouse->SimplePointerProtocol,NULL);
-    if (EFI_ERROR(Status)) {
-        return;
-    }
+	if (EFI_ERROR(Status)) {
+		return;
+	}
 
     //
     // Someone is waiting on the mouse event, if there's
@@ -449,22 +450,6 @@ UsbMouseWaitForInput (
 /**
     Initialize USB Mouse driver
 
-    @param Controller       The handle of a controller that the driver specified by
-                            This is managing.  This handle specifies the controller
-                            whose name is to be returned.
-    @param Child            The handle of the child controller to retrieve the name
-                            of.  This is an optional parameter that may be NULL.  It
-                            will be NULL for device drivers.  It will also be NULL
-                            for a bus drivers that wish to retrieve the name of the
-                            bus controller.  It will not be NULL for a bus driver
-                            that wishes to retrieve the name of a child controller.
-                            Language         - A pointer to a three character ISO 639-2 language
-                            identifier.  This is the language of the controller name
-                            that that the caller is requesting, and it must match one
-                            of the languages specified in SupportedLanguages.  The
-                            number of languages supported by a driver is up to the
-                            driver writer.
-    @retval NULL            No controller name
 **/
 
 CHAR16*
@@ -479,7 +464,7 @@ UsbMsGetControllerName(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

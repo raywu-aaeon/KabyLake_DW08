@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -20,31 +20,12 @@
     PEIM
 
 **/
-/**
-Usb Hub Request Support In PEI Phase
 
-Copyright (c) 2006 - 2014, Intel Corporation. All rights reserved.<BR>
-  
-This program and the accompanying materials
-are licensed and made available under the terms and conditions
-of the BSD License which accompanies this distribution.  The
-full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
-**/
 //#include "HubPeim.h"
 #include "UsbPei.h"
 //#include "PeiUsbLib.h"
 
 #include "Ppi/Stall.h"
-#include <Ppi/IoMmu.h>
-#include <Library/DebugLib.h>
-
-extern EDKII_IOMMU_PPI *gEdk2IoMmuPpi;
-UINT32    *gHubPortStatusPtr = NULL;
 
 typedef struct {
 	UINT32	HubPortStatus;
@@ -119,36 +100,19 @@ EFI_STATUS PeiHubGetPortStatus (
     IN  UINT8               Port,
     OUT UINT32              *PortStatus )
 {
-    EFI_USB_DEVICE_REQUEST  DevReq;
-    PEI_USB_DEVICE          *PeiUsbDev;
-    EFI_STATUS              EfiStatus;
-    UINT32                  HubPortStatus = 0;
-    UINT32                  Timeout;
-    EFI_USB_PORT_STATUS_MAP *PortStatusMap;
-    UINT8                   Index;
-    UINT8                   Count;
-    UINT32                  UsbStatus;
-    EFI_STATUS              Status;
+    EFI_USB_DEVICE_REQUEST DevReq;
+	PEI_USB_DEVICE *PeiUsbDev;
+    EFI_STATUS EfiStatus;
+	UINT32 HubPortStatus = 0;
+	UINT32 Timeout;
+	EFI_USB_PORT_STATUS_MAP	*PortStatusMap;
+	UINT8	Index;
+	UINT8	Count;
+    UINT32  UsbStatus;
 
-    PeiUsbDev = PEI_USB_DEVICE_FROM_THIS( UsbIoPpi );
+	PeiUsbDev = PEI_USB_DEVICE_FROM_THIS( UsbIoPpi );
+//    ZeroMem( &DevReq, sizeof(EFI_USB_DEVICE_REQUEST) );
     (*PeiServices)->SetMem(&DevReq, sizeof(EFI_USB_DEVICE_REQUEST), 0);
-    if (gEdk2IoMmuPpi) {
-        if (gHubPortStatusPtr == NULL) {
-            Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                        gEdk2IoMmuPpi,
-                                        EfiRuntimeServicesData,
-                                        1,
-                                        (VOID**)&gHubPortStatusPtr,
-                                        EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                        );
-            if (EFI_ERROR(Status)) {
-                return EFI_OUT_OF_RESOURCES;
-            }
-        }
-        (*PeiServices)->SetMem(gHubPortStatusPtr, sizeof(UINT32), 0);
-    } else {
-        gHubPortStatusPtr = &HubPortStatus;
-    }
 
     //
     // Fill Device request packet
@@ -167,7 +131,7 @@ EFI_STATUS PeiHubGetPortStatus (
         &DevReq,
         EfiUsbDataIn,
         Timeout,
-        gHubPortStatusPtr,
+        &HubPortStatus,
         sizeof(UINT32),
         &UsbStatus
                 );
@@ -182,7 +146,7 @@ EFI_STATUS PeiHubGetPortStatus (
     }
 
     for (*PortStatus = 0, Index = 0; Index < Count; Index++) {
-        if ((*gHubPortStatusPtr) & PortStatusMap[Index].HubPortStatus) {
+        if (HubPortStatus & PortStatusMap[Index].HubPortStatus) {
             *PortStatus |= PortStatusMap[Index].EfiPortStatus;
         }
     }
@@ -598,13 +562,12 @@ EFI_STATUS PeiDoHubConfig (
 
    --*/
 {
-    EFI_USB_HUB_DESCRIPTOR  HubDescriptor;
-    EFI_STATUS              Status;
-    EFI_USB_HUB_STATUS      HubStatus;
-    UINTN                   Index;
-    UINT32                  PortStatus;
-    PEI_USB_IO_PPI          *UsbIoPpi;
-    EFI_USB_HUB_DESCRIPTOR  *HubDescriptorPtr = NULL;
+    EFI_USB_HUB_DESCRIPTOR HubDescriptor;
+    EFI_STATUS Status;
+    EFI_USB_HUB_STATUS     HubStatus;
+    UINTN  i;
+    UINT32 PortStatus;
+    PEI_USB_IO_PPI *UsbIoPpi;
 
 //(EIP67320+)>
     EFI_PEI_STALL_PPI       *PeiStall;      //(EIP68971)
@@ -613,7 +576,7 @@ EFI_STATUS PeiDoHubConfig (
         &gEfiPeiStallPpiGuid,
         0,
         NULL,
-        (VOID**)&PeiStall
+        &PeiStall
     );
 //<(EIP67320+)
 
@@ -629,36 +592,21 @@ EFI_STATUS PeiDoHubConfig (
 		return EFI_DEVICE_ERROR;
 	}
 
-    if (gEdk2IoMmuPpi) {
-            Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                        gEdk2IoMmuPpi,
-                                        EfiRuntimeServicesData,
-                                        1,
-                                        (VOID**)&HubDescriptorPtr,
-                                        EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                        );
-            if (EFI_ERROR(Status)) {
-                return EFI_OUT_OF_RESOURCES;
-            }
-        (*PeiServices)->SetMem(HubDescriptorPtr, sizeof(EFI_USB_HUB_DESCRIPTOR), 0);
-    } else {
-        HubDescriptorPtr = &HubDescriptor;
-    }
     //
     // First get the whole descriptor, then
     // get the number of hub ports
     //
     Status = PeiGetHubDescriptor(
-                 PeiServices,
-                 UsbIoPpi,
-                 sizeof(EFI_USB_HUB_DESCRIPTOR),
-                 HubDescriptorPtr
-                 );
+        PeiServices,
+        UsbIoPpi,
+        sizeof(EFI_USB_HUB_DESCRIPTOR),
+        &HubDescriptor
+             );
     if ( EFI_ERROR( Status ) ) {
         return EFI_DEVICE_ERROR;
     }
 
-    PeiUsbDevice->DownStreamPortNo = HubDescriptorPtr->NbrPorts;
+    PeiUsbDevice->DownStreamPortNo = HubDescriptor.NbrPorts;
 
     Status = PeiHubGetHubStatus( PeiServices,
         UsbIoPpi,
@@ -672,12 +620,12 @@ EFI_STATUS PeiDoHubConfig (
     //
     //  Get all hub ports status
     //
-    for (Index = 0; Index < PeiUsbDevice->DownStreamPortNo; Index++) {
+    for (i = 0; i < PeiUsbDevice->DownStreamPortNo; i++) {
         Status = PeiHubGetPortStatus( PeiServices,
-                     UsbIoPpi,
-                     (UINT8)(Index + 1),
-                     &PortStatus
-                     );
+            UsbIoPpi,
+            (UINT8) (i + 1),
+            &PortStatus
+                 );
         if ( EFI_ERROR( Status ) ) {
             continue;
         }
@@ -686,12 +634,12 @@ EFI_STATUS PeiDoHubConfig (
     //
     //  Power all the hub ports
     //
-    for (Index = 0; Index < PeiUsbDevice->DownStreamPortNo; Index++) {
+    for (i = 0; i < PeiUsbDevice->DownStreamPortNo; i++) {
         Status = PeiHubSetPortFeature( PeiServices,
-                     UsbIoPpi,
-                     (UINT8)(Index + 1),
-                     EfiUsbPortPower
-                     );
+            UsbIoPpi,
+            (UINT8) (i + 1),
+            EfiUsbPortPower
+                 );
         if ( EFI_ERROR( Status ) ) {
             continue;
         }
@@ -728,14 +676,7 @@ EFI_STATUS PeiDoHubConfig (
             );
         }
     }
-    PeiStall->Stall( PeiServices, PeiStall, (HubDescriptorPtr->PwrOn2PwrGood << 1) *1000);  //(EIP67320)
-    if (gEdk2IoMmuPpi) {
-        gEdk2IoMmuPpi->FreeBuffer (
-                           gEdk2IoMmuPpi,
-                           1,
-                           (VOID*)HubDescriptorPtr
-                           );
-    }
+    PeiStall->Stall( PeiServices, PeiStall, (HubDescriptor.PwrOn2PwrGood << 1) *1000);  //(EIP67320)
     return EFI_SUCCESS;
 
 }
@@ -759,7 +700,7 @@ VOID PeiResetHubPort (
         &gEfiPeiStallPpiGuid,
         0,
         NULL,
-        (VOID**)&PeiStall
+        &PeiStall
     );
 
     //
@@ -808,7 +749,7 @@ VOID PeiResetHubPort (
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

@@ -1,7 +1,7 @@
 #**********************************************************************
 #**********************************************************************
 #**                                                                  **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**        (C)Copyright 1985-2012, American Megatrends, Inc.         **
 #**                                                                  **
 #**                       All Rights Reserved.                       **
 #**                                                                  **
@@ -27,24 +27,10 @@
   MdePkg/MdePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-
-[LibraryClasses]
-  UefiBootServicesTableLib
-  DebugLib
+#  MdePkg/MdePkg.dec
+#  MdeModulePkg/MdeModulePkg.dec
+#  IntelFrameworkPkg/IntelFrameworkPkg.dec
 
 [Protocols]
   gEfiUsbProtocolGuid
 
-#**********************************************************************
-#**********************************************************************
-#**                                                                  **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
-#**                                                                  **
-#**                       All Rights Reserved.                       **
-#**                                                                  **
-#**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
-#**                                                                  **
-#**                       Phone: (770)-246-8600                      **
-#**                                                                  **
-#**********************************************************************
-#**********************************************************************

@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -16,28 +16,13 @@
     PEI USB functions library
 
 **/
-/**
-Common Libarary for PEI USB
 
-Copyright (c) 2006 - 2014, Intel Corporation. All rights reserved. <BR>
-  
-This program and the accompanying materials
-are licensed and made available under the terms and conditions
-of the BSD License which accompanies this distribution.  The
-full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
-**/
 #include <Token.h>
 #include "UsbPei.h"
 #include <Library/DebugLib.h>
 
 #if USB_PEI_KEYBOARD_SUPPORT  
 #include <Ppi/AmiKeyCodePpi.h>
-#include <Ppi/IoMmu.h>
 
 extern EFI_PEI_AMIKEYCODE_DATA gKeys[PEI_MAX_USB_KEYS];
 extern EFI_PEI_AMIKEYCODE_DATA *gKeysHead;
@@ -45,7 +30,6 @@ extern EFI_PEI_AMIKEYCODE_DATA *gKeysTail;
 extern UINT8 gCapsLockOn;
 extern UINT8 gNumLockOn;
 extern UINT8 gScrlLockOn;
-extern EDKII_IOMMU_PPI         *gEdk2IoMmuPpi;
 
 #define USB_KEYCODE_MAX_MAKE    0x64
 
@@ -120,11 +104,11 @@ UINT8 KeyConversionTable[USB_KEYCODE_MAX_MAKE][4] = {
     EFI_SCAN_F8,        0x00,   0x00,   0x42,   // 0x41
     EFI_SCAN_F9,        0x00,   0x00,   0x43,   // 0x42
     EFI_SCAN_F10,       0x00,   0x00,   0x44,   // 0x43
-    EFI_SCAN_F11,       0x00,   0x00,   0x57,   // 0x44   F11
-    EFI_SCAN_F12,       0x00,   0x00,   0x58,   // 0x45   F12
+    EFI_SCAN_F11,       0x00,   0x00,   0x85,   // 0x44   F11
+    EFI_SCAN_F12,       0x00,   0x00,   0x86,   // 0x45   F12
     EFI_SCAN_NULL,      0x00,   0x00,   0x00,   // 0x46   PrintScreen
     EFI_SCAN_NULL,      0x00,   0x00,   0x46,   // 0x47   Scroll Lock
-    EFI_SCAN_NULL,      0x00,   0x00,   0x00,   // 0x48   Pause // EFI scan code 0x48 undefined
+    EFI_SCAN_NULL,      0x00,   0x00,   0x00,   // 0x48   Pause
     EFI_SCAN_INS,       0x00,   0x00,   0x52,   // 0x49
     EFI_SCAN_HOME,      0x00,   0x00,   0x47,   // 0x4A
     EFI_SCAN_PGUP,      0x00,   0x00,   0x49,   // 0x4B
@@ -136,7 +120,7 @@ UINT8 KeyConversionTable[USB_KEYCODE_MAX_MAKE][4] = {
     EFI_SCAN_DN,        0x00,   0x00,   0x50,   // 0x51
     EFI_SCAN_UP,        0x00,   0x00,   0x48,   // 0x52
     EFI_SCAN_NULL,      0x00,   0x00,   0x45,   // 0x53   NumLock
-    EFI_SCAN_NULL,      '/',    '/',    0x35,   // 0x54
+    EFI_SCAN_NULL,      '/',    '/',    0x35,   //  0x54
     EFI_SCAN_NULL,      '*',    '*',    0x37,   // 0x55
     EFI_SCAN_NULL,      '-',    '-',    0x4a,   // 0x56
     EFI_SCAN_NULL,      '+',    '+',    0x4e,   // 0x57
@@ -152,52 +136,52 @@ UINT8 KeyConversionTable[USB_KEYCODE_MAX_MAKE][4] = {
     EFI_SCAN_PGUP,      '9',    '9',    0x49,   // 0x61
     EFI_SCAN_INS,       '0',    '0',    0x52,   // 0x62
     EFI_SCAN_DEL,       '.',    '.',    0x53,   // 0x63
-    EFI_SCAN_NULL,      '\\',   '|',    0x56,   // 0x64 Keyboard Non-US \ and |
+    EFI_SCAN_NULL,      '\\',   '|',    0x2b,   // 0x64 Keyboard Non-US \ and |
     EFI_SCAN_NULL,      0x00,   0x00,   0x00,   // 0x65 Keyboard Application
     EFI_SCAN_NULL,      0x00,   0x00,   0x00,   // 0x66 Keyboard Power
-    EFI_SCAN_NULL,      '=' ,   '=',    0x59    // 0x67 Keypad =
+    EFI_SCAN_NULL,      '=' ,   '=',    0x0d    // 0x67 Keypad =
  };
 
 UINT8 UsbToEfiKeyTable[USB_KEYCODE_MAX_MAKE] = {
-    EfiKeyC1,       //   'a',    'A',    0x1e,   // 0x04
-    EfiKeyB5,       //   'b',    'B',    0x30,   // 0x05
-    EfiKeyB3,       //   'c',    'C',    0x2e,   // 0x06
-    EfiKeyC3,       //   'd',    'D',    0x20,   // 0x07
-    EfiKeyD3,       //   'e',    'E',    0x12,   // 0x08
-    EfiKeyC4,       //   'f',    'F',    0x21,   // 0x09
-    EfiKeyC5,       //   'g',    'G',    0x22,   // 0x0A
-    EfiKeyC6,       //   'h',    'H',    0x23,   // 0x0B
-    EfiKeyD8,       //   'i',    'I',    0x17,   // 0x0C
-    EfiKeyC7,       //   'j',    'J',    0x24,   // 0x0D
-    EfiKeyC8,       //   'k',    'K',    0x25,   // 0x0E
-    EfiKeyC9,       //   'l',    'L',    0x26,   // 0x0F
-    EfiKeyB7,       //   'm',    'M',    0x32,   // 0x10
-    EfiKeyB6,       //   'n',    'N',    0x31,   // 0x11
-    EfiKeyD9,       //   'o',    'O',    0x18,   // 0x12
-    EfiKeyD10,      //   'p',    'P',    0x19,   // 0x13
-    EfiKeyD1,       //   'q',    'Q',    0x10,   // 0x14
-    EfiKeyD4,       //   'r',    'R',    0x13,   // 0x15
-    EfiKeyC2,       //   's',    'S',    0x1f,   // 0x16
-    EfiKeyD5,       //   't',    'T',    0x14,   // 0x17
-    EfiKeyD7,       //   'u',    'U',    0x16,   // 0x18
-    EfiKeyB4,       //   'v',    'V',    0x2f,   // 0x19
-    EfiKeyD2,       //   'w',    'W',    0x11,   // 0x1A
-    EfiKeyB2,       //   'x',    'X',    0x2d,   // 0x1B
-    EfiKeyD6,       //   'y',    'Y',    0x15,   // 0x1C
-    EfiKeyB1,       //   'z',    'Z',    0x2c,   // 0x1D
-    EfiKeyE1,       //   '1',    '!',    0x02,   // 0x1E
-    EfiKeyE2,       //   '2',    '@',    0x03,   // 0x1F
-    EfiKeyE3,       //   '3',    '#',    0x04,   // 0x20
-    EfiKeyE4,       //   '4',    '$',    0x05,   // 0x21
-    EfiKeyE5,       //   '5',    '%',    0x06,   // 0x22
-    EfiKeyE6,       //   '6',    '^',    0x07,   // 0x23
-    EfiKeyE7,       //   '7',    '&',    0x08,   // 0x24
-    EfiKeyE8,       //   '8',    '*',    0x09,   // 0x25
-    EfiKeyE9,       //   '9',    '(',    0x0a,   // 0x26
-    EfiKeyE10,      //   '0',    ')',    0x0b,   // 0x27
-    EfiKeyEnter,    //   0x0d,   0x0d,   0x1c,   // 0x28   Enter
-    EfiKeyEsc,      //   0x00,   0x00,   0x01,   // 0x29   Esc
-    EfiKeyBackSpace,//   0x08,   0x08,   0x0e,   // 0x2A   Backspace
+    EfiKeyC1, //      'a',    'A',    0x1e,   // 0x04
+    EfiKeyB5, //      'b',    'B',    0x30,   // 0x05
+    EfiKeyB3, //      'c',    'C',    0x2e,   // 0x06
+    EfiKeyC3, //      'd',    'D',    0x20,   // 0x07
+    EfiKeyD3, //      'e',    'E',    0x12,   // 0x08
+    EfiKeyC4, //      'f',    'F',    0x21,   // 0x09
+    EfiKeyC5, //      'g',    'G',    0x22,   // 0x0A
+    EfiKeyC6, //      'h',    'H',    0x23,   // 0x0B
+    EfiKeyD8, //      'i',    'I',    0x17,   // 0x0C
+    EfiKeyC7, //      'j',    'J',    0x24,   // 0x0D
+    EfiKeyC8, //      'k',    'K',    0x25,   // 0x0E
+    EfiKeyC9, //      'l',    'L',    0x26,   // 0x0F
+    EfiKeyB7, //      'm',    'M',    0x32,   // 0x10
+    EfiKeyB6, //      'n',    'N',    0x31,   // 0x11
+    EfiKeyD9, //      'o',    'O',    0x18,   // 0x12
+    EfiKeyD10,//       'p',    'P',    0x19,   // 0x13
+    EfiKeyD1, //      'q',    'Q',    0x10,   // 0x14
+    EfiKeyD4, //      'r',    'R',    0x13,   // 0x15
+    EfiKeyC2, //      's',    'S',    0x1f,   // 0x16
+    EfiKeyD5, //      't',    'T',    0x14,   // 0x17
+    EfiKeyD7, //      'u',    'U',    0x16,   // 0x18
+    EfiKeyB4, //      'v',    'V',    0x2f,   // 0x19
+    EfiKeyD2, //      'w',    'W',    0x11,   // 0x1A
+    EfiKeyB2, //      'x',    'X',    0x2d,   // 0x1B
+    EfiKeyD6, //      'y',    'Y',    0x15,   // 0x1C
+    EfiKeyB1, //      'z',    'Z',    0x2c,   // 0x1D
+    EfiKeyE1, //      '1',    '!',    0x02,   // 0x1E
+    EfiKeyE2, //      '2',    '@',    0x03,   // 0x1F
+    EfiKeyE3, //      '3',    '#',    0x04,   // 0x20
+    EfiKeyE4, //      '4',    '$',    0x05,   // 0x21
+    EfiKeyE5, //      '5',    '%',    0x06,   // 0x22
+    EfiKeyE6, //      '6',    '^',    0x07,   // 0x23
+    EfiKeyE7, //      '7',    '&',    0x08,   // 0x24
+    EfiKeyE8, //      '8',    '*',    0x09,   // 0x25
+    EfiKeyE9, //      '9',    '(',    0x0a,   // 0x26
+    EfiKeyE10,  //       '0',    ')',    0x0b,   // 0x27
+    EfiKeyEnter,//       0x0d,   0x0d,   0x1c,   // 0x28   Enter
+    EfiKeyEsc,  //      0x00,   0x00,   0x01,   // 0x29   Esc
+    EfiKeyBackSpace,    //       0x08,   0x08,   0x0e,   // 0x2A   Backspace
     EfiKeyTab,      //   0x09,   0x09,   0x0f,   // 0x2B   Tab
     EfiKeySpaceBar, //   ' ',    ' ',    0x39,   // 0x2C   Spacebar
     EfiKeyE11,      //   '-',    '_',    0x0c,   // 0x2D
@@ -223,8 +207,8 @@ UINT8 UsbToEfiKeyTable[USB_KEYCODE_MAX_MAKE] = {
     EfiKeyF8,       //   0x00,   0x00,   0x42,   // 0x41
     EfiKeyF9,       //   0x00,   0x00,   0x43,   // 0x42
     EfiKeyF10,      //   0x00,   0x00,   0x44,   // 0x43
-    EfiKeyF11,      //   0x00,   0x00,   0x57,   // 0x44   F11
-    EfiKeyF12,      //   0x00,   0x00,   0x58,   // 0x45   F12
+    EfiKeyF11,      //   0x00,   0x00,   0x85,   // 0x44   F11
+    EfiKeyF12,      //   0x00,   0x00,   0x86,   // 0x45   F12
     EfiKeyPrint,    //   0x00,   0x00,   0x00,   // 0x46   PrintScreen
     EfiKeySLck,     //   0x00,   0x00,   0x00,   // 0x47   Scroll Lock
     EfiKeyPause,    //   0x00,   0x00,   0x00,   // 0x48   Pause
@@ -255,10 +239,10 @@ UINT8 UsbToEfiKeyTable[USB_KEYCODE_MAX_MAKE] = {
     EfiKeyNine,       // '9',    '9',    0x0a,   // 0x61
     EfiKeyZero,       // '0',    '0',    0x0b,   // 0x62
     EfiKeyPeriod,     // '.',    '.',    0x53,   // 0x63
-    EfiKeyB0,         // '\\',   '|',    0x56,   // 0x64 Keyboard Non-US \ and |
-    EfiKeyA4,         // 0x00,   0x00,   0x00,   // 0x65 Keyboard Application
-    0,                // 0x00,   0x00,   0x00,   // 0x66 Keyboard Power
-    0                 // '=' ,   '=',    0x59,   // 0x67 Keypad =
+    EfiKeyD13,        // '\\',   '|',    0x2b,   // 0x64 Keyboard Non-US \ and |
+    0,               // 0x00,    0x00,   0x00,   // 0x65 Keyboard Application
+    0,               // 0x00,    0x00,   0x00,   // 0x66 Keyboard Power
+    0                // '=' ,    '=',    0x0d    // 0x67 Keypad =
 };
 
 #endif
@@ -905,43 +889,15 @@ EFI_STATUS PeiUsbLibLightenKbLeds(
     IN PEI_USB_IO_PPI   *UsbIoPpi
 )
 {
-    UINT8                   ModifierReportByte = 0;
-    UINT32                  UsbStatus;
-    EFI_STATUS              Status;
-    UINT8                   *Data8;
+    UINT8   ModifierReportByte = 0;
+    UINT32  UsbStatus;
 
-    if (gEdk2IoMmuPpi) {
-        Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                    gEdk2IoMmuPpi,
-                                    EfiRuntimeServicesData,
-                                    1,
-                                    (VOID**)&Data8,
-                                    EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                    );
-        if (EFI_ERROR(Status)) {
-            return EFI_OUT_OF_RESOURCES;
-        }
-        (*PeiServices)->SetMem((VOID*)Data8, sizeof(UINT8), 0);
-    } else {
-        Data8 = &ModifierReportByte;
-    }
+    if (gNumLockOn) ModifierReportByte |= 1;
+    if (gCapsLockOn) ModifierReportByte |= 2;
+    if (gScrlLockOn) ModifierReportByte |= 4;
 
-    if (gNumLockOn) (*Data8) |= HID_LED_NUM_LOCK;
-    if (gCapsLockOn) (*Data8) |= HID_LED_CAP_LOCK;
-    if (gScrlLockOn) (*Data8) |= HID_LED_SCROLL_LOCK;
-
-    Status = PeiUsbIoControlTransfer(PeiServices, UsbIoPpi,
-        (UINT16)HID_RQ_SET_REPORT, 0, 0x200, Data8, 1, &UsbStatus);
-
-    if (gEdk2IoMmuPpi) {
-        gEdk2IoMmuPpi->FreeBuffer (
-                           gEdk2IoMmuPpi,
-                           1,
-                           (VOID*)Data8
-                           );
-    }
-
-    return Status;
+    return PeiUsbIoControlTransfer(PeiServices, UsbIoPpi,
+        (UINT16)HID_RQ_SET_REPORT, 0, 0x200, &ModifierReportByte, 1, &UsbStatus);
 }
 
 
@@ -1069,7 +1025,7 @@ VOID PeiUsbLibProcessKeypress(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

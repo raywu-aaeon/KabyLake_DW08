@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -20,243 +20,253 @@
 
 #include <Uefi.h>
 #include <Library/SmmServicesTableLib.h>
+#include <Library/DebugLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/AmiBufferValidationLib.h>
-#include <AmiDef.h>
-#include <UsbDef.h>
-#include <Xhci.h>
+#include "../Rt/UsbDef.h"
+#include "../Rt/Xhci.h"
 #include <Library/AmiUsbSmmGlobalDataValidationLib.h>
 
-USB_DATA_LIST           **gUsbDataListAddr   = NULL;
-USB_GLOBAL_DATA         **gUsbGlobdaDataAddr = NULL;
-UINT8                   *gUsbDataInSmmAddr   = NULL;
-UINT8                   gValidateErrorCode   = 0;
+extern UINT32  mCrcTable[256];
+extern EFI_STATUS EFIAPI RuntimeDriverCalculateCrc32(VOID *, UINTN, UINT32*);
+extern VOID RuntimeDriverInitializeCrc32Table(VOID);
 
-/**
-    This function Check Usb Smm Global Data.
-    @param  None
-    @retval EFI_STATUS  Status of the operation
+AMI_USB_SMM_PROTOCOL	*gAmiUsbSmmProtocol = NULL;
 
-**/
+typedef struct {
+    UINT32                  UsbLegSupOffSet;
+    XHCI_DCBAA              *DcbaaPtr;
+    TRB_RING                *XfrRings;
+    UINTN                   XfrTrbs;
+    VOID					*DeviceContext;
+    VOID					*InputContext;
+    UINT64                  *ScratchBufEntry;
+    UINT32                  HashValue;
+    UINT8					ContextSize;
+    XHCI_HC_CAP_REGS        CapRegs;
+} USB3_HC_CONSTANT_DATA;
+
+typedef struct {
+    UINT8           HcType;
+    UINT8           OpRegOffset;
+    UINT8           ExtCapPtr;
+    UINT16          BusDevFuncNum;
+    UINT16          AsyncListSize;
+    UINT32          *FrameList;
+    UINTN           BaseAddressSize;
+    VOID            *UsbBusData;
+    VOID            *IsocTds;
+    UINT32          HashValue;
+} USB_HC_CONSTANT_DATA;
+
+typedef struct {
+    HCD_HEADER                  HcdriverTable[MAX_HC_TYPES];
+    DEV_DRIVER                  DevDriverTable[MAX_DEVICE_TYPES];
+    DEV_DRIVER                  DelayedDrivers[MAX_DEVICE_TYPES];
+    CALLBACK_FUNC               CallBackFunctionTable[MAX_CALLBACK_FUNCTION];
+    UINT8                       *MemBlockStart;
+    UINT32			            MemPages;
+    UINT8                       *UsbTempBuffer;
+    UINT8                       *UsbMassConsumeBuffer;
+    UINT32                      *MemBlkSts;
+    UINTN                       PciExpressBaseAddress;
+    VOID                        *QueueCnnctDiscData;
+    int                         QueueCnnctDiscMaxSize;
+    VOID                        *IccQueueCnnctDiscData;
+    int                         IccQueueCnnctDiscMaxSize;
+    UINT32                      HashValue;
+} USB_CONSTANT_DATA;
+
 EFI_STATUS
-CheckAmiUsbSmmGlobalData(
+CalculateUsbGlobalConstantDataCrc32(
+    USB_GLOBAL_DATA         *UsbData,
+    UINT32                  *Crc32
 )
 {
+    USB_CONSTANT_DATA           UsbConStantData = {0};
     UINTN                       Index = 0;
     HC_STRUC                    *HcStruc;
     USB3_HOST_CONTROLLER        *Usb3Hc = NULL;
     UINTN                       HcInitializedNumber = 0;
     UINTN                       Usb3HcInitializedNumber = 0;
+    UINTN                       HcStrucDataIndex = 0;
+    UINTN                       Usb3HcStrucDataIndex = 0;
+    USB_HC_CONSTANT_DATA        *HcStrucData = NULL;
+    USB3_HC_CONSTANT_DATA       *Usb3HcStrucData = NULL;
     EFI_STATUS                  Status;
-    UINT32                      FrameListSize;
-    UINTN                       DeviceContextSize;
-    UINTN                       XfrRingsSize;
-    UINT16                      NumBufs;
-    UINT16                      Count;
-    VOID                        *Buffer;
-    USB_DATA_LIST               *UsbDataList   = (USB_DATA_LIST*)*gUsbDataListAddr;
-    USB_GLOBAL_DATA             *UsbGlobdaData = (USB_GLOBAL_DATA*)*gUsbGlobdaDataAddr;
-    SMM_VALIDATE_STRUCT         SmmVaildateStruct[]={
-  //  BufferInRuntime,                       BufferInSmm              VaildateSize                   ErrorCode
-  //============================================================================================================================
-  { (VOID*)UsbGlobdaData,                    (VOID*)UsbGlobdaData,    sizeof(USB_GLOBAL_DATA),           VALIDATE_USB_GLOBAL_DATA},
-  { (VOID*)UsbDataList,                      (VOID*)UsbDataList,      sizeof(USB_DATA_LIST),             VALIDATE_USB_DATA_LIST  },
-  { (VOID*)UsbDataList->MemBlockStart,       0,                       UsbGlobdaData->MemPages << 12,     VALIDATE_USB_MEM_BLOCK  },
-  { (VOID*)UsbDataList->MemBlkSts,           0, ((UsbGlobdaData->MemPages << 12) / sizeof(MEM_BLK)) / 8, VALIDATE_USB_MEM_BLOCK_STATUS},
-  { (VOID*)UsbDataList->UsbTempBuffer,       0,                       MAX_TEMP_BUFFER_SIZE,              VALIDATE_USB_TEMP_BUFFER},
-  { (VOID*)UsbDataList->UsbMassConsumeBuffer,0,                       MAX_CONSUME_BUFFER_SIZE,           VALIDATE_USB_MASS_MEM_BUFFER},
-  { (VOID*)UsbDataList->UsbTimingPolicy,     0,                       sizeof(USB_TIMING_POLICY),         VALIDATE_USB_TIMING_POLICY},
-  { (VOID*)UsbDataList->UsbSetupData,        0,                       sizeof(USB_SUPPORT_SETUP),         VALIDATE_USB_SETUP_DATA},
-  { (VOID*)UsbDataList->UsbSkipListTable,    0, UsbGlobdaData->MaxSkipListCount * sizeof(USB_SKIP_LIST), VALIDATE_USB_SKIP_LIST},
-  { (VOID*)UsbDataList->DevInfoTable,        0,    UsbGlobdaData->MaxDevCount * sizeof(DEV_INFO),        VALIDATE_DEVICE_TABLE},
-  { (VOID*)UsbDataList->UsbKbDeviceTable,    0,    UsbGlobdaData->MaxHidCount * sizeof(DEV_INFO*),       VALIDATE_KB_DEVICE_TABLE},
-  };
+    UINT32                      Crc32Value[3] = {0};
 
-    // Vaildate Usb buffer pointer.
-    for (Index = 0; Index < sizeof(SmmVaildateStruct)/sizeof(SMM_VALIDATE_STRUCT); Index++){
-        gValidateErrorCode = SmmVaildateStruct[Index].ErrorCode;
-        if (*gUsbDataInSmmAddr == FALSE){
-            Status = AmiValidateMemoryBuffer(SmmVaildateStruct[Index].BufferInRuntime,
-                                             SmmVaildateStruct[Index].VaildateSize);
-            if (EFI_ERROR(Status)) return Status;
-        } else {
-            if (SmmVaildateStruct[Index].BufferInSmm == NULL){
-                Status = AmiValidateMemoryBuffer(SmmVaildateStruct[Index].BufferInRuntime,
-                                                 SmmVaildateStruct[Index].VaildateSize);
-                if (EFI_ERROR(Status)) return Status;
-            } else {
-                Status = AmiValidateSmramBuffer(SmmVaildateStruct[Index].BufferInSmm,
-                                                 SmmVaildateStruct[Index].VaildateSize);
-                if (EFI_ERROR(Status)) return Status;
-            }
-        }
+    if (gAmiUsbSmmProtocol == NULL) {
+        return EFI_NOT_READY;
     }
-    if (UsbDataList->HubPortStatusBuffer != NULL) {
-        gValidateErrorCode = VALIDATE_HUB_PORT_STATUS_BUFFER;
-        Status = AmiValidateMemoryBuffer((VOID*)UsbDataList->HubPortStatusBuffer, sizeof(UINT32));
-        if (EFI_ERROR(Status)) {
-            return Status;
-        }
-    }
-    if (UsbDataList->InterruptStatus != NULL) {
-        gValidateErrorCode = VALIDATE_INTERRUPT_STATUS;
-        Status = AmiValidateMemoryBuffer((VOID*)UsbDataList->InterruptStatus, sizeof(UINT32));
-        if (EFI_ERROR(Status)) {
-            return Status;
-        }
-    }
+    
+    CopyMem(UsbConStantData.HcdriverTable, UsbData->aHCDriverTable, sizeof(UsbConStantData.HcdriverTable));
+    CopyMem(UsbConStantData.DevDriverTable, UsbData->aDevDriverTable, sizeof(UsbConStantData.DevDriverTable));
+    CopyMem(UsbConStantData.DelayedDrivers, UsbData->aDelayedDrivers, sizeof(UsbConStantData.DelayedDrivers));
+    CopyMem(UsbConStantData.CallBackFunctionTable, UsbData->aCallBackFunctionTable, sizeof(UsbConStantData.CallBackFunctionTable));
+   
+    UsbConStantData.UsbTempBuffer = UsbData->fpUSBTempBuffer;
+    UsbConStantData.UsbMassConsumeBuffer = UsbData->fpUSBMassConsumeBuffer;
+    UsbConStantData.PciExpressBaseAddress = UsbData->PciExpressBaseAddress;
+    UsbConStantData.MemBlkSts = UsbData->aMemBlkSts;
+    UsbConStantData.MemBlockStart = UsbData->fpMemBlockStart;
+    UsbConStantData.MemPages = UsbData->MemPages;
+    UsbConStantData.QueueCnnctDiscData = UsbData->QueueCnnctDisc.data;
+    UsbConStantData.QueueCnnctDiscMaxSize = UsbData->QueueCnnctDisc.maxsize;
+    UsbConStantData.IccQueueCnnctDiscData = UsbData->ICCQueueCnnctDisc.data;
+    UsbConStantData.IccQueueCnnctDiscMaxSize = UsbData->ICCQueueCnnctDisc.maxsize;
+    UsbConStantData.HashValue = gAmiUsbSmmProtocol->GlobalDataValidation.Crc32Hash;
 
-    for (Index = 0; Index < UsbDataList->HcTableCount; Index++) {
-        HcStruc = UsbDataList->HcTable[Index];
+    for (Index = 0; Index < UsbData->HcTableCount; Index++) {
+        HcStruc = UsbData->HcTable[Index];
         if (HcStruc == NULL) {
             continue;
         }
-        if (HcStruc->HcFlag & (HC_STATE_RUNNING |HC_STATE_INITIALIZED)) {
+        if (HcStruc->dHCFlag & (HC_STATE_RUNNING |HC_STATE_INITIALIZED)) {
             HcInitializedNumber++;
-            if (HcStruc->Usb3HcData) {
+            if (HcStruc->usbbus_data) {
                 Usb3HcInitializedNumber++;
             }
         }
     }
 
-    for (Index = 0; Index < UsbDataList->HcTableCount; Index++) {
-        HcStruc = UsbDataList->HcTable[Index];
+    if (HcInitializedNumber != 0) {
+        Status = gSmst->SmmAllocatePool(EfiRuntimeServicesData, 
+                sizeof(USB_HC_CONSTANT_DATA) * HcInitializedNumber,
+                (VOID**)&HcStrucData);
+
+        if (EFI_ERROR(Status)) {
+            return Status;
+        }
+        ZeroMem(HcStrucData, sizeof(USB_HC_CONSTANT_DATA) * HcInitializedNumber);
+    }
+
+    if (Usb3HcInitializedNumber != 0) {
+
+        Status = gSmst->SmmAllocatePool(EfiRuntimeServicesData, 
+                sizeof(USB3_HC_CONSTANT_DATA) * Usb3HcInitializedNumber,
+                (VOID**)&Usb3HcStrucData);
+
+        if (EFI_ERROR(Status)) {
+            return Status;
+        }
+
+        ZeroMem(Usb3HcStrucData, sizeof(USB3_HC_CONSTANT_DATA) * Usb3HcInitializedNumber);
+    }
+
+    for (Index = 0; Index < UsbData->HcTableCount; Index++) {
+        HcStruc = UsbData->HcTable[Index];
         if (HcStruc == NULL) {
             continue;
         }
-
-        gValidateErrorCode = VALIDATE_USB_HC_STRUC;
-        if (*gUsbDataInSmmAddr == FALSE){
-            Status = AmiValidateMemoryBuffer((VOID*)HcStruc, sizeof(HC_STRUC));
-            if (EFI_ERROR(Status)) {
-                return Status;
-            }
-        } else {
-            Status = AmiValidateSmramBuffer((VOID*)HcStruc, sizeof(HC_STRUC));
-            if (EFI_ERROR(Status)) return Status;
-        }
-
-        if (HcStruc->HcFlag & (HC_STATE_RUNNING |HC_STATE_INITIALIZED)) {
-
-            // Validate Frame List
-            switch (HcStruc->HcType) {
-                case USB_HC_UHCI:
-                     FrameListSize = USB_UHCI_FRAME_LIST_SIZE;
-                     break;
-                case USB_HC_OHCI:
-                     FrameListSize = USB_OHCI_FRAME_LIST_SIZE;
-                     break;
-                case USB_HC_EHCI:
-                     FrameListSize = USB_EHCI_FRAME_LIST_SIZE;
-                     break;
-                case USB_HC_XHCI:
-                     FrameListSize = USB_XHCI_FRAME_LIST_SIZE;
-                     break;
-            }
-            
-            gValidateErrorCode = VALIDATE_USB_FRAME_LIST;
-            if (FrameListSize > 0) {
-                Status = AmiValidateMemoryBuffer((VOID*)HcStruc->FrameList, FrameListSize);
+        Status = AmiValidateMemoryBuffer((VOID*)HcStruc, sizeof(HC_STRUC));
+        if (EFI_ERROR(Status)) {
+            return Status;
+        }        
+        if (HcStruc->dHCFlag & (HC_STATE_RUNNING |HC_STATE_INITIALIZED)) {
+            HcStrucData[HcStrucDataIndex].HcType = HcStruc->bHCType;
+            HcStrucData[HcStrucDataIndex].FrameList = HcStruc->fpFrameList;
+            HcStrucData[HcStrucDataIndex].AsyncListSize = HcStruc->wAsyncListSize;
+            HcStrucData[HcStrucDataIndex].BaseAddressSize = HcStruc->BaseAddressSize;
+            HcStrucData[HcStrucDataIndex].BusDevFuncNum = HcStruc->wBusDevFuncNum;
+            HcStrucData[HcStrucDataIndex].OpRegOffset = HcStruc->bOpRegOffset;
+            HcStrucData[HcStrucDataIndex].ExtCapPtr = HcStruc->bExtCapPtr;
+            HcStrucData[HcStrucDataIndex].UsbBusData = HcStruc->usbbus_data;
+            HcStrucData[HcStrucDataIndex].IsocTds = HcStruc->IsocTds;
+            HcStrucData[HcStrucDataIndex].HashValue = gAmiUsbSmmProtocol->GlobalDataValidation.Crc32Hash;
+            HcStrucDataIndex++;
+            if (HcStruc->usbbus_data) {
+                Usb3Hc = HcStruc->usbbus_data;
+                Status = AmiValidateMemoryBuffer((VOID*)Usb3Hc, sizeof(USB3_HOST_CONTROLLER));
                 if (EFI_ERROR(Status)) {
                     return Status;
                 }
-            }
-            
-            // Validate IsocTds
-            if (HcStruc->IsocTds!=NULL){
-                gValidateErrorCode = VALIDATE_USB_EHCI_ISOCTDS;
-                Status = AmiValidateMemoryBuffer((VOID*)HcStruc->IsocTds, EHCI_FRAMELISTSIZE * sizeof(EHCI_ITD));
-                if (EFI_ERROR(Status)) {
-                        return Status;
-                }
-            }
-
-            if (HcStruc->Usb3HcData) {
-                gValidateErrorCode = VALIDATE_USB_XHCI_BUS_DATA;
-                Usb3Hc = HcStruc->Usb3HcData;
-                if (*gUsbDataInSmmAddr == FALSE) {
-                    Status = AmiValidateMemoryBuffer((VOID*)Usb3Hc, sizeof(USB3_HOST_CONTROLLER));
-                    if (EFI_ERROR(Status)) {
-                        return Status;
-                    }
-                }else{
-                    Status = AmiValidateSmramBuffer((VOID*)Usb3Hc, sizeof(USB3_HOST_CONTROLLER));
-                    if (EFI_ERROR(Status)) return Status;
-                }
-                
-                Status = AmiValidateMmioBuffer((VOID*)Usb3Hc->OpRegs, sizeof(XHCI_HC_OP_REGS));
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
-                
-                Status = AmiValidateMmioBuffer((VOID*)Usb3Hc->RtRegs, sizeof(XHCI_HC_RT_REGS));
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
-
-                if (Usb3Hc->Usb3xProtocolCount>0){
-                    Status = AmiValidateMemoryBuffer((VOID*)Usb3Hc->Usb3xProtocol,
-                                 (sizeof(XHCI_EXT_PROTOCOL) * Usb3Hc->Usb3xProtocolCount));
-                    if (EFI_ERROR(Status)) {
-                        return Status;
-                    }
-                }
-
-                Status = AmiValidateMemoryBuffer((VOID*)Usb3Hc->DcbaaPtr, TRANSFER_RING_OFFSET);
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
-
-                XfrRingsSize = Usb3Hc->CapRegs.HcsParams1.MaxSlots * END_POINTS_PADDED * TRB_RING_PADDED_SIZE;
-                Status = AmiValidateMemoryBuffer((VOID*)Usb3Hc->XfrRings, XfrRingsSize);
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
-
-                DeviceContextSize = (XHCI_DEVICE_CONTEXT_ENTRIES * Usb3Hc->ContextSize) * Usb3Hc->CapRegs.HcsParams1.MaxSlots;
-                Status = AmiValidateMemoryBuffer((VOID*)Usb3Hc->DeviceContext, DeviceContextSize);
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
-
-                if (Usb3Hc->InputContext != ((VOID*)((UINTN)Usb3Hc->DcbaaPtr + INPUT_CONTEXT_OFFSET)))
-                    return EFI_ACCESS_DENIED;
-
-                NumBufs =  ((Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsHi) << 5) + 
-                                    Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsLo;
-                if ((NumBufs > 0) && (Usb3Hc->ScratchBufEntry != NULL)) {
-                    Status = AmiValidateMemoryBuffer((VOID*)Usb3Hc->ScratchBufEntry, (sizeof(Usb3Hc->ScratchBufEntry)*NumBufs));
-                    if (EFI_ERROR(Status)) {
-                        return Status;
-                    }
-                    for (Count = 0; Count < NumBufs; Count++) {
-                        Buffer = (VOID*)(UINTN)Usb3Hc->ScratchBufEntry[Count];
-                        Status = AmiValidateMemoryBuffer (Buffer, EFI_PAGES_TO_SIZE(Usb3Hc->PageSize4K));
-                        if (EFI_ERROR(Status)) {
-                            return Status;
-                        }
-                    }
-                }
+                Usb3HcStrucData[Usb3HcStrucDataIndex].UsbLegSupOffSet = Usb3Hc->UsbLegSupOffSet;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].DcbaaPtr = Usb3Hc->DcbaaPtr;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].XfrRings = Usb3Hc->XfrRings;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].XfrTrbs = Usb3Hc->XfrTrbs;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].DeviceContext = Usb3Hc->DeviceContext;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].InputContext = Usb3Hc->InputContext;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].ScratchBufEntry = Usb3Hc->ScratchBufEntry;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].ContextSize = Usb3Hc->ContextSize;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].CapRegs = Usb3Hc->CapRegs;
+                Usb3HcStrucData[Usb3HcStrucDataIndex].HashValue = gAmiUsbSmmProtocol->GlobalDataValidation.Crc32Hash;
+                Usb3HcStrucDataIndex++;
             }
         }
+    }
+
+    if (HcInitializedNumber != 0) {
+    	Status = RuntimeDriverCalculateCrc32((UINT8*)HcStrucData, 
+    			(UINTN)(sizeof(USB_HC_CONSTANT_DATA) * HcInitializedNumber), &Crc32Value[0]);
+        Status = gSmst->SmmFreePool(HcStrucData);
+        if (EFI_ERROR(Status)) {
+            return Status;
+        }
+    }
+
+    if (Usb3HcInitializedNumber != 0) {
+    	Status = RuntimeDriverCalculateCrc32((UINT8*)Usb3HcStrucData, 
+    			(UINTN)(sizeof(USB3_HC_CONSTANT_DATA) * Usb3HcInitializedNumber), &Crc32Value[1]);
+        Status = gSmst->SmmFreePool(Usb3HcStrucData);
+        if (EFI_ERROR(Status)) {
+            return Status;
+        }
+    }
+    Status = RuntimeDriverCalculateCrc32((UINT8*)&UsbConStantData, sizeof(UsbConStantData), &Crc32Value[2]);
+    
+    RuntimeDriverCalculateCrc32((UINT8*)Crc32Value, sizeof(Crc32Value), Crc32);
+    
+    return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+UpdateAmiUsbSmmGlobalDataCrc32(
+    USB_GLOBAL_DATA *UsbGlobdaData
+)
+{
+    EFI_STATUS  Status;
+    UINT32      Crc32;
+
+    
+    Status = CalculateUsbGlobalConstantDataCrc32(UsbGlobdaData, &Crc32);
+
+    if (EFI_ERROR(Status)) {
+        return Status;
+    }
+
+    gAmiUsbSmmProtocol->GlobalDataValidation.ConstantDataCrc32 = Crc32;
+    
+    return EFI_SUCCESS;
+}
+
+EFI_STATUS
+CheckAmiUsbSmmGlobalDataCrc32(
+    VOID *UsbGlobdaData
+)
+{
+    EFI_STATUS  Status;
+    UINT32      Crc32;
+
+    Status = CalculateUsbGlobalConstantDataCrc32(UsbGlobdaData, &Crc32);
+
+    if (EFI_ERROR(Status)) {
+        return Status;
+    }
+
+    if (gAmiUsbSmmProtocol->GlobalDataValidation.ConstantDataCrc32 != Crc32) {
+        return EFI_ACCESS_DENIED;
     }
 
     return EFI_SUCCESS;
 }
 
-/**
-    This function Validate Usb Smm Global Data.
-    @param  UsbGlobdaDataAddr  Pointer of Usb Globda Data
-    @param  UsbDataListAddr    Pointer of Usb Data List
-    @param  UsbDataInSmmAddr   Pointer of Usb Data In Smm
-    @retval EFI_STATUS         Status of the operation
 
-**/
 EFI_STATUS
 EFIAPI
 AmiUsbSmmGlobalDataValidation(
-    USB_GLOBAL_DATA *UsbGlobdaDataAddr,
-    USB_DATA_LIST   *UsbDataListAddr,
-    UINT8           *UsbDataInSmmAddr
+    USB_GLOBAL_DATA *UsbData
 )
 {
     EFI_STATUS          Status;
@@ -266,101 +276,63 @@ AmiUsbSmmGlobalDataValidation(
     UINTN               Index;
     DEV_INFO            *DevInfoTableEnd;
     HC_STRUC            *HcStruc;
-    LIST_ENTRY          *Link = NULL;
-    USB_DEV_CONFIG_LINK *ReadDevConfigLink = NULL;
-    USB_DATA_LIST       *UsbDataList;
-    USB_GLOBAL_DATA     *UsbGlobdaData;
-
-    if(gUsbGlobdaDataAddr == NULL) gUsbGlobdaDataAddr = (USB_GLOBAL_DATA**)UsbGlobdaDataAddr;
-    if(gUsbDataInSmmAddr == NULL)  gUsbDataInSmmAddr  = UsbDataInSmmAddr;
-    if(gUsbDataListAddr == NULL)   gUsbDataListAddr   = (USB_DATA_LIST**)UsbDataListAddr;
-
-    UsbGlobdaData = (USB_GLOBAL_DATA*)*gUsbGlobdaDataAddr;
-    UsbDataList   = (USB_DATA_LIST*)*gUsbDataListAddr;
-
-    // Validate Device config information
-    gValidateErrorCode = VALIDATE_USB_DEV_CON_INFO;
-    for (Link = UsbGlobdaData->DevConfigInfoList.ForwardLink;
-        Link != &UsbGlobdaData->DevConfigInfoList; 
-        Link = Link->ForwardLink ) {
-        ReadDevConfigLink = BASE_CR(Link, USB_DEV_CONFIG_LINK, Link);
-        if (ReadDevConfigLink < (&UsbGlobdaData->DevConfigLink[0])) return EFI_ACCESS_DENIED;
-        if (ReadDevConfigLink > (&UsbGlobdaData->DevConfigLink[MAX_DEV_CONFIG_LINK-1])) return EFI_ACCESS_DENIED;
-    }
     
-    // Validate Mosue Input Buffer
-    gValidateErrorCode = VALIDATE_USB_MS_INPUT_BUFFER;
-    MouseInputBufferEnd = (UINT8*)((UINTN)UsbGlobdaData->UsbMsInputBuffer + sizeof(UsbGlobdaData->UsbMsInputBuffer));
-    if (((UINTN)UsbDataList->MouseInputBufferHeadPtr < (UINTN)UsbGlobdaData->UsbMsInputBuffer) ||
-        ((UINTN)UsbDataList->MouseInputBufferHeadPtr > (UINTN)MouseInputBufferEnd) ||
-        ((UINTN)UsbDataList->MouseInputBufferTailPtr < (UINTN)UsbGlobdaData->UsbMsInputBuffer) ||
-        ((UINTN)UsbDataList->MouseInputBufferTailPtr > (UINTN)MouseInputBufferEnd)) {
+    MouseInputBufferEnd = UsbData->aMouseInputBuffer + sizeof(UsbData->aMouseInputBuffer);
+
+    if ((UsbData->fpMouseInputBufferHeadPtr < UsbData->aMouseInputBuffer) ||
+        (UsbData->fpMouseInputBufferHeadPtr > MouseInputBufferEnd) ||
+        (UsbData->fpMouseInputBufferTailPtr < UsbData->aMouseInputBuffer) ||
+        (UsbData->fpMouseInputBufferTailPtr > MouseInputBufferEnd)) {
         return EFI_ACCESS_DENIED;
     }
 
-    // Validate Keyboard CHAR Buffer
-    gValidateErrorCode = VALIDATE_USB_KB_CHAR_BUFFER;
-    KbcharacterBufferEnd = (UINT8*)((UINTN)UsbGlobdaData->KbcCharacterBufferStart + sizeof(UsbGlobdaData->KbcCharacterBufferStart));
-    if (((UINTN)UsbDataList->KbcCharacterBufferHead < (UINTN)UsbGlobdaData->KbcCharacterBufferStart) ||
-        ((UINTN)UsbDataList->KbcCharacterBufferHead > (UINTN)KbcharacterBufferEnd) ||
-        ((UINTN)UsbDataList->KbcCharacterBufferTail < (UINTN)UsbGlobdaData->KbcCharacterBufferStart) ||
-        ((UINTN)UsbDataList->KbcCharacterBufferTail > (UINTN)KbcharacterBufferEnd)) {
+    KbcharacterBufferEnd = UsbData->aKBCCharacterBufferStart + sizeof(UsbData->aKBCCharacterBufferStart);
+
+    if ((UsbData->fpKBCCharacterBufferHead < UsbData->aKBCCharacterBufferStart) ||
+        (UsbData->fpKBCCharacterBufferHead > KbcharacterBufferEnd) ||
+        (UsbData->fpKBCCharacterBufferTail < UsbData->aKBCCharacterBufferStart) ||
+        (UsbData->fpKBCCharacterBufferTail > KbcharacterBufferEnd)) {
         return EFI_ACCESS_DENIED;
     }
 
-    // Validate Keyboard SCAN Buffer
-    gValidateErrorCode = VALIDATE_USB_KB_SCAN_BUFFER;
-    KbcScanCodeBufferEnd = (UINT8*)((UINTN)UsbGlobdaData->KbcScanCodeBufferStart + sizeof(UsbGlobdaData->KbcScanCodeBufferStart));
-    if (((UINTN)UsbDataList->KbcScanCodeBufferPtr < (UINTN)UsbGlobdaData->KbcScanCodeBufferStart) ||
-        ((UINTN)UsbDataList->KbcScanCodeBufferPtr > (UINTN)KbcScanCodeBufferEnd)) {
+    KbcScanCodeBufferEnd = UsbData->aKBCScanCodeBufferStart + sizeof(UsbData->aKBCScanCodeBufferStart);
+
+    if ((UsbData->fpKBCScanCodeBufferPtr < UsbData->aKBCScanCodeBufferStart) ||
+        (UsbData->fpKBCScanCodeBufferPtr > KbcScanCodeBufferEnd)) {
         return EFI_ACCESS_DENIED;
     }
 
-    // Validate Keyboard Repeat device info
-    gValidateErrorCode = VALIDATE_USB_KB_REPEAT_DEV;
-    DevInfoTableEnd = UsbDataList->DevInfoTable + UsbGlobdaData->MaxDevCount;
-    if (UsbDataList->KeyRepeatDevInfo != NULL) { 
-        if (((UINTN)UsbDataList->KeyRepeatDevInfo < (UINTN)UsbDataList->DevInfoTable) ||
-            ((UINTN)UsbDataList->KeyRepeatDevInfo > (UINTN)DevInfoTableEnd)) {
+    DevInfoTableEnd = UsbData->aDevInfoTable + sizeof(UsbData->aDevInfoTable);
+
+    if (UsbData->fpKeyRepeatDevInfo != NULL) { 
+        if ((UsbData->fpKeyRepeatDevInfo < UsbData->aDevInfoTable) ||
+            (UsbData->fpKeyRepeatDevInfo > DevInfoTableEnd)) {
             return EFI_ACCESS_DENIED;
         }
     }
 
-    // Validate Keyboard device info
-    gValidateErrorCode = VALIDATE_USB_KB_DEV;
-    for (Index = 0; Index < UsbGlobdaData->MaxHidCount; Index++) {
-        if (UsbDataList->UsbKbDeviceTable[Index] != NULL) {
-            if (((UINTN)(UsbDataList->UsbKbDeviceTable[Index]) < (UINTN)UsbDataList->DevInfoTable) ||
-                ((UINTN)(UsbDataList->UsbKbDeviceTable[Index]) > (UINTN)DevInfoTableEnd)) {
+    for (Index = 0; Index < USB_DEV_HID_COUNT; Index++) {
+        if (UsbData->aUSBKBDeviceTable[Index] != NULL) {
+            if ((UsbData->aUSBKBDeviceTable[Index] < UsbData->aDevInfoTable) ||
+                (UsbData->aUSBKBDeviceTable[Index] > DevInfoTableEnd)) {
                 return EFI_ACCESS_DENIED;
             }
         }
     }
 
-    if (UsbDataList->HcTableCount != 0) {
-
-        // Validate USB HC struc pointer
-        gValidateErrorCode = VALIDATE_USB_HC_STRUC_POINTER;
-        if (*gUsbDataInSmmAddr == FALSE){
-            Status = AmiValidateMemoryBuffer((VOID*)UsbDataList->HcTable, sizeof(HC_STRUC*) * UsbDataList->HcTableCount);
-            if (EFI_ERROR(Status)) {
-                return EFI_ACCESS_DENIED;
-            }
-        } else {
-            Status = AmiValidateSmramBuffer((VOID*)UsbDataList->HcTable, sizeof(HC_STRUC*) * UsbDataList->HcTableCount);
-            if (EFI_ERROR(Status)) return Status;
+    if (UsbData->HcTableCount != 0) {
+        Status = AmiValidateMemoryBuffer((VOID*)UsbData->HcTable, sizeof(HC_STRUC) * UsbData->HcTableCount);
+        if (EFI_ERROR(Status)) {
+            return EFI_ACCESS_DENIED;
         }
-        
-        for (Index = 0; Index < UsbDataList->HcTableCount; Index++) {
-            HcStruc = UsbDataList->HcTable[Index];
+        for (Index = 0; Index < UsbData->HcTableCount; Index++) {
+            HcStruc = UsbData->HcTable[Index];
             if (HcStruc == NULL) {
                 continue;
             }
            //Check if MMIO address space of usb controller resides in SMRAM region. If yes, don't proceed.
-            if (HcStruc->HcType != USB_HC_UHCI) {
+            if (HcStruc->bHCType != USB_HC_UHCI) {
                 if (HcStruc->BaseAddress != 0) {
-                    // Validate USB HC struc pointer
-                    gValidateErrorCode = VALIDATE_USB_UHCI_MMIO;
                     Status = AmiValidateMmioBuffer((VOID*)HcStruc->BaseAddress, HcStruc->BaseAddressSize);
                     if (EFI_ERROR(Status)) {
                         DEBUG((DEBUG_ERROR, "Usb Mmio address is invalid, it is in SMRAM\n"));
@@ -371,20 +343,66 @@ AmiUsbSmmGlobalDataValidation(
         }
     }
 
-    Status = CheckAmiUsbSmmGlobalData();
+    Status = CheckAmiUsbSmmGlobalDataCrc32(UsbData);
     
     if (EFI_ERROR(Status)) {
         return EFI_ACCESS_DENIED;
     }
 
-    gValidateErrorCode = VALIDATE_USB_DUMMY;
+    return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+UsbSmmProtocolCallback(
+    CONST EFI_GUID  *Protocol,
+    VOID            *Interface,
+    EFI_HANDLE      Handle
+)
+{
+    EFI_STATUS  Status;
+    
+    Status = gSmst->SmmLocateProtocol(
+                    &gAmiUsbSmmProtocolGuid,
+                    NULL,
+                    &gAmiUsbSmmProtocol);
+
+    ASSERT_EFI_ERROR(Status);
+    
+    return Status;
+}
+
+EFI_STATUS
+EFIAPI
+AmiUsbSmmGlobalDataValidationLibLibConstructor(
+        IN EFI_HANDLE ImageHandle, 
+        IN EFI_SYSTEM_TABLE *SystemTable)
+{
+    EFI_STATUS  Status;
+    VOID        *ProtocolNotifyRegistration;
+    
+    RuntimeDriverInitializeCrc32Table();
+    
+    Status = gSmst->SmmLocateProtocol(
+                    &gAmiUsbSmmProtocolGuid,
+                    NULL,
+                    &gAmiUsbSmmProtocol);
+
+    if (EFI_ERROR(Status)) {
+        Status = gSmst->SmmRegisterProtocolNotify(
+                    &gAmiUsbSmmProtocolGuid,
+                    UsbSmmProtocolCallback,
+                    &ProtocolNotifyRegistration
+                    );
+    }
+    
     return EFI_SUCCESS;
 }
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

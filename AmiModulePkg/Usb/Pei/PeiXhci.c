@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -29,9 +29,6 @@
 #include <Ppi/Stall.h>
 #include "PeiXhci.h"
 #include "UsbPei.h"
-#include <Ppi/IoMmu.h>
-
-extern EDKII_IOMMU_PPI *gEdk2IoMmuPpi;
 
 #if XHCI_PEI_SUPPORT
 
@@ -81,9 +78,7 @@ VOID        XhciClearOpReg(USB3_CONTROLLER*, UINT32, UINT32);
 
 **/
 
-EFI_STATUS
-EFIAPI
-XhciPeiUsbEntryPoint (
+EFI_STATUS XhciPeiUsbEntryPoint (
     IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN EFI_PEI_SERVICES    **PeiServices )
 {
@@ -91,7 +86,7 @@ XhciPeiUsbEntryPoint (
     EFI_STATUS              Status;
     EFI_PEI_STALL_PPI       *StallPpi;
     UINTN                   XhciBaseAddress = PEI_XHCI_MMIOBASE;
-    EFI_PHYSICAL_ADDRESS    TempPtr = 0;
+    EFI_PHYSICAL_ADDRESS    TempPtr;
     USB3_CONTROLLER         *Usb3Hc;
     UINTN                   MemPages;
     UINT8                   ControllerIndex;
@@ -107,7 +102,7 @@ XhciPeiUsbEntryPoint (
     // Initialize the EFI_PEI_STALL_PPI interface
     //-------------------------------------------
     Status = (**PeiServices).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid,
-        0, NULL, (VOID**)&StallPpi );
+        0, NULL, &StallPpi );
     if ( EFI_ERROR( Status ) ) {
         return EFI_UNSUPPORTED;
     }
@@ -174,22 +169,10 @@ XhciPeiUsbEntryPoint (
         // data structures, get it ready for operation.
         //----------------------------------------------------------
         MemPages = sizeof(USB3_CONTROLLER) / 0x1000 + 1;
-
-        if (gEdk2IoMmuPpi) {
-            Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                        gEdk2IoMmuPpi,
-                                        EfiRuntimeServicesData,
-                                        MemPages,
-                                        (VOID**)&TempPtr,
-                                        EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                        );
-        } else {
-            Status = (**PeiServices).AllocatePages (
-                                         PeiServices, 
-                                         EfiBootServicesData,
-                                         MemPages,
-                                         &TempPtr);
-        }
+        Status = (**PeiServices).AllocatePages(PeiServices, 
+                EfiBootServicesData,
+                MemPages,
+                &TempPtr);
         if (EFI_ERROR(Status)) {
             return EFI_OUT_OF_RESOURCES;
         }
@@ -212,7 +195,7 @@ XhciPeiUsbEntryPoint (
         PciAttributes = (UINT8)Usb3Hc->BaseAddress;
         
         if (((PciAttributes & (BIT1 |BIT2)) == BIT2) &&
-                (sizeof(UINTN) != sizeof(UINT32))) {            
+                ((sizeof(VOID*) / sizeof(UINT32) == 2))) {            
             (*PeiServices)->PciCfg->Read(PeiServices,(*PeiServices)->PciCfg,
                 EfiPeiPciCfgWidthUint64,
                 XHCI_PCI_ADDRESS(ControllerIndex, PCI_BASE_ADDRESSREG_OFFSET),
@@ -254,7 +237,7 @@ XhciPeiUsbEntryPoint (
 
         do {
             Status = (*PeiServices)->LocatePpi(PeiServices, &gLoadXhcFirmwarePpiGuid,
-                            Instance++, NULL, (VOID**)&LoadXhcFwPpi );
+                            Instance++, NULL, &LoadXhcFwPpi );
             if (!EFI_ERROR(Status)) {
                 Status = LoadXhcFwPpi->LoadXhcFirmware(PeiServices, XHCI_PCI_ADDRESS(ControllerIndex, 0));
                 if (!EFI_ERROR(Status)) {
@@ -287,8 +270,6 @@ XhciPeiUsbEntryPoint (
         Usb3Hc->DeviceContext = (VOID*)Usb3Hc->DevCtx;
         Usb3Hc->ControllerIndex = ControllerIndex;
         
-        Status = XhciExtCapUsb3xCount (PeiServices, Usb3Hc);
-        ASSERT(Status == EFI_SUCCESS);
         XhciExtCapParser(PeiServices, Usb3Hc);
         
         Usb3Hc->DcbaaPtr = (XHCI_DCBAA*)Usb3Hc->Dcbaa;
@@ -361,10 +342,9 @@ XhciAllocateScratchpadBuffers (
     UINT16                  NumBufs = ((Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsHi) << 5) + 
                                             Usb3Hc->CapRegs.HcsParams2.MaxScratchPadBufsLo;
     UINT16                  Count;
-    EFI_PHYSICAL_ADDRESS    TempPtr = 0;
+    EFI_PHYSICAL_ADDRESS    TempPtr;
     UINTN                   AlignmentMask;
     UINT64                  *ScratchBufEntry;
-    UINT64                  TempBuf;
 
     if (NumBufs == 0) {
         return EFI_SUCCESS;
@@ -372,20 +352,10 @@ XhciAllocateScratchpadBuffers (
 
     // Allcate a PAGESIZE boundary for Scratchpad Buffer Array Base Address
     // because bit[0..5] are reserved in  Device Context Base Address Array Element 0.
-    if (gEdk2IoMmuPpi) {
-        Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                    gEdk2IoMmuPpi,
-                                    EfiRuntimeServicesData,
-                                    EFI_SIZE_TO_PAGES(sizeof(UINT64) * NumBufs),
-                                    (VOID**)&TempPtr,
-                                    EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                    );
-    } else {
-        Status = (**PeiServices).AllocatePages(PeiServices,
-                                     EfiBootServicesData,
-                                     EFI_SIZE_TO_PAGES(sizeof(UINT64) * NumBufs),
-                                     &TempPtr);
-    }
+    Status = (**PeiServices).AllocatePages(PeiServices,
+                                EfiBootServicesData,
+                                EFI_SIZE_TO_PAGES(sizeof(UINT64) * NumBufs),
+                                &TempPtr);
 
     if (EFI_ERROR(Status)) {
         return EFI_OUT_OF_RESOURCES;
@@ -397,21 +367,10 @@ XhciAllocateScratchpadBuffers (
    
     // Allocate scratch pad buffer: PAGESIZE block located on
     // a PAGESIZE boundary. Section 4.20.
-    if (gEdk2IoMmuPpi) {
-        Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                    gEdk2IoMmuPpi,
-                                    EfiRuntimeServicesData,
-                                    Usb3Hc->PageSize4K * (NumBufs + 1),
-                                    (VOID**)&TempPtr,
-                                    EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                    );
-    } else {
-
-        Status = (**PeiServices).AllocatePages(PeiServices, 
-                                     EfiBootServicesData,
-                                     Usb3Hc->PageSize4K * (NumBufs + 1),
-                                     &TempPtr);
-    }
+    Status = (**PeiServices).AllocatePages(PeiServices, 
+                                EfiBootServicesData,
+                                Usb3Hc->PageSize4K * (NumBufs + 1),
+                                &TempPtr);
     
     if (EFI_ERROR(Status)) {
         return EFI_OUT_OF_RESOURCES;
@@ -423,11 +382,10 @@ XhciAllocateScratchpadBuffers (
     AlignmentMask = (Usb3Hc->PageSize4K << 12) - 1;
 
     TempPtr = ((UINTN)TempPtr +AlignmentMask) & ~AlignmentMask;
-    TempBuf = LShiftU64(Usb3Hc->PageSize4K, 12);
 
     for (Count = 0; Count < NumBufs; Count++) {    
         // Update *ScratchBufArrayBase
-        ScratchBufEntry[Count] = (UINTN)TempPtr + MultU64x32(TempBuf, Count);
+        ScratchBufEntry[Count] = (UINTN)TempPtr + (Usb3Hc->PageSize4K << 12) * Count;
     }
 
     // Update scratch pad pointer
@@ -465,14 +423,14 @@ XhciInitHC(
     BOOLEAN     PpSet = FALSE;
     UINT8       PortNumber;
     UINT32      CurrentPortOffset = 0;
-    UINT32      Index;
+    UINT32      i;
     UINT8	    Count;
     UINT32      Data;
     UINT32      PortStsOffset;
     UINT32      DbCapDcctrl = 0;
 
 	// Wait controller ready
-	for (Index = 0; Index < PEI_XHCI_READY_TIMEOUT_MS * 10; Index++) {
+	for (i = 0; i < PEI_XHCI_READY_TIMEOUT_MS * 10; i++) {
         if (!(XhciReadOpReg(Usb3Hc, XHCI_USBSTS_OFFSET) & XHCI_STS_CNR)) {
             break;
         }
@@ -488,7 +446,7 @@ XhciInitHC(
 	if (!(XhciReadOpReg(Usb3Hc, XHCI_USBSTS_OFFSET) & XHCI_STS_HALTED)) {
         XhciClearOpReg(Usb3Hc, XHCI_USBCMD_OFFSET, XHCI_CMD_RS);
 		// The xHC should halt within 16 ms. Section 5.4.1.1
-		for (Index = 0; Index < PEI_XHCI_HALT_TIMEOUT_MS * 10; Index++) {
+		for (i = 0; i < PEI_XHCI_HALT_TIMEOUT_MS * 10; i++) {
             if (XhciReadOpReg(Usb3Hc, XHCI_USBSTS_OFFSET) & XHCI_STS_HALTED) {
                 break;
             }
@@ -512,7 +470,7 @@ XhciInitHC(
         // for issuing HC Reset and before accessing any MMIO register.
         XHCI_FIXED_DELAY_MS(Usb3Hc, PEI_XHCI_RESET_DELAY_MS);
         
-        for (Index = 0; Index < PEI_XHCI_RESET_TIMEOUT_MS * 10; Index++) {
+        for (i = 0; i < PEI_XHCI_RESET_TIMEOUT_MS * 10; i++) {
             if (!(XhciReadOpReg(Usb3Hc, XHCI_USBCMD_OFFSET) & XHCI_CMD_HCRST)) {
                 break;
             }
@@ -526,7 +484,7 @@ XhciInitHC(
     }
 
 	// Wait controller ready
-	for (Index = 0; Index < PEI_XHCI_READY_TIMEOUT_MS * 10; Index++) {
+	for (i = 0; i < PEI_XHCI_READY_TIMEOUT_MS * 10; i++) {
         if (!(XhciReadOpReg(Usb3Hc, XHCI_USBSTS_OFFSET) & XHCI_STS_CNR)) {
             break;
         }
@@ -608,18 +566,14 @@ XhciInitHC(
 
     XhciSetOpReg(Usb3Hc, XHCI_USBCMD_OFFSET, XHCI_CMD_RS);
 
-    for (Index = 0; Index < PEI_XHCI_HALT_TIMEOUT_MS * 10; Index++) {
+    for (i = 0; i < PEI_XHCI_HALT_TIMEOUT_MS * 10; i++) {
         if (!(XhciReadOpReg(Usb3Hc, XHCI_USBSTS_OFFSET) & XHCI_STS_HALTED)) {
             break;
         }
         XHCI_FIXED_DELAY_US(Usb3Hc, 100);
     }
     ASSERT(!(XhciReadOpReg(Usb3Hc, XHCI_USBSTS_OFFSET) & XHCI_STS_HALTED));
-
-#if PEI_USB_HOST_SYSTEM_ERRORS_SUPPORT
-    XhciSetOpReg(Usb3Hc, XHCI_USBCMD_OFFSET, XHCI_CMD_HSEE);
-#endif
-
+    
     XhciResetUsb2Port(PeiServices, Usb3Hc);    //(EIP75547+)
 
     if (Usb3Hc->Usb2Protocol.PortCount) {
@@ -628,7 +582,7 @@ XhciInitHC(
             PortStsOffset = XHCI_PORTSC_OFFSET + + (0x10 * (PortNumber - 1));
             if (XhciReadOpReg(Usb3Hc, PortStsOffset) & XHCI_PCS_PED) {
                 XhciWriteOpReg(Usb3Hc, PortStsOffset, XHCI_PCS_PED | XHCI_PCS_PP);
-			    for (Index = 0; Index < PEI_XHCI_DISABLE_USB2_PORT_TIMEOUT_MS * 10; Index++) {
+			    for (i = 0; i < PEI_XHCI_DISABLE_USB2_PORT_TIMEOUT_MS * 10; i++) {
 				    if (!(XhciReadOpReg(Usb3Hc, PortStsOffset) & XHCI_PCS_PED)) {
 					    break;
 				    }
@@ -671,7 +625,7 @@ XhciAddressDevice(
     EFI_STATUS                  Status;
     XHCI_INPUT_CONTROL_CONTEXT  *InputCtrl = NULL;
     XHCI_SLOT_CONTEXT           *InputSlot = NULL;
-    XHCI_SLOT_CONTEXT           *OutputSlot;
+    XHCI_SLOT_CONTEXT           *OutputSlot = NULL;
     XHCI_SLOT_CONTEXT           *ParentHubSlotCtx = NULL;
     XHCI_EP_CONTEXT             *InputEp0 = NULL;
     XHCI_EP_CONTEXT             *OutputEp0 = NULL;
@@ -680,7 +634,7 @@ XhciAddressDevice(
     TRB_RING                    *XfrRing = NULL;
     UINT16                      AddrDevParam = 0;
     UINT8                       Bsr = 0;
-    UINT8                       Index;
+    UINT8                       i;
     UINT8	                    ParentHubSlotId;
     UINT8		                *ParentHubDevice;
 
@@ -710,9 +664,7 @@ XhciAddressDevice(
 		InputSlot->RootHubPort = Port;
 	} else {
 		Status = GetSlotId(Usb3Hc->DeviceMap, &ParentHubSlotId, (UINT8)(PeiUsbDev->TransactionTranslator & 0x7F));
-        if (EFI_ERROR (Status)) {
-            DEBUG((DEBUG_INFO, "Xhci Get Slot Id Status %r\n", Status));
-        }
+		ASSERT(Status == EFI_SUCCESS);
 		ParentHubDevice = (UINT8*)XhciGetDeviceContext(Usb3Hc, ParentHubSlotId);
 		ParentHubSlotCtx = (XHCI_SLOT_CONTEXT*)XhciGetContextEntry(Usb3Hc, ParentHubDevice, 0);
 		InputSlot->RootHubPort = ParentHubSlotCtx->RootHubPort;
@@ -749,9 +701,6 @@ XhciAddressDevice(
         default:
             break;
     }
-    if (XfrRing == NULL) {
-        return EFI_DEVICE_ERROR;
-    }
 
     // Initialize the Input default control Endpoint 0 Context
 
@@ -766,12 +715,12 @@ XhciAddressDevice(
 	if (PeiUsbDev->TransactionTranslator != 0) {
 		if ((ParentHubSlotCtx->Speed == XHCI_DEVSPEED_SUPER) ||
 		        (ParentHubSlotCtx->Speed == XHCI_DEVSPEED_SUPER_PLUS)) {	
-			for (Index = 0; Index < 5; Index++) {
-				if (((ParentHubSlotCtx->RouteString >> (Index << 2)) & 0xF) == 0) {
+			for (i = 0; i < 5; i++) {
+				if (((ParentHubSlotCtx->RouteString >> (i << 2)) & 0xF) == 0) {
 					break;
 				}
 			}
-	        InputSlot->RouteString = ParentHubSlotCtx->RouteString | (Port << (Index << 2));
+	        InputSlot->RouteString = ParentHubSlotCtx->RouteString | (Port << (i << 2));
 		} else {
 			// Update TT fields in the Slot context for LS/FS device connected to HS hub
 	        if (InputSlot->Speed == XHCI_DEVSPEED_FULL || InputSlot->Speed == XHCI_DEVSPEED_LOW) {
@@ -1093,6 +1042,7 @@ XhciUpdateEp0MaxPacket(
     UINT8               Endp0MaxPacket
 )
 {
+    UINT8   Status;
 	UINT8	*DevCtx;
 	XHCI_INPUT_CONTROL_CONTEXT	*CtlCtx;
 	XHCI_SLOT_CONTEXT			*SlotCtx;
@@ -1115,7 +1065,7 @@ XhciUpdateEp0MaxPacket(
 	EpCtx = (XHCI_EP_CONTEXT*)XhciGetContextEntry(Usb3Hc, (UINT8*)Usb3Hc->InputContext, 2);
     EpCtx->MaxPacketSize = Endp0MaxPacket;
 
-    XhciExecuteCommand(PeiServices, Usb3Hc, XhciTEvaluateContextCmd, &SlotId);
+    Status = XhciExecuteCommand(PeiServices, Usb3Hc, XhciTEvaluateContextCmd, &SlotId);
     //ASSERT(Status == EFI_SUCCESS);
 }
 
@@ -1226,9 +1176,7 @@ XhciHcControlTransfer(
         SlotId = Usb3Hc->DeviceMap->SlotId;
     } else {
         Status = GetSlotId(Usb3Hc->DeviceMap, &SlotId, DeviceAddress);
-        if (EFI_ERROR (Status)) {
-            DEBUG((DEBUG_INFO, "Xhci Get Slot Id Status %r\n", Status));
-        }
+        ASSERT(Status == EFI_SUCCESS);
     }
     
     if (SlotId == 0) {
@@ -1245,9 +1193,6 @@ XhciHcControlTransfer(
         if (SlotCtx->SlotState == XHCI_SLOT_STATE_DEFAULT) {
             Status = XhciAddressDevice(PeiServices, Usb3Hc, 
                 Usb3Hc->DeviceMap->PeiUsbDev, SlotId, Usb3Hc->DeviceMap->PortNumber);
-            if (EFI_ERROR (Status)) {
-                DEBUG((DEBUG_INFO, "Xhci Set Address Status %r\n", Status));
-            }
         }
         Status = UpdateDeviceMap(Usb3Hc->DeviceMap, SlotId, 
             Usb3Hc->DeviceMap->PortNumber, 
@@ -1321,8 +1266,6 @@ XhciHcControlTransfer(
                 break;
             case XHCI_TRB_BABBLE_ERROR:
                 *TransferResult |= EFI_USB_ERR_BABBLE;
-                XhciClearStalledEp(PeiServices, Usb3Hc, SlotId, 1);
-                break;
             case XHCI_TRB_TRANSACTION_ERROR:
                 XhciClearStalledEp(PeiServices, Usb3Hc, SlotId, 1);
                 break;
@@ -1520,9 +1463,6 @@ XhciHcBulkTransfer(
             
         }
 
-        if (FirstTrb == NULL) {
-            break;
-        }
         ((XHCI_NORMAL_XFR_TRB*)FirstTrb)->CycleBit = XfrRing->CycleBit;
         if (Trb < FirstTrb) {
             ((XHCI_NORMAL_XFR_TRB*)FirstTrb)->CycleBit ^= 1;
@@ -1548,8 +1488,6 @@ XhciHcBulkTransfer(
                     break;
                 case XHCI_TRB_BABBLE_ERROR:
                     *TransferResult |= EFI_USB_ERR_BABBLE;
-                    XhciClearStalledEp(PeiServices, Usb3Hc, SlotId, Dci);
-                    break;
                 case XHCI_TRB_TRANSACTION_ERROR:
                     XhciClearStalledEp(PeiServices, Usb3Hc, SlotId, Dci);
                     break;
@@ -1711,72 +1649,6 @@ UpdatePortStatusSpeed(
 
 
 /**
-    This function resets the XHCI host controller Root hub port.
-    
-    @param  PeiServices  EFI_PEI_SERVICES pointer
-            Usb3Hc       Pointer to the HC structure
-            Port         Root Port number
-            WarmReset    Reset type
-
-    @retval EFI_STATUS   Status of the operation
-
-**/
-
-EFI_STATUS
-XHCI_ResetPort(
-    IN EFI_PEI_SERVICES            **PeiServices,
-    IN USB3_CONTROLLER             *Usb3Hc,
-    IN UINT8                       Port,
-    IN BOOLEAN                     WarmReset
-)
-{
-    UINT32  Index;
-    UINT32  PortStsOffset = XHCI_PORTSC_OFFSET + (0x10 * (Port - 1));
-    UINT32  XhciPortSts;
-
-    if (WarmReset && XhciIsUsb3Port(Usb3Hc, Port)) {
-      //
-      // issue Warm Port Reset (WPR) and keep port power bit(PP).
-      //
-      XhciWriteOpReg(Usb3Hc, PortStsOffset, XHCI_PCS_WPR | XHCI_PCS_PP);        
-      for (Index = 0; Index < PEI_XHCI_RESET_USB3_PORT_TIMEOUT_MS*10; Index++) {     
-        XhciPortSts = XhciReadOpReg(Usb3Hc, PortStsOffset);
-        if ((XhciPortSts & XHCI_PCS_WRC) || (XhciPortSts & XHCI_PCS_PRC))
-          break;
-        XHCI_FIXED_DELAY_US(Usb3Hc, 100);
-
-        }
-
-      if ((!(XhciPortSts & XHCI_PCS_WRC)) && (!(XhciPortSts & XHCI_PCS_PRC)))
-        return EFI_INVALID_PARAMETER;
-
-    } else {
-        //
-        // issue Port Reset (PR) and keep port power bit(PP).
-        //
-      XhciWriteOpReg(Usb3Hc, PortStsOffset, XHCI_PCS_PR | XHCI_PCS_PP); 
-        for (Index = 0; Index < PEI_XHCI_RESET_USB2_PORT_TIMEOUT_MS*10; Index++) {
-          XhciPortSts = XhciReadOpReg(Usb3Hc, PortStsOffset);
-          if (XhciPortSts & XHCI_PCS_PRC)
-            break;
-          XHCI_FIXED_DELAY_US(Usb3Hc, 100);
-        }
-
-        if (!(XhciPortSts & XHCI_PCS_PRC)) 
-          return EFI_INVALID_PARAMETER;
-
-    }
-
-    // Clear Warm Port Reset Change and Port Reset Change bits
-    XhciWriteOpReg(Usb3Hc, PortStsOffset, XHCI_PCS_WRC | XHCI_PCS_PRC | XHCI_PCS_PP); 
-   
-    // The USB System Software guarantees a minimum of 10 ms for reset recovery.
-    XHCI_FIXED_DELAY_US(Usb3Hc, 10 * 1000);
-    return EFI_SUCCESS; 
-}
-
-
-/**
     Host controller API function; returns root hub port status in terms of
     PEI_USB_HOST_CONTROLLER_PPI definition.
 
@@ -1850,10 +1722,7 @@ XhciHcGetRootHubPortStatus(
             if (PortSts->Field.Pls == XHCI_PORT_LINK_RXDETECT) {
                 break;
 			}
-            XHCI_ResetPort(PeiServices, Usb3Hc, PortNumber, TRUE);
-            break;
 		case XHCI_PORT_LINK_COMPLIANCE_MODE:
-		    XHCI_ResetPort(PeiServices, Usb3Hc, PortNumber, TRUE); 
 			break;
 		default:
 			break;
@@ -2046,47 +1915,17 @@ XhciHcReset(
   IN UINT16                       Attributes
 )
 {    
-    UINT32                  Index;
-    USB3_CONTROLLER         *Usb3Hc = PEI_RECOVERY_USB_XHCI_DEV_FROM_THIS (This);
+    UINT32                  i;
+    USB3_CONTROLLER         *Usb3Hc = 
+                                PEI_RECOVERY_USB_XHCI_DEV_FROM_THIS (This);
     UINT32                  DbCapDcctrl;
     EFI_PEI_PCI_CFG_PPI_WIDTH Width;
-    UINT64                  Val64;
-    UINT8                   PciDevIndex;
-    XHCI_SLOT_CONTEXT	    *SlotCtx;
-    UINT8                   SlotId;
-    UINT8                   Dci;
-    TRB_RING                *XfrRing;
-    XHCI_EP_CONTEXT         *EpCtx;
-    UINT16                  EpInfo;
-    UINT32                  UsbCmdData = 0;
-
+    UINT64                   Val64;
+    UINT8                    PciDevIndex;
+ 
     switch (Attributes) {
         case EFI_USB_HC_RESET_GLOBAL:
-            // Disable the device slots before we stop the host controller.
-            for (Index = 0; Index <= PEI_XHCI_MAX_SLOTS; Index++) {
-                if (Usb3Hc->DcbaaPtr->DevCntxtAddr[Index]) {
-                    SlotId = Index + 1;
-                    SlotCtx = (XHCI_SLOT_CONTEXT*)XhciGetContextEntry(Usb3Hc, (VOID*)Usb3Hc->DcbaaPtr->DevCntxtAddr[Index], 0);
-                    for (Dci = 1; Dci <= SlotCtx->ContextEntries; Dci++) {
-                	    EpCtx = (XHCI_EP_CONTEXT*)XhciGetContextEntry(Usb3Hc, (VOID*)Usb3Hc->DcbaaPtr->DevCntxtAddr[Index], Dci);
-                        if (EpCtx->TrDequeuePtr != 0) {
-                			if (EpCtx->EpState == XHCI_EP_STATE_RUNNING) {
-                				EpInfo = (Dci << 8) + SlotId;
-                				XhciExecuteCommand(PeiServices, Usb3Hc, XhciTStopEndpointCmd, &EpInfo);
-                        	}
-                			// Clear transfer rings
-                            XfrRing = XhciGetXfrRing(Usb3Hc, SlotId, Dci - 1);
-                            ZeroMem((UINT8*)XfrRing->Base, RING_SIZE);
-                        }
-                    }
-                    XhciExecuteCommand(PeiServices, Usb3Hc, XhciTDisableSlotCmd, &SlotId);
-                	Usb3Hc->DcbaaPtr->DevCntxtAddr[SlotId - 1] = 0;
-                }
-            }
-
-#if PEI_USB_HOST_SYSTEM_ERRORS_SUPPORT
-    UsbCmdData = XhciReadOpReg(Usb3Hc, XHCI_USBCMD_OFFSET);
-#endif
+		
     		// Disable interrupt				
             XhciClearOpReg(Usb3Hc, XHCI_USBCMD_OFFSET, XHCI_CMD_INTE);
             XhciClearHcMem(Usb3Hc, 
@@ -2096,7 +1935,7 @@ XhciHcReset(
             XhciClearOpReg(Usb3Hc, XHCI_USBCMD_OFFSET, XHCI_CMD_RS);
 		
 		    // The xHC should halt within 16 ms. Section 5.4.1.1
-            for (Index = 0; Index < PEI_XHCI_HALT_TIMEOUT_MS * 10; Index++) {			
+            for (i = 0; i < PEI_XHCI_HALT_TIMEOUT_MS * 10; i++) {			
                 if (XhciReadOpReg(Usb3Hc, XHCI_USBSTS_OFFSET) & XHCI_STS_HALTED) {
                     break;
                 }
@@ -2120,19 +1959,14 @@ XhciHcReset(
             // for issuing HC Reset and before accessing any MMIO register.
             XHCI_FIXED_DELAY_MS(Usb3Hc, PEI_XHCI_RESET_DELAY_MS);
             
-            for (Index = 0; Index < PEI_XHCI_RESET_TIMEOUT_MS * 10; Index++) {
+            for (i = 0; i < PEI_XHCI_RESET_TIMEOUT_MS * 10; i++) {
                 if (!(XhciReadOpReg(Usb3Hc, XHCI_USBCMD_OFFSET) & XHCI_CMD_HCRST)) {
                     break;
                 }	
                 XHCI_FIXED_DELAY_US(Usb3Hc, 100);    // 100us delay
             }
-            ASSERT(!(XhciReadOpReg(Usb3Hc, XHCI_USBCMD_OFFSET) & XHCI_CMD_HCRST));
-
-#if PEI_USB_HOST_SYSTEM_ERRORS_SUPPORT
-    if (UsbCmdData & XHCI_CMD_HSEE) {
-        XhciSetOpReg(Usb3Hc, XHCI_USBCMD_OFFSET, XHCI_CMD_HSEE);
-    }
-#endif
+            ASSERT(!(XhciReadOpReg(Usb3Hc, XHCI_USBCMD_OFFSET) & XHCI_CMD_HCRST)); 
+            
             Val64 = 0;
             
             //Check flag 'FreeResource' and clear resource
@@ -2643,10 +2477,6 @@ XhciExecuteCommand(
         case XhciTDisableSlotCmd:
             ((XHCI_DISABLESLOT_CMD_TRB*)Trb)->SlotId = *((UINT8*)Params);
             break;
-        case XhciTStopEndpointCmd:
-            ((XHCI_STOP_EP_CMD_TRB*)Trb)->SlotId = *((UINT8*)Params);
-            ((XHCI_STOP_EP_CMD_TRB*)Trb)->EndpointId = *((UINT8*)Params+1);
-            break;
     }
 
     Trb->CycleBit = Usb3Hc->CmdRing.CycleBit;
@@ -2689,10 +2519,6 @@ XhciExecuteCommand(
         case XhciTDisableSlotCmd:
             DEBUG((DEBUG_INFO, "PEI_XHCI: DisableSlot command complete.\n"));
             break;
-        case XhciTStopEndpointCmd:
-            DEBUG((DEBUG_INFO, "XHCI: Stop Endpoint command complete (slot#%x dci#%x).\n",
-                *((UINT8*)Params), *((UINT8*)Params+1)));
-            break;
     }
 
     return EFI_SUCCESS;
@@ -2733,7 +2559,7 @@ XhciInitXfrRing(
     appropriate value for this field.
 
     For high-speed and SuperSpeed Interrupt and Isoch endpoints the bInterval
-    field the Endpoint Descriptor is computed as 125us * 2^(bInterval-1), where
+    field the Endpoint Descriptor is computed as 125æs * 2^(bInterval-1), where
     bInterval = 1 to 16, therefore Interval = bInterval - 1.
 
     For low-speed Interrupt and full-speed Interrupt and Isoch endpoints the
@@ -3140,38 +2966,6 @@ XhciGetContextEntry(
 }
 
 /**
-    Parse Minor Revision of Xhci Supported Protocol Capability structures.
-    @param  MinorRev   Minor Specification Release Number in Binary-Coded Decimal
-
-    @retval BOOLEAN    TRUE if supported.
-
-**/
-
-BOOLEAN
-EFIAPI 
-IsUsb3xSupportProtocol (
-    IN UINT32    MinorRev
-)
-{
-    //
-    // The bcdUSB field contains a BCD version number. The value of the bcdUSB field is 0xJJMN
-    // for version JJ.M.N (JJ = major version number, M = minor version number, N = sub-minor
-    // version number), e.g., version 3.10 is represented with a value of 0310H
-    //
-    switch (MinorRev) {
-        case XHCI_EXT_PROTOCOL_MINOR_REV_01:
-        case XHCI_EXT_PROTOCOL_MINOR_REV_10:
-        case XHCI_EXT_PROTOCOL_MINOR_REV_20:
-            return TRUE;
-        break;
-        default:
-            return FALSE;
-        break;
-    }
-}
-
-
-/**
 
 **/
 
@@ -3181,24 +2975,16 @@ XhciIsUsb3Port(
     UINT8                       Port
 )
 {
-    UINT8                   Usb3xProtocolCount;
-    XHCI_EXT_PROTOCOL       *Usb3xProtocol;
+	if ((Usb3Hc->Usb3Protocol.PortCount != 0) && (Port >= Usb3Hc->Usb3Protocol.PortOffset) &&
+		(Port < Usb3Hc->Usb3Protocol.PortOffset + Usb3Hc->Usb3Protocol.PortCount)) {
+		return TRUE;
+	}
 
-    if ((Usb3Hc->Usb3Protocol.PortCount != 0) && (Port >= Usb3Hc->Usb3Protocol.PortOffset) &&
-        (Port < Usb3Hc->Usb3Protocol.PortOffset + Usb3Hc->Usb3Protocol.PortCount)) {
-        return TRUE;
-    }
-
-    if (Usb3Hc->Usb3xProtocolCount) {
-        for (Usb3xProtocolCount = 0; Usb3xProtocolCount < Usb3Hc->Usb3xProtocolCount; Usb3xProtocolCount++) {
-            Usb3xProtocol = (XHCI_EXT_PROTOCOL *)((UINTN)Usb3Hc->Usb3xProtocol + Usb3xProtocolCount * (sizeof(XHCI_EXT_PROTOCOL)));
-            if ((Usb3xProtocol->PortCount != 0) && (Port >= Usb3xProtocol->PortOffset) &&
-                (Port < Usb3xProtocol->PortOffset + Usb3xProtocol->PortCount)) {
-                return TRUE;
-            }
-        }
-    }
-
+	if ((Usb3Hc->Usb31Protocol.PortCount != 0) && (Port >= Usb3Hc->Usb31Protocol.PortOffset) &&
+		(Port < Usb3Hc->Usb31Protocol.PortOffset + Usb3Hc->Usb31Protocol.PortCount)) {
+		return TRUE;
+	}
+    
 	return FALSE;
 }
                                         
@@ -3244,75 +3030,6 @@ XhciResetUsb2Port(
  }
  
 /**
-    Collect protocol capability pointer of USB3.1 and above version.
-    @param  PeiServices  EFI_PEI_SERVICES pointer
-            Usb3Hc       Pointer to the HC structure
-
-    @retval EFI_STATUS Status of the operation
-
-**/
-EFI_STATUS
-XhciExtCapUsb3xCount (
-    EFI_PEI_SERVICES    **PeiServices,
-    USB3_CONTROLLER     *Usb3Hc
-)
-{
-    UINT32                  CurPtrOffset;
-    UINT32                  XhciLegSup;
-    XHCI_EXT_CAP            *XhciExtCap;
-    UINT8                   Usb3xProtocolCount;
-    EFI_PHYSICAL_ADDRESS    TempPtr;
-    UINTN                   MemPages;
-    EFI_STATUS              Status;
-
-    XhciExtCap = (XHCI_EXT_CAP*)&XhciLegSup;
-    Usb3xProtocolCount = 0;
-
-    if (Usb3Hc->CapRegs.HccParams1.Xecp == 0) {
-        return EFI_SUCCESS;
-    }
-
-    // Starts from first capability
-    CurPtrOffset = Usb3Hc->CapRegs.HccParams1.Xecp << 2;
-
-    // Traverse all capability structures
-    for (;;) {
-        XhciReadHcMem (Usb3Hc, EfiPeiPciCfgWidthUint32, CurPtrOffset, 1, XhciExtCap);
-        switch (XhciExtCap->CapId) {
-            case XHCI_EXT_CAP_SUPPORTED_PROTOCOL:
-                if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev == XHCI_EXT_PROTOCOL_MAJOR_REV_03) {
-                    if (IsUsb3xSupportProtocol(((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev)) {
-                        Usb3xProtocolCount++;
-                    }
-                }
-                break;
-        }
-        if (XhciExtCap->NextCapPtr == 0) {
-            break;
-        }
-        // Point to next capability
-        CurPtrOffset += XhciExtCap->NextCapPtr << 2;
-    }
-
-    if (Usb3xProtocolCount > 0) {
-        MemPages = ((sizeof(XHCI_EXT_PROTOCOL)) * Usb3xProtocolCount) / 0x1000 + 1;
-        Status = (**PeiServices).AllocatePages (
-                                   PeiServices,
-                                   EfiBootServicesData,
-                                   MemPages,
-                                   &TempPtr
-                                   );
-        if (EFI_ERROR (Status)) {
-            return EFI_OUT_OF_RESOURCES;
-        }
-        ZeroMem ((VOID*)TempPtr, MemPages * 4096);
-        Usb3Hc->Usb3xProtocolCount = Usb3xProtocolCount;
-        Usb3Hc->Usb3xProtocol = (VOID*)TempPtr;
-    }
-    return EFI_SUCCESS;
-}
-
-/**
 
 **/
 
@@ -3325,8 +3042,6 @@ XhciExtCapParser(
     UINT32                  CurPtrOffset;
     UINT32                  XhciLegSup;
     XHCI_EXT_CAP            *XhciExtCap = (XHCI_EXT_CAP*)&XhciLegSup;
-    UINT8                   Usb3xProtocolCount = 0;
-    XHCI_EXT_PROTOCOL       *Usb3xProtocol;
 
     if (Usb3Hc->CapRegs.HccParams1.Xecp == 0) {
         return EFI_SUCCESS;
@@ -3342,24 +3057,19 @@ XhciExtCapParser(
             case XHCI_EXT_CAP_USB_LEGACY:
                 break;
             case XHCI_EXT_CAP_SUPPORTED_PROTOCOL:
-                DEBUG((DEBUG_INFO, "XHCI: CAP supported : MajorRev %x MinorRev %x\n", ((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev, ((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev));
-                if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev == XHCI_EXT_PROTOCOL_MAJOR_REV_02) {
+                if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev == 0x02) {
                     XhciReadHcMem(Usb3Hc, EfiPeiPciCfgWidthUint32, CurPtrOffset, 3, &Usb3Hc->Usb2Protocol);
                     DEBUG((DEBUG_INFO, "XHCI: USB2 Support Protocol %x, PortOffset %x PortCount %x\n", 
                         Usb3Hc->BaseAddress + CurPtrOffset, Usb3Hc->Usb2Protocol.PortOffset, Usb3Hc->Usb2Protocol.PortCount));
-                } else if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev == XHCI_EXT_PROTOCOL_MAJOR_REV_03) {
-                    if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev == XHCI_EXT_PROTOCOL_MINOR_REV_00) {
+                } else if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MajorRev == 0x03) {
+                    if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev == 0x00) {
                         XhciReadHcMem(Usb3Hc, EfiPeiPciCfgWidthUint32, CurPtrOffset, 3, &Usb3Hc->Usb3Protocol);
                         DEBUG((DEBUG_INFO, "XHCI: USB3.0 Support Protocol %x, PortOffset %x PortCount %x\n", 
                             Usb3Hc->BaseAddress + CurPtrOffset, Usb3Hc->Usb3Protocol.PortOffset, Usb3Hc->Usb3Protocol.PortCount));
-                    } else if (IsUsb3xSupportProtocol(((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev)) {
-                        if ((Usb3Hc->Usb3xProtocolCount) && (Usb3xProtocolCount < Usb3Hc->Usb3xProtocolCount)) {
-                            Usb3xProtocol = (XHCI_EXT_PROTOCOL *)((UINTN)Usb3Hc->Usb3xProtocol + Usb3xProtocolCount * (sizeof(XHCI_EXT_PROTOCOL)));
-                            XhciReadHcMem(Usb3Hc, EfiPeiPciCfgWidthUint32, CurPtrOffset, 3, Usb3xProtocol);
-                            DEBUG((DEBUG_INFO, "XHCI: USB3.x Support Protocol %x, PortOffset %x PortCount %x\n", 
-                                Usb3Hc->BaseAddress + CurPtrOffset, Usb3xProtocol->PortOffset, Usb3xProtocol->PortCount));
-                            Usb3xProtocolCount++;
-                        }
+                    } else if (((XHCI_EXT_PROTOCOL*)XhciExtCap)->MinorRev == 0x01) {
+                        XhciReadHcMem(Usb3Hc, EfiPeiPciCfgWidthUint32, CurPtrOffset, 3, &Usb3Hc->Usb31Protocol);
+                        DEBUG((DEBUG_INFO, "XHCI: USB3.1 Support Protocol %x, PortOffset %x PortCount %x\n", 
+                            Usb3Hc->BaseAddress + CurPtrOffset, Usb3Hc->Usb31Protocol.PortOffset, Usb3Hc->Usb31Protocol.PortCount));
                     }
                 }
                 break;
@@ -3391,7 +3101,7 @@ XhciReadHcMem(
     VOID                            *Buffer
 )
 {
-    UINTN   Index;
+    UINTN   i;
     if (Width < 0 || Width > EfiPeiPciCfgWidthUint64) {
         return EFI_INVALID_PARAMETER;
     }
@@ -3404,21 +3114,23 @@ XhciReadHcMem(
         return EFI_INVALID_PARAMETER;
     }
 
-    for (Index = 0; Index < Count; Index++) {
+    for (i = 0; i < Count; i++) {
         
         switch (Width) {
             case EfiPeiPciCfgWidthUint8:
-                ((UINT8*)Buffer)[Index] = MmioRead8(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT8));
+                ((UINT8*)Buffer)[i] = MmioRead8(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT8));
                 break;
             case EfiPeiPciCfgWidthUint16:
-                ((UINT16*)Buffer)[Index] = MmioRead16(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT16));
+                ((UINT16*)Buffer)[i] = MmioRead16(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT16));
                 break;
             case EfiPeiPciCfgWidthUint32:
-                ((UINT32*)Buffer)[Index] = MmioRead32(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT32));
+                ((UINT32*)Buffer)[i] = MmioRead32(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT32));
                 break;
             case EfiPeiPciCfgWidthUint64:
-                ((UINT64*)Buffer)[Index] = MmioRead64(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT64));
+                ((UINT64*)Buffer)[i] = MmioRead64(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT64));
                 break;
+            default:
+                return EFI_INVALID_PARAMETER;
         }
     }
     
@@ -3434,7 +3146,7 @@ XhciWriteHcMem(
     VOID                            *Buffer
 )
 {
-    UINTN   Index;
+    UINTN   i;
     if (Width < 0 || Width > EfiPeiPciCfgWidthUint64) {
         return EFI_INVALID_PARAMETER;
     }
@@ -3447,21 +3159,23 @@ XhciWriteHcMem(
         return EFI_INVALID_PARAMETER;
     }
 
-    for (Index = 0; Index < Count; Index++) {
+    for (i = 0; i < Count; i++) {
         
         switch (Width) {
             case EfiPeiPciCfgWidthUint8:
-                MmioWrite8(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT8), ((UINT8*)Buffer)[Index]);
+                MmioWrite8(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT8), ((UINT8*)Buffer)[i]);
                 break;
             case EfiPeiPciCfgWidthUint16:
-                MmioWrite16(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT16), ((UINT16*)Buffer)[Index]);
+                MmioWrite16(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT16), ((UINT16*)Buffer)[i]);
                 break;
             case EfiPeiPciCfgWidthUint32:
-                MmioWrite32(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT32), ((UINT32*)Buffer)[Index]);
+                MmioWrite32(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT32), ((UINT32*)Buffer)[i]);
                 break;
             case EfiPeiPciCfgWidthUint64:
-                MmioWrite64(Usb3Hc->BaseAddress + Offset + Index * sizeof(UINT64), ((UINT64*)Buffer)[Index]);
+                MmioWrite64(Usb3Hc->BaseAddress + Offset + i * sizeof(UINT64), ((UINT64*)Buffer)[i]);
                 break;
+            default:
+                return EFI_INVALID_PARAMETER;
         }
     }
     
@@ -3557,7 +3271,7 @@ XhciClearOpReg(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

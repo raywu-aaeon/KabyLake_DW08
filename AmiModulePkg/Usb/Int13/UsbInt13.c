@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -18,17 +18,18 @@
 **/
 
 #include <Token.h>
+#include <Library/DebugLib.h>
 #include <Library/UefiLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 #include "Protocol/AmiUsbController.h"
 #include <Protocol/ComponentName.h>
 #include <Protocol/LegacyBiosExt.h>
 #include <Protocol/LegacyBios.h>
 #include "UsbInt13.h"
 #include <Pci.h>
-#include <AmiDef.h>
-#include <UsbDef.h>
+#include "../Rt/UsbDef.h"
 #include <Protocol/UsbPolicy.h>
-
+#include <AmiDxeLib.h>
 
 EFI_STATUS InitInt13RuntimeImage();
 
@@ -39,7 +40,6 @@ UINT13_DATA                         *gI13BinData = NULL;
 EFI_USB_PROTOCOL                    *gAmiUsb = NULL;
 UINT8                               gBootOverrideDeviceIndx = 0;
 USB_GLOBAL_DATA                     *gUsbData = NULL;
-USB_DATA_LIST                       *gUsbDataList = NULL;
 
 
 UINT8   gHotplugFddName[] = "USB Hotplug FDD";
@@ -74,15 +74,14 @@ UsbInt13EntryPoint(
     EFI_EVENT   Event;
     EFI_STATUS  Status;
 
-    //InitAmiLib(ImageHandle, SystemTable);
-    Status = gBS->LocateProtocol(&gEfiUsbProtocolGuid, NULL, (VOID**)&gAmiUsb);
+    InitAmiLib(ImageHandle, SystemTable);
+    Status = gBS->LocateProtocol(&gEfiUsbProtocolGuid, NULL, &gAmiUsb);
     ASSERT_EFI_ERROR(Status);
     if (EFI_ERROR(Status)) {
         return Status;
     }
 
-    gUsbData     = gAmiUsb->USBDataPtr;
-    gUsbDataList = gUsbData->UsbDataList;
+    gUsbData = gAmiUsb->USBDataPtr;
 
     Status = InitInt13RuntimeImage();
     ASSERT_EFI_ERROR(Status);
@@ -130,7 +129,7 @@ InitInt13RuntimeImage()
     // Get the USB INT13 runtime image
     //
     Status = gBS->LocateProtocol(
-        &gEfiLegacyBiosExtProtocolGuid, NULL, (VOID**)&gBiosExtensions);
+        &gEfiLegacyBiosExtProtocolGuid, NULL, &gBiosExtensions);
     if (EFI_ERROR(Status)) {
         return Status;
     }
@@ -154,8 +153,8 @@ InitInt13RuntimeImage()
             UINT32  SmmData;
         } USB_SMM_RTS;
     
-        //static USB_SMM_RTS UsbSmmRt = {1, 0, SW_SMI_IO_ADDRESS, USB_SWSMI};
-        USB_SMM_RTS UsbSmmRt = {1, 0, SW_SMI_IO_ADDRESS, (gUsbData->UsbSwSmi)};
+        static USB_SMM_RTS UsbSmmRt = {1, 0, SW_SMI_IO_ADDRESS, USB_SWSMI};
+    
         *(USB_SMM_RTS*)((UINTN)Image + ((UINT13_DATA*)Image)->UsbSmmDataOffset) = UsbSmmRt;
 
 #pragma pack(pop)
@@ -182,20 +181,20 @@ HotplugEnabled (
 {
     if (DeviceType == Floppy)
     {
-        return ((gUsbDataList->UsbSetupData->UsbHotplugFddSupport == SETUP_DATA_HOTPLUG_ENABLED) ||
-            (gUsbDataList->UsbSetupData->UsbHotplugFddSupport == SETUP_DATA_HOTPLUG_AUTO));
+        return ((gUsbData->fdd_hotplug_support == SETUP_DATA_HOTPLUG_ENABLED) ||
+            (gUsbData->fdd_hotplug_support == SETUP_DATA_HOTPLUG_AUTO));
     }
 
     if (DeviceType == HardDrive)
     {
-        return ((gUsbDataList->UsbSetupData->UsbHotplugHddSupport == SETUP_DATA_HOTPLUG_ENABLED) ||
-            (gUsbDataList->UsbSetupData->UsbHotplugHddSupport == SETUP_DATA_HOTPLUG_AUTO));
+        return ((gUsbData->hdd_hotplug_support == SETUP_DATA_HOTPLUG_ENABLED) ||
+            (gUsbData->hdd_hotplug_support == SETUP_DATA_HOTPLUG_AUTO));
     }
 
     if (DeviceType == CDROM)
     {
-        return ((gUsbDataList->UsbSetupData->UsbHotplugCdromSupport == SETUP_DATA_HOTPLUG_ENABLED) ||
-            (gUsbDataList->UsbSetupData->UsbHotplugCdromSupport == SETUP_DATA_HOTPLUG_AUTO));
+        return ((gUsbData->cdrom_hotplug_support == SETUP_DATA_HOTPLUG_ENABLED) ||
+            (gUsbData->cdrom_hotplug_support == SETUP_DATA_HOTPLUG_AUTO));
     }
 
     return FALSE;
@@ -272,7 +271,7 @@ ReadyToBootNotify(
     // Find BBS table pointer
     //
     Status = gBS->LocateProtocol(
-        &gEfiLegacyBiosProtocolGuid, NULL, (VOID**)&Bios);
+        &gEfiLegacyBiosProtocolGuid, NULL, &Bios);
     ASSERT_EFI_ERROR(Status);
     if (EFI_ERROR(Status)) {
         return;
@@ -412,7 +411,7 @@ CreateBbsEntry(
 
     if (gBiosExtensions == NULL) return EFI_NOT_FOUND;
 
-    SetMem(BbsEntry, sizeof(BBS_TABLE), 0);
+    gBS->SetMem(BbsEntry, sizeof(BBS_TABLE), 0);
 
     //
     // Get the HC PCI location
@@ -427,8 +426,7 @@ CreateBbsEntry(
     BbsEntry->Class = PCI_CL_SER_BUS;
     BbsEntry->SubClass = PCI_CL_SER_BUS_SCL_USB;
 
-    StatusFlags.Enabled = 1; 
-    StatusFlags.MediaPresent = 1;
+    StatusFlags.Enabled = 1; StatusFlags.MediaPresent = 1;
     BbsEntry->StatusFlags = StatusFlags;  // Enabled, Unknown media
 
     //
@@ -529,7 +527,7 @@ InstallUsbLegacyBootDevices(
     USB_MASS_DEV            *MassDev;
     DEV_INFO                *DevInfo;
 
-    if (gUsbData->UsbStateFlag & USB_FLAG_DISABLE_LEGACY_SUPPORT) {
+    if (gUsbData->dUSBStateFlag & USB_FLAG_DISABLE_LEGACY_SUPPORT) {
         return EFI_UNSUPPORTED;
     }
 
@@ -542,7 +540,7 @@ InstallUsbLegacyBootDevices(
     }
 
     for (Index = 0; Index < NumberOfHandles; Index++) {
-        Status = gBS->HandleProtocol(HandleBuffer[Index], &gEfiUsbIoProtocolGuid, (VOID**)&UsbIo);
+        Status = gBS->HandleProtocol(HandleBuffer[Index], &gEfiUsbIoProtocolGuid, &UsbIo);
         if (EFI_ERROR(Status)) {
             continue;
         }
@@ -556,16 +554,16 @@ InstallUsbLegacyBootDevices(
         }
 
         Status = gBS->HandleProtocol(HandleBuffer[Index], 
-                                &gEfiBlockIoProtocolGuid, (VOID**)&BlkIo);
+                                &gEfiBlockIoProtocolGuid, &BlkIo);
         if (EFI_ERROR(Status)) {
             continue;
         }
 
-        MassDev = USB_MASS_DEV_FROM_THIS(BlkIo, BlockIoProtocol);
+        MassDev = (USB_MASS_DEV*)BlkIo;
         DevInfo = (DEV_INFO*)MassDev->DevInfo;
-        if ((DevInfo->PhyDevType != USB_MASS_DEV_UNKNOWN) &&
-            !(DevInfo->PhyDevType != USB_MASS_DEV_CDROM && 
-            (DevInfo->BlockSize > 0x200 && DevInfo->BlockSize != 0xFFFF))){
+        if ((DevInfo->bPhyDevType != USB_MASS_DEV_UNKNOWN) &&
+            !(DevInfo->bPhyDevType != USB_MASS_DEV_CDROM && 
+            (DevInfo->wBlockSize > 0x200 && DevInfo->wBlockSize != 0xFFFF))){
             UsbInstallLegacyDevice(MassDev);
         }
     }
@@ -643,14 +641,14 @@ UsbInstallLegacyDevice(
     // Update device geometry related information
     //
     Device = (DEV_INFO*)UsbMassDevice->DevInfo;
-    (gI13BinData->UsbMassI13Dev)[Index].NumHeads = Device->NonLbaHeads;
-    (gI13BinData->UsbMassI13Dev)[Index].LbaNumHeads = Device->Heads;
-    (gI13BinData->UsbMassI13Dev)[Index].NumCylinders = Device->NonLbaCylinders;
-    (gI13BinData->UsbMassI13Dev)[Index].LBANumCyls = Device->Cylinders;
-    (gI13BinData->UsbMassI13Dev)[Index].NumSectors = Device->NonLbaSectors;
-    (gI13BinData->UsbMassI13Dev)[Index].LBANumSectors = Device->Sectors;
-    (gI13BinData->UsbMassI13Dev)[Index].BytesPerSector = Device->BlockSize;
-    (gI13BinData->UsbMassI13Dev)[Index].MediaType = Device->MediaType;
+    (gI13BinData->UsbMassI13Dev)[Index].NumHeads = Device->NonLBAHeads;
+    (gI13BinData->UsbMassI13Dev)[Index].LBANumHeads = Device->Heads;
+    (gI13BinData->UsbMassI13Dev)[Index].NumCylinders = Device->wNonLBACylinders;
+    (gI13BinData->UsbMassI13Dev)[Index].LBANumCyls = Device->wCylinders;
+    (gI13BinData->UsbMassI13Dev)[Index].NumSectors = Device->bNonLBASectors;
+    (gI13BinData->UsbMassI13Dev)[Index].LBANumSectors = Device->bSectors;
+    (gI13BinData->UsbMassI13Dev)[Index].BytesPerSector = Device->wBlockSize;
+    (gI13BinData->UsbMassI13Dev)[Index].MediaType = Device->bMediaType;
     (gI13BinData->UsbMassI13Dev)[Index].LastLBA = Device->MaxLba;
     (gI13BinData->UsbMassI13Dev)[Index].BpbMediaDesc = Device->BpbMediaDesc;
 
@@ -675,13 +673,13 @@ UsbInstallLegacyDevice(
     // Note2: This feature will only be available for the devices connected
     // directly to the root port; devices behind the hub(s) will be ignored.
     //
-    if (Device->HubDeviceNumber & 0x80) {
+    if (Device->bHubDeviceNumber & 0x80) {
         Status = gAmiUsb->UsbGetAssignBootPort(&HcIndx, &PortIndx);
         if ((!EFI_ERROR(Status)) && (gBootOverrideDeviceIndx == 0)) {
             DEBUG((DEBUG_INFO,"OemUsbGetAssignBootPort: HC %d, Port %d; current HC %d, Port %d\n",
-                HcIndx, PortIndx, Device->HcNumber, Device->HubPortNumber));
+                HcIndx, PortIndx, Device->bHCNumber, Device->bHubPortNumber));
 
-            if ((Device->HcNumber == HcIndx) && (Device->HubPortNumber == PortIndx)) {
+            if ((Device->bHCNumber == HcIndx) && (Device->bHubPortNumber == PortIndx)) {
                 DEBUG((DEBUG_INFO,"---OemUsbGetAssignBootPort: BBS Entry# %d\n", EntryNumber));
 
                 gBootOverrideDeviceIndx = EntryNumber;
@@ -697,7 +695,7 @@ UsbInstallLegacyDevice(
     // Process hotplug floppy
     if ((UsbMassDevice != &gHotplugFloppy) &&
          (UsbMassDevice->StorageType == USB_MASS_DEV_ARMD) &&
-         (gUsbDataList->UsbSetupData->UsbHotplugFddSupport == SETUP_DATA_HOTPLUG_AUTO)) {
+         (gUsbData->fdd_hotplug_support == SETUP_DATA_HOTPLUG_AUTO)) {
         DEBUG((DEBUG_INFO, "Uninstalling Hotplug Floppy (Setup 'Auto' option)\n"));
         UsbUninstallLegacyDevice(&gHotplugFloppy);    // Okay not to be successful
     }
@@ -705,14 +703,14 @@ UsbInstallLegacyDevice(
     // Process hotplug HDD
     if ((UsbMassDevice != &gHotplugHardDrive) &&
          (UsbMassDevice->StorageType == USB_MASS_DEV_HDD) &&
-         (gUsbDataList->UsbSetupData->UsbHotplugHddSupport == SETUP_DATA_HOTPLUG_AUTO)) {
+         (gUsbData->hdd_hotplug_support == SETUP_DATA_HOTPLUG_AUTO)) {
         DEBUG((DEBUG_INFO, "Uninstalling Hotplug HDD (Setup 'Auto' option)\n"));
         UsbUninstallLegacyDevice(&gHotplugHardDrive);    // Okay not to be successful
     }
     // Process hotplug CDROM
     if ((UsbMassDevice != &gHotplugCDROM) &&
          (UsbMassDevice->StorageType == USB_MASS_DEV_CDROM) &&
-         (gUsbDataList->UsbSetupData->UsbHotplugCdromSupport == SETUP_DATA_HOTPLUG_AUTO)) {
+         (gUsbData->cdrom_hotplug_support == SETUP_DATA_HOTPLUG_AUTO)) {
         DEBUG((DEBUG_INFO, "Uninstalling Hotplug CDROM (Setup 'Auto' option)\n"));
         UsbUninstallLegacyDevice(&gHotplugCDROM);    // Okay not to be successful
     }
@@ -781,7 +779,7 @@ UsbUninstallLegacyDevice(
     // Process hotplug floppy
     if ((UsbMassDevice != &gHotplugFloppy) &&
          (UsbMassDevice->StorageType == USB_MASS_DEV_ARMD) &&
-         (gUsbDataList->UsbSetupData->UsbHotplugFddSupport == SETUP_DATA_HOTPLUG_AUTO) &&
+         (gUsbData->fdd_hotplug_support == SETUP_DATA_HOTPLUG_AUTO) &&
          (gUsbData->NumberOfFDDs == 0)) {
         DEBUG((DEBUG_INFO, "Installing Hotplug Floppy (Setup 'Auto' option)\n"));
         UsbInstallLegacyDevice(&gHotplugFloppy);
@@ -789,14 +787,14 @@ UsbUninstallLegacyDevice(
 
     if ((UsbMassDevice != &gHotplugHardDrive) &&
          (UsbMassDevice->StorageType == USB_MASS_DEV_HDD) &&
-         (gUsbDataList->UsbSetupData->UsbHotplugHddSupport == SETUP_DATA_HOTPLUG_AUTO) &&
+         (gUsbData->hdd_hotplug_support == SETUP_DATA_HOTPLUG_AUTO) &&
          (gUsbData->NumberOfHDDs == 0)) {
         DEBUG((DEBUG_INFO, "Installing Hotplug HDD (Setup 'Auto' option)\n"));
         UsbInstallLegacyDevice(&gHotplugHardDrive);
     }
     if ((UsbMassDevice != &gHotplugCDROM) &&
          (UsbMassDevice->StorageType == USB_MASS_DEV_CDROM) &&
-         (gUsbDataList->UsbSetupData->UsbHotplugCdromSupport == SETUP_DATA_HOTPLUG_AUTO) &&
+         (gUsbData->cdrom_hotplug_support == SETUP_DATA_HOTPLUG_AUTO) &&
          (gUsbData->NumberOfCDROMs == 0)) {
         DEBUG((DEBUG_INFO, "Installing Hotplug CDROM (Setup 'Auto' option)\n"));
         UsbInstallLegacyDevice(&gHotplugCDROM);
@@ -808,7 +806,7 @@ UsbUninstallLegacyDevice(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

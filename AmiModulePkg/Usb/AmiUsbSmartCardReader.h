@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,10 +17,14 @@
 
 **/
 
-#ifndef _AMI_USB_SMART_CARD_READER_H_
-#define _AMI_USB_SMART_CARD_READER_H_
+#ifndef _USB_SMART_CARD_READER_H_
+#define _USB_SMART_CARD_READER_H_
 
-#include <Protocol/SmartCardReader.h>
+#if defined(MDE_PKG_VERSION) && (MDE_PKG_VERSION>=10)
+    #include "Protocol/SmartCardReader.h"
+#else
+    #include "Protocol/UsbSmartCardReaderProtocol.h"
+#endif
 
 typedef struct {
     EFI_SMART_CARD_READER_PROTOCOL   EfiSmartCardReaderProtocol;
@@ -73,12 +77,12 @@ USBSCardReaderAPITransmit(
 EFI_STATUS
 EFIAPI
 USBSCardReaderAPIControl(
-  IN     EFI_SMART_CARD_READER_PROTOCOL    *This,
-  IN     UINT32                            ControlCode,
-  IN     UINT8                             *InBuffer OPTIONAL,
-  IN     UINTN                             InBufferLength OPTIONAL,
-     OUT UINT8                             *OutBuffer OPTIONAL,
-  IN OUT UINTN                             *OutBufferLength OPTIONAL
+    IN EFI_SMART_CARD_READER_PROTOCOL *This,
+    IN UINT32                         ControlCode,
+    IN UINT8                          *InBuffer,
+    IN UINTN                          *InBufferLength,
+    OUT UINT8                         *OutBuffer,
+    IN OUT UINTN                      *OutBufferLength
 );
 
 EFI_STATUS
@@ -97,12 +101,12 @@ GetSmartCardReaderName (
     UINTN         *ReaderNameLength
 );
 
-#endif // _AMI_USB_SMART_CARD_READER_H_
+#endif // _USB_SMART_CARD_READER_H_
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

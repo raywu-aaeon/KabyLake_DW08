@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -29,27 +29,36 @@
    the additional terms of the license agreement
    --*/
 
-/**
+/*++
 
-Copyright (c) 2006 - 2015, Intel Corporation. All rights reserved.<BR>
-  
-This program and the accompanying materials
-are licensed and made available under the terms and conditions
-of the BSD License which accompanies this distribution.  The
-full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
+   Copyright (c)  1999 - 2002 Intel Corporation. All rights reserved
+   This software and associated documentation (if any) is furnished
+   under a license and may only be used or copied in accordance
+   with the terms of the license. Except as permitted by such
+   license, no part of this software or documentation may be
+   reproduced, stored in a retrieval system, or transmitted in any
+   form or by any means without the express written consent of
+   Intel Corporation.
 
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
-**/
+   Module Name:
 
+   UsbBotPeim.c
+
+   Abstract:
+
+   Usb Bus PPI
+
+   --*/
 
 #include "UsbBotPeim.h"
 #include "BotPeim.h"
 #define PAGESIZE  4096
-#include <Library/DebugLib.h>
-#include <Ppi/Stall.h>
+#include "Ppi/Stall.h"
+#include "Ppi/LoadFile.h"
+
+//#include EFI_PPI_DEFINITION( Stall )
+//#include EFI_PPI_DEFINITION( LoadFile )
 
 //
 // Global function
@@ -103,7 +112,7 @@ EFI_STATUS PeimInitializeUsbBot (
             &gAmiPeiUsbIoPpiGuid,
             UsbIoPpiInstance,
             &TempPpiDescriptor,
-            (VOID**)&UsbIoPpi
+            &UsbIoPpi
                  );
         if ( EFI_ERROR( Status ) ) {
             break;
@@ -176,6 +185,8 @@ EFI_STATUS InitUsbBot (
     IN EFI_PEI_SERVICES **PeiServices,
     IN PEI_USB_IO_PPI   *UsbIoPpi )
 {
+    STATIC UINTN   UsbIoPpiIndex = 0;
+
     PEI_BOT_DEVICE *PeiBotDevice;
     EFI_STATUS     Status;
     EFI_USB_INTERFACE_DESCRIPTOR *InterfaceDesc;
@@ -208,13 +219,13 @@ EFI_STATUS InitUsbBot (
     for(CurrentLun = 0; CurrentLun <= MaxLun; CurrentLun++) {
     
         Status = (*PeiServices)->AllocatePool( PeiServices,
-            sizeof(PEI_BOT_DEVICE), (VOID**)&AllocateAddress );
-        if (EFI_ERROR( Status)) {
+            sizeof(PEI_BOT_DEVICE), &AllocateAddress );
+        if ( EFI_ERROR( Status ) ) {
             return Status;
-        }
+	    }
 
-        PeiBotDevice = (PEI_BOT_DEVICE *)AllocateAddress;
-        (**PeiServices).SetMem(PeiBotDevice, sizeof(PEI_BOT_DEVICE), 0);
+	    PeiBotDevice = (PEI_BOT_DEVICE *)AllocateAddress;
+	    (**PeiServices).SetMem(PeiBotDevice, sizeof(PEI_BOT_DEVICE), 0);
 
         PeiBotDevice->Signature = PEI_BOT_DEVICE_SIGNATURE;
         PeiBotDevice->UsbIoPpi = UsbIoPpi;
@@ -255,14 +266,13 @@ EFI_STATUS InitUsbBot (
         PeiBotDevice->BlkIoPpiList.Ppi = &PeiBotDevice->BlkIoPpi;
 
         Status = PeiUsbInquiry( PeiServices, PeiBotDevice );
-        if (EFI_ERROR(Status)) {
-            DEBUG((DEBUG_ERROR, "Failed to get inquiry data\n"));
+        if ( EFI_ERROR( Status ) ) {
             return Status;
         }
 
         Status = (**PeiServices).InstallPpi( PeiServices,
             &PeiBotDevice->BlkIoPpiList );
-        if (EFI_ERROR(Status)) {
+        if ( EFI_ERROR( Status ) ) {
             return Status;
         }
     }
@@ -325,7 +335,7 @@ PeiBotDetectMedia (
     REQUEST_SENSE_DATA      *SensePtr;
     UINT8                   SenseKey;
     UINT8                   Asc;
-
+    UINT8                   Ascq;
     UINT8                   RetryCount;
     UINT8                   RetryReq = 0;
     EFI_PEI_STALL_PPI       *StallPpi;
@@ -346,20 +356,17 @@ PeiBotDetectMedia (
                 Status = (**PeiServices).AllocatePool(
                                         PeiServices,
                                         sizeof(REQUEST_SENSE_DATA),
-                                        (VOID**)&AllocateAddress
+                                        &AllocateAddress
                                         );
                 if (EFI_ERROR(Status)) {
-                    return Status;
-                }
+	                return Status;
+	            }
                 PeiBotDev->SensePtr = (REQUEST_SENSE_DATA *)AllocateAddress;
             }
             SensePtr = PeiBotDev->SensePtr;
             (**PeiServices).SetMem((VOID*)SensePtr, sizeof(REQUEST_SENSE_DATA), 0);
             Status = (**PeiServices).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid, 
-                                    0, NULL, (VOID**)&StallPpi );
-            if (EFI_ERROR (Status)) {
-                DEBUG((DEBUG_ERROR, "Failed to Locate Pei Stall Ppi\n"));
-            }
+                                    0, NULL, &StallPpi );
         }
 
         Status = PeiUsbRequestSense(PeiServices, PeiBotDev, (UINT8 *)SensePtr);
@@ -375,12 +382,12 @@ PeiBotDetectMedia (
 
         SenseKey = SensePtr->sense_key;
         Asc = SensePtr->addnl_sense_code;
-
+        Ascq = SensePtr->addnl_sense_code_qualifier;
         
-        if (SenseKey == SK_NOT_READY) {
+        if (SenseKey == 0x02) {
             //Logical Unit Problem
             switch (Asc) {
-                case    ASC_NO_MEDIA:   // //Medium Not Present.
+                case    0x3A:   // //Medium Not Present.
                     if (RetryCount >= 3) {
                         Status = BotCheckDeviceReady(PeiServices, PeiBotDev);
                         if (Status == EFI_NO_MEDIA) {
@@ -388,18 +395,16 @@ PeiBotDetectMedia (
                             return Status;
                         }  
                     }
-                    RetryReq = 1;   //Do retry
-                    break;
-                case    ASC_NOT_READY:           //Becoming Ready/Init Required/ Busy/ Format in Progress.
-                case    ASC_MEDIA_UPSIDE_DOWN:   //No reference position found (medium may be upside down)
-                case    ASC_COMM_ERR:            //Communication failure
+                case    0x04:   //Becoming Ready/Init Required/ Busy/ Format in Progress.
+                case    0x06:   //No ref. found
+                case    0x08:   //Comm failure
                     RetryReq = 1;   //Do retry
                     break;
                 default:
                     break;
             }
-        } else if (SenseKey == SK_UNIT_ATTENTION && Asc == ASC_MEDIA_CHANGE) {
-            RetryReq = 1;   //Do retry
+        } else if (SenseKey == 0x06 && Asc == 0x28) {
+        	RetryReq = 1;   //Do retry
         }
 
         PeiBotDev->Media.MediaPresent = FALSE;
@@ -433,7 +438,7 @@ BotReadBlocks(
     REQUEST_SENSE_DATA      *SensePtr;
     UINT8                   SenseKey;
     UINT8                   Asc;
-
+    UINT8                   Ascq;
     UINT8                   RetryCount;
     EFI_PEI_STALL_PPI       *StallPpi;
 
@@ -485,22 +490,19 @@ BotReadBlocks(
         if (RetryCount == 0) {
             if (PeiBotDev->SensePtr == NULL) {
                 Status = (**PeiServices).AllocatePool(
-                                        PeiServices,
-                                        sizeof(REQUEST_SENSE_DATA),
-                                        (VOID**)&AllocateAddress
-                                        );
-                if (EFI_ERROR(Status)) {
-                    return Status;
-                }
+	                                    PeiServices,
+	                                    sizeof(REQUEST_SENSE_DATA),
+	                                    &AllocateAddress
+	                                    );
+	            if (EFI_ERROR(Status)) {
+	                return Status;
+	            }
                 PeiBotDev->SensePtr = (REQUEST_SENSE_DATA *)AllocateAddress;
             }
             SensePtr = PeiBotDev->SensePtr;
             (**PeiServices).SetMem((VOID*)SensePtr, sizeof(REQUEST_SENSE_DATA), 0);
             Status = (**PeiServices).LocatePpi(PeiServices, &gEfiPeiStallPpiGuid, 
-                                        0, NULL, (VOID**)&StallPpi);
-            if (EFI_ERROR (Status)) {
-                DEBUG((DEBUG_ERROR, "Failed to Locate Pei Stall Ppi\n"));
-            }
+                                        0, NULL, &StallPpi);
         }
 
         Status = PeiUsbRequestSense(PeiServices, PeiBotDev, (UINT8 *)SensePtr);
@@ -513,7 +515,7 @@ BotReadBlocks(
         
         SenseKey = SensePtr->sense_key;
         Asc = SensePtr->addnl_sense_code;
-
+        Ascq = SensePtr->addnl_sense_code_qualifier;
 
         if ((SenseKey == 0x02) && (Asc == 0x3A)) {
             Status = BotCheckDeviceReady(PeiServices, PeiBotDev);
@@ -544,7 +546,7 @@ BotCheckDeviceReady (
     UINT8                   RetryCount;
     UINT8                   SenseKey;
     UINT8                   Asc;
-
+    UINT8                   Ascq;
     EFI_STATUS              Status;
     REQUEST_SENSE_DATA      *SensePtr;
     EFI_PEI_STALL_PPI       *StallPpi;
@@ -552,20 +554,20 @@ BotCheckDeviceReady (
 
     if (PeiBotDev->SensePtr == NULL) {
         Status = (**PeiServices).AllocatePool(
-                                PeiServices,
-                                sizeof(REQUEST_SENSE_DATA),
-                                (VOID**)&AllocateAddress
-                                );
+	                            PeiServices,
+	                            sizeof(REQUEST_SENSE_DATA),
+	                            &AllocateAddress
+	                            );
         if (EFI_ERROR(Status)) {
             return Status;
         }
-        PeiBotDev->SensePtr = (REQUEST_SENSE_DATA *)AllocateAddress;
+		PeiBotDev->SensePtr = (REQUEST_SENSE_DATA *)AllocateAddress;
     }
     SensePtr = PeiBotDev->SensePtr;
     (**PeiServices).SetMem((VOID*)SensePtr, sizeof(REQUEST_SENSE_DATA), 0);
     
     Status = (**PeiServices).LocatePpi(PeiServices,
-                    &gEfiPeiStallPpiGuid, 0, NULL, (VOID**)&StallPpi);
+                    &gEfiPeiStallPpiGuid, 0, NULL, &StallPpi);
 
     for (RetryCount = 0; RetryCount < 3; RetryCount++) {
         
@@ -582,7 +584,7 @@ BotCheckDeviceReady (
         
         SenseKey = SensePtr->sense_key;
         Asc = SensePtr->addnl_sense_code;
-
+        Ascq = SensePtr->addnl_sense_code_qualifier;
 
         if (SenseKey == 0) {
             Status = EFI_SUCCESS;
@@ -606,7 +608,7 @@ BotCheckDeviceReady (
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

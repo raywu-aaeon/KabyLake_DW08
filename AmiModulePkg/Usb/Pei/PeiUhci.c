@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -121,14 +121,12 @@ EFI_PEI_PPI_DESCRIPTOR PpiList[] = {
 
 **/
 
-EFI_STATUS
-EFIAPI
-UhciPeiUsbEntryPoint (
+EFI_STATUS UhciPeiUsbEntryPoint (
     IN EFI_FFS_FILE_HEADER *FfsHeader,
     IN EFI_PEI_SERVICES    **PeiServices )
 {
 
-    UINTN      Index;
+    UINTN      i;
     EFI_STATUS Status;
     EFI_PEI_PCI_CFG2_PPI *PciCfgPpi;
     UINT8       ClassCode[4];
@@ -141,16 +139,16 @@ UhciPeiUsbEntryPoint (
   #endif
 
     // Assign resources and enable UHCI controllers
-    for (Index = 0; Index < MAX_USB_CTRLERS; Index++) {
+    for (i = 0; i < MAX_USB_CTRLERS; i++) {
         // PEI_UHCI_IOBASE = 0x4000
-        gPeiUhciDev.IoBase[Index] = PEI_UHCI_IOBASE + 0x40 * Index;
+        gPeiUhciDev.IoBase[i] = PEI_UHCI_IOBASE + 0x40 * i;
         
         (*PeiServices)->PciCfg->Read(PeiServices,(*PeiServices)->PciCfg,
             EfiPeiPciCfgWidthUint32, 
-            gUhciPciReg[Index] + PCI_REG_REVID, ClassCode);
+            gUhciPciReg[i] + PCI_REG_REVID, ClassCode);
         
         DEBUG((DEBUG_INFO, "USB UHCI #%d PI %x SubClassCode %x BaseCode %x\n", 
-                Index, ClassCode[1], ClassCode[2], ClassCode[3]));
+            i, ClassCode[1], ClassCode[2], ClassCode[3]));
 
         if ((ClassCode[1] != PCI_CLASSC_PI_UHCI) || 
             (ClassCode[2] != PCI_CLASSC_SUBCLASS_SERIAL_USB) ||
@@ -158,11 +156,8 @@ UhciPeiUsbEntryPoint (
             continue;   //This is not an uhci controller.
         }
         
-        Status = EnableUhciController( PeiServices, PciCfgPpi, gPeiUhciDev.IoBase[Index], (UINT8) Index );
-        if (EFI_ERROR(Status)){
-            DEBUG((DEBUG_INFO, "Enable Uhci Controller Status = %r\n", Status));
-    
-        }
+        Status = EnableUhciController( PeiServices, PciCfgPpi,
+            gPeiUhciDev.IoBase[i], (UINT8) i );
     }
 
     // Install USB Controller PPI
@@ -328,7 +323,7 @@ GetUhciController(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -71,10 +71,6 @@
 
 #ifndef PEI_XHCI_RESET_EP_DELAY_MS
 #define PEI_XHCI_RESET_EP_DELAY_MS      10
-#endif
-
-#ifndef PEI_XHCI_RESET_USB3_PORT_TIMEOUT_MS
-#define PEI_XHCI_RESET_USB3_PORT_TIMEOUT_MS         600
 #endif
 
 #ifndef PEI_XHCI_RESET_USB2_PORT_TIMEOUT_MS
@@ -407,18 +403,6 @@ typedef struct {
     UINT32  RsvdZ3      : 8;
     UINT32  SlotId      : 8;
 } XHCI_DISABLESLOT_CMD_TRB;
-
-typedef struct {
-    UINT32  RsvdZ1[3];
-
-    UINT32  CycleBit    : 1;
-    UINT32  RsvdZ2      : 9;
-    UINT32  TrbType     : 6;
-    UINT32  EndpointId  : 5;
-    UINT32  RsvdZ3      : 2;
-    UINT32  Suspend     : 1;
-    UINT32  SlotId      : 8;
-} XHCI_STOP_EP_CMD_TRB;
 
 typedef struct {
     UINT64  InpCtxAddress;
@@ -1096,17 +1080,6 @@ typedef struct {
 
 #define PEI_XHCI_MAX_SLOTS  32
 
-//---------------------------------------------------------
-// Extended Capabilities Protocol
-//---------------------------------------------------------
-#define XHCI_EXT_PROTOCOL_MAJOR_REV_02                 0x02
-#define XHCI_EXT_PROTOCOL_MAJOR_REV_03                 0x03
-
-#define XHCI_EXT_PROTOCOL_MINOR_REV_00                 0x00
-#define XHCI_EXT_PROTOCOL_MINOR_REV_01                 0x01
-#define XHCI_EXT_PROTOCOL_MINOR_REV_10                 0x10
-#define XHCI_EXT_PROTOCOL_MINOR_REV_20                 0x20
-
 										//(EIP75547+)>
 typedef struct {
 	struct {
@@ -1260,7 +1233,7 @@ typedef struct _USB3_CONTROLLER {
     XHCI_HC_RT_REGS     *RtRegs;
     XHCI_EXT_PROTOCOL   Usb2Protocol;
     XHCI_EXT_PROTOCOL   Usb3Protocol;
-    VOID                *Usb3xProtocol;
+    XHCI_EXT_PROTOCOL   Usb31Protocol;
     UINT32              DbCapOffset;
 
     PEI_XHCI_SLOTADDR_MAP DeviceMap[PEI_XHCI_MAX_SLOTS + 1];
@@ -1276,7 +1249,6 @@ typedef struct _USB3_CONTROLLER {
     UINT8               HidData[8];
     UINT8               ControllerIndex;
     BOOLEAN             FreeResource;
-    UINT8               Usb3xProtocolCount;
 } USB3_CONTROLLER;
 
 #pragma pack(pop)
@@ -1501,24 +1473,10 @@ XhciIsUsb3Port(
     UINT8                       Port
 );
 
-EFI_STATUS
-XHCI_ResetPort(
-    IN EFI_PEI_SERVICES            **PeiServices,
-    IN USB3_CONTROLLER             *Usb3Hc,
-    IN UINT8                       Port,
-    IN BOOLEAN                     WarmReset
-);
-
 VOID
 XhciResetUsb2Port(
     EFI_PEI_SERVICES    **PeiServices,
     USB3_CONTROLLER *Usb3Hc
-);
-
-EFI_STATUS
-XhciExtCapUsb3xCount (
-    EFI_PEI_SERVICES    **PeiServices,
-    USB3_CONTROLLER     *Usb3Hc
 );
 
 EFI_STATUS
@@ -1543,7 +1501,7 @@ XhciAllocateScratchpadBuffers(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

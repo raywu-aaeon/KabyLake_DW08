@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,7 +17,7 @@
 
 **/
 
-#include <Token.h>
+#include "Token.h"
 #include "UsbPei.h"
 #include "UsbBotPeim.h"
 #include <PiPei.h>
@@ -26,22 +26,9 @@
 #include <Ppi/EndOfPeiPhase.h>
 #include <Ppi/BootInRecoveryMode.h>
 #include <Library/DebugLib.h>
-#include <Ppi/IoMmu.h>
 
 //this funciton is created from InitList.c template file during build process
 VOID InitParts(IN EFI_FFS_FILE_HEADER *FfsHeader,IN EFI_PEI_SERVICES **PeiServices);
-
-EFI_STATUS
-UsbPeiEntryIoMmu (
-    IN EFI_PEI_SERVICES           **PeiServices,
-    IN EFI_PEI_NOTIFY_DESCRIPTOR  *NotifyDescriptor,
-    IN VOID                       *InvokePpi
-);
-
-EFI_STATUS
-UsbPeiEntryRun (
-    IN CONST EFI_PEI_SERVICES     **PeiServices
-);
 
 EFI_GUID gPeiAmikeycodeInputPpiGuid = EFI_PEI_AMI_KEYCODE_PPI_GUID;
 EFI_GUID gPeiChipUsbRecoveryInitPpiGuid = PEI_USB_CHIP_INIT_PPI_GUID;
@@ -57,8 +44,6 @@ UINT8   gNumLockOn  = PEI_USB_KEYBOARD_NUMLOCK_ON;
 UINT8   gScrlLockOn = 0;
 UINT8   gCapsLockOn = 0;
 #endif
-
-EDKII_IOMMU_PPI *gEdk2IoMmuPpi   = NULL;
 
 BOOLEAN gUsbBootInRecoveryNotifyFlag = FALSE;
 BOOLEAN gUsbKeybaordBootNotifyFlag = FALSE;
@@ -78,21 +63,10 @@ EFI_PEI_NOTIFY_DESCRIPTOR gUsbKeybaordBootInRecoveryNotifyList = {
     &gEfiPeiBootInRecoveryModePpiGuid,
     InitializeUsbMassDevice};
 
-EFI_PEI_NOTIFY_DESCRIPTOR gEdkiiIoMmuPpiList = {
-    EFI_PEI_PPI_DESCRIPTOR_NOTIFY_DISPATCH | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
-    &gEdkiiIoMmuPpiGuid,
-    UsbPeiEntryIoMmu
-};
 
 /**
     This function enables USB controllers on the PCI bus, programs BARs,
     starts controllers and installs EFI_PEI_USBINIT_PPI.
-    @param  FileHandle             Handle of the file being invoked.
-    @param  PeiServices            Describes the list of possible PEI Services.
-
-    @retval EFI_STATUS             This function returns EFI_SUCCESS if the
-                                   Usb initialization is done successfully.
-                                   Otherwise, returns any type of error.
 
 **/
 
@@ -103,79 +77,6 @@ UsbPeiEntryPoint (
     IN CONST EFI_PEI_SERVICES       **PeiServices
 )
 {
-    EFI_STATUS              Status;
-
-    if (TRUE == PcdGetExBool (&gAmiUsbPkgTokenSpaceGuid, AmiPcdUsbPeiEdkiiIommuPpiSupport)) {
-        Status = (*PeiServices)->LocatePpi (
-                                     PeiServices,
-                                     &gEdkiiIoMmuPpiGuid,
-                                     0,
-                                     NULL,
-                                     &gEdk2IoMmuPpi
-                                     );
-        if (EFI_ERROR(Status)) {
-            return (**PeiServices).NotifyPpi(PeiServices, &gEdkiiIoMmuPpiList);
-        }
-    }
-
-    return UsbPeiEntryRun(PeiServices);
-}
-
-/**
-    This nitify function enables USB controllers on the PCI bus, programs BARs,
-    starts controllers and installs EFI_PEI_USBINIT_PPI.
-    @param  PeiServices            Describes the list of possible PEI Services.
-    @param  NotifyDescriptor       Address of the notification descriptor data structure.
-    @param  InvokePpi              Address of the PPI that was installed.
-
-    @retval EFI_UNSUPPORTED        gEdkiiIoMmuPpiGuid is not located.
-    @retval EFI_STATUS             This function returns EFI_SUCCESS if the
-                                   Usb initialization is done successfully.
-                                   Otherwise, returns any type of error.
-
-**/
-
-EFI_STATUS
-UsbPeiEntryIoMmu (
-    IN EFI_PEI_SERVICES           **PeiServices,
-    IN EFI_PEI_NOTIFY_DESCRIPTOR  *NotifyDescriptor,
-    IN VOID                       *InvokePpi
-)
-{
-    EFI_STATUS              Status;
-
-    Status = (*PeiServices)->LocatePpi (
-                                 PeiServices,
-                                 &gEdkiiIoMmuPpiGuid,
-                                 0,
-                                 NULL,
-                                 &gEdk2IoMmuPpi
-                                 );
-    if (EFI_ERROR(Status)) {
-        return EFI_UNSUPPORTED;
-    }
-
-    Status = UsbPeiEntryRun(PeiServices);
-
-    return Status;
-}
-
-/**
-    This function enables USB controllers on the PCI bus, programs BARs,
-    starts controllers and installs EFI_PEI_USBINIT_PPI.
-    @param  PeiServices            Describes the list of possible PEI Services.
-
-    @retval EFI_STATUS             This function returns EFI_SUCCESS if the
-                                   Usb initialization is done successfully.
-                                   Otherwise, returns any type of error.
-
-**/
-
-EFI_STATUS
-UsbPeiEntryRun (
-    IN CONST EFI_PEI_SERVICES   **PeiServices
-)
-{
 #if USB_PEI_KEYBOARD_SUPPORT
     UINTN                       PpiInstance;
     EFI_PEI_PPI_DESCRIPTOR      *TempPpiDescriptor;
@@ -183,12 +84,12 @@ UsbPeiEntryRun (
     EFI_STATUS                  Status;
     
 #if !USBPEI_IN_S3_SUPPORT
-    EFI_BOOT_MODE    BootMode;
-
-    (**PeiServices).GetBootMode(PeiServices, &BootMode);
-    if (BootMode == BOOT_ON_S3_RESUME) {
-        return EFI_UNSUPPORTED;
-    }
+	EFI_BOOT_MODE	 BootMode;
+	
+	(**PeiServices).GetBootMode(PeiServices, &BootMode);
+	if (BootMode == BOOT_ON_S3_RESUME) {
+		return EFI_UNSUPPORTED;
+	}
 #endif
 
     InitializeUsbHostDevice((EFI_PEI_SERVICES **)PeiServices, NULL, NULL);
@@ -196,7 +97,7 @@ UsbPeiEntryRun (
 #if PEI_USB_MASS_STORAGE_SUPPORT_POLICY == 0
     (**PeiServices).NotifyPpi(PeiServices, &gUsbKeybaordBootInRecoveryNotifyList);
 #else
-    InitializeUsbMassDevice((EFI_PEI_SERVICES **)PeiServices, NULL, NULL);
+    InitializeUsbMassDevice(PeiServices, NULL, NULL);
 #endif
 
     for (PpiInstance = 0; PpiInstance < PEI_MAX_USB_IO_PPI; PpiInstance++) {
@@ -204,7 +105,7 @@ UsbPeiEntryRun (
             &gAmiPeiUsbIoPpiGuid,
             PpiInstance,
             &TempPpiDescriptor,
-            (VOID**)&UsbIoPpi);
+            &UsbIoPpi);
 
         if (EFI_ERROR(Status)) {
             break;
@@ -214,9 +115,9 @@ UsbPeiEntryRun (
     }
     
 #else
-    (**PeiServices).NotifyPpi(PeiServices, &gUsbBootInRecoveryNotifyList);
+	(**PeiServices).NotifyPpi(PeiServices, &gUsbBootInRecoveryNotifyList);
 #endif
-
+	
     return EFI_SUCCESS;
 }
 
@@ -224,12 +125,10 @@ UsbPeiEntryRun (
 /**
     Gets the keyboard data from TD if available and returns the next
     keystroke from input buffer.
-    @param  PeiServices            Describes the list of possible PEI Services.
-    @param  This                   Protocol instance pointer.
-    @param  KeyData                Pointer to EFI_PEI_AMIKEYCODE_DATA.
 
-    @retval EFI_NOT_READY          There was no keystroke data available.
-    @retval EFI_SUCCESS            KeyData is filled with the most up-to-date keypress
+         
+    @retval EFI_NOT_READY There was no keystroke data available.
+    @retval EFI_SUCCESS KeyData is filled with the most up-to-date keypress
 
 **/
 
@@ -250,22 +149,7 @@ PeiUsbReadKey(
     static UINT8    Data[8];
     static UINTN    DataLength = 8;
     EFI_STATUS      Status;
-    UINT8           *Data8 = NULL;
 
-    if (gEdk2IoMmuPpi) {
-        Status = gEdk2IoMmuPpi->AllocateBuffer (
-                                    gEdk2IoMmuPpi,
-                                    EfiRuntimeServicesData,
-                                    1,
-                                    (VOID**)&Data8,
-                                    EDKII_IOMMU_ATTRIBUTE_MEMORY_WRITE_COMBINE
-                                    );
-        if (EFI_ERROR(Status)) {
-            return EFI_OUT_OF_RESOURCES;
-        }
-    } else {
-        Data8 = Data;
-    }
     // Check the keypress for every available USB keyboard.
     for (UsbIoPpiInstance = 0;
          UsbIoPpiInstance < PEI_MAX_USB_IO_PPI;
@@ -275,7 +159,7 @@ PeiUsbReadKey(
             &gAmiPeiUsbIoPpiGuid,
             UsbIoPpiInstance,
             &TempPpiDescriptor,
-            (VOID**)&UsbIoPpi);
+            &UsbIoPpi);
 
         if (EFI_ERROR(Status)) break;
 
@@ -286,22 +170,15 @@ PeiUsbReadKey(
             PeiServices,
             UsbIoPpi,
             PeiUsbDev->IntEndpoint,
-            Data8,
+            Data,
             &DataLength,
             PEI_USB_RECOVERYREQUEST_TIMEOUT  // timeout, ms
         );
         if (!EFI_ERROR(Status)) {
-            PeiUsbLibProcessKeypress(PeiServices, UsbIoPpi, Data8);    // This will update gKeys
+            PeiUsbLibProcessKeypress(PeiServices, UsbIoPpi, Data);    // This will update gKeys
         }
     }
     
-    if (gEdk2IoMmuPpi) {
-        gEdk2IoMmuPpi->FreeBuffer (
-                           gEdk2IoMmuPpi,
-                           1,
-                           (VOID*)Data8
-                           );
-    }
     if (gKeysHead == gKeysTail) return EFI_NOT_READY;
 
     // Get the data and adjust the tail
@@ -342,9 +219,9 @@ PeiUsbSetLedState(
     EFI_PEI_PPI_DESCRIPTOR      *TempPpiDescriptor;
     PEI_USB_IO_PPI              *UsbIoPpi;
     
-    if (!(KeyToggleState & TOGGLE_STATE_VALID)) {
-        return EFI_UNSUPPORTED;
-    }
+	if (!(KeyToggleState & TOGGLE_STATE_VALID)) {
+		return EFI_UNSUPPORTED;
+	}
 
     if (KeyToggleState & SCROLL_LOCK_ACTIVE) {
         gScrlLockOn = 1;
@@ -369,7 +246,7 @@ PeiUsbSetLedState(
             &gAmiPeiUsbIoPpiGuid,
             Index,
             &TempPpiDescriptor,
-            (VOID**)&UsbIoPpi);
+            &UsbIoPpi);
 
         if (EFI_ERROR(Status)) {
             break;
@@ -426,12 +303,6 @@ IsUsbKbdRecovery (
 
 /**
     Initialize USB keyboard input PPI.
-    @param  PeiServices            Describes the list of possible PEI Services.
-    @param  UsbIoPpi               PEI_USB_IO_PPI instance pointer.
-
-    @retval EFI_STATUS             This function returns EFI_SUCCESS if the
-                                   initialization of USB keyboard is done successfully.
-                                   Otherwise, returns any type of error.
 
 **/
 
@@ -529,7 +400,7 @@ InitUsbKbdPPI(
 
         if (IsUsbKbdRecovery(&KeyData)) {
             static EFI_PEI_PPI_DESCRIPTOR RecoveryModePpi = {
-                EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
+          	    EFI_PEI_PPI_DESCRIPTOR_PPI | EFI_PEI_PPI_DESCRIPTOR_TERMINATE_LIST,
                 &gEfiPeiBootInRecoveryModePpiGuid, NULL
             };
     
@@ -548,13 +419,10 @@ InitUsbKbdPPI(
 /**
     This routine initializes usb mass devices.
 
-    @param  PeiServices            Describes the list of possible PEI Services.
-    @param  NotifyDescriptor       Address of the notification descriptor data structure.
-    @param  InvokePpi              Address of the PPI that was installed.
-
-    @retval EFI_STATUS             This function returns EFI_SUCCESS if the
-                                   initialization of Usb Mass Device is done successfully.
-                                   Otherwise, returns any type of error.
+    @param PeiServices 
+    @param NotifyDesc 
+    @param InvokePpi 
+    
 **/
 
 EFI_STATUS
@@ -581,7 +449,7 @@ InitializeUsbMassDevice(
     gUsbKeybaordBootNotifyFlag = TRUE;
     
     Status = (**PeiServices).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid,
-                    0, NULL, (VOID**)&StallPpi);
+                    0, NULL, &StallPpi);
 
     if (EFI_ERROR(Status)) {
         return Status;
@@ -595,7 +463,7 @@ InitializeUsbMassDevice(
                                 &gAmiPeiUsbIoPpiGuid,
                                 PpiInstance,
                                 &TempPpiDescriptor,
-                                (VOID**)&UsbIoPpi);
+                                &UsbIoPpi);
             if (EFI_ERROR(Status)) {
                 break;
             }
@@ -623,7 +491,7 @@ InitializeUsbMassDevice(
             &gAmiPeiUsbIoPpiGuid,
             PpiInstance,
             &TempPpiDescriptor,
-            (VOID**)&UsbIoPpi);
+            &UsbIoPpi);
 
         if (EFI_ERROR(Status)) {
             break;
@@ -637,13 +505,10 @@ InitializeUsbMassDevice(
 /**
     This routine initializes usb host controllers and devices.
 
-    @param  PeiServices            Describes the list of possible PEI Services.
-    @param  NotifyDescriptor       Address of the notification descriptor data structure.
-    @param  InvokePpi              Address of the PPI that was installed.
-
-    @retval EFI_STATUS             This function returns EFI_SUCCESS if the
-                                   initialization of Usb host controllers is done successfully.
-                                   Otherwise, returns any type of error.
+    @param PeiServices 
+    @param NotifyDesc 
+    @param InvokePpi 
+    
 **/
 
 EFI_STATUS
@@ -674,13 +539,13 @@ InitializeUsbHostDevice(
 
     for (PpiInstance = 0; PpiInstance < PEI_MAX_USB_RECOVERY_INIT_PPI; PpiInstance++) {
         Status = (**PeiServices).LocatePpi( PeiServices, &gPeiChipUsbRecoveryInitPpiGuid,
-            PpiInstance, NULL, (VOID**)&UsbChipsetRecoveryInitPpi);
+            PpiInstance, NULL, &UsbChipsetRecoveryInitPpi);
         if (EFI_ERROR(Status)) {
             break;
         }
 
         UsbChipsetRecoveryInitPpi->EnableChipUsbRecovery(PeiServices);
-    }
+    }	
 
 #if EHCI_PEI_SUPPORT
     EhciPeiUsbEntryPoint(NULL, PeiServices);
@@ -702,10 +567,10 @@ InitializeUsbHostDevice(
 #if USB_PEI_KEYBOARD_SUPPORT     
     if (KbConnectDelay != 0) {
         Status = (**PeiServices).LocatePpi( PeiServices, &gEfiPeiStallPpiGuid,
-                        0, NULL, (VOID**)&StallPpi);
-        if (!EFI_ERROR(Status)) {
-            StallPpi->Stall(PeiServices, StallPpi, KbConnectDelay * 1000);
-        }
+                        0, NULL, &StallPpi);
+ 	  if (!EFI_ERROR(Status)) {
+		  StallPpi->Stall(PeiServices, StallPpi, KbConnectDelay * 1000);
+	  }
     }
 #endif
     
@@ -721,7 +586,7 @@ InitializeUsbHostDevice(
                             &gAmiPeiUsbIoPpiGuid,
                             PpiInstance,
                             &TempPpiDescriptor,
-                            (VOID**)&UsbIoPpi);
+                            &UsbIoPpi);
         if (EFI_ERROR(Status)) {
             break;
         }
@@ -740,22 +605,23 @@ InitializeUsbHostDevice(
     InitializeUsbMassDevice(PeiServices, NULL, NULL);
 #endif
 
-    (**PeiServices).NotifyPpi(PeiServices, &gUsbPeiNotifyList);
-
+	(**PeiServices).NotifyPpi(PeiServices, &gUsbPeiNotifyList);
+	
     return EFI_SUCCESS;
 }
 
 /**
     This routine halts all available host controllers at end of PEI
 
-    @param  PeiServices            Describes the list of possible PEI Services.
-    @param  NotifyDescriptor       Address of the notification descriptor data structure.
-    @param  InvokePpi              Address of the PPI that was installed.
+    @param PeiServices 
+    @param NotifyDesc 
+    @param InvokePpi 
 
-    @retval EFI_STATUS             This function returns EFI_SUCCESS if the
-                                   host controller is reset successfully. Otherwise, returns
-                                   any type of error it encountered during the reset operation.
-
+         
+    @retval EFI_STATUS this function returns EFI_SUCCESS if the
+        host controller is reset successfully. Otherwise, returns
+        any type of error it encountered during the reset operation.
+              
 **/
 
 EFI_STATUS
@@ -769,8 +635,8 @@ NotifyOnRecoveryCapsuleLoaded(
     EFI_STATUS                      Status;
     UINT8                           ControllerIndex = 0;
     PEI_USB_HOST_CONTROLLER_PPI     *UsbHcPpi;
-    UINT8                           NumOfRootPort;
-    UINT8                           PortNum;
+	UINT8				 			NumOfRootPort;
+	UINT8							PortNum;
 
     while (TRUE) {
         
@@ -779,34 +645,29 @@ NotifyOnRecoveryCapsuleLoaded(
                     &gAmiPeiUsbHostControllerPpiGuid,
                     ControllerIndex++,
                     NULL,
-                    (VOID**)&UsbHcPpi
+                    &UsbHcPpi
                     );
 
         if (EFI_ERROR (Status)) break;
 
-        UsbHcPpi->GetRootHubPortNumber(
-                    PeiServices,
-                    UsbHcPpi,
-                    &NumOfRootPort
-                    );
-        for (PortNum = 1; PortNum <= NumOfRootPort; PortNum++) {
-            UsbHcPpi->ClearRootHubPortFeature(
-                        PeiServices,
-                        UsbHcPpi,
-                        PortNum,
-                        EfiUsbPortEnable
-                        );
-        }
+		UsbHcPpi->GetRootHubPortNumber(
+	  			PeiServices,
+	  			UsbHcPpi,
+	  			&NumOfRootPort
+  				);
+		for (PortNum = 1; PortNum <= NumOfRootPort; PortNum++) {
+			UsbHcPpi->ClearRootHubPortFeature(
+							PeiServices,
+							UsbHcPpi,
+							PortNum,
+							EfiUsbPortEnable
+							);
+		}
 
         if (UsbHcPpi->Reset != NULL ){
-            Status = UsbHcPpi->Reset (
-                                 PeiServices, 
-                                 UsbHcPpi, 
-                                 EFI_USB_HC_RESET_GLOBAL
-                                 );
-            if (EFI_ERROR (Status)) {
-                DEBUG((DEBUG_INFO, "PEI USB Host Controller Ppi Reset Status %r\n", Status));
-            }
+            Status = UsbHcPpi->Reset ( PeiServices, 
+										UsbHcPpi, 
+										EFI_USB_HC_RESET_GLOBAL );
         }
     }    
 
@@ -816,7 +677,7 @@ NotifyOnRecoveryCapsuleLoaded(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

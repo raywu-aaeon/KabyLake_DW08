@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -425,15 +425,10 @@ typedef struct
 #define PCI_CLASSC_PI_EHCI                  0x20
 #define PCI_CLASSC_PI_XHCI                  0x30
 
-#define HID_LED_NUM_LOCK                    (BIT0)
-#define HID_LED_CAP_LOCK                    (BIT1)
-#define HID_LED_SCROLL_LOCK                 (BIT2)
-
 EFI_STATUS
 EhciPeiUsbEntryPoint(EFI_FFS_FILE_HEADER*, EFI_PEI_SERVICES**);
 
 EFI_STATUS
-EFIAPI
 UhciPeiUsbEntryPoint(EFI_FFS_FILE_HEADER*, EFI_PEI_SERVICES**);
 
 EFI_STATUS
@@ -443,7 +438,6 @@ EFI_STATUS
 OhciPeiUsbEntryPoint(EFI_FFS_FILE_HEADER*, EFI_PEI_SERVICES**);
 
 EFI_STATUS
-EFIAPI
 XhciPeiUsbEntryPoint(EFI_FFS_FILE_HEADER*, EFI_PEI_SERVICES**);
 
 EFI_STATUS
@@ -735,7 +729,7 @@ typedef struct _PEI_USB_CHIP_INIT_PPI {
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

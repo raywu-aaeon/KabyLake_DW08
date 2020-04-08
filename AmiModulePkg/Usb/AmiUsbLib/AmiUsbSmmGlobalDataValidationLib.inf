@@ -1,7 +1,7 @@
 #**********************************************************************
 #**********************************************************************
 #**                                                                  **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 #**                                                                  **
 #**                       All Rights Reserved.                       **
 #**                                                                  **
@@ -24,24 +24,23 @@
   VERSION_STRING                 = 1.0
   PI_SPECIFICATION_VERSION       = 0x0001000A
   LIBRARY_CLASS                  = AmiUsbSmmGlobalDataValidationLib|DXE_SMM_DRIVER SMM_CORE
+  CONSTRUCTOR                    = AmiUsbSmmGlobalDataValidationLibLibConstructor
 
 [Sources]
   AmiUsbSmmGlobalDataValidationLib.c
+  Crc32.c
 
 [Packages]
   MdePkg/MdePkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-  AmiModulePkg/Usb/AmiUsbPkg.dec
-  
+
 [LibraryClasses]
-  BaseLib
   SmmServicesTableLib
   UefiBootServicesTableLib
   BaseMemoryLib
   DebugLib
   AmiBufferValidationLib
-  TimerLib
 
 [Protocols]
   gAmiUsbSmmProtocolGuid
@@ -49,7 +48,7 @@
 #**********************************************************************
 #**********************************************************************
 #**                                                                  **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 #**                                                                  **
 #**                       All Rights Reserved.                       **
 #**                                                                  **

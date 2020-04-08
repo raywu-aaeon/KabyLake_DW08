@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -37,13 +37,13 @@ extern "C" {
 
 **/
 #pragma pack(push, 1)
-typedef struct _BOT_STATUS_BLOCK BOT_STATUS_BLOCK;
-struct _BOT_STATUS_BLOCK{
+
+typedef struct {
     UINT32      dCswSignature;      // 0-3h, CSW signature = "USBS"
     UINT32      dCswTag;            // 4-7h, Tag
     UINT32      dCswDataResidue;    //  8-0Bh, Data residue
     UINT8       bmCswStatus;        // 0Ch, CSW status
-};
+} BOT_STATUS_BLOCK;
 
 #pragma pack(pop)
 
@@ -68,107 +68,74 @@ struct _BOT_STATUS_BLOCK{
 #define COMMON_READ_FORMAT_CAPACITY_OPCODE              0x23
 #define COMMON_GET_CONFIGURATION_OPCODE                 0x46
 
-#define INQUIRY_COMMAND_ALLOCATE_LENGTH                 0x24
-#define INQUIRY_SPC_4_COMMAND_SIZE                      0x06
-#define INQUIRY_TEMP_BUFFER_OFFSET                      0x40
-#define INQUIRY_TRNASFER_LENGTH                         0x24
-
-#define ATA_PASS_THROUGH_16_OPCODE                      0x85
-#define ATA_PROTOCOL_DEVICE_RESET                       0x09
-#define ATA_IDENTIFY_DEVICE_DATA                        0xEC
-#define ATA_TRANSFER_LENGTH                             0x0E
-#define ATA_SECTOR_COUNT                                0x0100
-
 #pragma pack(push, 1)
-typedef struct _COMMON_INQ_CMD COMMON_INQ_CMD;
-struct _COMMON_INQ_CMD{
+
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number, etc
     UINT8           bPageCode;      // 02h, Page Code
-    UINT8           Reserved;       // 03h, Reserved
+    UINT8           bReserved;      // 03h, Reserved
     UINT8           bAllocLength;   // 04h, Allocation Length
     UINT8           bControl;       // 05h, Control/Reserved
     UINT8           aReserved[6];   // 06h-0Bh, Reserved
-};
+} COMMON_INQ_CMD;
 
-typedef struct _COMN_READ_CAPACITY_10_CMD COMN_READ_CAPACITY_10_CMD; 
-struct _COMN_READ_CAPACITY_10_CMD {
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code
-    UINT8           bLun;          // 01h, Logical Unit Number, etc
-    UINT32          dLba;          // 02h-05h, Logical Block Address
-    UINT16          wbReserved;    // 06h-07, Reserved
-    UINT8           bPMI;          // 08h, PMI - bit 0
-    UINT8           bControl;      // 09h, Control/Reserved
-    UINT16          wdReserved;    // 0Ah-0Bh, Reserved
-};
+    UINT8           bLun;       // 01h, Logical Unit Number, etc
+    UINT32          dLba;       // 02h-05h, Logical Block Address
+    UINT16          wbReserved; // 06h-07, Reserved
+    UINT8           bPMI;       // 08h, PMI - bit 0
+    UINT8           bControl;   // 09h, Control/Reserved
+    UINT16          wdReserved; // 0Ah-0Bh, Reserved
+} COMN_READ_CAPACITY_10_CMD;
 
-typedef struct _COMN_READ_CAPACITY_16_CMD COMN_READ_CAPACITY_16_CMD; 
-struct _COMN_READ_CAPACITY_16_CMD{
+typedef struct {
     UINT8           OpCode;         // 00h, Operation Code
     UINT8           ServiceAction;  // 01h, Service Action - bit0..bit4
     UINT64          Lba;            // 02h-09h, Logical Block Address
     UINT32          AllocLength;    // 10h-0Dh, Allocation Length
     UINT8           PMI;            // 0Eh, PMI - bit 0
     UINT8           Control;        // 0Fh, Control
-};
+} COMN_READ_CAPACITY_16_CMD;
 
-typedef struct _COMN_READ_FMT_CAPACITY COMN_READ_FMT_CAPACITY; 
-struct _COMN_READ_FMT_CAPACITY{
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number, etc
     UINT8           aReserved[5];   // 02-06h, Reserved
     UINT16          wAllocLength;   // 07h-08h, Allocation Length(BIG ENDIAN)
     UINT8           aReserved1[3];  // 09h-0Bh, Reserved
-};
+} COMN_READ_FMT_CAPACITY;
 
-typedef struct _IDENTIFY_DEVICE_PACKET_CMD IDENTIFY_DEVICE_PACKET_CMD; 
-struct _IDENTIFY_DEVICE_PACKET_CMD{
-    UINT8           OpCode;
-    UINT8           Protocol;
-    UINT8           TLength;
-    UINT16          Feature;
-    UINT16          SectorCount;
-    UINT16          LbaLow;
-    UINT16          LbaMid;
-    UINT16          LbaHigh;
-    UINT8           Device;
-    UINT8           Command;
-    UINT8           Control; 
-};
-
-typedef struct _COMN_RWV_10_CMD COMN_RWV_10_CMD ;
-struct _COMN_RWV_10_CMD{
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number, etc
     UINT32          dLba;           // 02h-05h, Logical Block Address
-    UINT8           Reserved;      // 06h, Reserved
+    UINT8           bReserved;      // 06h, Reserved
     UINT16          wTransferLength;// 07h-08h, Transfer Length(BIG ENDIAN)
     UINT8           bControl;       // 09h, Control/Reserved
     UINT16          wReserved;      // 0Ah-0Bh, Reserved
-};
+} COMN_RWV_10_CMD;
 
-typedef struct _COMN_RWV_16_CMD COMN_RWV_16_CMD ;
-struct _COMN_RWV_16_CMD{
+typedef struct {
     UINT8           OpCode;             // 00h, Operation Code
     UINT8           Lun;                // 01h, Logical Unit Number, etc
     UINT64          Lba;                // 02h-09h, Logical Block Address
     UINT32          TransferLength;     // 0Ah-0Dh, Transfer Length(BIG ENDIAN)
     UINT8           GroupNum;           // 0Eh, Group Number, etc
     UINT8           Control;            // 0Fh, Control
-};
+} COMN_RWV_16_CMD;
 
-typedef struct _COMN_MODE_SENSE_6CMD COMN_MODE_SENSE_6CMD ;
-struct _COMN_MODE_SENSE_6CMD{
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number, etc
     UINT8           bPageCode;      // 02h, Page Code
-    UINT8           Reserved;      // 03h, Reserved
+    UINT8           bReserved;      // 03h, Reserved
     UINT8           bAllocLength;   // 04h, Allocation Length
     UINT8           bControl;       // 05h, Control/Reserved
-};
+} COMN_MODE_SENSE_6CMD;
 
-typedef struct _COMN_MODE_SENSE_10CMD COMN_MODE_SENSE_10CMD ;
-struct _COMN_MODE_SENSE_10CMD{
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number, etc
     UINT8           bPageCode;      // 02h, Page Code
@@ -176,53 +143,46 @@ struct _COMN_MODE_SENSE_10CMD{
     UINT16          wAllocLength;   // 07h-08h, Allocation Length(BIG ENDIAN)
     UINT8           bControl;       // 09h, Control/Reserved
     UINT16          wReserved;      // 0Ah-0Bh, Reserved
-};
+} COMN_MODE_SENSE_10CMD;
 
-typedef struct _COMN_SEND_DIAG_CMD COMN_SEND_DIAG_CMD ;
-struct _COMN_SEND_DIAG_CMD{
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code (1D)
     UINT8           bLun;           // 01h, Logical Unit Number, etc
-    UINT8           Reserved[10];  // 02h-0Bh, Reserved
-};
+    UINT8           bReserved[10];  // 02h-0Bh, Reserved
+} COMN_SEND_DIAG_CMD;
 
-typedef struct _COMN_TEST_UNIT_READY_CMD COMN_TEST_UNIT_READY_CMD ;
-struct _COMN_TEST_UNIT_READY_CMD{
+typedef struct {
     UINT8           bOpCode;            // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number
-    UINT8           Reserved[10];  // 02h-0Bh, Reserved
-};
+    UINT8           bReserved[10];  // 02h-0Bh, Reserved
+} COMN_TEST_UNIT_READY_CMD;
 
-
-typedef struct _COMMON_REQ_SENSE_CMD COMMON_REQ_SENSE_CMD ;
-struct _COMMON_REQ_SENSE_CMD{
+typedef struct {
     UINT8           bOpCode;        //00h, Operation Code
     UINT8           bLun;           //01h, Logical Unit Number
     UINT16          wReserved;      //02-03h, Reserved
     UINT8           bAllocLength;   //04h, Allocation Length
     UINT8           aReserved[7];   //05h-0Bh, Reserved
-};
+} COMMON_REQ_SENSE_CMD;
 
-typedef struct _COMMON_START_STOP_UNIT_CMD COMMON_START_STOP_UNIT_CMD ;
-struct _COMMON_START_STOP_UNIT_CMD{
+typedef struct {
     UINT8           bOpCode;            // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number, etc
     UINT16          wReserved;      // 02-03h, Reserved
     UINT8           bStart;         // 04h, LoEj, Start bits
     UINT8           aReserved[7];   // 05h-0Bh, Reserved
-};
+} COMMON_START_STOP_UNIT_CMD;
 
-typedef struct _COMMON_GET_CONFIGURATION COMMON_GET_CONFIGURATION ;
-struct _COMMON_GET_CONFIGURATION{
+typedef struct {
     UINT8           OpCode;                 // 00h, Operation Code
     UINT8           Rt;                     // 01h, Logical Unit Number, etc
     UINT16          StartingFeatureNumber;  // 02h, StartingFeatureNumber
     UINT8           Reserved[3];            // 03-06h, Reserved
     UINT16          AllocLength;            // 07h, Allocation Length
     UINT8           Control;                // 09h, Control
-};
+} COMMON_GET_CONFIGURATION;
 
-typedef struct _UFI_FMT_UNIT_CMD UFI_FMT_UNIT_CMD ;
-struct _UFI_FMT_UNIT_CMD{
+typedef struct {
     UINT8           bOpCode;        // 00h, Operation Code
     UINT8           bLun;           // 01h, Logical Unit Number, etc
     UINT8           bTrackNumber;   // 02h, Track Number
@@ -230,19 +190,16 @@ struct _UFI_FMT_UNIT_CMD{
     UINT16          wReserved;      // 05-06h, Reserved
     UINT16          wParamLength;   // 07h-08h, Parameter List Length(BIG ENDIAN)
     UINT8           aReserved[3];   // 09h-0Bh, Reserved
-};
+} UFI_FMT_UNIT_CMD;
 
-typedef struct _MODE_SENSE_10_HEADER MODE_SENSE_10_HEADER ;
-struct _MODE_SENSE_10_HEADER{
+typedef struct {
     UINT16          wLength;
-    UINT8           MediaType;
+    UINT8           bMediaType;
     UINT8           aReserved[3];
     UINT16          wBlkDescSize;
-};
+} MODE_SENSE_10_HEADER;
 
-
-typedef struct _BOT_CMD_BLK BOT_CMD_BLK ;
-struct _BOT_CMD_BLK{
+typedef struct {
     UINT32          dCbwSignature;  // 0-3h, CBW signature = "USBC"
     UINT32          dCbwTag;        // 4-7h, Tag
     UINT32          dCbwDataLength; // 8-0Bh, Data transfer length
@@ -250,34 +207,31 @@ struct _BOT_CMD_BLK{
     UINT8           bCbwLun;        // 0Dh, Logical unit number
     UINT8           bCbwLength;     // 0Eh, Command block length
     UINT8           aCBWCB[16];     // 0Fh-1Eh, Command block buffer
-};
+} BOT_CMD_BLK;
 
-typedef struct _PAGE_CODE_5 PAGE_CODE_5 ;
-struct _PAGE_CODE_5{
+typedef struct {
     UINT8           bPageCode;
     UINT8           bPageSize;
     UINT16          wXferRate;
-    UINT8           Heads;
-    UINT8           Sectors;
-    UINT16          BlockSize;
-    UINT16          Cylinders;
+    UINT8           bHeads;
+    UINT8           bSectors;
+    UINT16          wBlockSize;
+    UINT16          wCylinders;
     UINT8           aReserved[22];
-};
+} PAGE_CODE_5;
 
-typedef struct _READ_FMT_CAP_HDR READ_FMT_CAP_HDR ;
-struct _READ_FMT_CAP_HDR{
+typedef struct {
     UINT8           aReserved[3];
     UINT8           bCapListLength; // Amount of capacity format data after the header
-};
+} READ_FMT_CAP_HDR;
 
-typedef struct _READ_FMT_CAPACITY READ_FMT_CAPACITY ;
-struct _READ_FMT_CAPACITY{
+typedef struct {
     READ_FMT_CAP_HDR    stCapHeader;
     UINT32          dNumBlocks;
     UINT8           bDescCode;
-    UINT8           Reserved;
-    UINT16          BlockSize;
-};
+    UINT8           bReserved;
+    UINT16          wBlockSize;
+}READ_FMT_CAPACITY;
 
 #pragma pack(pop)
 
@@ -298,6 +252,8 @@ struct _READ_FMT_CAPACITY{
 //----------------------------------------------------------------------------
 //      USB Mass Storage Related Data Structures and Equates
 //----------------------------------------------------------------------------
+//#define MAX_SIZE_FOR_FLOPPY_EMULATION   530         // 530MB  //(EIP80382-)
+//#define MAX_LBA_FOR_FLOPPY_EMULATION    0x109000    // 530MB  //(EIP80382-)
 
 // LBA to CHS conversion parameters
 #define USB_FIXED_LBA_HPT_ABOVE_1GB 0xFF
@@ -375,8 +331,8 @@ struct _READ_FMT_CAPACITY{
 #define BOT_CBW_SIGNATURE       0x43425355  // 0-3h, signature = "USBC"
 
 #pragma pack(push, 1)
-typedef struct _MBR_PARTITION  MBR_PARTITION ;
-struct _MBR_PARTITION {
+
+typedef struct {
     UINT8  BootIndicator;
     UINT8  StartHead;
     UINT8  StartSector;
@@ -387,19 +343,17 @@ struct _MBR_PARTITION {
     UINT8  EndTrack;
     UINT32 StartingLba;
     UINT32 SizeInLba;
-};
+} MBR_PARTITION;
 
-typedef struct _MASTER_BOOT_RECORD  MASTER_BOOT_RECORD ;
-struct _MASTER_BOOT_RECORD{
+typedef struct {
     UINT8         BootCode[440];
     UINT32        UniqueMbrSig;
     UINT16        Unknown;
     MBR_PARTITION PartRec[4];
     UINT16        Sig;
-};
+} MASTER_BOOT_RECORD;
 
-typedef struct _BOOT_SECTOR  BOOT_SECTOR ;
-struct _BOOT_SECTOR{
+typedef struct {
     UINT8  jmp[3];               //0x0
     CHAR8  OEMName[8];           //0x3
     UINT16 BytsPerSec;           //0xB
@@ -416,33 +370,33 @@ struct _BOOT_SECTOR{
     UINT32 TotSec32;             //0x20
     union {
         struct {
-            UINT8  DrvNum;         //0x24
-            UINT8  Reserved1;      //0x25
-            UINT8  BootSig;        //0x26
-            UINT32 VolID;          //0x27
-            CHAR8  VolLab[11];     //0x2B
-            CHAR8  FilSysType[8];  //0x36
-            UINT8  Padding[510 - 0x3E];  //0x3E
+			UINT8  DrvNum;			//0x24
+			UINT8  Reserved1;		//0x25
+			UINT8  BootSig;			//0x26
+			UINT32 VolID;			//0x27
+			CHAR8  VolLab[11];		//0x2B
+			CHAR8  FilSysType[8];	//0x36
+            UINT8  Padding[510 - 0x3E];	//0x3E
         } Fat16;
         struct {
-            UINT32 FATSz32;       //0x24
-            UINT16 ExtFlags;      //0x28
-            UINT16 FSVer;         //0x2A
-            UINT32 RootClus;      //0x2C
-            UINT16 FSInfo;        //0x30
-            UINT16 BkBootSec;     //0x32
-            UINT8  Reserved[12];  //0x34
-            UINT8  DrvNum;        //0x40
-            UINT8  Reserved1;     //0x41
-            UINT8  BootSig;       //0x42
-            UINT32 VolID;         //0x43
-            CHAR8  VolLab[11];    //0x47
-            CHAR8  FilSysType[8]; //0x52
-            UINT8  Padding2[510 - 0x5A];  //0x5A
+            UINT32 FATSz32;			//0x24
+            UINT16 ExtFlags;		//0x28
+			UINT16 FSVer;			//0x2A
+			UINT32 RootClus;		//0x2C
+			UINT16 FSInfo;			//0x30
+			UINT16 BkBootSec;		//0x32
+			UINT8  Reserved[12];	//0x34
+			UINT8  DrvNum;			//0x40
+			UINT8  Reserved1;		//0x41
+			UINT8  BootSig;			//0x42
+			UINT32 VolID;			//0x43
+			CHAR8  VolLab[11];		//0x47
+			CHAR8  FilSysType[8];	//0x52
+            UINT8  Padding2[510 - 0x5A];	//0x5A
         } Fat32;
     } Fat;
     UINT16 Signature;
-};
+} BOOT_SECTOR;
 
 #pragma pack(pop)
 
@@ -455,7 +409,7 @@ struct _BOOT_SECTOR{
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

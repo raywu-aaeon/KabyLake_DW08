@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,9 +17,13 @@
 
 **/
 
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "Uhcd.h"
 #include "ComponentName.h"
 #include "UsbBus.h"
+
+#if USB_DEV_POINT                       //(EIP66231) 
 
 #include <Protocol/AbsolutePointer.h>
 #define USB_ABSOLUTE_MOUSE_DRIVER_VERSION 1
@@ -63,10 +67,9 @@ extern USB_GLOBAL_DATA *gUsbData;
 /**
     Installs ABSOLUTEPointerProtocol interface on a given controller.
 
-    @param Controller    controller handle to install interface on.
-    @param DevInfo       Ptr to DEV_INFO
+    @param Controller - controller handle to install interface on.
 
-    @retval EFI_SUCCESS   Success to install point devcie
+    @retval VOID
 
 **/
 
@@ -80,8 +83,8 @@ InstallUSBAbsMouse(
     USB_ABSOLUTE_MOUSE_DEV          *UsbAbsMs;
 
     Status = gBS->AllocatePool(EfiBootServicesData,
-                    sizeof(USB_ABSOLUTE_MOUSE_DEV),
-                    (VOID**)&UsbAbsMs);
+            sizeof(USB_ABSOLUTE_MOUSE_DEV),
+            &UsbAbsMs);
         
     ASSERT(Status == EFI_SUCCESS);
 
@@ -89,7 +92,7 @@ InstallUSBAbsMouse(
         return Status;
     }
 
-    SetMem(UsbAbsMs, sizeof(USB_ABSOLUTE_MOUSE_DEV), 0);
+    gBS->SetMem(UsbAbsMs, sizeof(USB_ABSOLUTE_MOUSE_DEV), 0);
 
     //
     // Initialize UsbABSDevice
@@ -110,18 +113,18 @@ InstallUSBAbsMouse(
 
     UsbAbsMs->DevInfo = DevInfo;
 
-    SetMem(&UsbAbsMs->State, sizeof(EFI_ABSOLUTE_POINTER_STATE), 0);
-    SetMem(&DevInfo->AbsMouseData, sizeof(ABS_MOUSE), 0);
+    gBS->SetMem(&UsbAbsMs->State, sizeof(EFI_ABSOLUTE_POINTER_STATE), 0);
+    gBS->SetMem(&DevInfo->AbsMouseData, sizeof(ABS_MOUSE), 0);
 
     UsbAbsMs->StateChanged = FALSE;
     
     Status = gBS->CreateEvent (
-                    EFI_EVENT_NOTIFY_WAIT,
-                    TPL_NOTIFY,
-                    UsbAbsMouseWaitForInput,
-                    UsbAbsMs,
-                    &((UsbAbsMs->AbsolutePointerProtocol).WaitForInput)
-                    );
+            EFI_EVENT_NOTIFY_WAIT,
+            EFI_TPL_NOTIFY,
+            UsbAbsMouseWaitForInput,
+            UsbAbsMs,
+            &((UsbAbsMs->AbsolutePointerProtocol).WaitForInput)
+            );
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_4, "ABS event is created, status = %r\n", Status);
         
     ASSERT(Status == EFI_SUCCESS);
@@ -129,28 +132,25 @@ InstallUSBAbsMouse(
     // Install protocol interfaces for the USB ABS device
     //
     Status = gBS->InstallProtocolInterface(
-                    &Controller,
-                    &gEfiAbsolutePointerProtocolGuid,
-                    EFI_NATIVE_INTERFACE,
-                    &UsbAbsMs->AbsolutePointerProtocol);
+        &Controller,
+        &gEfiAbsolutePointerProtocolGuid,
+        EFI_NATIVE_INTERFACE,
+        &UsbAbsMs->AbsolutePointerProtocol);
 
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_4, "ABS protocol is installed, status = %r\n", Status);
     
     ASSERT(Status == EFI_SUCCESS);
-        
-    return Status;
+	
+	return Status;
 }
 
 
 /**
     Uninstalls ABSOLUTEPointerProtocol interface.
 
-    @param This                Pointer to driver binding protocol
-    @param Controller          Controller handle.
-    @param NumberOfChildren    Number of children in driver binding
-    @param Children            Pointer to children handle
-            
-    @retval EFI_STATUS         Status of the operation
+    @param Controller - controller handle.
+
+    @retval VOID
 
 **/
 
@@ -167,11 +167,11 @@ UninstallUSBAbsMouse(
     EFI_STATUS Status;
 
     Status = gBS->OpenProtocol(Controller,
-                    &gEfiAbsolutePointerProtocolGuid,
-                    (VOID**)&AbsPointer,
-                    This->DriverBindingHandle,
-                    Controller,
-                    EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+                                &gEfiAbsolutePointerProtocolGuid,
+                                &AbsPointer,
+                                This->DriverBindingHandle,
+                                Controller,
+                                EFI_OPEN_PROTOCOL_GET_PROTOCOL);
     if (EFI_ERROR(Status)) {
         return Status;
     }
@@ -179,16 +179,16 @@ UninstallUSBAbsMouse(
     UsbAbsMs = USB_ABSOLUTE_MOUSE_DEV_FROM_ABSOLUTE_PROTOCOL(AbsPointer);
 
     Status = gBS->UninstallProtocolInterface(
-                    Controller,
-                    &gEfiAbsolutePointerProtocolGuid,
-                    &UsbAbsMs->AbsolutePointerProtocol);
+            Controller,
+            &gEfiAbsolutePointerProtocolGuid,
+            &UsbAbsMs->AbsolutePointerProtocol);
     
     if (EFI_ERROR(Status)) {
         return Status;
     }
 
     Status = gBS->CloseEvent(
-                    (UsbAbsMs->AbsolutePointerProtocol).WaitForInput);
+            (UsbAbsMs->AbsolutePointerProtocol).WaitForInput);
             
     ASSERT(Status == EFI_SUCCESS);
 
@@ -208,12 +208,12 @@ UninstallUSBAbsMouse(
     This routine is a part of ABSOLUTEPointerProtocol implementation;
     it resets USB ABS.
 
-    @param This                 A pointer to the EFI_ABSOLUTE_POINTER_PROTOCOL instance.
-    @param ExtendedVerification Indicates that the driver may perform
-                                a more exhaustive verification operation of the device during
-                                reset.
+    @param This - A pointer to the EFI_ABSOLUTE_POINTER_PROTOCOL instance.
+        ExtendedVerification - Indicates that the driver may perform
+        a more exhaustive verification operation of the device during
+        reset.
 
-    @retval EFI_SUCCESS         Success to reset point device
+    @retval EFI_SUCCESS or EFI_DEVICE_ERROR
 
 **/
 
@@ -238,11 +238,11 @@ UsbAbsMouseReset(
         return EFI_DEVICE_ERROR;
     }
 
-    SetMem(&UsbAbsMs->State, sizeof(EFI_ABSOLUTE_POINTER_STATE), 0);
+    gBS->SetMem(&UsbAbsMs->State, sizeof(EFI_ABSOLUTE_POINTER_STATE), 0);
     
     UsbAbsMs->StateChanged = FALSE;
 
-    SetMem(&DevInfo->AbsMouseData, sizeof(ABS_MOUSE), 0);
+    gBS->SetMem(&DevInfo->AbsMouseData, sizeof(ABS_MOUSE), 0);
 
     gBS->RestoreTPL(OldTpl);
     
@@ -254,16 +254,23 @@ UsbAbsMouseReset(
     This routine is a part of ABSOLUTEPointerProtocol implementation;
     it retrieves the current state of a pointer device.
 
-    @param This      A pointer to the EFI_ABSOLUTE_POINTER_PROTOCOL instance.
-    @param ABSState  A pointer to the state information on the pointer
-                     device.
+    @param This - A pointer to the EFI_ABSOLUTE_POINTER_PROTOCOL instance.
+        ABSState - A pointer to the state information on the pointer
+        device. Type EFI_ABSOLUTE_POINTER_STATE is defined as follows:
+        typedef struct {
+        INT32 RelativeMovementX;
+        INT32 RelativeMovementY;
+        INT32 RelativeMovementZ;
+        BOOLEAN LeftButton;
+        BOOLEAN RightButton;
+        } EFI_ABSOLUTE_POINTER_STATE;
 
-    @retval EFI_SUCCESS  The state of the pointer device was returned
-                         in ABSState.
+    @retval EFI_SUCCESS The state of the pointer device was returned
+        in ABSState.
     @retval EFI_NOT_READY The state of the pointer device has not changed
-                         since the last call to GetABSState().
+        since the last call to GetABSState().
     @retval EFI_DEVICE_ERROR A device error occurred while attempting to
-                         retrieve the current state of absolute mouse
+        retrieve the pointer device’s current state.
 **/
 
 EFI_STATUS
@@ -298,7 +305,7 @@ GetAbsMouseState(
         return EFI_NOT_READY;
     }
 
-    CopyMem(AbsMouseState, &UsbAbsMs->State, sizeof(EFI_ABSOLUTE_POINTER_STATE));
+    gBS->CopyMem(AbsMouseState, &UsbAbsMs->State, sizeof(EFI_ABSOLUTE_POINTER_STATE));
     
     UsbAbsMs->StateChanged = FALSE;
 
@@ -311,9 +318,8 @@ GetAbsMouseState(
 /**
     This routine updates current AbsMouse data.
 
-    @param UsbAbsMs    pointer to USB_ABSOLUTE_MOUSE_DEV to be updated.
-    @param AbsData     pointer to ABS_MOUSE to be updated.
-    
+    @param Data* - pointer to the data area to be updated.
+
     @retval EFI_SUCCESS
 
 **/
@@ -350,8 +356,10 @@ UpdateUsbAbsMouseData (
     Event notification function for AbsMouseOLUTE_POINTER.WaitForInput
     event. Signal the event if there is input from AbsMouse.
 
-    @param Event    event to signal in case of AbsMouse activity
-    @param Context  data to pass along with the event.
+    @param Event - event to signal in case of AbsMouse activity
+        Context - data to pass along with the event.
+
+    @retval VOID
 
 **/
 
@@ -392,10 +400,12 @@ UsbAbsMouseWaitForInput (
     return;
 }
 
+#endif
+
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

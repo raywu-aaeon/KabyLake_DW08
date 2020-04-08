@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,10 +17,9 @@
 
 **/
 
-#ifndef _AMIUSB_UHCD_H
-#define _AMIUSB_UHCD_H
-#include <AmiDef.h>
-#include <UsbDef.h>
+#ifndef _AMIUSB_H
+#define _AMIUSB_H
+
 #include <Protocol/BlockIo.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/PciIo.h>
@@ -31,10 +30,6 @@
 #include <Protocol/DriverBinding.h>
 #include <Protocol/SimpleTextIn.h>
 #include <Protocol/UsbIo.h>
-#include <Library/ReportStatusCodeLib.h>
-#include <Library/DevicePathLib.h>
-#include <Library/UefiLib.h>
-#include <AmiStatusCodes.h>
 
 /* PCI Configuration Registers for USB */
 // Class Code Register offset
@@ -47,7 +42,7 @@
 //
 #define PCI_CLASSC_BASE_CLASS_SERIAL        0x0c
 #define PCI_CLASSC_SUBCLASS_SERIAL_USB      0x03
-#define PCI_CLASSC_IFT_USB_DEVICE           0xFE    // Interface type for USB Device
+#define PCI_CLASSC_IFT_USB_DEVICE			0xFE    // Interface type for USB Device
 #define PCI_CLASSC_PI_UHCI                  0x00
 #define PCI_CLASSC_PI_OHCI                  0x10
 #define PCI_CLASSC_PI_EHCI                  0x20
@@ -93,6 +88,8 @@ EFI_STATUS usbhc_init(EFI_HANDLE  ImageHandle,EFI_HANDLE  ServiceHandle);
 }\
 
 EFI_STATUS  UsbMsInit(EFI_HANDLE  ImageHandle, EFI_HANDLE  ServiceHandle);
+EFI_STATUS  UsbMassInit(EFI_HANDLE ImageHandle, EFI_HANDLE  ServiceHandle);
+EFI_STATUS  UsbCCIDInit(EFI_HANDLE ImageHandle, EFI_HANDLE  ServiceHandle);
 HC_STRUC*   FindHcStruc(EFI_HANDLE Controller);
 
 EFI_STATUS
@@ -125,21 +122,21 @@ AmiUsbDriverBindingStop (
 
 HC_STRUC*
 AddHC (
-    EFI_HANDLE                   Controller,
-    UINTN                        PciBus,
-    UINTN                        PciDev,
-    UINTN                        PciFunc,
-    UINT8                        HcType,
-    UINT8                        Irq,
-    EFI_DEVICE_PATH_PROTOCOL     *DevicePatch,
-    EFI_PCI_IO_PROTOCOL          *PciIo
+    EFI_HANDLE					Controller,
+    UINTN						PciBus,
+    UINTN						PciDev,
+    UINTN						PciFunc,
+    UINT8       				HcType,
+	UINT8       				Irq,
+	EFI_DEVICE_PATH_PROTOCOL    *DevicePatch,
+	EFI_PCI_IO_PROTOCOL   		*PciIo
 );
 
 EFI_STATUS
 LocateEhciController(
-    IN EFI_DRIVER_BINDING_PROTOCOL  *This,
-    IN EFI_HANDLE                   Controller,
-    IN EFI_DEVICE_PATH_PROTOCOL     *CompanionDevicePath
+	IN EFI_DRIVER_BINDING_PROTOCOL	*This,
+	IN EFI_HANDLE					Controller,
+	IN EFI_DEVICE_PATH_PROTOCOL 	*CompanionDevicePath
 );
 
 VOID
@@ -156,16 +153,9 @@ ReadyToBootNotify(
     VOID        *Context
 );
 
-VOID
-EFIAPI
-EndOfDxeEventCallback(
-    EFI_EVENT   Event, 
-    VOID        *Context
-);
-
 EFI_STATUS
 EFIAPI
-UsbGetRuntimeRegion(
+GetRuntimeRegion(
     EFI_PHYSICAL_ADDRESS *Start,
     EFI_PHYSICAL_ADDRESS *End
 );
@@ -179,18 +169,18 @@ VOID        EFIAPI UsbChangeEfiToLegacy(UINT8);
 VOID*       AllocAlignedMemory(UINT32, UINT16);
 VOID        USBGenerateSWSMI(UINT8);
 VOID        UsbPrepareForLegacyOS();
-EFI_STATUS  EFIAPI UpdateHcPciInfo();
+EFI_STATUS  UpdateHcPciInfo();
 EFI_STATUS  EFIAPI OemGetAssignUsbBootPort(UINT8*, UINT8*);
-EFI_STATUS  EFIAPI UsbGetSkipList(USB_SKIP_LIST*, UINT8*, BOOLEAN); //(EIP51653+) 
-VOID        FreeMemory(UINT32);
-VOID        InvokeUsbApi(URP_STRUC*);
+VOID  		EFIAPI UsbGetSkipList(USB_SKIP_LIST*, UINT8);	//(EIP51653+) 
+VOID		FreeMemory(UINT32);
+VOID		InvokeUsbApi(URP_STRUC*);
 
 EFI_STATUS
 InstallHcProtocols(
     IN EFI_DRIVER_BINDING_PROTOCOL  *This,
     IN EFI_HANDLE                   Controller,
-    IN EFI_PCI_IO_PROTOCOL          *PciIo,
-    IN HC_STRUC                     *HcData
+    IN EFI_PCI_IO_PROTOCOL   		*PciIo,
+    IN HC_STRUC              		*HcData
 );
 
 EFI_STATUS
@@ -208,101 +198,65 @@ AmiUsb2HcSetState(
 EFI_STATUS
 EFIAPI
 AmiUsb2HcSyncInterruptTransfer(
-  IN     EFI_USB2_HC_PROTOCOL               *HcProtocol,
-  IN     UINT8                              DeviceAddress,
-  IN     UINT8                              Endpointaddress,
-  IN     UINT8                              DeviceSpeed,
-  IN     UINTN                              MaximumPacketLength,
-  IN OUT VOID                               *Data,
-  IN OUT UINTN                              *DataLength,
-  IN OUT UINT8                              *DataToggle,
-  IN     UINTN                              Timeout,
+  IN EFI_USB2_HC_PROTOCOL    *hc_protocol,
+  IN     UINT8                      deviceaddress,
+  IN     UINT8                      endpointaddress,
+  IN     UINT8                      DeviceSpeed,
+  IN     UINTN                      maximumpacketlength,
+  IN OUT VOID                       *data,
+  IN OUT UINTN                      *datalength,
+  IN OUT UINT8                      *datatoggle,
+  IN     UINTN                      timeout,
   IN     EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
-  OUT    UINT32                             *TransferResult
-  );
+  OUT    UINT32                     *transferresult  );
 
 EFI_STATUS
 EFIAPI
 AmiUsb2HcControlTransfer(
-  IN     EFI_USB2_HC_PROTOCOL               *HcProtocol,
-  IN     UINT8                              DeviceAddress,
-  IN     UINT8                              DeviceSpeed,
-  IN     UINTN                              MaximumPacketLength,
-  IN     EFI_USB_DEVICE_REQUEST             *Request,
-  IN     EFI_USB_DATA_DIRECTION             TransferDirection,
-  IN OUT VOID                               *Data,
-  IN OUT UINTN                              *DataLength,
-  IN     UINTN                              Timeout,
+  IN EFI_USB2_HC_PROTOCOL           *hc_protocol,
+  IN     UINT8                      deviceaddress,
+  IN     UINT8                      DeviceSpeed,
+  IN     UINTN                      maximumpacketlength,
+  IN     EFI_USB_DEVICE_REQUEST     *request,
+  IN     EFI_USB_DATA_DIRECTION     transferdirection,
+  IN OUT VOID                       *data ,
+  IN OUT UINTN                      *datalength,
+  IN     UINTN                      timeout,
   IN     EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
-  OUT    UINT32                             *TransferResult
-  );
+  OUT    UINT32                     *transferresult
+);
 
 EFI_STATUS 
 EFIAPI 
 AmiUsb2HcBulkTransfer(
-  IN     EFI_USB2_HC_PROTOCOL               *HcProtocol,
-  IN     UINT8                              DeviceAddress,
-  IN     UINT8                              Endpointaddress,
-  IN     UINT8                              DeviceSpeed,
-  IN     UINTN                              MaximumPacketLength,
-  IN     UINT8                              DataBuffersNumber,
-  IN OUT VOID                               *Data[EFI_USB_MAX_BULK_BUFFER_NUM],
-  IN OUT UINTN                              *DataLength,
-  IN OUT UINT8                              *DataToggle,
-  IN     UINTN                              Timeout,
-  IN     EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
-  OUT    UINT32                             *TransferResult
-  );
+  IN EFI_USB2_HC_PROTOCOL   *hc_protocol,
+  IN  UINT8                 deviceaddress,
+  IN  UINT8                 endpointaddress,
+  IN     UINT8              DeviceSpeed,
+  IN  UINTN                 maximumpacketlength,
+  IN     UINT8              DataBuffersNumber,
+  IN OUT VOID               *Data[EFI_USB_MAX_BULK_BUFFER_NUM],
+  IN OUT UINTN              *datalength,
+  IN OUT UINT8              *datatoggle,
+  IN  UINTN                 timeout,
+  IN EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
+  OUT UINT32                *transferresult );
 
 EFI_STATUS
 EFIAPI
 AmiUsb2HcAsyncInterruptTransfer(
-    IN EFI_USB2_HC_PROTOCOL               *HcProtocol,
-    IN UINT8                              DeviceAddress,
-    IN UINT8                              EndpointAddress,
-    IN UINT8                              DeviceSpeed,
-    IN UINTN                              MaxPacket,
-    IN BOOLEAN                            IsNewTransfer,
-    IN OUT UINT8                          *DataToggle,
-    IN UINTN                              PollingInterval,
-    IN UINTN                              DataLength,
-    IN EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
-    IN EFI_ASYNC_USB_TRANSFER_CALLBACK    CallbackFunction ,
-    IN VOID                               *Context
-    );
-
-EFI_STATUS
-EFIAPI
-DiskInfoInquiry (
-    IN  EFI_DISK_INFO_PROTOCOL  *This,
-    IN  OUT VOID                *InquiryData,
-    IN  OUT UINT32              *InquiryDataSize
-);
-
-EFI_STATUS
-EFIAPI
-DiskInfoIdentify (
-    EFI_DISK_INFO_PROTOCOL  *This,
-    IN  OUT VOID            *IdentifyData,
-    IN  OUT UINT32          *IdentifyDataSize
-);
-
-EFI_STATUS
-EFIAPI
-DiskInfoSenseData (
-    IN  EFI_DISK_INFO_PROTOCOL  *This,
-    OUT VOID                    *SenseData,
-    OUT UINT32                  *SenseDataSize,
-    OUT UINT8                   *SenseDataNumber
-);
-
-EFI_STATUS
-EFIAPI
-DiskInfoWhichIDE (
-    IN  EFI_DISK_INFO_PROTOCOL  *This,
-    OUT UINT32                  *IdeChannel,
-    OUT UINT32                  *IdeDevice
-);
+    IN EFI_USB2_HC_PROTOCOL                             *hc_protocol,
+    IN UINT8                            deviceaddress,
+    IN UINT8                            endpointaddress,
+    IN UINT8                             DeviceSpeed,
+    IN UINTN                            maxpacket,
+    IN BOOLEAN                          isnewtransfer,
+    IN OUT UINT8                        *datatoggle,
+    IN UINTN                            pollinginterval  ,
+    IN UINTN                            datalength,
+    IN     EFI_USB2_HC_TRANSACTION_TRANSLATOR *Translator,
+    IN EFI_ASYNC_USB_TRANSFER_CALLBACK  callbackfunction ,
+    IN VOID                             *context);
 
 EFI_STATUS
 EFIAPI
@@ -337,19 +291,13 @@ AmiUsbBlkIoWriteBlocks (
   IN VOID                   *Buffer
 );
 
-EFI_STATUS
-EFIAPI
-UsbHcMemoryRecord(
-    EFI_HANDLE              Handle,
-    EFI_PHYSICAL_ADDRESS    MemoryStartAddress,
-    UINTN                   MemoryTotalPages
-);
+EFI_STATUS UpdateMassDevicesForSetup();
 
-EFI_STATUS EFIAPI UpdateMassDevicesForSetup();
+UINT32 CalculateMemorySize(VOID);
 
 VOID EFIAPI OnExitBootServices(EFI_EVENT, VOID*);
-EFI_STATUS EFIAPI InitUsbSetupVars(USB_GLOBAL_DATA*);
-UINT8 EFIAPI UsbSetupGetLegacySupport();
+EFI_STATUS InitUsbSetupVars(USB_GLOBAL_DATA*);
+UINT8 UsbSetupGetLegacySupport();
 
 typedef EFI_STATUS (*USB_HC_PREINIT_FUNC) (
   IN EFI_HANDLE Handle,
@@ -366,8 +314,8 @@ typedef struct {
     UINT16  FrameListSize;
     UINT16  FrameListAlignment;
     USB_HC_PREINIT_FUNC HcPreInit;
-    USB_HC_POSTSTOP_FUNC HcPostStop;
-} HC_SPECIFIC_INFO;
+	USB_HC_POSTSTOP_FUNC HcPostStop;
+} HCSPECIFICINFO;
 
 enum {
     opHC_Start,
@@ -396,52 +344,32 @@ enum {
     opHC_SmiControl,
 };
 
-
-#define USB_PCD_TYPE_BOOLEAN    0x01
-#define USB_PCD_TYPE_UINT8      0x02
-#define USB_PCD_TYPE_UINT16     0x03
-#define USB_PCD_TYPE_UINT32     0x04
-#define USB_PCD_TYPE_UINT64     0x05
-#define USB_PCD_TYPE_VOID       0x06
-
-#pragma pack(push, 1)
-typedef struct _PCD_INFO_INIT_TABLE PCD_INFO_INIT_TABLE;
-struct _PCD_INFO_INIT_TABLE{
-    UINTN   TokenName;
-    UINT32  *MemAddr;
-    UINTN   Value;
-    UINT8   Type;
-};
-#pragma pack(pop)
-
 EFI_STATUS  DummyHcFunc(EFI_HANDLE, HC_STRUC*);
 EFI_STATUS  PreInitXhci(EFI_HANDLE, HC_STRUC*);
 EFI_STATUS  PostStopXhci(EFI_HANDLE, HC_STRUC*);
 EFI_STATUS  PreInitEhci(EFI_HANDLE, HC_STRUC*);
 EFI_STATUS  PostStopEhci(EFI_HANDLE, HC_STRUC*);
-EFI_STATUS  EFIAPI Usb3OemGetMaxDeviceSlots(HC_STRUC*, UINT8*);
+EFI_STATUS  Usb3OemGetMaxDeviceSlots(HC_STRUC*, UINT8*);
 VOID        *AllocateHcMemory (IN EFI_PCI_IO_PROTOCOL*, UINTN, UINTN);
-VOID        FreeHcMemory(IN EFI_PCI_IO_PROTOCOL*, IN UINTN, IN VOID*);
+VOID		FreeHcMemory(IN EFI_PCI_IO_PROTOCOL*, IN UINTN, IN VOID*);
 EFI_STATUS  ReallocateMemory(UINTN, UINTN, VOID**);
 VOID        UsbSmiPeriodicEvent(VOID);
 VOID        EFIAPI UhcdPciIoNotifyCallback(EFI_EVENT, VOID*);
 VOID        EFIAPI UhcdPciIrqPgmNotifyCallback(EFI_EVENT, VOID*);
 VOID        EFIAPI LegacyBiosProtocolNotifyCallback(EFI_EVENT, VOID*);
-VOID        EFIAPI UsbLegcyToEfiNotify(EFI_EVENT, VOID*);
 UINTN       UsbSmiHc(UINT8,UINT8, ...);
+EFI_STATUS  USBPort_InstallEventHandler(HC_STRUC*);
 VOID        EFIAPI Emul6064NotifyCallback(EFI_EVENT, VOID*);
 VOID        EFIAPI UsbRtShutDownLegacy(VOID);
 VOID        EFIAPI UsbRtStopController(UINT16);
 VOID        EFIAPI UsbHcOnTimer(EFI_EVENT, VOID*);
 UINT8       UsbSmiEnableEndpoints(HC_STRUC*, DEV_INFO*, UINT8*);
-EFI_STATUS  EFIAPI GetRuntimeRegion(EFI_PHYSICAL_ADDRESS*, EFI_PHYSICAL_ADDRESS*);
-BOOLEAN     EFIAPI IsExternalController(EFI_DEVICE_PATH_PROTOCOL*);
 #endif
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -18,11 +18,14 @@
 
 **/
 
-
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "AmiUsb.h"
 #include "UsbKbd.h"
-#include <Library/AmiUsbHcdLib.h>
-
+#include <Library/BaseMemoryLib.h>
+#if !USB_RT_DXE_DRIVER
+#include <Library/SmmServicesTableLib.h>
+#endif
 
 #if KEYMONFILTER_SUPPORT
 #include <Protocol/KeyMonPlatform.h>
@@ -35,7 +38,6 @@ VOID UpdateKeyMon(UINT8 KeyCode);
 extern LEGACY_USB_KEYBOARD mLegacyKeyboard;
 extern USB_GLOBAL_DATA *gUsbData;
 extern UINT8 aTypematicRateDelayTable[];
-extern USB_DATA_LIST   *gUsbDataList;
 
 VOID UpdateLEDs();
 
@@ -213,29 +215,29 @@ typedef UINT16 (*GETCODE_FUNC) (UINT8 usbcode);
     5) ascii_code (shifted) = 0x41+(key-first_keycode)
     6) ascii_code (w/Ctrl) = key-first_keycode+1
 
-    @param UsbCode                Key index (key code - 4)
+    @param Key index (key code - 4)
 
-    @retval ScanCodeAsciiCode     scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
-UINT16 GetCode_Letter(UINT8 UsbCode)
+UINT16 GetCode_Letter(UINT8 usbcode)
 {
-    UINT8 ScanCode = aLetters[UsbCode];
-    UINT8 AsciiCode = 0x61 + UsbCode;
-    BOOLEAN ChangeCase = mLegacyKeyboard.KeyModifierState.CapsLock
+    UINT8 scan_code = aLetters[usbcode];
+    UINT8 ascii_code = 0x61 + usbcode;
+    BOOLEAN changecase = mLegacyKeyboard.KeyModifierState.CapsLock
         || mLegacyKeyboard.KeyModifierState.Shift;
 
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon(ScanCode);
+    UpdateKeyMon(scan_code);
 
     if (mLegacyKeyboard.KeyModifierState.CapsLock
-        && mLegacyKeyboard.KeyModifierState.Shift) ChangeCase = FALSE;
-    if (ChangeCase) AsciiCode -= 0x20;
-    if (mLegacyKeyboard.KeyModifierState.Ctrl) AsciiCode = UsbCode+1;
-    return (UINT16)(ScanCode << 8) + AsciiCode;
+        && mLegacyKeyboard.KeyModifierState.Shift) changecase = FALSE;
+    if (changecase) ascii_code -= 0x20;
+    if (mLegacyKeyboard.KeyModifierState.Ctrl) ascii_code = usbcode+1;
+    return (UINT16)(scan_code << 8) + ascii_code;
 }
 
 
@@ -249,38 +251,38 @@ UINT16 GetCode_Letter(UINT8 UsbCode)
     5) ascii_code (shifted) = aNumbers[key-first_keycode].ShiftedNumber
     6) scan_code (w/Alt) = key-first_keycode + 0x78
 
-    @param UsbCode Key         index (key code - 1E)
+    @param Key index (key code - 1E)
 
-    @retval ScanCodeAsciiCode  scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
-UINT16 GetCode_Number(UINT8 UsbCode)
+UINT16 GetCode_Number(UINT8 usbcode)
 {
-    UINT8 ScanCode = UsbCode+2;
-    UINT8 AsciiCode = aNumbers[UsbCode].NormalNumber;
+    UINT8 scan_code = usbcode+2;
+    UINT8 ascii_code = aNumbers[usbcode].NormalNumber;
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon(ScanCode);
+    UpdateKeyMon(scan_code);
     if (mLegacyKeyboard.KeyModifierState.Shift) {
-        AsciiCode = aNumbers[UsbCode].ShiftedNumber;
+        ascii_code = aNumbers[usbcode].ShiftedNumber;
     }
     if (mLegacyKeyboard.KeyModifierState.Ctrl) {
-        AsciiCode = 0; ScanCode = 0;
-        if (UsbCode == 1) { // "2"
-            ScanCode = 3;
+        ascii_code = 0; scan_code = 0;
+        if (usbcode == 1) { // "2"
+            scan_code = 3;
         }
-        if (UsbCode == 5) { // "6"
-            ScanCode = 7;
-            AsciiCode = 0x1E;
+        if (usbcode == 5) { // "6"
+            scan_code = 7;
+            ascii_code = 0x1E;
         }
     }
     if (mLegacyKeyboard.KeyModifierState.Alt) {
-        ScanCode = UsbCode + 0x78;
+        scan_code = usbcode + 0x78;
     }
 
-    return (UINT16)(ScanCode << 8) + AsciiCode;
+    return (UINT16)(scan_code << 8) + ascii_code;
 }
 
 
@@ -288,28 +290,28 @@ UINT16 GetCode_Number(UINT8 UsbCode)
     Returns the scan/ascii code for "basic keys" - not letters, not
     numbers (Enter, Escape, '[', '/', etc.); USB code from 28 to 38.
 
-    @param UsbCode              Key index (key code - 28)
+    @param Key index (key code - 28)
 
-    @retval ScanCodeAsciiCode   scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
-UINT16 GetCode_BasicKey(UINT8 UsbCode)
+UINT16 GetCode_BasicKey(UINT8 usbcode)
 {
-    UINT8 ScanCode  = aBasicKey[UsbCode].BasicKeyScancode;
-    UINT8 AsciiCode  = (mLegacyKeyboard.KeyModifierState.Shift)?
-            aBasicKey[UsbCode].BasicKeyAsciiShifted : aBasicKey[UsbCode].BasicKeyAsciiNormal;
+    UINT8 scan_code = aBasicKey[usbcode].BasicKeyScancode;
+    UINT8 ascii_code = (mLegacyKeyboard.KeyModifierState.Shift)?
+            aBasicKey[usbcode].BasicKeyAsciiShifted : aBasicKey[usbcode].BasicKeyAsciiNormal;
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon(ScanCode );
-    if (mLegacyKeyboard.KeyModifierState.Ctrl) return aBasicKey[UsbCode].BasicKeyCodeCtrl;
+    UpdateKeyMon(scan_code);
+    if (mLegacyKeyboard.KeyModifierState.Ctrl) return aBasicKey[usbcode].BasicKeyCodeCtrl;
     if (mLegacyKeyboard.KeyModifierState.Alt) {
-        AsciiCode = aBasicKey[UsbCode].BasicKeyAsciiAlt;
-        if (AsciiCode == 0) ScanCode  = 0;
+        ascii_code = aBasicKey[usbcode].BasicKeyAsciiAlt;
+        if (ascii_code == 0) scan_code = 0;
     }
 
-    return (UINT16)(ScanCode  << 8) + AsciiCode ;
+    return (UINT16)(scan_code << 8) + ascii_code;
 }
 
 
@@ -317,15 +319,15 @@ UINT16 GetCode_BasicKey(UINT8 UsbCode)
     Returns the scan/ascii code for functional keys F1..F10;
     USB code from 3A to 43.
 
-    @param UsbCode             Key index (key code - 3A)
+    @param Key index (key code - 3A)
 
-    @retval ScanCodeAsciiCode  scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
-UINT16 GetCode_F1_10Key(UINT8 UsbCode)
+UINT16 GetCode_F1_10Key(UINT8 usbcode)
 {
-    UINT8 Code = aF1_10Key[UsbCode];
+    UINT8 code = aF1_10Key[usbcode];
     //
     // ASCII codes are 0s
     // Scan codes:
@@ -337,13 +339,13 @@ UINT16 GetCode_F1_10Key(UINT8 UsbCode)
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon(Code);
+    UpdateKeyMon(code);
 
-    if (mLegacyKeyboard.KeyModifierState.Shift) return (UINT16)(Code+0x19) << 8;
-    if (mLegacyKeyboard.KeyModifierState.Ctrl) return (UINT16)(Code+0x23) << 8;
-    if (mLegacyKeyboard.KeyModifierState.Alt) return (UINT16)(Code+0x2d) << 8;
+    if (mLegacyKeyboard.KeyModifierState.Shift) return (UINT16)(code+0x19) << 8;
+    if (mLegacyKeyboard.KeyModifierState.Ctrl) return (UINT16)(code+0x23) << 8;
+    if (mLegacyKeyboard.KeyModifierState.Alt) return (UINT16)(code+0x2d) << 8;
 
-    return (UINT16)Code << 8;
+    return (UINT16)code << 8;
 }
 
 
@@ -351,13 +353,13 @@ UINT16 GetCode_F1_10Key(UINT8 UsbCode)
     Returns the scan/ascii code for functional keys F11 and F12;
     USB code 44 and 45.
 
-    @param UsbCode             Key index (key code - 44)
+    @param Key index (key code - 44)
 
-    @retval ScanCodeAsciiCode  scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
-UINT16 GetCode_F11F12Key(UINT8 UsbCode)
+UINT16 GetCode_F11F12Key(UINT8 usbcode)
 {
     UINT16 aF11_F12[2] = {0x8500, 0x8600};
     //
@@ -370,13 +372,13 @@ UINT16 GetCode_F11F12Key(UINT8 UsbCode)
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon((UINT8)(aF11_F12[UsbCode] >> 8));
+    UpdateKeyMon((UINT8)(aF11_F12[usbcode] >> 8));
 
-    if (mLegacyKeyboard.KeyModifierState.Shift) return aF11_F12[UsbCode]+0x200;
-    if (mLegacyKeyboard.KeyModifierState.Ctrl) return aF11_F12[UsbCode]+0x400;
-    if (mLegacyKeyboard.KeyModifierState.Alt) return aF11_F12[UsbCode]+0x600;
+    if (mLegacyKeyboard.KeyModifierState.Shift) return aF11_F12[usbcode]+0x200;
+    if (mLegacyKeyboard.KeyModifierState.Ctrl) return aF11_F12[usbcode]+0x400;
+    if (mLegacyKeyboard.KeyModifierState.Alt) return aF11_F12[usbcode]+0x600;
 
-    return aF11_F12[UsbCode];
+    return aF11_F12[usbcode];
 }
 
 
@@ -384,35 +386,35 @@ UINT16 GetCode_F11F12Key(UINT8 UsbCode)
     Returns the scan/ascii code for extended keys such as Home,
     End, arrows, PgUp/Dn; USB code from 49 to 52.
 
-    @param UsbCode  Key index (key code - 49)
+    @param Key index (key code - 49)
 
     @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
-UINT16 GetCode_ExtKey(UINT8 UsbCode )
+UINT16 GetCode_ExtKey(UINT8 usbcode)
 {
-/*    UINT8 ScanCode = aExtKeys[UsbCode].NormalShiftedScanCode;
-    UINT8 AsciiCode  = 0;
+/*    UINT8 scan_code = aExtKeys[usbcode].NormalShiftedScanCode;
+    UINT8 ascii_code = 0;
 
     if (mLegacyKeyboard.KeyModifierState.Shift) {
-        AsciiCode = aExtKeys[UsbCode].ShiftedAsciiCode;
+        ascii_code = aExtKeys[usbcode].ShiftedAsciiCode;
     } else {
         if (mLegacyKeyboard.KeyModifierState.Ctrl) {
-            ScanCode = aExtKeys[UsbCode].wCtrlScanCode;
+            scan_code = aExtKeys[usbcode].wCtrlScanCode;
         } else {
             if (mLegacyKeyboard.KeyModifierState.Alt) {
-                ScanCode = aExtKeys[UsbCode].wAltScanCode;
+                scan_code = aExtKeys[usbcode].wAltScanCode;
             }
         }
     }
-    return ((UINT16)ScanCode << 8) + AsciiCode;*/
+    return ((UINT16)scan_code << 8) + ascii_code;*/
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon(aExtKeys[UsbCode]);
+    UpdateKeyMon(aExtKeys[usbcode]);
 
-    return (UINT16)aExtKeys[UsbCode]<<8;
+    return (UINT16)aExtKeys[usbcode]<<8;
 }
 
 
@@ -420,13 +422,13 @@ UINT16 GetCode_ExtKey(UINT8 UsbCode )
     Returns the scan/ascii code for non-numeric part of the keypad,
     such as '/', '*', etc.; USB code from 54 to 58.
 
-    @param UsbCode            Key index (key code - 54)
+    @param Key index (key code - 54)
 
-    @retval ScanCodeAsciiCode scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
-UINT16 GetCode_Keypad1(UINT8 UsbCode)
+UINT16 GetCode_Keypad1(UINT8 usbcode)
 {
     if (mLegacyKeyboard.KeyModifierState.Ctrl || mLegacyKeyboard.KeyModifierState.Alt) {
         return 0;
@@ -435,9 +437,9 @@ UINT16 GetCode_Keypad1(UINT8 UsbCode)
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon((UINT8)(aKeypad1[UsbCode] >> 8));
+    UpdateKeyMon((UINT8)(aKeypad1[usbcode] >> 8));
 
-    return aKeypad1[UsbCode];
+    return aKeypad1[usbcode];
 }
 
 
@@ -445,38 +447,38 @@ UINT16 GetCode_Keypad1(UINT8 UsbCode)
     Returns the scan/ascii code for numeric part of the keypad;
     USB code from 59 to 63.
 
-    @param UsbCode             Key index (key code - 59)
+    @param Key index (key code - 59)
 
-    @retval ScanCodeAsciiCode  UsbCode scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
     @note  The ascii_code is altered depending on the combination of
               Shift and NumLock.
 
 **/
 
-UINT16 GetCode_Keypad2(UINT8 UsbCode)
+UINT16 GetCode_Keypad2(UINT8 usbcode)
 {
-    UINT8 ScanCode  = aKeypad2[UsbCode].NormalScanCode;
-    UINT8 AsciiCode  = 0;
-    BOOLEAN ChangeCase = mLegacyKeyboard.KeyModifierState.NumLock
+    UINT8 scan_code = aKeypad2[usbcode].NormalScanCode;
+    UINT8 ascii_code = 0;
+    BOOLEAN changecase = mLegacyKeyboard.KeyModifierState.NumLock
         || mLegacyKeyboard.KeyModifierState.Shift;
 
     //
     // Check for Hot Key from the KeyMon driver
     //
-    UpdateKeyMon(ScanCode);
+    UpdateKeyMon(scan_code);
 
     if (mLegacyKeyboard.KeyModifierState.NumLock
-        && mLegacyKeyboard.KeyModifierState.Shift) ChangeCase = FALSE;
+        && mLegacyKeyboard.KeyModifierState.Shift) changecase = FALSE;
 
-    if (ChangeCase) AsciiCode  = aKeypad2[UsbCode].ShiftedAsciiCode;
+    if (changecase) ascii_code = aKeypad2[usbcode].ShiftedAsciiCode;
     if (mLegacyKeyboard.KeyModifierState.Ctrl) {
-        return (UINT16)aKeypad2[UsbCode].CtrlScanCode << 8;
+        return (UINT16)aKeypad2[usbcode].CtrlScanCode << 8;
     }
     if (mLegacyKeyboard.KeyModifierState.Alt) {
-        return (UINT16)aKeypad2[UsbCode].AltScanCode << 8;
+        return (UINT16)aKeypad2[usbcode].AltScanCode << 8;
     }
-    return ((UINT16)ScanCode << 8) + AsciiCode ;
+    return ((UINT16)scan_code<<8) + ascii_code;
 }
 
 
@@ -484,9 +486,7 @@ UINT16 GetCode_Keypad2(UINT8 UsbCode)
     Returns the scan/ascii code for USB Key 0x64, a.k.a. Europe2
     Europe2 is typically in AT-101 Key Position 45, between Left
     Shift and Z keys.
-    @param    UsbCode       Key index 
-    @retval   0x567C
-    @retval   0x565C
+
 **/
 
 UINT16 GetCode_64(UINT8 usbcode)
@@ -511,12 +511,12 @@ UINT16 GetCode_64(UINT8 usbcode)
           GetCode        GETCODE_FUNC function to call if the code is in the range
 
 **/
-typedef struct _TKEYGROUP  TKEYGROUP;  
-struct _TKEYGROUP {
+
+typedef struct {
     UINT8   first_keycode;
     UINT8   last_keycode;
     GETCODE_FUNC    GetCode;
-};
+} TKEYGROUP;
 
 TKEYGROUP aGetKey[] = {
     {0x04, 0x1d, GetCode_Letter},
@@ -534,54 +534,37 @@ TKEYGROUP aGetKey[] = {
 
 /**
     This function performs the key autorepeat
-    @param  None
 
-    @retval None
 **/
 
 VOID SysNoKbcAutoRepeat()
 {
-    UINT8 Index;
-    UINT8 BdaKbdLedFlags;
-    UINT8 Ledstate;
+    UINT8 i;
+    UINT8 bdaKbdLedFlags = *(UINT8*)0x417;
+    UINT8 ledstate;
 
-
-    EFI_STATUS  Status;
-    VOID        *AddrCheck = ((VOID*)0x417); 
-    Status = AmiUsbValidateMemoryBuffer (AddrCheck, sizeof(UINT8));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)) return;
-
-
-    BdaKbdLedFlags = *(UINT8*)0x417;
-    gUsbData->RepeatCounter++;
-    if (gUsbData->RepeatCounter >= gUsbData->RepeatRate) {
+    gUsbData->wRepeatCounter++;
+    if (gUsbData->wRepeatCounter >= gUsbData->wRepeatRate) {
 
         //
         // Repeat rate is reached.
         // Reload repeat delay counter with keyrepeat delay value; original
         // type delay value will be restored in ProcessKeyboardData
         //
-        if (gUsbData->RepeatIntervalMode){
-            gUsbData->RepeatRate = aTypematicRateDelayTable[
-                    (gUsbData->UsbKbcStatusFlag & KBC_TYPE_RATE_BIT_MASK_16MS) >>
-                     KBC_TYPE_RATE_BIT_SHIFT_16MS];
-        } else {
-            gUsbData->RepeatRate = aTypematicRateDelayTable[
-                    (gUsbData->UsbKbcStatusFlag & KBC_TYPE_RATE_BIT_MASK_8MS) >>
-                     KBC_TYPE_RATE_BIT_SHIFT_8MS];            
-        }
-        
-        gUsbData->RepeatCounter   = 0;
+        gUsbData->wRepeatRate = aTypematicRateDelayTable[
+            (gUsbData->wUSBKBC_StatusFlag & KBC_TYPE_RATE_BIT_MASK) >>
+                    KBC_TYPE_RATE_BIT_SHIFT];
+        gUsbData->wRepeatCounter   = 0;
 
-        for (Index=6; Index>0; Index--) if (mLegacyKeyboard.KeyCodeStorage[Index-1] != 0) break;
+        for (i=6; i>0; i--) if (mLegacyKeyboard.KeyCodeStorage[i-1] != 0) break;
 
-        if (Index != 0) {    // Some keys to repeat
-            if (mLegacyKeyboard.KeyCodeStorage[Index-1]==mLegacyKeyboard.KeyToRepeat) {
+        if (i != 0) {    // Some keys to repeat
+            if (mLegacyKeyboard.KeyCodeStorage[i-1]==mLegacyKeyboard.KeyToRepeat) {
                 ProcessKeyCode(mLegacyKeyboard.KeyToRepeat);
             } else {
-                mLegacyKeyboard.KeyToRepeat = mLegacyKeyboard.KeyCodeStorage[Index-1];
+                mLegacyKeyboard.KeyToRepeat = mLegacyKeyboard.KeyCodeStorage[i-1];
             }
-            USBKeyRepeat(NULL, 2);  // Enable Key repeat
+		    USBKeyRepeat(NULL, 2);  // Enable Key repeat
         }
     }
 
@@ -589,10 +572,10 @@ VOID SysNoKbcAutoRepeat()
     // See if current NumLock/ScrlLock/CapsLock matches the 40:17 values; update
     // the local data and LEDs accordingly.
     //
-    Ledstate = *(UINT8*)&mLegacyKeyboard.KeyModifierState & 7;
-    if (((BdaKbdLedFlags>>4) & 7) != Ledstate) {  // 7 is a mask for Scrl/Num/Caps locks
+    ledstate = *(UINT8*)&mLegacyKeyboard.KeyModifierState & 7;
+    if (((bdaKbdLedFlags>>4) & 7) != ledstate) {  // 7 is a mask for Scrl/Num/Caps locks
         *(UINT8*)&mLegacyKeyboard.KeyModifierState &= 0xF8;
-        *(UINT8*)&mLegacyKeyboard.KeyModifierState |= ((BdaKbdLedFlags>>4) & 7);
+        *(UINT8*)&mLegacyKeyboard.KeyModifierState |= ((bdaKbdLedFlags>>4) & 7);
         UpdateLEDs();   // Turn on/off Ctrl, Alt, NumLock LEDs
     }
 }
@@ -602,9 +585,9 @@ VOID SysNoKbcAutoRepeat()
     Calls the service routine for the given keycode. Returns the
     scan/ascii code.
 
-    @param keyCode             Key code
+    @param Key code
 
-    @retval Code               scan code in upper byte, ascii code in lower byte
+    @retval scan code in upper byte, ascii code in lower byte
 
 **/
 
@@ -612,14 +595,14 @@ UINT16
 GetAsciiScan(UINT8 keyCode)
 {
     TKEYGROUP *KeyGroup;
-    UINT16 Code;
+    UINT16 code;
 
     if (keyCode == 0x2C) return 0x3920; // Space Bar
     for (KeyGroup = aGetKey; KeyGroup->GetCode != 0; KeyGroup++) {
         if (keyCode >= KeyGroup->first_keycode && keyCode <= KeyGroup->last_keycode) {
-            Code = KeyGroup->GetCode(keyCode-KeyGroup->first_keycode);
-            if (mLegacyKeyboard.KeyModifierState.Alt) Code &= 0xFF00;
-            return Code;
+            code = KeyGroup->GetCode(keyCode-KeyGroup->first_keycode);
+            if (mLegacyKeyboard.KeyModifierState.Alt) code &= 0xFF00;
+            return code;
         }
     }
     return 0;
@@ -633,8 +616,9 @@ GetAsciiScan(UINT8 keyCode)
     Key monitor map (32 bit) updated by this routine is at 9FC0:108
     Map element is {BYTE, DWORD}; BYTE - scan code, DWORD - attribute    
 
-    @param KeyCode Key code
-    @retval None 
+    @param Key code
+
+        Output        Key monitor map is updated accordingly    
 
 **/
 VOID
@@ -644,36 +628,16 @@ UpdateKeyMon(UINT8 KeyCode)
 #if KEYMONFILTER_SUPPORT
     KEY_ELEMENT     *KeyMonData;
     UINT32          *KeyMonMap;
-    UINT16          EbdaSeg;
-    UINTN           Index;
+    UINT16          EbdaSeg = *(UINT16*)0x40e;
+    UINTN           i;
     UINTN           KeyMonSize;
-    
 
-    EFI_STATUS  Status;
-    VOID        *AddrCheck = ((VOID*)0x40E); 
-    Status = AmiUsbValidateMemoryBuffer(AddrCheck, sizeof(UINT32));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)) return ;
-
- 
-    EbdaSeg = *(UINT16*)0x40e;
     KeyMonMap=(UINT32 *)((EbdaSeg << 4)+ KEYMON_MAP);
-
-
-    Status = AmiUsbValidateMemoryBuffer((VOID*)KeyMonMap, sizeof(UINT32));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)) return;
-
-
     //
     //KeyMon data Seg is located in EBDA:10E and Offset is EBDA:0x10C
     //    
     KeyMonData=(KEY_ELEMENT*)((*(UINT16 *)((EbdaSeg << 4) + KEYMON_DATA_ADDRESS + 2) << 4) + \
                              *(UINT16 *)((EbdaSeg << 4)  + KEYMON_DATA_ADDRESS));
-
-
-    Status = AmiUsbValidateMemoryBuffer((VOID*)KeyMonData, sizeof(KEY_ELEMENT));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)) return;
-
-
 
     if(KeyMonData == 0) {
         //
@@ -685,15 +649,15 @@ UpdateKeyMon(UINT8 KeyCode)
     KeyMonSize=*(UINT32 *)KeyMonData;
     (UINT8 *)KeyMonData+=4;
 
-    for(Index=0;Index<=KeyMonSize;Index++) {
-        if(KeyMonData[Index].ScanCode == KeyCode && 
-            KeyMonData[Index].Keyattribute.ShiftKey == mLegacyKeyboard.KeyModifierState.Shift && 
-            KeyMonData[Index].Keyattribute.CtrlKey == mLegacyKeyboard.KeyModifierState.Ctrl &&
-            KeyMonData[Index].Keyattribute.AltKey == mLegacyKeyboard.KeyModifierState.Alt ) {
+    for(i=0;i<=KeyMonSize;i++) {
+        if(KeyMonData[i].ScanCode == KeyCode && 
+            KeyMonData[i].Keyattribute.ShiftKey == mLegacyKeyboard.KeyModifierState.Shift && 
+            KeyMonData[i].Keyattribute.CtrlKey == mLegacyKeyboard.KeyModifierState.Ctrl &&
+            KeyMonData[i].Keyattribute.AltKey == mLegacyKeyboard.KeyModifierState.Alt ) {
             //
             //Update the Keymon Map in the EBDA:0x108 area.
             //
-            *KeyMonMap= (*KeyMonMap) | (1<< Index);
+            *KeyMonMap= (*KeyMonMap) | (1<< i);
         }
 
     }
@@ -708,43 +672,31 @@ UpdateKeyMon(UINT8 KeyCode)
     Insert the given scan/ascii code in the BDA keyboard queue.
     Updates the necessary BDA pointers, head and tail.
 
-    @param KeyCode    Key code, scan code in upper byte, ascii code in lower byte
-    @retval None 
+    @param Key code, scan code in upper byte, ascii code in lower byte
+
 **/
 
 VOID
-InsertChar(UINT16 KeyCode)
+InsertChar(UINT16 keyCode)
 {
-    UINT16 BufHead;
-    UINT16 BufTail;
-    UINT16 BufStart;
-    UINT16 BufEnd;
+    UINT16 bufHead = *(UINT16*)0x41a;
+    UINT16 bufTail = *(UINT16*)0x41c;
+    UINT16 bufStart = *(UINT16*)0x480;
+    UINT16 bufEnd = *(UINT16*)0x482;
 
-
-    EFI_STATUS  Status;
-    VOID        *AddrCheck = ((VOID*)0x400); 
-    Status = AmiUsbValidateMemoryBuffer (AddrCheck, 0x100);
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)) return;
-
-
-    BufHead = *(UINT16*)0x41a;
-    BufTail = *(UINT16*)0x41c;
-    BufStart = *(UINT16*)0x480;
-    BufEnd = *(UINT16*)0x482;
-
-    *(UINT16*)(UINTN)(0x400+BufTail) = KeyCode;
-    BufTail+=2;
-    if (BufTail >= BufEnd) {
-        BufTail = BufStart;
+    *(UINT16*)(UINTN)(0x400+bufTail) = keyCode;
+    bufTail+=2;
+    if (bufTail >= bufEnd) {
+        bufTail = bufStart;
     }
 
-    if (BufTail == BufHead) {
+    if (bufTail == bufHead) {
         //
         // Buffer overflow should be indicated here
         //
         return;
     }
-    *(UINT16*)0x41c = BufTail;
+    *(UINT16*)0x41c = bufTail;
 
     return;
 }
@@ -754,24 +706,16 @@ InsertChar(UINT16 KeyCode)
 /**
     Updates USB keyboard(s) LEDs according to the value of
     mLegacyKeyboard.KeyModifierState.
-    
-    @param None 
-    @retval None 
+
 **/
 
 VOID
 UpdateLEDs(
 )
 {
-    UINT8       Index;
+    UINT8       i;
     DEV_INFO    *KbdDev;
     UINT8       Rb;
-
-
-    EFI_STATUS  Status;
-    VOID        *AddrCheck = ((VOID*)0x497); 
-    Status = AmiUsbValidateMemoryBuffer (AddrCheck, sizeof(UINT8));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)) return;
 
     //
     // Update LED status in every USB keyboard on the system
@@ -786,10 +730,10 @@ UpdateLEDs(
     *(UINT8*)0x497 = ((*(UINT8*)0x497) & 0xF8 ) | ((mLegacyKeyboard.KeyModifierState.NumLock)? 2 : 0)
                                | ((mLegacyKeyboard.KeyModifierState.CapsLock)? 4:0) | ((mLegacyKeyboard.KeyModifierState.ScrlLock)? 1 : 0) ;
 
-    for (Index = 0; Index < gUsbData->MaxHidCount; Index++) {
-        KbdDev  = gUsbDataList->UsbKbDeviceTable[Index];
+    for (i = 0; i < USB_DEV_HID_COUNT; i++) {
+        KbdDev  = gUsbData->aUSBKBDeviceTable[i];
         if (KbdDev) {
-        UsbKbdSetLed(KbdDev, Rb);
+			UsbKbdSetLed(KbdDev, Rb);
         }
     }
 }
@@ -798,9 +742,7 @@ UpdateLEDs(
 /**
     Updates mLegacyKeyboard.KeyModifierState according to the value
     of the 1st byte of the USB keyboard data.
-    
-    @param  UsbKeys     Usb Key buffer
-    @retval None
+
 **/
 
 VOID
@@ -808,8 +750,10 @@ ProcessCtrlAltShift(
     UINT8 *UsbKeys
 )
 {
-    UINT8   Index;
-
+    UINT8   i;
+    UINTN   SmmTableIndex = 0;
+    EFI_RUNTIME_SERVICES 	*SmmRuntimeVar = NULL;
+    EFI_GUID SmmRsTableGuid = EFI_SMM_RUNTIME_SERVICES_TABLE_GUID;
 
     mLegacyKeyboard.KeyModifierState.Ctrl  = (UsbKeys[0] & 0x11)? 1 : 0;
     mLegacyKeyboard.KeyModifierState.Shift = (UsbKeys[0] & 0x22)? 1 : 0;
@@ -820,15 +764,27 @@ ProcessCtrlAltShift(
     //
     if (mLegacyKeyboard.KeyModifierState.Ctrl
         && mLegacyKeyboard.KeyModifierState.Alt) {
-        for (Index = 2; Index < 6; Index++) {
-            if (UsbKeys[Index] == 0x4C || UsbKeys[Index] == 0x63) {
-                if (!(gUsbData->UsbStateFlag & USB_FLAG_RUNNING_UNDER_EFI)) {
-
-                      AmiUsbResetSystem();
-                      ByteWriteIO(0xcf9, 6);
-                      // We should never get this far
-                      while(1);
-//                    }
+        for (i = 2; i < 6; i++) {
+            if (UsbKeys[i] == 0x4C || UsbKeys[i] == 0x63) {
+                if (!(gUsbData->dUSBStateFlag & USB_FLAG_RUNNING_UNDER_EFI)) {
+#if !USB_RT_DXE_DRIVER
+                    for (; SmmTableIndex < gSmst->NumberOfTableEntries; ++SmmTableIndex) {
+                        if (CompareGuid(&gSmst->SmmConfigurationTable[SmmTableIndex].VendorGuid,
+                                            &SmmRsTableGuid) == TRUE) {
+                            break;
+                        }
+                    }
+                    if (SmmTableIndex != gSmst->NumberOfTableEntries) {
+                         SmmRuntimeVar =(EFI_RUNTIME_SERVICES *)gSmst->SmmConfigurationTable[SmmTableIndex].VendorTable;
+                    }
+#endif
+                    if ((SmmRuntimeVar != NULL) && (SmmRuntimeVar->ResetSystem != NULL)) {
+                        SmmRuntimeVar->ResetSystem(EfiResetCold, EFI_SUCCESS, 0, NULL);
+                    } else {
+                        ByteWriteIO(0xcf9, 6);
+                        // We should never get this far
+                        while(1);
+                    }
                 }
             }
         }
@@ -840,20 +796,19 @@ ProcessCtrlAltShift(
     Process the keys that alter NumLock/ScrollLock/CapsLock; updates
     mLegacyKeyboard.KeyModifierState and 0:417 accordingly.
 
-    @param  UsbKeys     Usb Key buffer
-    @retval None
+    @param USB key buffer
 
 **/
 
 VOID
 ProcessLockKeys(
-    UINT8 *UsbKeys
+    UINT8 *usbKeys
 )
 {
-    UINT8 Index;
+    UINT8 i;
 
-    for (Index = 2; Index < 8; Index++) {
-        switch (UsbKeys[Index]) {
+    for (i=2; i<8; i++) {
+        switch (usbKeys[i]) {
             case 0x53:  // NumLock
                 *(UINT8*)0x417 ^= 0x20; // Toggle BIT5
                 // *(UINT8*)0x497 ^= 0x02; // Toggle BIT1
@@ -883,35 +838,32 @@ ProcessLockKeys(
     keys are removed.
     The only time we do not do this analysis is when the buffer
     is clear that indicates that all keys are released.
-    
-    @param  UsbKeys     Usb Key buffer
-    @retval None
 
 **/
 
 VOID
 AdjustKeyBuffer(
-    UINT8 *UsbKeys
+    UINT8 *usbKeys
 )
 {
     UINT8 aData[6];
-    UINT8 Index1, Index2;
+    UINT8 i, j;
 
     // Save the buffer
-    for (Index1 = 0; Index1 < 6; Index1++) aData[Index1]=UsbKeys[Index1];
+    for (i=0; i<6; i++) aData[i]=usbKeys[i];
 
     // Patch the buffer
-    for (Index2 =0; Index2 < 6; Index2++) {
-        if (mLegacyKeyboard.KeyCodeStorage[Index2]==0) continue;
-        for (Index1 = 0; Index1 < 6; Index1++) {
-            if (UsbKeys[Index1] == 0) continue;
-            if (UsbKeys[Index1] == mLegacyKeyboard.KeyCodeStorage[Index2]) {
-                UsbKeys[Index1] = 0;
+    for (j=0; j<6; j++) {
+        if (mLegacyKeyboard.KeyCodeStorage[j]==0) continue;
+        for (i=0; i<6; i++) {
+            if (usbKeys[i] == 0) continue;
+            if (usbKeys[i] == mLegacyKeyboard.KeyCodeStorage[j]) {
+                usbKeys[i] = 0;
             }
         }
     }
     // Store the original buffer
-    for (Index1 = 0; Index1 < 6; Index1++) mLegacyKeyboard.KeyCodeStorage[Index1] = aData[Index1];
+    for (i=0; i<6; i++) mLegacyKeyboard.KeyCodeStorage[i] = aData[i];
 }
 
 
@@ -920,17 +872,17 @@ AdjustKeyBuffer(
     lower byte and PS/2 scan code in the upper byte and inserts this
     UINT16 in the legacy keyboard queue in BDA.
 
-    @param Code    USB key code
-    @retval None
+    @param USB key
+
 **/
 
 VOID
-ProcessKeyCode(UINT8 Code)
+ProcessKeyCode(UINT8 code)
 {
-    UINT16 AsciiScan;
-    AsciiScan = GetAsciiScan(Code);
-    if (AsciiScan != 0) {
-        InsertChar(AsciiScan);
+    UINT16 ascii_scan;
+    ascii_scan = GetAsciiScan(code);
+    if (ascii_scan != 0) {
+        InsertChar(ascii_scan);
     }
 }
 
@@ -941,70 +893,56 @@ ProcessKeyCode(UINT8 Code)
     similar to legacy INT9 handler - data is converted into PS/2
     ASCII/Scan codes and placed in BDA.
 
-    @param UsbKeys Buffer with USB keys
-    @retval None
+    @param Buffer with USB keys
+
 **/
 
 VOID
 USBKB_Int9(
-    UINT8 *UsbKeys
+    UINT8 *usbKeys
 )
 {
-    UINT8 *KeyCode;
-    UINT8 Index;
-    UINT8 Ledstate;
-    UINT8 BdaKbdLedFlags;
+    UINT8 *keyCode;
+    UINT8 i;
+    UINT8 ledstate;
+    UINT8 bdaKbdLedFlags = (*(UINT8*)0x417) >> 4;
 
-
-    EFI_STATUS          Status;
-    VOID                *AddrCheck = ((VOID*)0x417); 
-    Status = AmiUsbValidateMemoryBuffer (AddrCheck, sizeof(UINT8));
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED)) return;
-
-
-    BdaKbdLedFlags = (*(UINT8*)0x417) >> 4;
-    AdjustKeyBuffer(&UsbKeys[2]);
+    AdjustKeyBuffer(&usbKeys[2]);
 
     //
     // See if current NumLock/ScrlLock/CapsLock matches the 40:17 values.
     // ; update the local data and LEDs accordingly.
     //
-    Ledstate = *(UINT8*)&mLegacyKeyboard.KeyModifierState & 7;
-    if ((BdaKbdLedFlags & 7) != Ledstate) {  // 7 is a mask for Scrl/Num/Caps locks
+    ledstate = *(UINT8*)&mLegacyKeyboard.KeyModifierState & 7;
+    if ((bdaKbdLedFlags & 7) != ledstate) {  // 7 is a mask for Scrl/Num/Caps locks
         *(UINT8*)&mLegacyKeyboard.KeyModifierState &= 0xF8;
-        *(UINT8*)&mLegacyKeyboard.KeyModifierState |= (BdaKbdLedFlags & 7);
+        *(UINT8*)&mLegacyKeyboard.KeyModifierState |= (bdaKbdLedFlags & 7);
         UpdateLEDs();   // Turn on/off Ctrl, Alt, NumLock LEDs
         //
         // Update to current Ctrl, Alt, NumLock LEDs state.
         //
-        Ledstate = *(UINT8*)&mLegacyKeyboard.KeyModifierState & 7;
+        ledstate = *(UINT8*)&mLegacyKeyboard.KeyModifierState & 7;
     }
 
-    ProcessLockKeys(UsbKeys);
-    ProcessCtrlAltShift(UsbKeys);
+    ProcessLockKeys(usbKeys);
+    ProcessCtrlAltShift(usbKeys);
 
-    for (KeyCode=UsbKeys+2, Index=0; Index<6; Index++, KeyCode++) {
-        if (*KeyCode==0) continue;
-        ProcessKeyCode(*KeyCode);
+    for (keyCode=usbKeys+2, i=0; i<6; i++, keyCode++) {
+        if (*keyCode==0) continue;
+        ProcessKeyCode(*keyCode);
     }
 
-    if (Ledstate != (*(UINT8*)&mLegacyKeyboard.KeyModifierState & 7)) {
+    if (ledstate != (*(UINT8*)&mLegacyKeyboard.KeyModifierState & 7)) {
         UpdateLEDs();   // Turn on/off Ctrl, Alt, NumLock LEDs
     }
 
     //
     // Reload the typematic rate value
     //
-    if (gUsbData->RepeatIntervalMode){
-        gUsbData->RepeatRate = aTypematicRateDelayTable[
-            (gUsbData->UsbKbcStatusFlag & KBC_TYPE_DELAY_BIT_MASK_16MS) >>
-                        KBC_TYPE_DELAY_BIT_SHIFT_16MS];
-    } else {
-        gUsbData->RepeatRate = aTypematicRateDelayTable[
-        (gUsbData->UsbKbcStatusFlag & KBC_TYPE_DELAY_BIT_MASK_8MS) >>
-                        KBC_TYPE_DELAY_BIT_SHIFT_8MS];
-    }
-    gUsbData->RepeatCounter   = 0;
+    gUsbData->wRepeatRate = aTypematicRateDelayTable[
+        (gUsbData->wUSBKBC_StatusFlag & KBC_TYPE_DELAY_BIT_MASK) >>
+                        KBC_TYPE_DELAY_BIT_SHIFT];
+    gUsbData->wRepeatCounter   = 0;
 
     //
     // Buffer might be modified, original buffer is stored
@@ -1020,7 +958,7 @@ USBKB_Int9(
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

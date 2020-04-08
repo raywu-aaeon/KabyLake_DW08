@@ -218,59 +218,11 @@ TOKEN
 	Token = "USB_PEI_KEYBOARD_SUPPORT" "=" "1"
 End
 
-TOKEN
-    Name  = "PEI_USB_HOST_SYSTEM_ERRORS_SUPPORT"
-    Value = "1"
-    Help  = "Enable/Disable Usb host system errors support in the PEI phase."
-    TokenType = Boolean
-    TargetH = Yes
-End
-
-TOKEN
-	Name  = "USB_PEI_DEBUG_MESSAGES"
-	Value  = "0"
-	Help  = "Enables/disables debug messages for Usb Pei."
-	TokenType = Boolean
-	Token = "DEBUG_CODE" "=" "1"
-End
-
-TOKEN
-    Name  = "USB_PEI_EDKII_IOMMU_PPI_SUPPORT"
-    Value  = "0"
-    Help  = "Enable/disable EdkiiIoMmuPpi support for Usb Pei."
-    TokenType = Boolean
-    TargetH = Yes
-End
-
 INFComponent
 	Name  = "UsbPei"
 	File  = "UsbPei.inf"
 	Package  = "AmiModulePkg"
 	ModuleTypes  = "PEIM"
-End
-
-PcdMapping
-	Name  = "PcdFixedDebugPrintErrorLevel"
-	GuidSpace  = "gEfiMdePkgTokenSpaceGuid"
-	PcdType  = "PcdsFixedAtBuild"
-	Value  = "0"
-	Override  = "AmiModulePkg.UsbPei"
-	Offset  = 00h
-	Length  = 00h
-	Help  = "Disables all debug messages based on USB_PEI_DEBUG_MESSAGES token value"
-	TargetDSC = Yes
-	Token = "USB_PEI_DEBUG_MESSAGES" "=" "0"
-End
-
-PcdMapping
-    Name  = "AmiPcdUsbPeiEdkiiIommuPpiSupport"
-    GuidSpace  = "gAmiUsbPkgTokenSpaceGuid"
-    PcdType  = "PcdsDynamicExDefault"
-    Value  = "TRUE"
-    Offset  = 00h
-    Length  = 00h
-    TargetDSC = Yes
-    Token = "USB_PEI_EDKII_IOMMU_PPI_SUPPORT" "=" "1"
 End
 
 FFS_FILE

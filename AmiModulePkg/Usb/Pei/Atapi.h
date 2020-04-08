@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -26,21 +26,27 @@
 // additional terms of your license agreement.
 //
 
-/**
-  This file contains just some basic definitions that are needed by drivers
-  that dealing with ATA/ATAPI interface.
+/*++
 
-Copyright (c) 2007 - 2016, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials are licensed and made available under 
-the terms and conditions of the BSD License that accompanies this distribution.  
-The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php.                                          
-    
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+   Copyright (c)  1999 - 2002 Intel Corporation. All rights reserved
+   This software and associated documentation (if any) is furnished
+   under a license and may only be used or copied in accordance
+   with the terms of the license. Except as permitted by such
+   license, no part of this software or documentation may be
+   reproduced, stored in a retrieval system, or transmitted in any
+   form or by any means without the express written consent of
+   Intel Corporation.
 
-**/
 
+   Module Name:
+
+    Atapi.h
+
+   Abstract:
+
+
+   Revision History
+   --*/
 
 #ifndef _PEI_RECOVERY_ATAPI_H
 #define _PEI_RECOVERY_ATAPI_H
@@ -359,7 +365,6 @@ typedef union {
 #define ASC_ILLEGAL_FIELD                (0x26)
 #define ASC_NO_MEDIA                     (0x3a)
 #define ASC_ILLEGAL_MODE_FOR_THIS_TRACK  (0x64)
-#define ASC_COMM_ERR                     (0x08)
 
 //
 // Additional Sense Code Qualifier
@@ -371,7 +376,7 @@ typedef union {
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2017, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

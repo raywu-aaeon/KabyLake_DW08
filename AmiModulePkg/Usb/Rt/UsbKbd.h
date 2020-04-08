@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -78,25 +78,22 @@
 #define KBC_SET_SCAN_CODE_SET2      (0x02 << KBC_SCAN_CODE_SET_BIT_SHIFT)
 #define KBC_SCAN_CODE_SET_BIT_MASK  (0x03 << KBC_SCAN_CODE_SET_BIT_SHIFT)
 
+#if USB_KEYREPEAT_INTERVAL
+#define REPEAT_INTERVAL 16
+#define KBC_TYPE_RATE_BIT_SHIFT     1
+#define KBC_TYPE_RATE_BIT_MASK      (0x05 << KBC_TYPE_RATE_BIT_SHIFT)
 
-#define REPEAT_8MS                    0
-#define REPEAT_16MS                   1
+#define KBC_TYPE_DELAY_BIT_SHIFT    4
+#define KBC_TYPE_DELAY_BIT_MASK     (0x05 << KBC_TYPE_DELAY_BIT_SHIFT)
 
-#define REPEAT_INTERVAL_16MS          16
-#define KBC_TYPE_RATE_BIT_SHIFT_16MS  1
-#define KBC_TYPE_RATE_BIT_MASK_16MS   (0x05 << KBC_TYPE_RATE_BIT_SHIFT_16MS)
+#else
+#define REPEAT_INTERVAL 8
+#define KBC_TYPE_RATE_BIT_SHIFT     2
+#define KBC_TYPE_RATE_BIT_MASK      (0x07 << KBC_TYPE_RATE_BIT_SHIFT)
 
-#define KBC_TYPE_DELAY_BIT_SHIFT_16MS 4
-#define KBC_TYPE_DELAY_BIT_MASK_16MS  (0x05 << KBC_TYPE_DELAY_BIT_SHIFT_16MS)
-
-
-#define REPEAT_INTERVAL_8MS           8
-#define KBC_TYPE_RATE_BIT_SHIFT_8MS   2
-#define KBC_TYPE_RATE_BIT_MASK_8MS    (0x07 << KBC_TYPE_RATE_BIT_SHIFT_8MS)
-
-#define KBC_TYPE_DELAY_BIT_SHIFT_8MS  6
-#define KBC_TYPE_DELAY_BIT_MASK_8MS   (0x07 << KBC_TYPE_DELAY_BIT_SHIFT_8MS)
-
+#define KBC_TYPE_DELAY_BIT_SHIFT    6
+#define KBC_TYPE_DELAY_BIT_MASK     (0x07 << KBC_TYPE_DELAY_BIT_SHIFT)
+#endif
 
 // Scan code common to all the cases (base, control, shift and alt cases)
 #define PRINT_SCREEN        (0x07C + 0x80)    // Local code id (scan-2)
@@ -150,55 +147,56 @@
 #endif
 
 UINT8       ByteReadIO(UINT16);
-VOID        ByteWriteIO(UINT16, UINT8);
+void        ByteWriteIO(UINT16, UINT8);
 
 UINT8       USBMouse_GetFromMouseBuffer ();
-VOID        USBKeyRepeat(HC_STRUC*, UINT8);
+void        USBKeyRepeat(HC_STRUC*, UINT8);
 UINT8       USBKBC_GetFromCharacterBuffer();
 
 UINT8   USBKB_ConvertSet2CodeToSet1Code(UINT8);
-VOID    USBKBC_SendToCharacterBuffer(UINT8);
+void    USBKBC_SendToCharacterBuffer(UINT8);
 UINT8   USBTrap_GetCurrentScanCodeSetNumber();
 UINT8   USBKB_ConvertScanCodeBetweenCodeSet(UINT8, UINT8*);
-UINT8   KBC_WaitForInputBufferToBeFree( );
+//void  SYSKBC_UpdateLEDState(UINT8);
+UINT8    KBC_WaitForInputBufferToBeFree( );
 UINT8   KBC_WaitForOutputBufferToBeFilled( );
-VOID    USBKB_GenerateType1MakeCode( );
-VOID    USBKB_GenerateType1BreakCode( );
-VOID    USBKB_GenerateType2MakeCode( );
-VOID    USBKB_GenerateType2BreakCode( );
+void    USBKB_GenerateType1MakeCode( );
+void    USBKB_GenerateType1BreakCode( );
+void    USBKB_GenerateType2MakeCode( );
+void    USBKB_GenerateType2BreakCode( );
 UINT8   USBTrap_GetOverrunCode( );
-VOID    USBKB_DiscardCharacter(UINT8*);
+void    USBKB_DiscardCharacter(UINT8*);
 UINT16  USBKB_CheckForExtendedKey(UINT8);
 UINT16  USBKB_CheckForNumericKeyPadKey(UINT8);
 UINT8   USBKBC_CheckCharacterBufferFull(UINT8);
-VOID    USBKB_UpdateLEDState(UINT8);
+void    USBKB_UpdateLEDState(UINT8);
 UINT8   USBKB_ConvertUSBKeyCodeToScanCodeSet2 (UINT8);
 UINT16  USBKB_CheckModifierKeyPress (UINT8);
 UINT8   KBC_WriteCommandByte(UINT8);
 UINT8   KBC_ReadDataByte(UINT8 *);
-VOID    KBC_WriteSubCommandByte(UINT8);
+void    KBC_WriteSubCommandByte(UINT8);
 EFI_STATUS    SYSKBC_SendKBCData();
 
 extern  UINT8       USB_InstallCallBackFunction (CALLBACK_FUNC);
 
 extern  DEV_INFO*   USB_GetDeviceInfoStruc(UINT8, DEV_INFO*,UINT8, HC_STRUC*);
 extern  UINT8       USBLogError(UINT16);
-extern  VOID        USBKeyRepeat(HC_STRUC*, UINT8);
-
+extern  void        USBKeyRepeat(HC_STRUC*, UINT8);
+#if USB_DEV_MOUSE
 extern  UINT8       USBMSSendMouseData();
-extern  VOID        USBMSUpdateMouseInterface();
+extern  void        USBMSUpdateMouseInterface();
+#endif
 
-
-VOID        USBKBDInitialize (VOID);
+void        USBKBDInitialize (void);
 UINT8       USBKBDDisconnectDevice (DEV_INFO*);
 
-VOID    USBKBC_GetAndStoreCCB();
+void    USBKBC_GetAndStoreCCB();
 DEV_INFO*   USBKBDConfigureDevice (DEV_INFO*);  //(EIP84455)
 UINT16  USBKBDFindUSBKBDeviceTableEntry(DEV_INFO*);
 UINT8   USBKBDProcessKeyboardData ( HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
-UINT8   UsbKbdSetLed(DEV_INFO*, UINT8);
+UINT8	UsbKbdSetLed(DEV_INFO*, UINT8);
 
-VOID    USBKB_GenerateScanCode ( UINT8, UINT8, UINT16 );
+void    USBKB_GenerateScanCode ( UINT8, UINT8, UINT16 );
 
 VOID    UsbScanner(DEV_INFO*, UINT8*);
 VOID    USBKB_Scanner (DEV_INFO*, UINT8*);
@@ -210,55 +208,52 @@ VOID    LegacyAutoRepeat(HC_STRUC*);
 VOID    SysKbcAutoRepeat(HC_STRUC*);
 VOID    SysNoKbcAutoRepeat();
 VOID    USBKBDPeriodicInterruptHandler(HC_STRUC*);
+                                        //(EIP84455+)>
 UINT8   USBHIDProcessData( HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);               
 UINT8   USBMSProcessMouseData ( HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
 UINT8   USBAbsProcessMouseData ( HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
+                                        //<(EIP84455+)
 
-typedef struct _USB_KEY USB_KEY; 
-struct _USB_KEY{
-  UINT8    KeyCode;
-  BOOLEAN  Press;
-};
+typedef struct {
+	UINT8	KeyCode;
+	BOOLEAN	Press;
+} USB_KEY;
 
 #define MAX_KEY_ALLOWED 32
 
-typedef struct _LEGACY_USB_KEY_MODIFIERS  LEGACY_USB_KEY_MODIFIERS; 
-struct _LEGACY_USB_KEY_MODIFIERS {
+typedef struct _LEGACY_USB_KEY_MODIFIERS {
     UINT8   ScrlLock    : 1;
     UINT8   NumLock     : 1;
     UINT8   CapsLock    : 1;
     UINT8   Ctrl        : 1;
     UINT8   Alt         : 1;
     UINT8   Shift       : 1;
-};
+} LEGACY_USB_KEY_MODIFIERS;
 
-
-typedef struct _LEGACY_USB_KEYBOARD  LEGACY_USB_KEYBOARD; 
-struct _LEGACY_USB_KEYBOARD {
+typedef struct _LEGACY_USB_KEYBOARD {
     UINT8 KeyCodeStorage[6];
     LEGACY_USB_KEY_MODIFIERS    KeyModifierState;
     UINT8 KeyToRepeat;
-};
+} LEGACY_USB_KEYBOARD;
 
-
-typedef struct _USBKBD_DATA  USBKBD_DATA ;
-struct _USBKBD_DATA{
+										//(EIP38434+)>
+typedef struct {
     union {
-      UINT8       Modifier;
-  struct {
-      UINT8       KB_RSHIFT      : 1;// RSHIFT key status bit
-      UINT8       KB_LSHIFT      : 1;// LSHIFT key status bit
-      UINT8       KB_CTRL        : 1;// CTRL key status bit
-      UINT8       KB_ALT         : 1;// ALT key status bit
-      UINT8       KB_NUM_LOCK    : 1;// NUM lock key LED bit
-      UINT8       KB_CAPS_LOCK   : 1;// CAPS lock key LED bit
-      UINT8       KB_SCROLL_LOCK : 1;// Scroll key LED bit
-      UINT8       KB_FUNCTION    : 1;// Function key LED bit     
-  } Modify;
+		UINT8		   Modifier;
+	struct {
+		UINT8		   KB_RSHIFT	: 1;// RSHIFT key status bit
+		UINT8		   KB_LSHIFT	: 1;// LSHIFT key status bit
+		UINT8		   KB_CTRL		: 1;// CTRL key status bit
+		UINT8		   KB_ALT		: 1;// ALT key status bit
+		UINT8		   KB_NUM_LOCK		: 1;// NUM lock key LED bit
+		UINT8		   KB_CAPS_LOCK 	: 1;// CAPS lock key LED bit
+		UINT8		   KB_SCROLL_LOCK	: 1;// Scroll key LED bit
+		UINT8		   KB_FUNCTION		: 1;// Function key LED bit 		
+	} Modify;
     };
-      UINT8  Reserved;
-      UINT8  Keycode[6];
-};
+		UINT8	Reserved;
+		UINT8	Keycode[6];
+}USBKBD_DATA;
 
 //              0   Bit     Description
 //              -------------------------------------------
@@ -269,31 +264,31 @@ struct _USBKBD_DATA{
 //              -------------------------------------------
 //              1   X displacement value
 //              2   Y displacement value
-typedef struct _USBMS_DATA  USBMS_DATA ;
-struct _USBMS_DATA{
+typedef struct {
     union {
-    UINT8       ButtonByte;
-  struct {
-    UINT8       BUTTON1     : 1;// RSHIFT key status bit
-    UINT8       BUTTON2     : 1;// LSHIFT key status bit
-    UINT8       BUTTON3     : 1;// CTRL key status bit
-    UINT8       RESERVED    : 5;// ALT key status bit
-  } BUTTON;
+		UINT8		   ButtonByte;
+	struct {
+		UINT8		   BUTTON1		: 1;// RSHIFT key status bit
+		UINT8		   BUTTON2		: 1;// LSHIFT key status bit
+		UINT8		   BUTTON3		: 1;// CTRL key status bit
+		UINT8		   RESERVED		: 5;// ALT key status bit
+	} BUTTON;
     };
-        UINT8   X;
-        UINT8   Y;
-        UINT8   Z;
-        UINT16  EfiX;
-        UINT16  EfiY;
-        UINT8   FillUsage;
-};
-typedef struct _USBABS_DATA  USBABS_DATA; 
-struct _USBABS_DATA {
-        UINT8  Button;
-        UINT16  X;
-        UINT16  Y;
-        UINT16   Pressure;
-}; 
+		UINT8	X;
+		UINT8	Y;
+		UINT8 	Z;
+        UINT16  EfiX;                   //(EIP127014)
+        UINT16  EfiY;                   //(EIP127014)
+        UINT8   FillUsage;              //(EIP127014)
+}USBMS_DATA;
+
+typedef struct {
+		UINT8	Button;
+		UINT16	X;
+		UINT16	Y;
+		UINT16 	Pressure;
+}USBABS_DATA; 
+										//<(EIP38434+)
 #endif      // __USB_H
 
 //**********************************************************************

@@ -2,7 +2,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -18,23 +18,23 @@
 
 **/
 
-
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "AmiUsb.h"
 #include "UsbKbd.h"
+#include <Library/BaseMemoryLib.h>
 #include <Protocol/AmiUsbHid.h>
-#include <Library/AmiUsbHcdLib.h>
 
 extern  USB_GLOBAL_DATA     *gUsbData;
 
 extern  EFI_EMUL6064MSINPUT_PROTOCOL* gMsInput;
 
-VOID                   USBMSInitialize (VOID);
-DEV_INFO*              USBMSConfigureDevice (HC_STRUC*, DEV_INFO*, UINT8*, UINT16, UINT16);
-UINT8                  USBMSProcessMouseData (HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
-VOID                   USBKeyRepeat(HC_STRUC*, UINT8);
-VOID                   SetMouseData (UINT8*, USBMS_DATA*, UINT8, UINT8, HID_REPORT_FIELD*);
-EFI_STATUS             SendMouseData(PS2MouseData*);
-extern USB_DATA_LIST   *gUsbDataList;
+VOID        USBMSInitialize (VOID);
+DEV_INFO*   USBMSConfigureDevice (HC_STRUC*, DEV_INFO*, UINT8*, UINT16, UINT16);
+UINT8       USBMSProcessMouseData (HC_STRUC*, DEV_INFO*, UINT8*, UINT8*, UINT16);
+VOID        USBKeyRepeat(HC_STRUC*, UINT8);
+VOID		SetMouseData (UINT8*, USBMS_DATA*, UINT8, UINT8, HID_REPORT_FIELD*);		//(EIP127014+)		
+EFI_STATUS  SendMouseData(PS2MouseData*);
 
 /**
     This routine is called once to initialize the USB mouse data
@@ -46,6 +46,7 @@ extern USB_DATA_LIST   *gUsbDataList;
 
 
 **/
+
 VOID
 USBMSInitialize()
 {
@@ -53,10 +54,9 @@ USBMSInitialize()
     // Initialize the mouse input buffer head and tail values
     //
     gUsbData->MsOrgButtonStatus = 0;
-
-    gUsbDataList->MouseInputBufferHeadPtr = &gUsbData->UsbMsInputBuffer[0];
-    gUsbDataList->MouseInputBufferTailPtr = &gUsbData->UsbMsInputBuffer[0];
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBMSInitialize: Head and Tail are at %x\n", gUsbDataList->MouseInputBufferHeadPtr);
+    gUsbData->fpMouseInputBufferHeadPtr = &gUsbData->aMouseInputBuffer[0];
+    gUsbData->fpMouseInputBufferTailPtr = &gUsbData->aMouseInputBuffer[0];
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBMSInitialize: Head and Tail are at %x\n", gUsbData->fpMouseInputBufferHeadPtr);
 }
 
 /**
@@ -66,11 +66,11 @@ USBMSInitialize()
     configured and initialized
 
     @param HcStruc   HCStruc pointer
-    @param DevInfo   Device information structure pointer
-    @param Desc      Pointer to the descriptor structure
-    @param Start     Offset within interface descriptor
-                     supported by the device
-    @param End       End offset of the device descriptor
+        DevInfo   Device information structure pointer
+        Desc      Pointer to the descriptor structure
+        Start      Offset within interface descriptor
+        supported by the device
+        End        End offset of the device descriptor
 
     @retval FPDEV_INFO  New device info structure, 0 on error
 
@@ -94,15 +94,13 @@ USBMSConfigureDevice (
     available to software using ports 60/64 to communicate with
     a PS/2 mouse.
 
-    @param HcStruc      Pointer to HCStruc
-    @param DevInfo      Pointer to device information structure
-    @param Td           Pointer to the polling TD
-    @param Buffer       Pointer to the data buffer
-    @param DataLength   Data length
-    
-    @retval USB_SUCCESS  Success
-    @retval Others       Error
-    
+    @param HcStruc   Pointer to HCStruc
+        DevInfo   Pointer to device information structure
+        Td        Pointer to the polling TD
+        Buffer    Pointer to the data buffer
+
+    @retval USB_SUCCESS
+
     @note  The format of 3 byte data packet is as follow:
                Byte              Description
           -----------------------------------------------------------
@@ -117,6 +115,7 @@ USBMSConfigureDevice (
               2   Y displacement value
           -----------------------------------------------------------
 **/
+
 UINT8
 USBMSProcessMouseData (
     HC_STRUC    *HcStruc,
@@ -126,64 +125,49 @@ USBMSProcessMouseData (
     UINT16      DataLength
 )
 {
-    UINT8               *MachineConfigPtr;
+    UINT8*              MachineConfigPtr = (UINT8*)(UINTN)0x410;
     PS2MouseData        MouseData;
     USBMS_DATA          TempData;
     INT32               Coordinates;
-    HID_REPORT_FIELD    *Field;
-    UINT8               OffsetTmp;
+	HID_REPORT_FIELD 	*Field = NULL;
+	UINT8 	            OffsetTmp = 0;
     UINT8               XStart;
     UINT8               XEnd;
     UINT8               YStart;
     UINT8               YEnd;
     UINT8               ButtonStart;
     UINT8               WheelStart;
-    UINT8               Index;
-    UINT16              IndexUsage;
-    UINT8               ButtonSet;
-    UINT8               XSet;
-    UINT8               YSet;
-    UINT8               WheelSet;
+    UINT8               i;
+    UINT16              j;
+    UINT8               ButtonSet = 0;
+    UINT8               XSet = 0;
+    UINT8               YSet = 0;
+    UINT8               WheelSet = 0;
 
-
-    EFI_STATUS          Status;
-    VOID                *AddrCheck = ((VOID*)0x410); 
-    Status = AmiUsbValidateMemoryBuffer (AddrCheck, sizeof(UINT32));
-
-    if ((EFI_ERROR(Status))&&(Status != EFI_ABORTED))
-        return USB_SUCCESS;
-
-    MachineConfigPtr = (UINT8*)(UINTN)0x410;
-    Field = NULL;
-    ButtonSet = 0;
-    XSet = 0;
-    YSet = 0;
-    WheelSet = 0;
-    OffsetTmp = 0;
     //Is KBC access allowed?
     if (gUsbData->IsKbcAccessBlocked) {
-        return USB_SUCCESS; 
+        return USB_SUCCESS; //(EIP29733+)
     }
     
     ZeroMem(&TempData, sizeof(USBMS_DATA));
 
     if (DevInfo->HidReport.Flag & HID_REPORT_FLAG_REPORT_PROTOCOL) {
         //serach button and X Y
-        for (Index = 0; Index < DevInfo->HidReport.FieldCount; Index++) {
-          Field = DevInfo->HidReport.Fields[Index];
+        for (i = 0; i < DevInfo->HidReport.FieldCount; i++) {
+			Field = DevInfo->HidReport.Fields[i];
 
             //Check if it is input?
             if (!(Field->Flag & HID_REPORT_FIELD_FLAG_INPUT)) {
-              continue;
+				continue;
             }
             //if report id is exist, check first byte
             if (Field->ReportId != 0 && Field->ReportId != Buffer[0]) {
-              continue;
+				continue;
             }
 
             // Check if the field is contant.
             if (Field->Flag & HID_REPORT_FIELD_FLAG_CONSTANT) {
-                OffsetTmp += (UINT8)(Field->ReportCount * Field->ReportSize);
+                OffsetTmp += Field->ReportCount * Field->ReportSize;
                 continue;
             }
             
@@ -201,90 +185,90 @@ USBMSProcessMouseData (
                 TempData.ButtonByte = *(Buffer + ButtonStart);
             }
             //Check X,Y
-            if ((Field->UsagePage == HID_UP_GENDESK) && (Field->UsageCount != 0)) {
-                for (IndexUsage = 0; IndexUsage < Field->UsageCount; IndexUsage++) {
-                    //find X
-                    if (Field->Usages[IndexUsage] == HID_GENDESK_X) {
+			if ((Field->UsagePage == HID_UP_GENDESK) && (Field->UsageCount != 0)) {
+                for (j = 0; j < Field->UsageCount; j++) {
+					//find X
+                    if (Field->Usages[j] == HID_GENDESK_X) {
                         XSet = 1;         
-                        XStart = (UINT8)(OffsetTmp + IndexUsage * Field->ReportSize); 
+                        XStart = (OffsetTmp + j * Field->ReportSize); 
                         if (Field->ReportId != 0) {
                             XStart += 8;
                         }
                         XEnd = XStart + Field->ReportSize;
                         TempData.FillUsage = HID_GENDESK_X;
                         SetMouseData(Buffer, &TempData, XStart, XEnd, Field);
-                    }
+					}
                     //find Y
-                    if (Field->Usages[IndexUsage] == HID_GENDESK_Y) {
+					if (Field->Usages[j] == HID_GENDESK_Y) {
                         YSet = 1;         
-                        YStart = (UINT8)(OffsetTmp + IndexUsage * Field->ReportSize);
+						YStart = (OffsetTmp + j * Field->ReportSize);
                         if (Field->ReportId != 0) {
                             YStart += 8;
                         }
-                        YEnd = YStart + Field->ReportSize;
+						YEnd = YStart + Field->ReportSize;
                         TempData.FillUsage = HID_GENDESK_Y;
-                        SetMouseData(Buffer, &TempData, YStart, YEnd, Field);
-                     }
-                     //find Wheel
-                    if (Field->Usages[IndexUsage] == HID_GENDESK_WHEEL) {
+						SetMouseData(Buffer, &TempData, YStart, YEnd, Field);
+					}
+					//find Wheel
+                    if (Field->Usages[j] == HID_GENDESK_WHEEL) {
                         WheelSet = 1;
-                        WheelStart = (UINT8)(OffsetTmp + IndexUsage * Field->ReportSize) / 8;
+                        WheelStart = (OffsetTmp + j * Field->ReportSize) / 8;
                         if (Field->ReportId != 0) {
                             WheelStart += 1;
                         }
                         TempData.Z = *(Buffer + WheelStart);
-                    }
-                 }
-            }
-            OffsetTmp += (UINT8)(Field->ReportCount * Field->ReportSize);
-        }
+					}
+				}
+			}
+            OffsetTmp += Field->ReportCount * Field->ReportSize;
+		}
                                         
-        for (Index = 0; Index < 8; Index++) {
-          Buffer[Index] = 0;
+        for (i = 0; i < 8; i++) {
+        	Buffer[i] = 0;
         }
 
-        //fill MS DATA
+		//fill MS DATA
         if (ButtonSet != 0) {
-          *Buffer = TempData.ButtonByte;
-           gUsbData->MsOrgButtonStatus = TempData.ButtonByte;
+    		*Buffer = TempData.ButtonByte;
+    		gUsbData->MsOrgButtonStatus = TempData.ButtonByte;
         } else {
             *Buffer = gUsbData->MsOrgButtonStatus;
         }
         
         if (XSet == 1) {
-          *(Buffer + 1) = TempData.X;
+    	    *(Buffer + 1) = TempData.X;
         }
         if (YSet == 1) {
-          *(Buffer + 2) = TempData.Y;
+		    *(Buffer + 2) = TempData.Y;
         }
         if (WheelSet == 1) { 
-          *(Buffer + 3) = TempData.Z;
+		    *(Buffer + 3) = TempData.Z;
         }
-    } else {
+	} else {
         TempData.EfiX = *((INT8*)Buffer + 1);
         TempData.EfiY = *((INT8*)Buffer + 2);
     }
 
     if ((!(DevInfo->HidReport.Flag & HID_REPORT_FLAG_REPORT_PROTOCOL)) && 
-        (DevInfo->IncompatFlags & USB_INCMPT_BOOT_PROTOCOL_IGNORED)) {
+            (DevInfo->wIncompatFlags & USB_INCMPT_BOOT_PROTOCOL_IGNORED)) {
         Buffer++;
     }
     
-    if (((gUsbData->UsbFeature & USB_BOOT_PROTOCOL_SUPPORT) == 0) && 
-        !(DevInfo->IncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
+	if ((BOOT_PROTOCOL_SUPPORT == 0) && 
+        !(DevInfo->wIncompatFlags & USB_INCMPT_HID_BOOT_PROTOCOL_ONLY)) {
         if (!(ButtonSet || XSet || YSet || WheelSet)) {
             return USB_SUCCESS;
         }
     }
     
-    if (gUsbData->UsbStateFlag & USB_FLAG_RUNNING_UNDER_EFI) {
+    if (gUsbData->dUSBStateFlag & USB_FLAG_RUNNING_UNDER_EFI) {
 
         gUsbData->MouseData.ButtonStatus = *(UINT8*)Buffer;
 
-        Coordinates = (INT16)TempData.EfiX;    
+        Coordinates = (INT16)TempData.EfiX;		//(EIP127014)
         gUsbData->MouseData.MouseX += Coordinates;
 
-        Coordinates = (INT16)TempData.EfiY;    
+        Coordinates = (INT16)TempData.EfiY;		//(EIP127014)
         gUsbData->MouseData.MouseY += Coordinates;
 
         Coordinates= *((INT8*)Buffer + 3);
@@ -324,75 +308,88 @@ USBMSProcessMouseData (
             MouseData.flags |= 0x20;    // Negative Y-axis movement
         }
 
-        if (gUsbData->KbcSupport || (gUsbData->UsbStateFlag & USB_FLAG_6064EMULATION_ON)) {
+        if (gUsbData->kbc_support || (gUsbData->dUSBStateFlag & USB_FLAG_6064EMULATION_ON)) {
             SendMouseData(&MouseData);
-            USBKeyRepeat(NULL, 2);          // Enable Key repeat  
-        }            
+            USBKeyRepeat(NULL, 2);          // Enable Key repeat	//(EIP49214+)
+        }				    
     }
 
     return USB_SUCCESS;
 }
-
+										//(EIP127014+)>
 /**
-    This routine sets mouse data
+    This routine checks for mouse type device from the
+    interface data provided
 
-    @param Buffer   Data Buffer
-    @param MsData   Mouse data
-    @param Start    Start offset
-    @param End      End offset
-    @param Field    Pointer to the HID_REPORT_FIELD structure
-    
-    @retval None
+    @param bBaseClass  USB base class code
+        bSubClass   USB sub-class code
+        bProtocol   USB protocol code
+
+    @retval BIOS_DEV_TYPE_MOUSE type on success or 0FFH on error
 
 **/
 
 VOID
 SetMouseData (
-    UINT8             *Buffer,
-    USBMS_DATA         *MsData,
-    UINT8              Start,
-    UINT8              End,
-    HID_REPORT_FIELD  *Field
+    UINT8           	*Buffer,
+    USBMS_DATA 	    	*MsData,
+    UINT8 		    	Start,
+    UINT8 		    	End,
+    HID_REPORT_FIELD	*Field
 )
 {
-    UINT8   ReportSize;
+	UINT8 	ReportSize;
     UINT8   Size;
     UINT8   PreSkip;
     UINT8   PostSkip;
-    UINT16  TempData = 0;
+	UINT16  TempData = 0;
     UINT16  MinMask = 0;
+    UINT16  Multi = 1;
+    UINT16  Resolution;
+    UINT16  Count = 0;
+    UINT16  i;
 
     if ((Field->PhysicalMax == 0) && (Field->PhysicalMin == 0)) {
         Field->PhysicalMax = Field->LogicalMax;
         Field->PhysicalMin = Field->LogicalMin;
     }
+    if (Field->UnitExponent != 0) {
+        Count = (~Field->UnitExponent) + 1;
+    }
+    
+    for (i = 0; i < Count; i++){
+        Multi = Multi * 10;
+    }        
+    
+    Resolution = ((INT16)Field->LogicalMax - (INT16)Field->LogicalMin) * Multi /
+                 ((INT16)Field->PhysicalMax - (INT16)Field->PhysicalMin);
 
-    ReportSize = End - Start;
-    MinMask = (UINT16)LShiftU64((~MinMask), ReportSize);
+	ReportSize = End - Start;
+    MinMask = ((~MinMask) >> ReportSize) << ReportSize;
 
-    Size = ReportSize / 8;
+	Size = ReportSize / 8;
     
     if ((ReportSize % 8) != 0) {
         Size++;
     }
 
-    ASSERT(Size > 0 && Size <= sizeof(TempData));
+	ASSERT(Size > 0 && Size <= sizeof(TempData));
     if ((Size == 0) || (Size > sizeof(TempData))) {
         return;
     }
 
     CopyMem(&TempData, Buffer + Start / 8, Size);
 
-    PreSkip = Start % 8;
-    PostSkip = End % 8;
-    
+	PreSkip = Start % 8;
+	PostSkip = End % 8;
+		
     if (PreSkip != 0) {
         TempData = TempData >> PreSkip;
     }
     if (PostSkip != 0) {
-        TempData = TempData << PostSkip;   
-        TempData = TempData >> PostSkip;       
-    }  
+        TempData = TempData << PostSkip; 	
+        TempData = TempData >> PostSkip; 			
+	}	
 
     if (TempData > Field->LogicalMax) {
         TempData |= MinMask;
@@ -407,13 +404,13 @@ SetMouseData (
         MsData->Y = (UINT8)TempData; 
     } 
 
-    return;
+	return;
 } 
-
+										//<(EIP127014+)
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

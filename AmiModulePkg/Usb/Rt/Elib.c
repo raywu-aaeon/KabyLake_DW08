@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -17,43 +17,60 @@
 
 **/
 
-
+#include <Library/IoLib.h>
 #include "AmiDef.h"
 #include "UsbDef.h"
+#if !USB_RT_DXE_DRIVER
+#include <Library/AmiBufferValidationLib.h>
+#endif
 
-extern USB_GLOBAL_DATA *gUsbData;
-extern USB_DATA_LIST   *gUsbDataList;
-extern HC_STRUC        **gHcTable;
-
-UINT32
-EFIAPI
-HcReadHcMem(
-    HC_STRUC    *HcStruc,
-    UINT32      Offset
-);
-
-VOID
-EFIAPI
-HcWriteHcMem(
-    HC_STRUC    *HcStruc,
-    UINT32      Offset,
-    UINT32      Data
-);
-
-VOID
-EFIAPI
-FixedDelay(
-    UINTN           Usec                           
-);
+extern  USB_GLOBAL_DATA         *gUsbData;
 
 /**
-    USB Host controller structure validation
+    This routine delays for specified number of micro seconds
 
-    @param  HcStruc    Pointer to host controller structure     
-    
-    @retval EFI_SUCCESS       Success
-    @retval Others            Error
+    @param Usec      Amount of delay (count in 1 microsec)
+
+    @retval VOID
+
 **/
+
+VOID 
+FixedDelay(
+    UINTN           Usec                           
+ )
+{
+#if !USB_RT_DXE_DRIVER
+    UINTN   Counter, i;
+    UINT32  Data32, PrevData;
+
+    Counter = Usec * 3;
+    Counter += Usec / 2;
+    Counter += (Usec * 2) / 25;
+
+    //
+    // Call WaitForTick for Counter + 1 ticks to try to guarantee Counter tick
+    // periods, thus attempting to ensure Microseconds of stall time.
+    //
+    if (Counter != 0) {
+
+        PrevData = IoRead32(PM_BASE_ADDRESS + 8);
+        for (i=0; i < Counter; ) {
+            Data32 = IoRead32(PM_BASE_ADDRESS + 8);    
+            if (Data32 < PrevData) {        // Reset if there is a overlap
+                PrevData=Data32;
+                continue;
+            }
+            i += (Data32 - PrevData);        
+            PrevData = Data32;
+        }
+    }
+#else
+	pBS->Stall(Usec);
+#endif
+    return;
+}
+
 EFI_STATUS
 UsbHcStrucValidation(
     HC_STRUC* HcStruc
@@ -65,95 +82,86 @@ UsbHcStrucValidation(
         return EFI_ACCESS_DENIED;
     }
     
-    for (Index = 0; Index < gUsbDataList->HcTableCount; Index++) {
-        if (HcStruc == gHcTable[Index]) {
+    for (Index = 0; Index < gUsbData->HcTableCount; Index++) {
+        if (HcStruc == gUsbData->HcTable[Index]) {
             break;
         }
     }
 
-    if (Index == gUsbDataList->HcTableCount) {
+    if (Index == gUsbData->HcTableCount) {
         return EFI_ACCESS_DENIED;
     }
 
-    if ((HcStruc->HcFlag & (HC_STATE_USED | HC_STATE_INITIALIZED)) 
-        != (HC_STATE_USED | HC_STATE_INITIALIZED)) {
+    if (!(HcStruc->dHCFlag & HC_STATE_USED)) {
         return EFI_ACCESS_DENIED;
     }
 
     return EFI_SUCCESS;
 }
 
-
-/**
-    USB device information structure validation
-
-    @param  DevInfo    Pointer to DEV_INFO structure     
-    
-    @retval EFI_SUCCESS       Success
-    @retval Others            Error
-**/
 EFI_STATUS
 UsbDevInfoValidation(
     DEV_INFO* DevInfo
 )
 {
     UINTN       Index;
-    UINT8       *MemBlockEnd = (UINT8*)((UINTN)gUsbDataList->MemBlockStart + (gUsbData->MemPages << 12));
+    UINT8       *MemBlockEnd = gUsbData->fpMemBlockStart + (gUsbData->MemPages << 12);
 
     if (DevInfo == NULL) {
         return EFI_ACCESS_DENIED;
     }
     
-    for (Index = 0; Index < gUsbData->MaxDevCount; Index++) {
-        if (DevInfo == &gUsbDataList->DevInfoTable[Index]) {
+    for (Index = 0; Index < MAX_DEVICES; Index++) {
+        if (DevInfo == &gUsbData->aDevInfoTable[Index]) {
             break;
         }
     }
 
-    if (Index == gUsbData->MaxDevCount) {
+    if (Index == MAX_DEVICES) {
         return EFI_ACCESS_DENIED;
     }
 
-
-    if (gUsbData->UsbRuntimeDriverInSmm){
-        if (DevInfo->PollEdPtr) {
-            if (((UINTN)DevInfo->PollEdPtr < (UINTN)gUsbDataList->MemBlockStart) ||
-                (((UINTN)DevInfo->PollEdPtr + sizeof(MEM_BLK)) > (UINTN)MemBlockEnd)) {
-                return EFI_ACCESS_DENIED;
-            }
-        }
-        
-        if (DevInfo->PollTdPtr) {
-            if (((UINTN)DevInfo->PollTdPtr < (UINTN)gUsbDataList->MemBlockStart) ||
-                (((UINTN)DevInfo->PollTdPtr + sizeof(MEM_BLK)) > (UINTN)MemBlockEnd)) {
-                return EFI_ACCESS_DENIED;
-            }
-        }
-        
-        if (DevInfo->PollDataBuffer) {
-            if (((UINTN)DevInfo->PollDataBuffer < (UINTN)gUsbDataList->MemBlockStart) ||
-                (((UINTN)DevInfo->PollDataBuffer + DevInfo->PollingLength) > (UINTN)MemBlockEnd)) {
-                return EFI_ACCESS_DENIED;
-            }
+#if USB_RUNTIME_DRIVER_IN_SMM
+    if (DevInfo->fpPollEDPtr) {
+        if ((DevInfo->fpPollEDPtr < gUsbData->fpMemBlockStart) ||
+            ((DevInfo->fpPollEDPtr + sizeof(MEM_BLK)) > MemBlockEnd)) {
+            return EFI_ACCESS_DENIED;
         }
     }
+
+    if (DevInfo->fpPollTDPtr) {
+        if ((DevInfo->fpPollTDPtr < gUsbData->fpMemBlockStart) ||
+            ((DevInfo->fpPollTDPtr + sizeof(MEM_BLK)) > MemBlockEnd)) {
+            return EFI_ACCESS_DENIED;
+        }
+    }
+
+    if (DevInfo->fpPollDataBuffer) {
+        if ((DevInfo->fpPollDataBuffer < gUsbData->fpMemBlockStart) ||
+            ((DevInfo->fpPollDataBuffer + DevInfo->PollingLength) > MemBlockEnd)) {
+            return EFI_ACCESS_DENIED;
+        }
+    }
+#endif
+
     return EFI_SUCCESS;
 }
 
 /**
     This routine reads a DWORD from the specified Memory Address
 
-    @param BaseAddr   Memory address
-    @param Offset     Offset of BaseAddr
+    @param 
+        BaseAddr   - Memory address
+        Offset     - Offset of BaseAddr
 
-    @retval Value     read data
+    @retval Value read
 
 **/
 
 UINT32
 DwordReadMem(
     UINTN   BaseAddr, 
-    UINT32  Offset
+    UINT16  Offset
 )
 {
     return MmioRead32((UINTN)(BaseAddr + Offset));
@@ -163,16 +171,17 @@ DwordReadMem(
 /**
     This routine writes a dword to a specified Memory Address
 
-    @param  BaseAddr   Memory address
-    @param  Offset     Offset of BaseAddr
-    @param  Value      Write value
-    @retval None
+    @param 
+        BaseAddr   - Memory address
+        Offset     - Offset of BaseAddr
+        Value      - Data to write
+
 **/
 
 VOID
 DwordWriteMem(
     UINTN   BaseAddr, 
-    UINT32  Offset, 
+    UINT16  Offset, 
     UINT32  Value
 )
 {
@@ -183,19 +192,19 @@ DwordWriteMem(
 /**
     This routine resets the specified bits at specified memory address
 
-    This routine writes a dword to a specified Memory Address
+    @param 
+        BaseAddr   - Memory address
+        Offset     - Offset of BaseAddr
+        Value      - Data to reset
 
-    @param  BaseAddr   Memory address
-    @param  Offset     Offset of BaseAddr
-    @param  Value      value to reset
-    @retval None
+    @retval VOID
 
 **/
 
 VOID
 DwordResetMem(
     UINTN   BaseAddr, 
-    UINT32  Offset, 
+    UINT16  Offset, 
     UINT32  Value
 )
 {
@@ -209,17 +218,19 @@ DwordResetMem(
 /**
     This routine sets the specified bits at specified memory address
 
-    @param  BaseAddr   Memory address
-    @param  Offset     Offset of BaseAddr
-    @param  Value      value to set
-    
-    @retval None
+    @param 
+        BaseAddr   - Memory address
+        Offset     - Offset of BaseAddr
+        Value      - Data to set
+
+    @retval VOID
+
 **/
 
 VOID
 DwordSetMem(
     UINTN   BaseAddr, 
-    UINT32  Offset, 
+    UINT16  Offset, 
     UINT32  Value
 )
 {
@@ -235,7 +246,7 @@ DwordSetMem(
 
     @param IoAddr     I/O address to read
 
-    @retval Value     Value read
+    @retval Value read
 
 **/
 
@@ -251,10 +262,11 @@ ByteReadIO(
 /**
     This routine writes a byte to the specified IO address
 
-    @param IoAddr     I/O address to write
-    @param Value      Byte value to write
+    @param
+        IoAddr     I/O address to write
+        Value      Byte value to write
 
-    @retval None
+    @retval VOID
 
 **/
 
@@ -272,8 +284,8 @@ ByteWriteIO(
     This routine reads a word from the specified IO address
 
     @param IoAddr     I/O address to read
-    
-    @retval Value      Byte value to read
+
+    @retval Value read
 
 **/
 
@@ -290,10 +302,10 @@ WordReadIO(
     This routine writes a word to the specified IO address
 
     @param
-    @param  IoAddr     I/O address to write
-    @param  Value      Word value to write
+        IoAddr     I/O address to write
+        Value      Word value to write
 
-    @retval None
+    @retval VOID
 
 **/
 
@@ -310,7 +322,8 @@ WordWriteIO(
 /**
     This routine reads a dword from the specified IO address
 
-    @param  IoAddr     I/O address to read
+    @param IoAddr     I/O address to read
+
     @retval Value read
 
 **/
@@ -350,10 +363,10 @@ DwordWriteIO(
     the value can be typecasted to 8bits - 32bits
 
     @param
-    @param BusDevFunc   Bus, device & function number of the PCI device
-    @param Register     Register offset to read
+        BusDevFunc - Bus, device & function number of the PCI device
+        Register   - Register offset to read
 
-    @retval Value       Value to read
+    @retval Value read
 
 **/
 
@@ -375,12 +388,11 @@ ReadPCIConfig(
     This routine writes a byte value to the PCI configuration
     register space
 
+    @param
+        BusDevFunc - Bus, device & function number of the PCI device
+        Register   - Register offset to write
+        Value      - Value to write
 
-    @param  BusDevFunc   Bus, device & function number of the PCI device
-    @param  Register     Register offset to write
-    @param  Value        Value to write
-    
-    @retval None
 **/
 
 VOID
@@ -399,11 +411,10 @@ ByteWritePCIConfig(
     This routine writes a word value to the PCI configuration
     register space
 
-    @param  BusDevFunc   Bus, device & function number of the PCI device
-    @param  Register     Register offset to write
-    @param  Value        Value to write
-    
-    @retval None
+    @param
+        BusDevFunc - Bus, device & function number of the PCI device
+        Register   - Register offset to write
+        Value      - Value to write
 
 **/
 
@@ -423,11 +434,10 @@ WordWritePCIConfig(
     This routine writes a Dword value to the PCI configuration
     register space
 
-    @param  BusDevFunc   Bus, device & function number of the PCI device
-    @param  Register     Register offset to write
-    @param  Value        Value to write
-    
-    @retval None
+    @param
+        BusDevFunc - Bus, device & function number of the PCI device
+        Register   - Register offset to write
+        Value      - Value to write
 
 **/
 
@@ -443,16 +453,171 @@ DwordWritePCIConfig(
     *(volatile UINT32*)(Address) = Value;
 }
 
+/**
+    This routine reads a dword value from the PCI configuration
+    register space of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to read
+
+**/
+
+UINT32
+HcReadPciReg(
+    HC_STRUC	*HcStruc,
+    UINT32		Offset
+)
+{
+#if !USB_RT_DXE_DRIVER
+    return ReadPCIConfig(HcStruc->wBusDevFuncNum, Offset);
+#else
+    EFI_STATUS	            Status;
+	UINT32                  Data = 0;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Pci.Read(PciIo, EfiPciIoWidthUint32, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return Data;
+#endif
+}
+
+/**
+    This routine writes a dword value to the PCI configuration
+    register space of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to write
+        Data        - Value to write
+
+**/
+
+VOID
+HcWritePciReg(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset,
+    UINT32      Data
+)
+{
+#if !USB_RT_DXE_DRIVER
+    DwordWritePCIConfig(HcStruc->wBusDevFuncNum, Offset, Data);
+    return;
+#else
+	EFI_STATUS              Status;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Pci.Write(PciIo, EfiPciIoWidthUint32, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return;
+#endif
+}
+
+/**
+    This routine writes a word value to the PCI configuration
+    register space of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to write
+        Data        - Value to write
+
+**/
+
+VOID
+HcWordWritePciReg(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset,
+    UINT16      Data
+)
+{
+#if !USB_RT_DXE_DRIVER
+    WordWritePCIConfig(HcStruc->wBusDevFuncNum, Offset, Data);
+    return;
+#else
+    EFI_STATUS	            Status;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Pci.Write(PciIo, EfiPciIoWidthUint16, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return;
+#endif
+}
+
+/**
+    This routine reads a dword value from the MMIO register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to read
+
+**/
+
+UINT32
+HcReadHcMem(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset
+)
+{
+#if !USB_RT_DXE_DRIVER
+    if (Offset > HcStruc->BaseAddressSize) {
+        return 0;
+    }
+    return DwordReadMem(HcStruc->BaseAddress, Offset);
+#else
+    EFI_STATUS              Status;
+    UINT32                  Data = 0;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+	Status = PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, 0, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return Data;
+#endif
+}
+
+/**
+    This routine writes a dword value to the MMIO register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to write
+        Data        - Value to write
+        
+**/
+
+VOID
+HcWriteHcMem(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset,
+    UINT32      Data
+)
+{
+#if !USB_RT_DXE_DRIVER
+    if ((Offset + sizeof(UINT32)) > HcStruc->BaseAddressSize) {
+        return;
+    }
+    DwordWriteMem(HcStruc->BaseAddress, Offset, Data);
+    return;
+#else
+    EFI_STATUS	            Status;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Mem.Write(PciIo, EfiPciIoWidthUint32, 0, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return;
+#endif
+}
 
 /**
     This routine sets the specified bits to the MMIO register 
     of the host controller.
 
-    @param HcStruc     HcStruc pointer
-    @param Offset      Register offset to set
-    @param Data        Value to set
-    
-    @retval None
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to set
+        Data        - Value to set
         
 **/
 
@@ -463,14 +628,14 @@ HcSetHcMem(
     UINT32      Bit
 )
 {
-    UINT32  Data;
+	UINT32  Data;
 
     if (Offset > HcStruc->BaseAddressSize) {
         return;
     }
 
-    Data = HcReadHcMem(HcStruc, Offset) | Bit;
-    HcWriteHcMem(HcStruc, Offset, Data);
+	Data = HcReadHcMem(HcStruc, Offset) | Bit;
+	HcWriteHcMem(HcStruc, Offset, Data);
     return;
 }
 
@@ -478,19 +643,18 @@ HcSetHcMem(
     This routine clears the specified bits to the MMIO register 
     of the host controller.
 
-    @param HcStruc     HcStruc pointer
-    @param Offset      Register offset to set
-    @param Bit        Bit to clear
-    
-    @retval None
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to clear
+        Data        - Value to clear
         
 **/
 
 VOID
 HcClearHcMem(
-    HC_STRUC *HcStruc,
-    UINT32  Offset,
-    UINT32  Bit
+	HC_STRUC	*HcStruc,
+	UINT32		Offset,
+	UINT32		Bit
 )
 {
     UINT32  Data;
@@ -508,10 +672,10 @@ HcClearHcMem(
     This routine reads a dword value from the operational register 
     of the host controller.
 
-    @param HcStruc     HcStruc pointer
-    @param Offset      Register offset to read
-    
-    @retval Value      Value to read
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to read
+
 **/
 
 UINT32
@@ -520,18 +684,17 @@ HcReadOpReg(
     UINT32      Offset
 )
 {
-    return HcReadHcMem(HcStruc, HcStruc->OpRegOffset + Offset);
+    return HcReadHcMem(HcStruc, HcStruc->bOpRegOffset + Offset);
 }
 
 /**
     This routine write a dword value to the operational register
     of the host controller.
 
-    @param HcStruc     HcStruc pointer
-    @param Offset      Register offset to write
-    @param Data        Value to write
-    
-    @retval None
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to write
+        Data        - Value to write
         
 **/
 
@@ -542,19 +705,19 @@ HcWriteOpReg(
     UINT32      Data
 )
 {
-    HcWriteHcMem(HcStruc, HcStruc->OpRegOffset + Offset, Data);
+    HcWriteHcMem(HcStruc, HcStruc->bOpRegOffset + Offset, Data);
     return;
 }
 
 /**
     This routine sets the specified bits to the operational register 
     of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to set
+        Data        - Value to set
         
-    @param HcStruc     HcStruc pointer
-    @param Offset      Register offset to set
-    @param Data        Value to set
-    
-    @retval None            
 **/
 
 VOID
@@ -575,11 +738,11 @@ HcSetOpReg(
     This routine clears the specified bits to the operational register 
     of the host controller.
 
-    @param HcStruc     HcStruc pointer
-    @param Offset      Register offset to clear
-    @param Data        Value to clear
-    
-    @retval None         
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to clear
+        Data        - Value to clear
+        
 **/
 
 VOID
@@ -593,18 +756,274 @@ HcClearOpReg(
 
     Data = HcReadOpReg(HcStruc, Offset) & ~Bit;
     HcWriteOpReg(HcStruc, Offset, Data);
-    return;
+	return;
 }
 
+/**
+    This routine reads a byte value from the Io register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to read
+
+**/
+
+UINT8
+HcByteReadHcIo(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset
+)
+{
+#if !USB_RT_DXE_DRIVER
+    return ByteReadIO((UINT16)HcStruc->BaseAddress + Offset);
+#else
+    EFI_STATUS              Status;
+    UINT8                   Data = 0;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Io.Read(PciIo, EfiPciIoWidthUint8, 4, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return Data;
+#endif
+}
+
+/**
+    This routine writes a byte value to the Io register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to write
+        Data        - Value to write
+        
+**/
+
+VOID
+HcByteWriteHcIo(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset,
+    UINT8       Data
+)
+{
+#if !USB_RT_DXE_DRIVER
+    ByteWriteIO((UINT16)HcStruc->BaseAddress + Offset, Data);
+    return;
+#else
+    EFI_STATUS	            Status;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Io.Write(PciIo, EfiPciIoWidthUint8, 4, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return;
+#endif
+}
+
+/**
+    This routine reads a word value from the Io register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to read
+
+**/
+
+UINT16
+HcWordReadHcIo(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset
+)
+{
+#if !USB_RT_DXE_DRIVER
+    return WordReadIO((UINT16)HcStruc->BaseAddress + Offset);
+#else
+    EFI_STATUS              Status;
+    UINT16                  Data = 0;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Io.Read(PciIo, EfiPciIoWidthUint16, 4, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return Data;
+#endif
+}
+
+/**
+    This routine writes a word value to the Io register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to write
+        Data        - Value to write
+        
+**/
+
+VOID
+HcWordWriteHcIo(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset,
+    UINT16      Data
+)
+{
+#if !USB_RT_DXE_DRIVER
+    WordWriteIO((UINT16)HcStruc->BaseAddress + Offset, Data);
+    return;
+#else
+    EFI_STATUS	            Status;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Io.Write(PciIo, EfiPciIoWidthUint16, 4, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return;
+#endif
+}
+
+/**
+    This routine reads a dword value from the Io register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to read
+
+**/
+
+UINT32
+HcDwordReadHcIo(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset
+)
+{
+#if !USB_RT_DXE_DRIVER
+    return DwordReadIO((UINT16)HcStruc->BaseAddress + Offset);
+#else
+    EFI_STATUS              Status;
+    UINT32                  Data = 0;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Io.Read(PciIo, EfiPciIoWidthUint32, 4, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return Data;
+#endif
+}
+
+/**
+    This routine writes a dword value to the Io register 
+    of the host controller.
+
+    @param
+        HcStruc     - HcStruc pointer
+        Offset      - Register offset to write
+        Data        - Value to write
+        
+**/
+
+VOID
+HcDwordWriteHcIo(
+    HC_STRUC    *HcStruc,
+    UINT32      Offset,
+    UINT32      Data
+)
+{
+#if !USB_RT_DXE_DRIVER
+    DwordWriteIO((UINT16)HcStruc->BaseAddress + Offset, Data);
+    return;
+#else
+    EFI_STATUS              Status;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Io.Write(PciIo, EfiPciIoWidthUint32, 4, Offset, 1, &Data);
+    ASSERT_EFI_ERROR(Status);
+    return;
+#endif
+}
+
+/**
+    This routine uses Map of the DMA services for DMA operations. 
+
+    @param
+        HcStruc     - HcStruc pointer
+        Direction   - Data direction 
+        BufferAddr  - BufferAddr for DmaMap.
+        BufferSize  - BufferSize for DmaMap
+        PhyAddr     - Phyaddr to access
+        Mapping     - A resulting value to pass to HcDmaUnmap.
+**/
+
+UINT8
+HcDmaMap(
+    HC_STRUC    *HcStruc,
+    UINT8       Direction,
+    UINT8       *BufferAddr,
+    UINT32      BufferSize,
+    UINT8       **PhyAddr,
+    VOID        **Mapping
+)
+{
+#if !USB_RT_DXE_DRIVER
+    *PhyAddr = BufferAddr;
+#else
+    EFI_PCI_IO_PROTOCOL_OPERATION       Operation;
+    EFI_PHYSICAL_ADDRESS                Addr;
+    EFI_STATUS                          Status;
+    UINTN                               Bytes = BufferSize;
+    EFI_PCI_IO_PROTOCOL	                *PciIo = HcStruc->PciIo;
+
+    if (Direction & BIT7) {
+        Operation = EfiPciIoOperationBusMasterWrite;
+    } else {
+        Operation = EfiPciIoOperationBusMasterRead;
+    }
+
+	Status = PciIo->Map(PciIo, Operation, BufferAddr, &Bytes, &Addr, Mapping);
+    
+	if (EFI_ERROR(Status) || Bytes != BufferSize) {
+        *PhyAddr = BufferAddr;
+		return USB_ERROR;
+	}
+
+	*PhyAddr = (UINT8*)Addr;
+#endif
+	return USB_SUCCESS;
+}
+
+/**
+    This routine uses UnMap of the DMA services for DMA operations. 
+
+    @param
+        HcStruc     - HcStruc pointer
+        Mapping     - The mapping value returned from HcDmaMap.
+**/
+
+UINT8
+HcDmaUnmap(
+	HC_STRUC	*HcStruc,
+	VOID		*Mapping
+)
+{
+#if USB_RT_DXE_DRIVER
+
+    EFI_STATUS              Status;
+    EFI_PCI_IO_PROTOCOL	    *PciIo = HcStruc->PciIo;
+
+    Status = PciIo->Unmap(PciIo, Mapping);
+    if (EFI_ERROR(Status)) {
+        return USB_ERROR;
+    }
+#endif
+    return USB_SUCCESS;
+}
 
 /**
     This routine produces a sound on the internal PC speaker
-    
-    @param Freq         Sound frequency
-    @param Duration     Sound duration in 15 microsecond units
-    @param HcStruc      Pointer to HCStruc
 
-    @retval None
+    @param
+        Freq -     Sound frequency
+        Duration - Sound duration in 15 microsecond units
+        HcStruc - Pointer to HCStruc
+
+    @retval VOID
 
 **/
 
@@ -615,26 +1034,24 @@ SpeakerBeep(
     HC_STRUC    *HcStruc
 )
 {
-
+#if USB_BEEP_ENABLE
     UINT8   Value;
-    if ((gUsbData->UsbFeature & USB_BEEP_SUPPORT) == USB_BEEP_SUPPORT){
-        if (gUsbData->UsbStateFlag & USB_FLAG_ENABLE_BEEP_MESSAGE) {
-            ByteWriteIO((UINT8)0x43, (UINT8)0xB6);
-            ByteWriteIO((UINT8)0x42, (UINT8)Freq);
-            ByteWriteIO((UINT8)0x42, (UINT8)Freq);
-            Value = ByteReadIO((UINT8)0x61);
-            ByteWriteIO((UINT8)0x61, (UINT8)(Value | 03));
-            FixedDelay((UINTN)Duration * 15);
-            ByteWriteIO((UINT8)0x61, (UINT8)(Value));
-        }
+    if (gUsbData->dUSBStateFlag & USB_FLAG_ENABLE_BEEP_MESSAGE) {
+        ByteWriteIO((UINT8)0x43, (UINT8)0xB6);
+        ByteWriteIO((UINT8)0x42, (UINT8)Freq);
+        ByteWriteIO((UINT8)0x42, (UINT8)Freq);
+        Value = ByteReadIO((UINT8)0x61);
+        ByteWriteIO((UINT8)0x61, (UINT8)(Value | 03));
+        FixedDelay((UINTN)Duration * 15);
+        ByteWriteIO((UINT8)0x61, (UINT8)(Value));
     }
-
+#endif
 }
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

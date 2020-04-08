@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -19,6 +19,8 @@
 
 
 #include <Efi.h>
+#include "AmiDef.h"
+#include "UsbDef.h"
 #include "Uhcd.h"
 
 #include "Tree.h"
@@ -26,79 +28,68 @@
 /**
     initializes TREENODE_T structure
 
-    @param  Node  Pointer to TREENODE_T structure
-    @param  Data  Pointer to data structure specific to
-                  the type of tree node
+    @param 
+        n - pointer to TREENODE_T structure
+        d - pointer to data structure specific to
+        the type of tree node
 
     @retval Pointer to TREENODE_T structure that was passed in as parrameter
 
 **/
 
-TREENODE_T*
-TreeCreate (
-    TREENODE_T  *Node,
-    VOID        *Data
-)
+TREENODE_T* TreeCreate( TREENODE_T* n, VOID* d )
 {
-    Node->data = Data;
-    Node->child = 0;
-    Node->right = 0;
-    Node->left = 0;
-    Node->parent = 0;
-    return Node;
+    n->data = d;
+    n->child = 0;
+    n->right = 0;
+    n->left = 0;
+    n->parent = 0;
+    return n;
 }
 
 
 /**
     add a child node to the TREENODE_T structure
 
-    @param    Parent  Pointer to parent TREENODE_T structure
-    @param    Child   Pointer to child TREENODE_T structure
-
-    @retval   None
+    @param 
+        p - pointer to parent TREENODE_T structure
+        c - pointer to child TREENODE_T structure
 
 **/
 
-VOID
-TreeAddChild (
-    TREENODE_T  *Parent,
-    TREENODE_T  *Child
-)
+VOID TreeAddChild( TREENODE_T* p, TREENODE_T* c )
 {
-    TREENODE_T* Node = Parent->child;
-    Parent->child = Child;
-    Child->right = Node;
-    if(Node != 0)
-        Node->left = Child;
-    Child->left = 0;
-    Child->parent = Parent;
+    TREENODE_T* n = p->child;
+    //for( n = p->child; n != NULL; n = n->right );
+    p->child = c;
+    c->right = n;
+    if(n!=0)
+        n->left = c;
+    c->left = 0;
+    c->parent = p;
 }
 
 
 /**
     removes a node from the tree
 
-    @param    Node  Pointer to TREENODE_T structure
-
-    @retval   None
+    @param 
+        n - pointer to TREENODE_T structure
 **/
 
-VOID
-TreeRemove (
-    TREENODE_T    *Node
-)
+VOID TreeRemove( TREENODE_T* n )
 {
-    if(  Node->right != 0){
-        Node->right->left = Node->left;
+    if(  n->right != 0){
+        n->right->left = n->left;
     }
-    if(  Node->left != 0){
-        Node->left->right = Node->right;
+    if(  n->left != 0){
+        n->left->right = n->right;
     }
-    if( Node->parent && Node->parent->child == Node )
-        Node->parent->child = Node->right;
-    Node->left = 0;
-    Node->right = 0;
-    Node->parent = 0;
+    if( n->parent && n->parent->child == n )
+        n->parent->child = n->right;
+    n->left = 0;
+    n->right = 0;
+    n->parent = 0;
 }
 
 
@@ -106,27 +97,23 @@ TreeRemove (
     Enumerates nodes of the tree which are direct children of
     the same parent
 
-    @param    Node        Pointer to TREENODE_T structure
-    @param    Predicate   Predicate function that is called for each node
-                          and controll whether enumeration should continue
-                          once predicate returns TRUE the enumeration will
-    @param    Data        Pointer that is passed to predicate to maintain
-                          the context of the enumeration
+    @param 
+        n   - pointer to TREENODE_T structure
+        pr  - predicate function that is called for each node
+        and controll whether enumeration should continue
+        once predicate returns TRUE the enumeration will
+        data - pointer that is passed to predicate to maintain
+        the context of the enumeration
 
     @retval the node that cause enumeration to stop
 **/
 
-TREENODE_T*
-TreeSearchSibling (
-    TREENODE_T         *Node,
-    TREE_PREDICATE1_T  Predicate,
-    VOID               *Data
-)
+TREENODE_T* TreeSearchSibling( TREENODE_T* n, TREE_PREDICATE1_T pr, VOID* data )
 {
-    TREENODE_T *Right;
-    for(; Node; Node = Right){
-        Right = Node->right;
-        if(Predicate(Node->data, Data))return Node;
+    TREENODE_T *r;
+    for(;n;n=r){
+        r = n->right;
+        if(pr(n->data,data))return n;
     }
     return NULL;
 }
@@ -136,33 +123,29 @@ TreeSearchSibling (
     Enumerates nodes of the tree which are direct and indirect
     children of the same parent
 
-    @param    Node       Pointer to TREENODE_T structure
-    @param    Predicate  Predicate function that is called for each node;
-                         controlls whether enumeration should continue
-                         once predicate returns TRUE the enumeration will
-    @param    Data       Pointer that is passed to predicate to maintain
-                         the context of the enumeration
+    @param 
+        n   - pointer to TREENODE_T structure
+        pr  - predicate function that is called for each node;
+        controlls whether enumeration should continue
+        once predicate returns TRUE the enumeration will
+        data - pointer that is passed to predicate to maintain
+        the context of the enumeration
 
     @retval the node that cause enumeration to stop
 **/
 
-TREENODE_T*
-TreeSearchDeep (
-    TREENODE_T         *Node,
-    TREE_PREDICATE1_T  Predicate,
-    VOID               *Data
-)
+TREENODE_T* TreeSearchDeep( TREENODE_T* n, TREE_PREDICATE1_T pr, VOID* data )
 {
-    TREENODE_T *Right;
-    TREENODE_T *Child;
-    for(; Node; Node=Right){
-        Right = Node->right;
-        Child = Node->child;
-        if(Predicate(Node->data, Data))return Node;
-        if(Child){
-            TREENODE_T* Child1 = TreeSearchDeep(Node->child, Predicate, Data);
-            if(Child1)
-                return Child1;
+    TREENODE_T *r;
+    TREENODE_T *c;
+    for(;n;n=r){
+        r = n->right;
+        c = n->child;
+        if(pr(n->data,data))return n;
+        if(c){
+            TREENODE_T* c1 = TreeSearchDeep(n->child,pr,data);
+            if(c1)
+                return c1;
         }
     }
     return 0;
@@ -175,24 +158,17 @@ TreeSearchDeep (
     function ignores the result returned from call-back routine
     and always enumerates all sibling nodes
 
-    @param    Node       Pointer to TREENODE_T structure
-    @param    CallBack   Call-back function that is called for each node
-    @param    Data       Pointer that is passed to call-back to maintain
-                         the context of the enumeration
-
-    @retval   None
-
+    @param 
+        n - pointer to TREENODE_T structure
+        pr  - call-back function that is called for each node
+        data - pointer that is passed to call-back to maintain
+        the context of the enumeration
 **/
 
-VOID
-TreeForEachSibling (
-    TREENODE_T       *Node,
-    TREE_CALLBACK_T  CallBack,
-    VOID             *Data
-)
+VOID TreeForEachSibling( TREENODE_T* n, TREE_CALLBACK_T pr, VOID* data )
 {
-    for(; Node; Node = Node->right)
-        CallBack(Node->data, Data);
+    for(;n;n=n->right)
+        pr(n->data,data);
 }
 
 
@@ -200,67 +176,50 @@ TreeForEachSibling (
     retrieves data stored at the tail of the queue and
     removes the tail item
 
-    @param    Queue  Pointer to QUEUE_T structure
-
-    @retval   Data   Pointer to QUEUE_T data
-
+    @param 
+        q - pointer to QUEUE_T structure
 **/
 
-VOID*
-QueueGet (
-    QUEUE_T  *Queue
-)
+VOID* QueueGet( QUEUE_T* q)
 {
-    VOID* Data;
-    if( Queue->tail == Queue->head ) return NULL;
-    Data = Queue->data[Queue->tail++];
-    if( Queue->tail == Queue->maxsize ) Queue->tail -= Queue->maxsize;
-    return Data;
+    VOID* d;
+    if( q->tail == q->head ) return NULL;
+    d = q->data[q->tail++];
+    if( q->tail == q->maxsize ) q->tail -= q->maxsize;
+    return d;
 }
 
 
 /**
     retrieves number of items stored in the queue
 
-    @param    Queue  Pointer to QUEUE_T structure
-
-    @retval   Size   Queue Size
-
+    @param 
+        q - pointer to QUEUE_T structure
 **/
 
-int
-QueueSize (
-    QUEUE_T  *Queue
-)
+int QueueSize(QUEUE_T* q)
 {
-    return (Queue->head >= Queue->tail)? Queue->head - Queue->tail:
-            Queue->head  + Queue->maxsize - Queue->tail;
+    return (q->head >= q->tail)? q->head - q->tail:
+        q->head  + q->maxsize - q->tail;
 }
 
 
 /**
     add a new item in front of the head of the queue
 
-    @param    Queue  Pointer to QUEUE_T structure
-    @param    Data   Pointer to QUEUE_T data
-
-    @retval   None
-
+    @param 
+        q - pointer to QUEUE_T structure
 **/
 
-VOID
-QueuePut (
-    QUEUE_T  *Queue,
-    VOID     *Data
-)
+VOID QueuePut( QUEUE_T* q, VOID * d)
 {
-    ASSERT(QueueSize(Queue) < Queue->maxsize );
-    Queue->data[Queue->head++] = Data;
-    if(Queue->head == Queue->maxsize) Queue->head -= Queue->maxsize;
-    if(Queue->head == Queue->tail){
+    ASSERT(QueueSize(q) < q->maxsize );
+    q->data[q->head++] = d;
+    if(q->head==q->maxsize) q->head -= q->maxsize;
+    if(q->head==q->tail){
         //Drop data from queue
-        Queue->tail++;
-        if( Queue->tail == Queue->maxsize ) Queue->tail -= Queue->maxsize;
+        q->tail++;
+        if( q->tail == q->maxsize ) q->tail -= q->maxsize;
     }
 }
 
@@ -268,68 +227,55 @@ QueuePut (
 /**
     add a variable size item to the queue
 
-    @param    Queue  Pointer to QUEUE_T structure
-    @param    Data   Pointer to data
-    @param    Size   Number of dwords to add to the queue
-
-    @retval   None
-
+    @param 
+        q - pointer to QUEUE_T structure
+        sz - number of dwords to add to the queue
 **/
 
-VOID
-QueuePutMsg (
-    QUEUE_T  *Queue,
-    VOID     *Data,
-    int      Size
-)
+VOID QueuePutMsg( QUEUE_T* q, VOID * d, int sz )
 {
-    ASSERT(QueueSize(Queue) < Queue->maxsize);
-    ASSERT(Size < Queue->maxsize);
-    if(Queue->head + Size > Queue->maxsize)
-        Queue->head = 0;
-    CopyMem( (char*)Queue->data + Queue->head, Data, Size );
-    Queue->head += Size;
-    if(Queue->head == Queue->maxsize) Queue->head = 0;
-    if(Queue->head == Queue->tail){
+    ASSERT(QueueSize(q) < q->maxsize );
+    ASSERT(sz<q->maxsize);
+    if(q->head + sz > q->maxsize )
+        q->head = 0;
+    EfiCopyMem( (char*)q->data + q->head, d, sz );
+    q->head += sz;
+    if(q->head==q->maxsize) q->head = 0;
+    if(q->head==q->tail){
         //Drop data from queue
-        Queue->tail += Size;
-        if( Queue->tail >= Queue->maxsize ) Queue->tail = 0;
+        q->tail+=sz;
+        if( q->tail >= q->maxsize ) q->tail = 0;
     }
 }
+
 
 /**
     retrieves a variable size item from the queue
 
-    @param    Queue  Pointer to QUEUE_T structure
-    @param    Size   Number of dwords to remove from the queue
-
-    @retval   Data   Pointer to data
-
+    @param 
+        q - pointer to QUEUE_T structure
+        sz - number of dwords to remove from the queue
 **/
 
-VOID*
-QueueRemoveMsg (
-    QUEUE_T  *Queue,
-    int      Size
-)
+VOID* QueueRemoveMsg( QUEUE_T* q, int sz)
 {
-    VOID* Data;
-    if( Queue->tail == Queue->head ) return NULL;
-    Data = (char*)Queue->data + Queue->tail;
-    Queue->tail += Size;
-    if( Queue->tail > Queue->maxsize ){
-        Data = Queue->data;
-        Queue->tail = Size;
-    } else if(Queue->tail == Queue->maxsize ){
-        Queue->tail = 0;
+    VOID* d;
+    if( q->tail == q->head ) return NULL;
+    d = (char*)q->data + q->tail;
+    q->tail += sz;
+    if( q->tail > q->maxsize ){
+        d = q->data;
+        q->tail = sz;
+    } else if(q->tail == q->maxsize ){
+        q->tail = 0;
     }
-    return Data;
+    return d;
 }
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2014, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

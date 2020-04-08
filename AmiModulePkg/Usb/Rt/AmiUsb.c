@@ -1,7 +1,7 @@
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **
@@ -19,20 +19,34 @@
     used afterwards.
 
 **/
+
 #include "AmiDef.h"
 #include "AmiUsb.h"
-#include "../UsbDevDriverElinks.h"
+#include <UsbDevDriverElinks.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/TimerLib.h>
+#if !USB_RT_DXE_DRIVER
+#include <Library/AmiBufferValidationLib.h>
+#include <Library/AmiUsbSmmGlobalDataValidationLib.h>
+#endif
+
+#if USB_DEV_KBD
 #include "UsbKbd.h"
+#endif
 #include "UsbMass.h"
 #include <Protocol/AmiUsbHid.h>
-#include <Library/AmiUsbHcdLib.h>
+
+//#pragma warning (disable: 4152)
 
 EFI_EMUL6064MSINPUT_PROTOCOL* gMsInput = 0;
 EFI_EMUL6064KBDINPUT_PROTOCOL* gKbdInput = 0;
 EFI_EMUL6064TRAP_PROTOCOL* gEmulationTrap = 0;
 
 USB_GLOBAL_DATA     *gUsbData;
+//USB_BADDEV_STRUC    *gUsbBadDeviceTable;			//(EIP60706-)
+
+AMI_USB_SMM_PROTOCOL	gUsbSmmProtocol = {0};
+
 BOOLEAN gLockSmiHandler = FALSE;
 BOOLEAN gLockHwSmiHandler = FALSE;
 BOOLEAN gCheckUsbApiParameter = FALSE;
@@ -40,11 +54,11 @@ BOOLEAN gCheckUsbApiParameter = FALSE;
 VOID    StopControllerType(UINT8);
 VOID    StartControllerType(UINT8);
 UINT8   USB_StopDevice (HC_STRUC*,  UINT8, UINT8);
-UINT8   USB_EnumerateRootHubPorts(UINT8);
-VOID    StopControllerBdf(UINT16);
+UINT8   USB_EnumerateRootHubPorts(UINT8);   //(EIP57521+)              
+VOID    StopControllerBdf(UINT16);			//(EIP74876+)
 
-VOID FillHcdEntries();
-
+VOID	FillHcdEntries();
+										//(EIP71750+)>
 typedef VOID USB_DEV_DELAYED_DRIVER_CHECK (DEV_DRIVER*);
 extern USB_DEV_DELAYED_DRIVER_CHECK USB_DEV_DELAYED_DRIVER EndOfUsbDevDelayedDriverList;
 USB_DEV_DELAYED_DRIVER_CHECK* UsbDevDelayedDrivers[]= {USB_DEV_DELAYED_DRIVER NULL};
@@ -52,135 +66,39 @@ USB_DEV_DELAYED_DRIVER_CHECK* UsbDevDelayedDrivers[]= {USB_DEV_DELAYED_DRIVER NU
 typedef VOID USB_DEV_DRIVER_CHECK (DEV_DRIVER*);
 extern USB_DEV_DRIVER_CHECK USB_DEV_DRIVER EndOfUsbDevDriverList;
 USB_DEV_DRIVER_CHECK* UsbDevDrivers[]= {USB_DEV_DRIVER NULL};
+										//<(EIP71750+)
 
-extern  UINT8   UsbFillHcdEntriesDummy(HCD_HEADER*);
-extern UINT8 UHCI_FillHCDEntries(HCD_HEADER*);
-extern UINT8 OHCI_FillHCDEntries(HCD_HEADER*);
-extern UINT8 EHCI_FillHCDEntries(HCD_HEADER*);
-extern UINT8 XHCI_FillHCDEntries(HCD_HEADER*);
+extern	UINT8	UHCI_FillHCDEntries(HCD_HEADER*);
+extern	UINT8	OHCI_FillHCDEntries(HCD_HEADER*);
+extern	UINT8	EHCI_FillHCDEntries(HCD_HEADER*);
+extern	UINT8	XHCI_FillHCDEntries(HCD_HEADER*);
 
-HCD_HEADER      gUsbHcdTable[MAX_HC_TYPES];
-DEV_DRIVER      gUsbDevDriverTable[MAX_DEVICE_TYPES];
-DEV_DRIVER      gUsbDelayedDrivers[MAX_DEVICE_TYPES]; 
-HCD_MEM_HEADER  gUsbHcdMemTable;
-
-URP_STRUC       *gParameters = NULL;
-USB_DATA_LIST   *gUsbDataList = NULL;
-HC_STRUC        **gHcTable = NULL;
-UINT8           gDataInSmm = FALSE;
-
-
-/**
-    This routine allocates blocks of memory from the global
-    memory pool
-
-    @param Ptr       Pointer to the memory block to be freed
-    @param NumBlk    Number of 32 byte blocks needed
-
-    @retval EFI_SUCCESS             On success
-    @retval EFI_OUT_OF_RESOURCES    Failure
-
-    @note  This routine allocates continuous 32 byte memory blocks.
-
-**/
-
-EFI_STATUS
-UsbHcdMemAlloc(
-    VOID _FAR_ **Ptr,
-    UINT16     NumBlk
-)
+void FillHcdEntries()
 {
-    *Ptr = USB_MemAlloc(NumBlk);
-    if (*Ptr == NULL) return  EFI_OUT_OF_RESOURCES;
-    return  EFI_SUCCESS;
-}
-
-
-/**
-    This routine frees the chunk of memory allocated using
-    the USBMem_Alloc call
-
-    @param Ptr       Pointer to the memory block to be freed
-    @param NumBlk    Number of 32 byte blocks to be freed
-
-    @retval EFI_SUCCESS      On success
-    @retval EFI_NOT_FOUND    Failure
-
-    @note  This routine frees continuous memory blocks starting from the Ptr.
-
-**/
-
-EFI_STATUS
-UsbHcdMemFree (
-    VOID _FAR_ *Ptr,
-    UINT16     NumBlk
-)
-{
-    if (USB_MemFree(Ptr, NumBlk) != USB_SUCCESS) {
-        return  EFI_NOT_FOUND;
-    }
-    return  EFI_SUCCESS;
+#if UHCI_SUPPORT
+	UHCI_FillHCDEntries (&gUsbData->aHCDriverTable[USB_INDEX_UHCI]);
+#endif
+#if OHCI_SUPPORT
+	OHCI_FillHCDEntries (&gUsbData->aHCDriverTable[USB_INDEX_OHCI]);
+#endif
+#if EHCI_SUPPORT
+	EHCI_FillHCDEntries (&gUsbData->aHCDriverTable[USB_INDEX_EHCI]);
+#endif
+#if XHCI_SUPPORT
+	XHCI_FillHCDEntries (&gUsbData->aHCDriverTable[USB_INDEX_XHCI]);
+#endif
 }
 
 /**
-    Call corresponding function for filling the host controller driver routine pointers with feature flag,
-    and install SMM USB Hcd protocol.
+ Type:        Function Dispatch Table
 
-    @param   None.
-    @retval  None.
+    This is the table of functions used by USB API
+
+    @note  This functions are invoked via software SMI
 
 **/
-VOID
-FillHcdEntries(
-  VOID
-  )
-{ 
-    //Check UHCI Support flag
-    if ((gUsbData->UsbFeature & USB_HC_UHCI_SUPPORT) == USB_HC_UHCI_SUPPORT){
-        UHCI_FillHCDEntries(&gUsbHcdTable[USB_INDEX_UHCI]);
-    } else {
-        UsbFillHcdEntriesDummy(&gUsbHcdTable[USB_INDEX_UHCI]);
-    }
-    
-    //Check OHCI Support flag
-    if ((gUsbData->UsbFeature & USB_HC_OHCI_SUPPORT) == USB_HC_OHCI_SUPPORT){
-        OHCI_FillHCDEntries(&gUsbHcdTable[USB_INDEX_OHCI]);
-    } else {
-        UsbFillHcdEntriesDummy(&gUsbHcdTable[USB_INDEX_OHCI]);
-    }
-    
-    //Check EHCI Support flag
-    if ((gUsbData->UsbFeature & USB_HC_EHCI_SUPPORT) == USB_HC_EHCI_SUPPORT){
-        EHCI_FillHCDEntries(&gUsbHcdTable[USB_INDEX_EHCI]);
-    } else {
-        UsbFillHcdEntriesDummy(&gUsbHcdTable[USB_INDEX_EHCI]);
-    }
-    
-    //Check XHCI Support flag
-    if ((gUsbData->UsbFeature & USB_HC_XHCI_SUPPORT) == USB_HC_XHCI_SUPPORT){
-        XHCI_FillHCDEntries(&gUsbHcdTable[USB_INDEX_XHCI]);
 
-    } else {
-        UsbFillHcdEntriesDummy(&gUsbHcdTable[USB_INDEX_XHCI]);
-    }
-    
-    gUsbHcdMemTable.FnHcdMemAlloc = UsbHcdMemAlloc;
-    gUsbHcdMemTable.FnHcdMemFree  = UsbHcdMemFree;
-
-    // Install SMM USB Hcd protocol
-    InitHcdTable((HCD_HEADER*)&gUsbHcdTable[0],
-                 (VOID*)&gUsbData,
-                 (VOID*)&gHcTable,
-                 (HCD_MEM_HEADER*)&gUsbHcdMemTable
-                 );
-}
-
-
-/**
- Type:  Function Dispatch Table
- This is the table of functions used by USB API
-**/
-API_FUNC gUsbApiTable[] = {
+API_FUNC aUsbApiTable[] = {
     USBAPI_CheckPresence,
     USBAPI_Start,
     USBAPI_Stop,
@@ -203,17 +121,18 @@ API_FUNC gUsbApiTable[] = {
     USBAPI_GetDeviceAddress,
     USBAPI_ExtDriverRequest,
     USBAPI_CCIDRequest,
-    USBAPI_UsbStopController,
-    USBAPI_HcStartStop,
-    UsbApiLockUsbSwSmi
+    USBAPI_UsbStopController,				//(EIP74876+)
+    USBAPI_HcStartStop
 };
 
 /**
- Type:Function Dispatch Table
- This is the table of functions used by USB Mass Storage API
+ Type:        Function Dispatch Table
+
+    This is the table of functions used by USB Mass Storage API
+
 **/
 
-API_FUNC gUsbMassApiTable[] = {
+API_FUNC aUsbMassApiTable[] = {
     USBMassAPIGetDeviceInformation, // USB Mass API Sub-Func 00h
     USBMassAPIGetDeviceGeometry,    // USB Mass API Sub-Func 01h
     USBMassAPIResetDevice,          // USB Mass API Sub-Func 02h
@@ -228,19 +147,16 @@ API_FUNC gUsbMassApiTable[] = {
     USBMassAPIGetDeviceParameters,  // USB BIOS API function 0Bh
     USBMassAPIEfiReadDevice,        // USB Mass API Sub-Func 0Ch
     USBMassAPIEfiWriteDevice,       // USB Mass API Sub-Func 0Dh
-    USBMassAPIEfiVerifyDevice,      // USB Mass API Sub-Func 0Eh
-    USBMassAPIGetIdentifyData       // USB Mass API Sub-Func 0Fh
+    USBMassAPIEfiVerifyDevice       // USB Mass API Sub-Func 0Eh
 };
 
+EFI_DRIVER_ENTRY_POINT(USBDriverEntryPoint)
+
 /**
-    This function is the entry point for this USB driver. 
-
-    @param   ImageHandle   The handle associated with this image being loaded into memory
-    @param   SystemTable   Pointer to the system table
-
-    @retval  EFI_SUCCESS   Success to initial USB Driver.
+    USB Driver entry point
 
 **/
+
 EFI_STATUS
 EFIAPI
 USBDriverEntryPoint(
@@ -250,144 +166,659 @@ USBDriverEntryPoint(
 {
     EFI_STATUS Status;
 
-    Status = InitUsbHcdDriver(ImageHandle, SystemTable);
-    ASSERT_EFI_ERROR(Status);
+    InitAmiLib(ImageHandle, SystemTable);
+
+#if !USB_RT_DXE_DRIVER
+    Status = InitSmmHandler(ImageHandle, SystemTable, InSmmFunction, NULL);
+#endif
     
+#if USB_RT_DXE_DRIVER
+    Status = InstallUsbProtocols(); 
+    InitializeUsbGlobalData();
+#endif
+	
+    ASSERT_EFI_ERROR(Status);
+
     return Status;
 }
 
 /**
     This function initializes the USB global data.
-    @param  None
-    @retval None
+
 **/
+
 EFI_STATUS
 InitializeUsbGlobalData(
-  VOID
+	VOID
 )
 {
+	EFI_STATUS	Status;
+    UINTN   	DriverIndex;
+    UINTN   	DelayedIndex;
+    UINTN       Index;
+    UINTN       MaxIndex;
+    EFI_PHYSICAL_ADDRESS    MemAddress;
 
-    UINTN    DriverIndex;
-    UINTN    DelayedIndex;
-    UINTN    Index;
-    UINTN    MaxIndex;
     //
     // Initialize host controller drivers
     //
     FillHcdEntries();
 
+    //
+    // Initialize the device driver pointers
+    //
+#if !USB_RT_DXE_DRIVER
     DriverIndex = 0;
     DelayedIndex = 0;
     MaxIndex = MAX_DEVICE_TYPES;
-
-    //
-    // Get Usb Data list, USB request Packet and host controller Table pointers.
-    //
-    if (gUsbData != NULL){
-      if (gUsbData->UsbDataList != NULL)
-        gUsbDataList = gUsbData->UsbDataList;      
-      if (gUsbData->UsbDataList->UsbUrp != NULL)
-        gParameters = gUsbData->UsbDataList->UsbUrp;      
-     if (gUsbDataList->HcTable != NULL)
-         gHcTable = gUsbDataList->HcTable;
-    }
+#else
+    DriverIndex = MAX_DEVICE_TYPES;
+    DelayedIndex = MAX_DEVICE_TYPES;
+    MaxIndex = MAX_DEVICE_TYPES * 2;
+#endif
 
     Index = 0;
+
     while (UsbDevDelayedDrivers[Index]) {
-      if (DelayedIndex == MaxIndex) {
-        break;
-      }
-      UsbDevDelayedDrivers[Index](&gUsbDelayedDrivers[DelayedIndex]);
-      if (gUsbDelayedDrivers[DelayedIndex].FnDeviceInit) {
-       (*gUsbDelayedDrivers[DelayedIndex].FnDeviceInit)();
-      }
-      if (gUsbDelayedDrivers[DelayedIndex].DevType) {
-        Index++;
-        DelayedIndex++;
-      }
+        if (DelayedIndex == MaxIndex) {
+            break;
+        }
+        UsbDevDelayedDrivers[Index](&gUsbData->aDelayedDrivers[DelayedIndex]);
+		if (gUsbData->aDelayedDrivers[DelayedIndex].pfnDeviceInit) {
+            (*gUsbData->aDelayedDrivers[DelayedIndex].pfnDeviceInit)();
+        }
+        if (gUsbData->aDelayedDrivers[DelayedIndex].bDevType) {
+            Index++;
+            DelayedIndex++;
+        }
     }
 
     ASSERT(DelayedIndex != MaxIndex);
 
     Index = 0;
+
     while (UsbDevDrivers[Index]) {
-      if (DriverIndex == MaxIndex) {
-        break;
-      }
-      UsbDevDrivers[Index](&gUsbDevDriverTable[DriverIndex]);
-      if (gUsbDevDriverTable[DriverIndex].FnDeviceInit) {
-        (*gUsbDevDriverTable[DriverIndex].FnDeviceInit)();
-      }
-      if (gUsbDevDriverTable[DriverIndex].DevType) {
-        Index++;
-        DriverIndex++;
-      }
+        if (DriverIndex == MaxIndex) {
+            break;
+        }
+        UsbDevDrivers[Index](&gUsbData->aDevDriverTable[DriverIndex]);
+		if (gUsbData->aDevDriverTable[DriverIndex].pfnDeviceInit) {
+            (*gUsbData->aDevDriverTable[DriverIndex].pfnDeviceInit)();
+        }
+        if (gUsbData->aDevDriverTable[DriverIndex].bDevType) {
+            Index++;
+            DriverIndex++;
+        }
     }
 
     ASSERT(DriverIndex != MaxIndex);
+
+	//
+	// Allocate a block of memory to be used as a temporary
+	// buffer for  USB mass transfer
+	//
+	if (gUsbData->fpUSBMassConsumeBuffer == NULL) {
+    	MemAddress = 0xFFFFFFFF;
+    	Status = gBS->AllocatePages(AllocateMaxAddress, EfiRuntimeServicesData,
+    					EFI_SIZE_TO_PAGES(MAX_CONSUME_BUFFER_SIZE), 
+    					&MemAddress);
+
+        if (EFI_ERROR(Status)) {
+    	    Status = gBS->AllocatePages(AllocateAnyPages, EfiRuntimeServicesData,
+    					    EFI_SIZE_TO_PAGES(MAX_CONSUME_BUFFER_SIZE), 
+    					    &MemAddress);
+        }
+
+    	ASSERT_EFI_ERROR(Status);
+        gUsbData->fpUSBMassConsumeBuffer = (VOID*)(UINTN)MemAddress;
+    	pBS->SetMem(gUsbData->fpUSBMassConsumeBuffer, MAX_CONSUME_BUFFER_SIZE, 0);
+    }
+
+	//
+	// Allocate a block of memory for the temporary buffer
+	//
+	if (gUsbData->fpUSBTempBuffer == NULL) {
+        MemAddress = 0xFFFFFFFF;
+    	Status = gBS->AllocatePages(AllocateMaxAddress, EfiRuntimeServicesData,
+    					EFI_SIZE_TO_PAGES(MAX_TEMP_BUFFER_SIZE), 
+    					&MemAddress);
+        if (EFI_ERROR(Status)) {
+        	Status = gBS->AllocatePages(AllocateAnyPages, EfiRuntimeServicesData,
+        					EFI_SIZE_TO_PAGES(MAX_TEMP_BUFFER_SIZE), 
+        					&MemAddress);
+        }
+
+    	ASSERT_EFI_ERROR(Status);
+        gUsbData->fpUSBTempBuffer = (VOID*)(UINTN)MemAddress;
+    	pBS->SetMem(gUsbData->fpUSBTempBuffer, MAX_TEMP_BUFFER_SIZE, 0);
+    }
+
     //
     // Allow to enumerate ports
     //
-    gUsbData->EnumFlag = FALSE;
+    gUsbData->bEnumFlag = FALSE;
 
-    if (gUsbDataList != NULL){
-        if (gUsbDataList->HubPortStatusBuffer == NULL){
-            gUsbDataList->HubPortStatusBuffer = (UINT32*)USB_MemAlloc(1);
-        }
-        if (gUsbDataList->InterruptStatus == NULL){
-            gUsbDataList->InterruptStatus = (UINT32*)USB_MemAlloc(1);
-        }
-        USB_DEBUG(DEBUG_ERROR, 3, "HubPortStatusBuffer %x  InterruptStatus %x \n", gUsbDataList->HubPortStatusBuffer, gUsbDataList->InterruptStatus);
-    }
-
-    return USB_SUCCESS;
+	return USB_SUCCESS;
 }
 
 
 /**
-    This function calls USB API handler.
-    @param Param   Param
-    @retval None
+
 **/
+
 VOID
 EFIAPI
 UsbApiHandler(
-  VOID* Param
+    VOID* Param
 )
 {
     URP_STRUC   *UsbUrp = (URP_STRUC*)Param;
     UINT8       FuncIndex;
     UINT8       NumberOfFunctions;
 
-    if (UsbUrp == NULL) {
-      return;
-    }
+	if (UsbUrp == NULL) {
+		return;
+	}
 
     FuncIndex = UsbUrp->bFuncNumber;
-    NumberOfFunctions = sizeof(gUsbApiTable) / sizeof (API_FUNC *);
+    NumberOfFunctions = sizeof(aUsbApiTable) / sizeof (API_FUNC *);
 
     //
     // Make sure function number is valid; if function number is not zero
-    // check for valid extended USB API function.
-    //  UsbApiTable is 0-based
+    // check for valid extended USB API function
     //
     if (FuncIndex && ((FuncIndex < USB_NEW_API_START_FUNC ) ||
-      FuncIndex >= (NumberOfFunctions + USB_NEW_API_START_FUNC - 1))) {
-      USB_DEBUG(DEBUG_ERROR, 3, "UsbApiHandler Invalid function#%x\n", FuncIndex);
-      return;
+            FuncIndex > (NumberOfFunctions + USB_NEW_API_START_FUNC))) {
+        //UsbUrp->bRetValue = USBAPI_INVALID_FUNCTION;
+        USB_DEBUG(DEBUG_ERROR, 3, "UsbApiHandler Invalid function#%x\n", FuncIndex);
+        return;
     }
 
     if (FuncIndex) {
-      FuncIndex = (UINT8)(FuncIndex - USB_NEW_API_START_FUNC + 1);
+        FuncIndex = (UINT8)(FuncIndex - USB_NEW_API_START_FUNC + 1);
     }
 
-    // Call the appropriate function
-    gUsbApiTable[FuncIndex](UsbUrp);
-
-    UsbUrp->bFuncNumber = 0;
+    aUsbApiTable[FuncIndex](UsbUrp);    // Call the appropriate function
 
 }
 
+/**
+    This function initializes the USB global data.
+
+**/
+
+EFI_STATUS
+InstallUsbProtocols(
+	VOID
+)
+{
+	EFI_STATUS	Status;
+	EFI_USB_PROTOCOL	*UsbProtocol;
+
+    Status = pBS->LocateProtocol(&gEfiUsbProtocolGuid, NULL, &UsbProtocol);
+	if (EFI_ERROR(Status)) {
+		return Status;
+	}
+
+    gUsbData = UsbProtocol->USBDataPtr;
+
+#if !USB_RT_DXE_DRIVER
+	UsbProtocol->UsbRtKbcAccessControl = UsbKbcAccessControl;
+	//Hook USB legacy control function for shutdown/init USB legacy support
+	UsbProtocol->UsbLegacyControl = USBRT_LegacyControl;
+	UsbProtocol->UsbStopUnsupportedHc = USB_StopUnsupportedHc;
+#else
+    if (USB_RUNTIME_DRIVER_IN_SMM == 0) {
+    	UsbProtocol->UsbRtKbcAccessControl = UsbKbcAccessControl;
+    	//Hook USB legacy control function for shutdown/init USB legacy support
+    	UsbProtocol->UsbLegacyControl = USBRT_LegacyControl;
+    	UsbProtocol->UsbStopUnsupportedHc = USB_StopUnsupportedHc;
+    }
+	UsbProtocol->UsbInvokeApi = UsbApiHandler;
+#endif
+
+	return Status;
+}
+
+#if !USB_RT_DXE_DRIVER
+/**
+    SMM entry point of AMIUSB driver
+
+**/
+
+EFI_STATUS
+InSmmFunction(
+    EFI_HANDLE ImageHandle,
+    EFI_SYSTEM_TABLE    *SystemTable
+)
+{
+    EFI_STATUS                      Status;
+	EFI_HANDLE                      SwSmiHandle = NULL;
+    EFI_SMM_SW_REGISTER_CONTEXT     SwSmiContext;
+	EFI_SMM_SW_DISPATCH2_PROTOCOL    *SwSmiDispatch;
+    UINT32                          KbcEmulFeature = 0;
+    VOID	                        *ProtocolNotifyRegistration;
+    EFI_EVENT                       Emul6064Event = NULL;
+	EFI_HANDLE	UsbSmmProtocolHandle = NULL;
+
+	Status = InitAmiSmmLib( ImageHandle, SystemTable );
+	if (EFI_ERROR(Status)) return Status;
+
+	InstallUsbProtocols();
+	InitializeUsbGlobalData();
+
+    Status = pSmst->SmmLocateProtocol(
+                    &gEmul6064TrapProtocolGuid,
+                    NULL,
+                    &gEmulationTrap);
+
+    if (EFI_ERROR(Status)) {
+        Status = pSmst->SmmRegisterProtocolNotify(
+                    &gEmul6064TrapProtocolGuid,
+                    Emul6064TrapCallback,
+                    &ProtocolNotifyRegistration
+                    );
+    }
+    if (!gUsbData->kbc_support) {
+        Status = pSmst->SmmLocateProtocol(&gEmul6064MsInputProtocolGuid, 
+                                    NULL, &gMsInput);
+
+        Status = pSmst->SmmLocateProtocol(&gEmul6064KbdInputProtocolGuid,
+                                    NULL, &gKbdInput);
+
+        if (Status == EFI_SUCCESS) {
+            gUsbData->dUSBStateFlag |= USB_FLAG_6064EMULATION_ON;
+            if (gEmulationTrap) {
+                KbcEmulFeature = gEmulationTrap->FeatureSupported(gEmulationTrap);
+            }
+            if (KbcEmulFeature & IRQ_SUPPORTED) {
+                gUsbData->dUSBStateFlag |= USB_FLAG_6064EMULATION_IRQ_SUPPORT;
+            }
+        } else {
+            InitSysKbc( &gKbdInput, &gMsInput );
+        }
+    } else {
+        //
+        //Init Fake Emulation interface
+        //
+        InitSysKbc( &gKbdInput, &gMsInput );
+    }
+    
+#if !USB_IRQ_SUPPORT
+    Status = USBSB_InstallSmiEventHandlers();
+#endif
+
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "AMIUSB global data at 0x%x\n", gUsbData);
+
+    //
+    // Register the USB SW SMI handler
+    //
+   Status = pSmst->SmmLocateProtocol(&gEfiSmmSwDispatch2ProtocolGuid, NULL, &SwSmiDispatch);
+
+   if (EFI_ERROR (Status)) {
+       USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_0, "SmmSwDispatch protocol: %r\n", Status);
+       return Status;
+   }
+
+    SwSmiContext.SwSmiInputValue = USB_SWSMI;
+    Status = SwSmiDispatch->Register(SwSmiDispatch, USBSWSMIHandler, &SwSmiContext, &SwSmiHandle);
+
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "AMIUSB SW SMI registration:: %r\n", Status);
+
+	gUsbSmmProtocol.UsbStopUnsupportedHc = USB_StopUnsupportedHc;
+    gUsbSmmProtocol.UsbApiTable = aUsbApiTable;
+    gUsbSmmProtocol.UsbMassApiTable = aUsbMassApiTable;
+    gUsbSmmProtocol.GlobalDataValidation.ConstantDataCrc32 = 0;
+    gUsbSmmProtocol.GlobalDataValidation.Crc32Hash = (UINT32)GetPerformanceCounter();
+  
+    Status = pSmst->SmmInstallProtocolInterface(
+                    &UsbSmmProtocolHandle,
+                    &gAmiUsbSmmProtocolGuid,
+                    EFI_NATIVE_INTERFACE,
+                    &gUsbSmmProtocol
+                    );
+	
+	USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "AMIUSB SMM protocol: %r\n", Status);
+
+    UpdateAmiUsbSmmGlobalDataCrc32(gUsbData);
+
+    return Status;
+}
+
+
+/**
+    Invoked on reads from SW SMI port with value USB_SWSMI. This
+    function dispatches the USB Request Packets (URP) to the
+    appropriate functions.
+
+    @param EBDA:USB_DATA_EBDA_OFFSET - Pointer to the URP (USB Request
+        Packet structure)
+        DispatchHandle  - EFI Handle
+        DispatchContext - Pointer to the EFI_SMM_SW_DISPATCH_CONTEXT
+
+        bRetValue   Zero on successfull completion
+    @retval Non zero on error
+
+**/
+EFI_STATUS
+EFIAPI
+USBSWSMIHandler (
+    EFI_HANDLE	DispatchHandle,
+    CONST VOID	*Context OPTIONAL,
+    VOID		*CommBuffer OPTIONAL,
+    UINTN	    *CommBufferSize OPTIONAL
+)
+{
+    URP_STRUC   *UsbUrp;
+    UINT16      EbdaSeg;
+    EFI_STATUS  Status;
+
+    if (gLockSmiHandler == TRUE) {
+        return EFI_SUCCESS;
+    }
+
+    Status = AmiUsbSmmGlobalDataValidation(gUsbData);
+
+    ASSERT_EFI_ERROR(Status);
+    
+    if (EFI_ERROR(Status)) {
+        gLockHwSmiHandler = TRUE;
+        gLockSmiHandler = TRUE;
+        return EFI_SUCCESS;
+    }
+
+	if (gUsbData->fpURP) {			// Call from AMIUSB C area
+        Status = AmiValidateMemoryBuffer((VOID*)gUsbData->fpURP, sizeof(URP_STRUC));
+        if (EFI_ERROR(Status)) {
+            USB_DEBUG(DEBUG_ERROR, 3, "UsbApiHandler Invalid Pointer, the address is in SMRAM.\n");
+            return EFI_ACCESS_DENIED;
+        }
+		UsbUrp = gUsbData->fpURP;
+		gUsbData->fpURP = 0;   		// Clear the switch
+	} else {
+	    if (gUsbData->dUSBStateFlag & USB_FLAG_RUNNING_UNDER_OS) {
+            return EFI_SUCCESS;
+        }
+        //
+        // Get the UsbUrp pointer from EBDA
+        //
+        EbdaSeg = *((UINT16*)0x40E);
+        UsbUrp = *(URP_STRUC**)(UINTN)(((UINT32)EbdaSeg << 4) + USB_DATA_EBDA_OFFSET);
+        UsbUrp = (URP_STRUC*)((UINTN)UsbUrp & 0xFFFFFFFF);
+        Status = AmiValidateMemoryBuffer((VOID*)UsbUrp, sizeof(URP_STRUC));
+        if (EFI_ERROR(Status)) {
+            USB_DEBUG(DEBUG_ERROR, 3, "UsbApiHandler Invalid Pointer, the address is in SMRAM.\n");
+            return EFI_SUCCESS;
+        }
+	}
+
+	if (UsbUrp == NULL) {
+        return EFI_SUCCESS;
+	}
+
+	gCheckUsbApiParameter = TRUE;
+
+	UsbApiHandler(UsbUrp);
+
+	gCheckUsbApiParameter = FALSE;
+
+    return EFI_SUCCESS;
+}
+
+/**
+    USB Hardware SMI handler.
+
+    @param Host controller type.
+
+**/
+
+VOID
+UsbHwSmiHandler (UINT8 HcType)
+{
+    UINT8       Index;
+    HC_STRUC    *HcStruc;
+    EFI_STATUS  Status;
+
+    if (gLockHwSmiHandler == TRUE) {
+        return;
+    }
+
+    Status = AmiUsbSmmGlobalDataValidation(gUsbData);
+
+    ASSERT_EFI_ERROR(Status);
+    
+    if (EFI_ERROR(Status)) {
+        gLockHwSmiHandler = TRUE;
+        gLockSmiHandler = TRUE;
+        return;
+    }
+
+    for (Index = 0; Index < gUsbData->HcTableCount; Index++) {
+        HcStruc = gUsbData->HcTable[Index];
+        if (HcStruc == NULL) {
+            continue;
+        }
+        if (!(HcStruc->dHCFlag & HC_STATE_USED)) {
+        	continue;
+        }
+        if (HcStruc->bHCType == HcType) { // Process appropriate interrupt
+            (*gUsbData->aHCDriverTable
+				[GET_HCD_INDEX(HcStruc->bHCType)].pfnHCDProcessInterrupt)(HcStruc);
+        }
+    }
+
+}
+
+/**
+    USB Hardware SMI handler.
+
+    @param DispatchHandle  - EFI Handle
+        DispatchContext - Pointer to the EFI_SMM_SW_DISPATCH_CONTEXT
+
+    @retval EFI_SUCCESS
+
+**/
+
+EFI_STATUS
+EFIAPI
+UhciHWSMIHandler (
+	EFI_HANDLE	DispatchHandle,
+	CONST VOID	*Context,
+	VOID		*CommBuffer,
+	UINTN		*CommBufferSize
+)
+{
+    UsbHwSmiHandler(USB_HC_UHCI);
+    return EFI_SUCCESS;
+}
+
+/**
+    USB Hardware SMI handler.
+
+    @param DispatchHandle  - EFI Handle
+        DispatchContext - Pointer to the EFI_SMM_SW_DISPATCH_CONTEXT
+
+    @retval EFI_SUCCESS
+
+**/
+
+EFI_STATUS
+EFIAPI
+OhciHWSMIHandler (
+    EFI_HANDLE	DispatchHandle,
+    CONST VOID	*Context,
+    VOID		*CommBuffer,
+    UINTN		*CommBufferSize
+)
+{
+    UsbHwSmiHandler(USB_HC_OHCI);
+	return EFI_SUCCESS;
+}
+
+/**
+    USB Hardware SMI handler.
+
+    @param DispatchHandle  - EFI Handle
+        DispatchContext - Pointer to the EFI_SMM_SW_DISPATCH_CONTEXT
+
+    @retval EFI_SUCCESS
+
+**/
+
+EFI_STATUS
+EFIAPI
+EhciHWSMIHandler (
+    EFI_HANDLE	DispatchHandle,
+    CONST VOID	*Context,
+    VOID		*CommBuffer,
+    UINTN		*CommBufferSize
+)
+{
+    UsbHwSmiHandler(USB_HC_EHCI);
+    return EFI_SUCCESS;
+}
+
+/**
+    USB Hardware SMI handler.
+
+    @param DispatchHandle  - EFI Handle
+        DispatchContext - Pointer to the EFI_SMM_SW_DISPATCH_CONTEXT
+
+    @retval EFI_SUCCESS
+
+**/
+
+EFI_STATUS
+EFIAPI
+XhciHwSmiHandler (
+    EFI_HANDLE	DispatchHandle,
+    CONST VOID	*Context,
+    VOID		*CommBuffer,
+    UINTN		*CommBufferSize
+)
+{
+    UsbHwSmiHandler(USB_HC_XHCI);
+    return EFI_SUCCESS;
+}
+
+/**
+    This function registers USB hardware SMI callback function.
+
+**/
+
+EFI_STATUS
+UsbInstallHwSmiHandler(
+	HC_STRUC    *HcStruc
+)
+{
+	EFI_STATUS                      Status;
+	EFI_SMM_USB_REGISTER_CONTEXT    UsbContext;
+    EFI_SMM_USB_DISPATCH2_PROTOCOL  *UsbDispatch;
+    EFI_SMM_HANDLER_ENTRY_POINT2	UsbCallback;
+    EFI_HANDLE                      Handle = NULL;
+
+    if (HcStruc->HwSmiHandle != NULL) {
+        return EFI_SUCCESS;
+    }
+	
+
+    Status = pSmst->SmmLocateProtocol(
+            &gEfiSmmUsbDispatch2ProtocolGuid,
+            NULL,
+            &UsbDispatch);
+
+    ASSERT_EFI_ERROR(Status);
+    
+	if (EFI_ERROR(Status)) {
+		return Status;
+	}
+
+	switch (HcStruc->bHCType) {
+		case USB_HC_UHCI:
+			UsbCallback = UhciHWSMIHandler;
+			break;
+
+		case USB_HC_OHCI:
+			UsbCallback = OhciHWSMIHandler;
+			break;
+
+		case USB_HC_EHCI:
+			UsbCallback = EhciHWSMIHandler;
+			break;
+
+		case USB_HC_XHCI:
+			UsbCallback = XhciHwSmiHandler;
+			break;
+
+		default:
+			return EFI_UNSUPPORTED;
+	}
+
+    UsbContext.Type = UsbLegacy;
+    UsbContext.Device = HcStruc->pHCdp;
+
+    Status = UsbDispatch->Register(
+                UsbDispatch,
+                UsbCallback,
+                &UsbContext,
+                &Handle);
+
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "AMIUSB HC type %x HW SMI registation status:: %r\n", HcStruc->bHCType, Status);
+    
+	if (!EFI_ERROR(Status)) {
+		HcStruc->HwSmiHandle = Handle;
+	}
+    
+	return Status;
+}
+
+/**
+    Update the KbcEmul feature when the Emul6064Trap Protocol becomes available.
+
+**/
+EFI_STATUS
+EFIAPI
+Emul6064TrapCallback (
+    CONST EFI_GUID  *Protocol,
+    VOID            *Interface,
+    EFI_HANDLE      Handle
+)
+{
+    EFI_STATUS                      Status;
+    UINT32                          KbcEmulFeature = 0;
+    
+    Status = pSmst->SmmLocateProtocol(
+                    &gEmul6064TrapProtocolGuid,
+                    NULL,
+                    &gEmulationTrap);
+    if (!gUsbData->kbc_support) {
+        Status = pSmst->SmmLocateProtocol(&gEmul6064MsInputProtocolGuid,
+                                        NULL, &gMsInput);
+
+        Status = pSmst->SmmLocateProtocol(&gEmul6064KbdInputProtocolGuid,
+                                        NULL, &gKbdInput);
+
+        if (Status == EFI_SUCCESS) {
+            gUsbData->dUSBStateFlag |= USB_FLAG_6064EMULATION_ON;
+            if (gEmulationTrap) {
+                KbcEmulFeature = gEmulationTrap->FeatureSupported(gEmulationTrap);
+            }
+            if (KbcEmulFeature & IRQ_SUPPORTED) {
+                gUsbData->dUSBStateFlag |= USB_FLAG_6064EMULATION_IRQ_SUPPORT;
+            }
+        } else {
+            InitSysKbc( &gKbdInput, &gMsInput );
+        }
+    } else {
+        //
+        //Init Fake Emulation interface
+        //
+        InitSysKbc( &gKbdInput, &gMsInput );
+    }
+    
+    return EFI_SUCCESS;
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -396,13 +827,13 @@ UsbApiHandler(
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-    This routine services the USB API function number 27h. It
+    This routine services the USB API function number 27h.  It
     handles all the mass storage related calls from the higher
     layer. Different sub-functions are invoked depending on
     the sub-function number
 
-    @param UsbUrp    Pointer to the URP structure
-        Subfunction number
+    @param fpURPPointer    Pointer to the URP structure
+        fpURPPointer.bSubFunc   Subfunction number
         00  Get Device Information
         01  Get Device Parameter
         02  Reset Device
@@ -419,8 +850,7 @@ UsbApiHandler(
         0D  Send Command
         0E  Assign drive number
 
-    @retval None
-    @note URP structure is updated with the relevant information
+    @retval URP structure is updated with the relevant information
 
 
 **/
@@ -431,21 +861,22 @@ USBAPI_MassDeviceRequest(
 )
 {
     UINT8 MassFuncIndex = UsbUrp->bSubFunc;
-    UINT8 NumberOfMassFunctions = sizeof(gUsbMassApiTable) / sizeof(API_FUNC *);
+    UINT8 NumberOfMassFunctions = sizeof(aUsbMassApiTable) / sizeof(API_FUNC *);
 
     //
     // Make sure function number is valid
     //
     if (MassFuncIndex >= NumberOfMassFunctions) {
         USB_DEBUG(DEBUG_ERROR, 3, "UsbApi MassDeviceRequet Invalid function#%x\n", MassFuncIndex);
+        //UsbUrp->bRetValue = USBAPI_INVALID_FUNCTION;
         return;
     }
-    gUsbData->UsbMassDevReqFlag = 01;
+    gUsbData->bUSBKBC_MassStorage = 01;
     //
     // Function number is valid - call it
     //
-    gUsbMassApiTable[MassFuncIndex](UsbUrp);
-    gUsbData->UsbMassDevReqFlag = 00;
+    aUsbMassApiTable[MassFuncIndex](UsbUrp);
+    gUsbData->bUSBKBC_MassStorage = 00;
 }
 
 
@@ -454,44 +885,40 @@ USBAPI_MassDeviceRequest(
     reports the USB BIOS presence, its version number and
     its current status information
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
-    
-    @note URP structure is updated with the following information
+    @param fpURPPointer - Pointer to the URP structure
+
+    @retval URP structure is updated with the following information
         CkPresence.wBiosRev       USB BIOS revision (0210h means r2.10)
         CkPresence.bBiosActive    0 - if USB BIOS is not running
         CkPresence.bNumBootDev    Number of USB boot devices found
         CkPresence.bNumHC         Number of host controller present
-        CkPresence.NumPorts       Number of root hub ports
+        CkPresence.bNumPorts      Number of root hub ports
         CkPresence.dUsbDataArea   Current USB data area
 
 **/
 
 VOID
-USBAPI_CheckPresence (
-  URP_STRUC *Urp
-  )
+USBAPI_CheckPresence (URP_STRUC *fpURP)
 {
-    Urp->bRetValue                       = USB_SUCCESS;
-    Urp->ApiData.CkPresence.BiosActive   = 0;
-    Urp->ApiData.CkPresence.NumBootDev   = 0;    // Number of USB boot devices found
-    Urp->ApiData.CkPresence.NumKeyboards = 0;    // Number of USB keyboards present
-    Urp->ApiData.CkPresence.NumMice      = 0;    // Number of USB mice present
-    Urp->ApiData.CkPresence.NumPoint     = 0;    // Number of USB Point present  
-    Urp->ApiData.CkPresence.NumHubs      = 0;    // Number of USB hubs present
-    Urp->ApiData.CkPresence.NumStorage   = 0;    // Number of USB storage devices present
+    fpURP->bRetValue                        = USB_SUCCESS;
+    fpURP->ApiData.CkPresence.bBiosActive   = 0;
 
-    Urp->ApiData.CkPresence.BiosRev = USB_DRIVER_MAJOR_VER;
-    Urp->ApiData.CkPresence.BiosActive = USB_ACTIVE; // Set USB BIOS as active
-    if (!(gUsbData->UsbStateFlag & USB_FLAG_DISABLE_LEGACY_SUPPORT)) {
-        Urp->ApiData.CkPresence.BiosActive |= USB_LEGACY_ENABLE;
+    fpURP->ApiData.CkPresence.bNumBootDev   = 0;    // Number of USB boot devices found
+    fpURP->ApiData.CkPresence.bNumKeyboards = 0;    // Number of USB keyboards present
+    fpURP->ApiData.CkPresence.bNumMice      = 0;    // Number of USB mice present
+    fpURP->ApiData.CkPresence.bNumPoint		= 0;    // Number of USB Point present    //(EIP38434+)
+    fpURP->ApiData.CkPresence.bNumHubs      = 0;    // Number of USB hubs present
+    fpURP->ApiData.CkPresence.bNumStorage   = 0;    // Number of USB storage devices present
+
+    fpURP->ApiData.CkPresence.wBiosRev = USB_DRIVER_MAJOR_VER;
+    fpURP->ApiData.CkPresence.bBiosActive = USB_ACTIVE; // Set USB BIOS as active
+    if (!(gUsbData->dUSBStateFlag & USB_FLAG_DISABLE_LEGACY_SUPPORT)) {
+        fpURP->ApiData.CkPresence.bBiosActive |= USB_LEGACY_ENABLE;
     }
-    if (gUsbData->UsbStateFlag & USB_FLAG_6064EMULATION_ON) {
-        Urp->ApiData.CkPresence.BiosActive |= USB_6064_ENABLE;
+    if (gUsbData->dUSBStateFlag & USB_FLAG_6064EMULATION_ON) {
+        fpURP->ApiData.CkPresence.bBiosActive |= USB_6064_ENABLE;
     }
-    
-    // Get active USB devices
-    USBWrap_GetDeviceCount(Urp);  
+    USBWrap_GetDeviceCount(fpURP);  // Get active USB devices
 }
 
 
@@ -499,62 +926,56 @@ USBAPI_CheckPresence (
     This API routine configures the USB host controllers and
     enumerate the devices
 
-    @param Urp URP structure with input parameters
-    @retval None        
-    @note  StartHc.DataAreaFlag Indicates which data area to use
-           StartHc.DataAreaFlag Returns current data area pointer
+    @param fpURPPointer  URP structure with input parameters
+        StartHc.wDataAreaFlag Indicates which data area to use
 
+        StartHc.wDataAreaFlag Returns current data area pointer
+    @retval bRetValue USB_SUCCESS on success, USB_ERROR on error.
 
 **/
 
-VOID
-USBAPI_Start (
-    URP_STRUC *Urp
-)
+VOID USBAPI_Start (URP_STRUC *fpURP)
 {
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBSMI: Start\n");
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "\tUSBAPI_HC_Proc:%x\n", &USBAPI_HC_Proc);
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "\tUSBAPI_Core_Proc:%x\n", &USBAPI_Core_Proc);
     USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "\tUSB_ReConfigDevice:%x\n", &USB_ReConfigDevice);
-    Urp->bRetValue = USB_StartHostControllers();
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USB_StartHostControllers returns %d\n", Urp->bRetValue);
+    fpURP->bRetValue = USB_StartHostControllers (gUsbData);
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USB_StartHostControllers returns %d\n", fpURP->bRetValue);
 }
 
 
 /**
     This routine stops the USB host controllers
 
-    @param  Urp    Pointer to the URP structure
-    @retval None  
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval bRetValue   USB_SUCCESS on success
+        USB_ERROR on error
 
 **/
 
-VOID
-USBAPI_Stop (
-    URP_STRUC *Urp
-)
+VOID USBAPI_Stop (URP_STRUC *fpURP)
 {
     gCheckUsbApiParameter = FALSE;
-    Urp->bRetValue = USB_StopHostControllers();
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USB_StopHostControllers returns %d\n", Urp->bRetValue);
-    gUsbData->UsbStateFlag &= ~(USB_FLAG_DRIVER_STARTED);
+    fpURP->bRetValue = USB_StopHostControllers (gUsbData);
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USB_StopHostControllers returns %d\n", fpURP->bRetValue);
+    gUsbData->dUSBStateFlag &= ~(USB_FLAG_DRIVER_STARTED);
 }
 
 
 /**
     This routine suspends the USB host controllers
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval VOID
 
 **/
 
-VOID
-USBAPI_PowerManageUSB (
-    URP_STRUC *Urp
-)
+VOID USBAPI_PowerManageUSB (URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USB_NOT_SUPPORTED;
+    fpURP->bRetValue = USB_NOT_SUPPORTED;
 }
 
 
@@ -562,68 +983,62 @@ USBAPI_PowerManageUSB (
     This routine updates data structures to reflect that
     POST is completed
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval VOID
 
 **/
 
-VOID
-USBAPI_PrepareForOS (
-    URP_STRUC *Urp
-)
+VOID USBAPI_PrepareForOS (URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USB_NOT_SUPPORTED;
+    fpURP->bRetValue = USB_NOT_SUPPORTED;
 }
 
 
 /**
     This routine handles the calls related to security device
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval VOID
 
 **/
 
-VOID
-USBAPI_SecureInterface (
-    URP_STRUC *Urp
-)
+VOID USBAPI_SecureInterface (URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USB_NOT_SUPPORTED;
+    fpURP->bRetValue = USB_NOT_SUPPORTED;
 }
 
 
 /**
     This routine stops the USB host controllers interrupts
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval bRetValue   USB_SUCCESS on success
+        USB_ERROR on error (Like data area not found)
 
 **/
 
-VOID
-USBAPI_DisableInterrupts (
-    URP_STRUC *Urp
-)
+VOID USBAPI_DisableInterrupts (URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USB_NOT_SUPPORTED;
+    fpURP->bRetValue = USB_NOT_SUPPORTED;
 }
 
 
 /**
     This routine re-enable the USB host controller interrupts
 
-    @param  Urp     Pointer to the URP structure
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval bRetValue   USB_SUCCESS on success
+        USB_ERROR on error (Like data area not found)
 
 **/
 
-VOID
-USBAPI_EnableInterrupts (
-    URP_STRUC *Urp
-)
+VOID USBAPI_EnableInterrupts (URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USB_NOT_SUPPORTED;
+    fpURP->bRetValue = USB_NOT_SUPPORTED;
 }
 
 
@@ -632,26 +1047,16 @@ USBAPI_EnableInterrupts (
     the data area used by host controllers to a new area.
     The host controller is started from the new place.
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param fpURPPointer    URP structure with input parameters
+        StartHc.wDataAreaFlag   Indicates which data area to use
+
+    @retval bRetValue   USB_SUCCESS
 
 **/
 
-VOID
-USBAPI_MoveDataArea (
-    URP_STRUC *Urp
-)
+VOID USBAPI_MoveDataArea(URP_STRUC *fpURP)
 {
-    if (Urp->bSubFunc == USB_DATA_SMM_TO_DXE) {
-        AmiUsbGlobalDataSwitch (
-            &gUsbData, 
-            &gUsbDataList, 
-            (HC_STRUC**)&gHcTable,
-            &gDataInSmm, 
-            USB_DATA_SMM_TO_DXE
-            );
-    }
-    Urp->bRetValue = USB_SUCCESS;
+    fpURP->bRetValue = USB_NOT_SUPPORTED;
 }
 
 
@@ -659,13 +1064,13 @@ USBAPI_MoveDataArea (
     This routine returns the information regarding
     a USB device like keyboard, mouse, floppy drive etc
 
-    @param Urp            URP structure with input parameters
-           GetDevInfo.bDevNumber   Device number (1-based) whose
-           information is requested
-    @retval None
-    @note URP structure is updated with the following information
-        GetDevInfo.HcNumber - HC number in which the device is found
-        GetDevInfo.DevType  - Type of the device
+    @param fpURPPointer            URP structure with input parameters
+        GetDevInfo.bDevNumber   Device number (1-based) whose
+        information is requested
+
+    @retval URP structure is updated with the following information
+        GetDevInfo.bHCNumber - HC number in which the device is found
+        GetDevInfo.bDevType  - Type of the device
         bRetValue will be one of the following value
         USB_SUCCESS         on successfull completion
         USB_PARAMETER_ERROR if bDevNumber is invalid
@@ -673,37 +1078,36 @@ USBAPI_MoveDataArea (
 
 **/
 
-VOID USBAPI_GetDeviceInfo (URP_STRUC *Urp)
+VOID USBAPI_GetDeviceInfo (URP_STRUC *fpURP)
 {
-    DEV_INFO* FpDevInfo;
+    DEV_INFO* fpDevInfo;
 
     //
     // Initialize the return values
     //
-    Urp->ApiData.GetDevInfo.HcNumber = 0;
-    Urp->ApiData.GetDevInfo.DevType  = 0;
-    Urp->bRetValue                   = USB_ERROR;
+    fpURP->ApiData.GetDevInfo.bHCNumber = 0;
+    fpURP->ApiData.GetDevInfo.bDevType  = 0;
+    fpURP->bRetValue                    = USB_ERROR;
 
     //
     // Check for parameter validity
     //
-    if ((!Urp->ApiData.GetDevInfo.DevNumber) || 
-        (Urp->ApiData.GetDevInfo.DevNumber >= gUsbData->MaxDevCount)) {
-        return;
-    }
+    if ( !fpURP->ApiData.GetDevInfo.bDevNumber ) return;
 
-    Urp->bRetValue = USB_PARAMETER_ERROR;
+    fpURP->bRetValue = USB_PARAMETER_ERROR;
 
     //
     // Get the device information structure for the 'n'th device
     //
-    FpDevInfo = USBWrap_GetnthDeviceInfoStructure(Urp->ApiData.GetDevInfo.DevNumber);
+    fpDevInfo = USBWrap_GetnthDeviceInfoStructure(fpURP->ApiData.GetDevInfo.bDevNumber);
+//  if (!wRetCode) return;  // USB_PARAMETER_ERROR
+
     //
     // Return value
     //
-    Urp->ApiData.GetDevInfo.DevType  = FpDevInfo->DeviceType;
-    Urp->ApiData.GetDevInfo.HcNumber = FpDevInfo->HcNumber;
-    Urp->bRetValue                   = USB_SUCCESS;
+    fpURP->ApiData.GetDevInfo.bDevType  = fpDevInfo->bDeviceType;
+    fpURP->ApiData.GetDevInfo.bHCNumber = fpDevInfo->bHCNumber;
+    fpURP->bRetValue                    = USB_SUCCESS;
 
 }
 
@@ -712,39 +1116,38 @@ VOID USBAPI_GetDeviceInfo (URP_STRUC *Urp)
     This routine checks whether a particular type of USB device
     is installed in the system or not.
 
-    @param Urp   URP structure with input parameters
-        ChkDevPrsnc.DevType    Device type to find
+    @param fpURPPointer            URP structure with input parameters
+        ChkDevPrsnc.bDevType    Device type to find
         ChkDevPrsnc.fpHCStruc   Pointer to HC being checked for device
         connection; if NULL then the total number of devices
         connected to ANY controller is returned.
         ChkDevPrsnc.bNumber     Number of devices connected
-        
-    @retval None
-    @note bRetValue will be one of the following value
+
+    @retval bRetValue will be one of the following value
         USB_SUCCESS     if device type present, ChkDevPrsnc.bNumber <> 0
         USB_ERROR       if device type absent, ChkDevPrsnc.bNumber returns 0
 
 **/
 
 VOID
-USBAPI_CheckDevicePresence (URP_STRUC *Urp)
+USBAPI_CheckDevicePresence (URP_STRUC *fpURP)
 {
-    UINT8 SearchFlag;
-    UINTN Data;
+    UINT8 bSearchFlag;
+    UINTN dData;
 
-    SearchFlag = USB_SRCH_DEV_NUM;
-    if (Urp->bSubFunc == 1)
+    bSearchFlag = USB_SRCH_DEV_NUM;
+    if (fpURP->bSubFunc == 1)
     {
-        SearchFlag = USB_SRCH_DEVBASECLASS_NUM;
+        bSearchFlag = USB_SRCH_DEVBASECLASS_NUM;
     }
     //
     // The total number of devices connected to ANY controller has been requested
     //
-    Data = (UINTN) USB_GetDeviceInfoStruc( SearchFlag,
-            0, Urp->ApiData.ChkDevPrsnc.DevType, Urp->ApiData.ChkDevPrsnc.HcStruc);
+    dData = (UINTN) USB_GetDeviceInfoStruc( bSearchFlag,
+            0, fpURP->ApiData.ChkDevPrsnc.bDevType, fpURP->ApiData.ChkDevPrsnc.fpHCStruc);
 
-    Urp->ApiData.ChkDevPrsnc.Number = (UINT8)Data;
-    Urp->bRetValue = (UINT8)((Urp->ApiData.ChkDevPrsnc.Number)?
+    fpURP->ApiData.ChkDevPrsnc.bNumber = (UINT8)dData;
+    fpURP->bRetValue = (UINT8)((fpURP->ApiData.ChkDevPrsnc.bNumber)?
                                             USB_SUCCESS : USB_ERROR);
 }
 
@@ -753,39 +1156,42 @@ USBAPI_CheckDevicePresence (URP_STRUC *Urp)
     This function is part of the USB BIOS MASS API. This function
     returns the device information of the mass storage device
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+        bDevAddr    USB device address of the device
 
-    @note Initially the DevAddr should be set to 0 as input. This
-          function returns the information regarding the first mass
-          storage device (if no device found it returns DevAddr as
-          0FFh) and also updates DevAddr to the device address of
-          the current mass storage device. If no other mass storage
-          device is found then the routine sets the bit7 to 1
-          indicating current information is valid but no more mass
-          device found in the system. The caller can get the next
-          device info if DevAddr is not 0FFh and bit7 is not set
+    @retval bRetValue   Return value
+        fpURPPointer    Pointer to the URP structure
+        dSenseData  Sense data of the last command
+        bDevType    Device type byte (HDD, CD, Removable)
+        bEmuType    Emulation type used
+        fpDevId     Far pointer to the device ID
+        dInt13Entry INT 13h entry point
+
+    @note  Initially the bDevAddr should be set to 0 as input. This
+      function returns the information regarding the first mass
+      storage device (if no device found it returns bDevAddr as
+      0FFh) and also updates bDevAddr to the device address of
+      the current mass storage device. If no other mass storage
+      device is found then the routine sets the bit7 to 1
+      indicating current information is valid but no more mass
+      device found in the system. The caller can get the next
+      device info if bDevAddr is not 0FFh and bit7 is not set
 
 **/
+
 VOID
-USBMassAPIGetDeviceInformation (URP_STRUC *Urp)
+USBMassAPIGetDeviceInformation (URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USBMassGetDeviceInfo (&Urp->ApiData.MassGetDevInfo);
+    fpURP->bRetValue = USBMassGetDeviceInfo (&fpURP->ApiData.MassGetDevInfo);
 }
 
-/**
-    This function is part of the USB BIOS MASS API. Get mass storage parameters data.
-
-    @param  Urp    Pointer to the URP structure
-    @retval None
-**/
 VOID
-USBMassAPIGetDeviceParameters (URP_STRUC *Urp)
+USBMassAPIGetDeviceParameters (URP_STRUC *fpURP)
 {
     DEV_INFO    *DevInfo;
     EFI_STATUS  Status;
 
-    DevInfo = Urp->ApiData.MassGetDevParms.FpDevInfo;
+    DevInfo = fpURP->ApiData.MassGetDevParms.fpDevInfo;
 
     Status = UsbDevInfoValidation(DevInfo);
 
@@ -793,112 +1199,120 @@ USBMassAPIGetDeviceParameters (URP_STRUC *Urp)
         return;
     }
 
-    Urp->ApiData.MassGetDevParms.FpInqData = USBMassGetDeviceParameters(DevInfo);
-    Urp->bRetValue = (Urp->ApiData.MassGetDevParms.FpInqData == NULL)? USB_ERROR : USB_SUCCESS;
-}
-
-/**
-    This function is part of the USB BIOS MASS API. Get mass storage identify data.
-
-    @param  Urp    Pointer to the URP structure
-    @retval None
-**/
-VOID 
-USBMassAPIGetIdentifyData (URP_STRUC *Urp)
-{
-    DEV_INFO    *DevInfo;
-
-    DevInfo = Urp->ApiData.MassGetIdentifyData.DevInfo;
-    Urp->ApiData.MassGetIdentifyData.Identify = USBMassGetIdentifyData (DevInfo);
-    Urp->bRetValue = (Urp->ApiData.MassGetIdentifyData.Identify == NULL)? USB_ERROR : USB_SUCCESS;
-}
-
-/**
-    This function returns the drive status and media presence status
-
-    @param  Urp    Pointer to the Urp structure
-    @retval None
-
-    @note USB_SUCCESS  Success
-    @note USB_ERROR    Failure
-**/
-
-VOID
-USBMassAPIGetDevStatus(URP_STRUC *Urp)
-{
-    if ((gUsbData->UsbDevSupport & USB_MASS_DEV_SUPPORT) == USB_MASS_DEV_SUPPORT)
-        Urp->bRetValue    = USBMassGetDeviceStatus (&Urp->ApiData.MassGetDevSts);
-    //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBMassAPIGetDevStatus ... check function call correct?\n");
-}
-
-
-
-/**
-    This function is part of the USB BIOS MASS API.
-
-    @param  Urp    Pointer to the Urp structure
-    @retval None
+#if !USB_RT_DXE_DRIVER
+    if (gCheckUsbApiParameter) {
+        Status = AmiValidateMemoryBuffer((VOID*)fpURP->ApiData.MassGetDevParms.fpInqData, sizeof(MASS_INQUIRY));
+        if (EFI_ERROR(Status)) {
+            return;
+        }
+        gCheckUsbApiParameter = FALSE;
+    }
+#endif
     
-    @note bRetValue   Return value
-        Urp             Pointer to the URP structure
-        SenseData       Sense data of the last command
-        NumHeads        Number of heads
-        NumCylinders    Number of cylinders
-        NumSectors      Number of sectors
-        BytesPerSector  Number of bytes per sector
-        MediaType       Media type
+    fpURP->ApiData.MassGetDevParms.fpInqData = USBMassGetDeviceParameters(DevInfo);
+    fpURP->bRetValue = (fpURP->ApiData.MassGetDevParms.fpInqData == NULL)? USB_ERROR : USB_SUCCESS;
+}
+
+/**
+    This function returns the drive status and media presence
+    status
+
+    @param fpURPPointer    Pointer to the URP structure
+        fpURP->ApiData.fpDevInfo - pointer to USB device that is
+        requested to be checked
+
+    @retval Return code USB_ERROR - Failure, USB_SUCCESS - Success
 
 **/
 
 VOID
-USBMassAPIGetDeviceGeometry(URP_STRUC *Urp)
+USBMassAPIGetDevStatus(URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USBMassGetDeviceGeometry (&Urp->ApiData.MassGetDevGeo);
+#if USB_DEV_MASS
+    fpURP->bRetValue    = USBMassGetDeviceStatus (&fpURP->ApiData.MassGetDevSts);
+    //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBMassAPIGetDevStatus ... check function call correct?\n");
+#endif
+}
+
+
+
+/**
+    This function is part of the USB BIOS MASS API.
+
+    @param fpURPPointer    Pointer to the URP structure
+        bDevAddr    USB device address of the device
+
+    @retval bRetValue   Return value
+        fpURPPointer    Pointer to the URP structure
+        dSenseData  Sense data of the last command
+        bNumHeads   Number of heads
+        wNumCylinders   Number of cylinders
+        bNumSectors Number of sectors
+        wBytesPerSector Number of bytes per sector
+        bMediaType  Media type
+
+**/
+
+VOID
+USBMassAPIGetDeviceGeometry(URP_STRUC *fpURP)
+{
+    fpURP->bRetValue = USBMassGetDeviceGeometry (&fpURP->ApiData.MassGetDevGeo);
 }
 
 
 /**
     This function is part of the USB BIOS MASS API.
 
-    @param  Urp    Pointer to the Urp structure
-    @retval None 
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval bRetValue   Return value
 
 **/
 
 VOID
-USBMassAPIResetDevice (URP_STRUC *Urp)
+USBMassAPIResetDevice (URP_STRUC *fpURP)
 {
-    UINT8       DevAddr;
-    DEV_INFO    *FpDevInfo;
-    UINT16      Result;
+    UINT8       bDevAddr;
+    DEV_INFO    *fpDevInfo;
+    UINT16      wResult;
 
-    DevAddr = Urp->ApiData.MassReset.DevAddr;
+    bDevAddr = fpURP->ApiData.MassReset.bDevAddr;
 
     //
     // Get the device info structure for the matching device address
     //
-    FpDevInfo   = USB_GetDeviceInfoStruc(USB_SRCH_DEV_INDX, 0, DevAddr, 0);
-    if ((FpDevInfo == NULL)|| (!(FpDevInfo->Flag & DEV_INFO_DEV_PRESENT))) {
-        Urp->bRetValue = USB_ATA_TIME_OUT_ERR;
+    fpDevInfo   = USB_GetDeviceInfoStruc(USB_SRCH_DEV_INDX, 0, bDevAddr, 0);
+    if((fpDevInfo == NULL)|| (!(fpDevInfo->Flag & DEV_INFO_DEV_PRESENT))) {
+		fpURP->bRetValue = USB_ATA_TIME_OUT_ERR;
         return;
     }
     //
     // Send Start/Stop Unit command to UFI class device only
     //
-    Urp->bRetValue    = USB_SUCCESS;
-    if (FpDevInfo->SubClass ==  SUB_CLASS_UFI) {
-        Result = USBMassStartUnitCommand (FpDevInfo);
-        if (Result) {
-            Urp->bRetValue  = USBWrapGetATAErrorCode(Urp->ApiData.MassReset.SenseData);
+    fpURP->bRetValue    = USB_SUCCESS;
+    if(fpDevInfo->bSubClass ==  SUB_CLASS_UFI) {
+        wResult = USBMassStartUnitCommand (fpDevInfo);
+        if (wResult) {
+            fpURP->bRetValue  = USBWrapGetATAErrorCode(fpURP->ApiData.MassReset.dSenseData);
         }
     }
 }
 
 /**
     This function is part of the USB BIOS MASS API.
-    @param  Urp    Pointer to the Urp structure
-    @retval None 
-    
+
+    @param fpURPPointer    Pointer to the URP structure, it contains the following:
+        bDevAddr      USB device address of the device
+        dStartLBA     Starting LBA address
+        wNumBlks      Number of blocks to read
+        wPreSkipSize  Number of bytes to skip before
+        wPostSkipSize Number of bytes to skip after
+        fpBufferPtr   Far buffer pointer
+
+    @retval fpURPPointer Pointer to the URP structure
+        bRetValue    Return value
+        dSenseData   Sense data of the last command
+
 **/
 VOID
 USBMassAPIReadDevice (
@@ -924,10 +1338,21 @@ USBMassAPIReadDevice (
 
 /**
     This function is part of the USB BIOS MASS API.
-    @param  Urp    Pointer to the Urp structure
-    @retval None 
-    
+
+    @param fpURPPointer    Pointer to the URP structure, it contains the following:
+        DevAddr      USB device address of the device
+        StartLBA     Starting LBA address
+        NumBlks      Number of blocks to read
+        PreSkipSize  Number of bytes to skip before
+        PostSkipSize Number of bytes to skip after
+        BufferPtr   Far buffer pointer
+
+    @retval fpURPPointer Pointer to the URP structure
+        bRetValue    Return value
+        dSenseData   Sense data of the last command
+
 **/
+
 VOID
 USBMassAPIEfiReadDevice (
     URP_STRUC *Urp
@@ -936,17 +1361,17 @@ USBMassAPIEfiReadDevice (
     DEV_INFO    *DevInfo;
     UINT8       DevAddr;
     UINT16      Result;
-    UINT32      Data = 0;
+    UINT32		Data = 0;
     UINT8       OpCode;
 
     DevAddr = Urp->ApiData.EfiMassRead.DevAddr;
 
     if (((DevAddr == USB_HOTPLUG_FDD_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_FDD_ENABLED) == FALSE)) ||
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_FDD_ENABLED) == FALSE)) ||
         ((DevAddr == USB_HOTPLUG_HDD_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_HDD_ENABLED) == FALSE)) ||
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_HDD_ENABLED) == FALSE)) ||
         ((DevAddr == USB_HOTPLUG_CDROM_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_CDROM_ENABLED) == FALSE))) {
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_CDROM_ENABLED) == FALSE))) {
         Urp->bRetValue = USB_ATA_DRIVE_NOT_READY_ERR;
         return;
     }
@@ -956,22 +1381,23 @@ USBMassAPIEfiReadDevice (
     //
     DevInfo = USB_GetDeviceInfoStruc(USB_SRCH_DEV_INDX, 0, DevAddr, 0);
     if ((DevInfo == NULL)|| (!(DevInfo->Flag & DEV_INFO_DEV_PRESENT))) {
-        Urp->bRetValue = USB_ATA_TIME_OUT_ERR;
+		Urp->bRetValue = USB_ATA_TIME_OUT_ERR;
         return;
     }
 
-
-    if ((gUsbData->UsbFeature & USB_EXTRA_CHECK_DEVICE_READY) == USB_EXTRA_CHECK_DEVICE_READY) {
-        //
-        // Check device ready
-        //
-        Data = USBMassCheckDeviceReady(DevInfo);
-        if (Data) {
-            Urp->ApiData.EfiMassRead.SenseData = Data;
-            Urp->bRetValue = USBWrapGetATAErrorCode(Urp->ApiData.EfiMassRead.SenseData); 
-            return;
-        }
-    }
+											//(EIP15037+)>
+#if EXTRA_CHECK_DEVICE_READY
+    //
+    // Check device ready
+    //
+    Data = USBMassCheckDeviceReady(DevInfo);
+	if (Data) {
+        Urp->ApiData.EfiMassRead.SenseData = Data;
+        Urp->bRetValue = USBWrapGetATAErrorCode(Urp->ApiData.EfiMassRead.SenseData);	//(EIP31535)
+		return;
+	}
+#endif
+											//<(EIP15037+)
 
     //
     // Issue read command
@@ -993,19 +1419,18 @@ USBMassAPIEfiReadDevice (
 
 /**
     This function is part of the USB BIOS MASS API.
-        
-    @param Urp    Pointer to the URP structure
-                  DevAddr         USB device address of the device
-                  StartLba        Starting LBA address
-                  NumBlks         Number of blocks to write
-                  PreSkipSize     Number of bytes to skip before
-                  PostSkipSize    Number of bytes to skip after
-                  BufferPtr       Buffer pointer
-    @retval None 
 
-    @retval Urp             Pointer to the Urp structure
-            bRetValue       Return value
-            SenseData       Sense data of the last command
+    @param fpURPPointer    Pointer to the URP structure
+        bDevAddr    USB device address of the device
+        dStartLBA   Starting LBA address
+        wNumBlks    Number of blocks to write
+        wPreSkipSize    Number of bytes to skip before
+        wPostSkipSize   Number of bytes to skip after
+        fpBufferPtr Far buffer pointer
+
+    @retval fpURPPointer    Pointer to the URP structure
+        bRetValue   Return value
+        dSenseData  Sense data of the last command
 
 **/
 
@@ -1034,38 +1459,39 @@ USBMassAPIWriteDevice(
 /**
     This function is part of the USB BIOS MASS API.
 
-    @param Urp     Pointer to the URP structure
-                   DevAddr       USB device address of the device
-                   StartLBA      Starting LBA address
-                   NumBlks       Number of blocks to write
-                   PreSkipSize   Number of bytes to skip before
-                   PostSkipSize  Number of bytes to skip after
-                   BufferPtr     Far buffer pointer
-                   bRetValue     Return value
-                   SenseData     Sense data of the last command
+    @param fpURPPointer    Pointer to the URP structure
+        DevAddr    USB device address of the device
+        StartLBA   Starting LBA address
+        NumBlks    Number of blocks to write
+        PreSkipSize    Number of bytes to skip before
+        PostSkipSize   Number of bytes to skip after
+        BufferPtr Far buffer pointer
 
-    @retval None
+    @retval fpURPPointer    Pointer to the URP structure
+        bRetValue   Return value
+        dSenseData  Sense data of the last command
+
 **/
 
 VOID
-USBMassAPIEfiWriteDevice (
+USBMassAPIEfiWriteDevice(
     URP_STRUC *Urp
 )
 {
     DEV_INFO    *DevInfo;
     UINT8       DevAddr;
     UINT16      Result;
-    UINT32      Data = 0;
+    UINT32		Data = 0;
     UINT8       OpCode;
 
     DevAddr = Urp->ApiData.EfiMassWrite.DevAddr;
 
     if (((DevAddr == USB_HOTPLUG_FDD_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_FDD_ENABLED) == FALSE)) ||
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_FDD_ENABLED) == FALSE)) ||
         ((DevAddr == USB_HOTPLUG_HDD_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_HDD_ENABLED) == FALSE)) ||
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_HDD_ENABLED) == FALSE)) ||
         ((DevAddr == USB_HOTPLUG_CDROM_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_CDROM_ENABLED) == FALSE))) {
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_CDROM_ENABLED) == FALSE))) {
         Urp->bRetValue = USB_ATA_DRIVE_NOT_READY_ERR;
         return;
     }
@@ -1074,22 +1500,29 @@ USBMassAPIEfiWriteDevice (
     // Get the device info structure for the matching device address
     //
     DevInfo = USB_GetDeviceInfoStruc(USB_SRCH_DEV_INDX, 0, DevAddr, 0);
-    if ((DevInfo == NULL)|| (!(DevInfo->Flag & DEV_INFO_DEV_PRESENT))) {
-        Urp->bRetValue = USB_ATA_TIME_OUT_ERR;
+    if((DevInfo == NULL)|| (!(DevInfo->Flag & DEV_INFO_DEV_PRESENT))) {
+		Urp->bRetValue = USB_ATA_TIME_OUT_ERR;
         return;
     }
-
-    if ((gUsbData->UsbFeature & USB_EXTRA_CHECK_DEVICE_READY) == USB_EXTRA_CHECK_DEVICE_READY) {
-        //
-        // Check device ready
-        //
-        Data = USBMassCheckDeviceReady(DevInfo);
-        if (Data) {
-            Urp->ApiData.EfiMassWrite.SenseData = Data;
-            Urp->bRetValue = USBWrapGetATAErrorCode(Urp->ApiData.EfiMassWrite.SenseData); 
-            return;
-        }
+/*
+    if (!(DevInfo->bLastStatus & USB_MASS_MEDIA_PRESENT)) {
+        Urp->bRetValue = USB_ATA_NO_MEDIA_ERR;
+        return;
     }
+*/
+											//(EIP15037+)>
+#if EXTRA_CHECK_DEVICE_READY
+    //
+    // Check device ready
+    //
+    Data = USBMassCheckDeviceReady(DevInfo);
+	if (Data) {
+        Urp->ApiData.EfiMassWrite.SenseData = Data;
+        Urp->bRetValue = USBWrapGetATAErrorCode(Urp->ApiData.EfiMassWrite.SenseData);	//(EIP31535)
+		return;
+	}
+#endif
+											//<(EIP15037+)
 
     //
     // Issue write command
@@ -1111,17 +1544,17 @@ USBMassAPIEfiWriteDevice (
 /**
     This function is part of the USB BIOS MASS API.
 
-    @param Urp    Pointer to the URP structure
-                  DevAddr        USB device address of the device
-                  StartLBA       Starting LBA address
-                  NumBlks        Number of blocks to write
-                  PreSkipSize    Number of bytes to skip before
-                  PostSkipSize   Number of bytes to skip after
-                  BufferPtr Far buffer pointer
-                  bRetValue      Return value
-                  SenseData      Sense data of the last command
-                  
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+        DevAddr    USB device address of the device
+        StartLBA   Starting LBA address
+        NumBlks    Number of blocks to write
+        PreSkipSize    Number of bytes to skip before
+        PostSkipSize   Number of bytes to skip after
+        BufferPtr Far buffer pointer
+
+    @retval fpURPPointer    Pointer to the URP structure
+        bRetValue   Return value
+        dSenseData  Sense data of the last command
 
 **/
 
@@ -1150,18 +1583,20 @@ USBMassAPIVerifyDevice(
 /**
     This function is part of the USB BIOS MASS API.
 
-    @param Urp    Pointer to the URP structure
-                  DevAddr        USB device address of the device
-                  StartLBA       Starting LBA address
-                  NumBlks        Number of blocks to write
-                  PreSkipSize    Number of bytes to skip before
-                  PostSkipSize   Number of bytes to skip after
-                  BufferPtr      Far buffer pointer
-                  bRetValue      Return value
-                  SenseData      Sense data of the last command
-                  
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+        DevAddr    USB device address of the device
+        StartLBA   Starting LBA address
+        NumBlks    Number of blocks to write
+        PreSkipSize    Number of bytes to skip before
+        PostSkipSize   Number of bytes to skip after
+        BufferPtr Far buffer pointer
+
+    @retval fpURPPointer    Pointer to the URP structure
+        bRetValue   Return value
+        dSenseData  Sense data of the last command
+
 **/
+
 VOID
 USBMassAPIEfiVerifyDevice(
     URP_STRUC *Urp
@@ -1170,17 +1605,17 @@ USBMassAPIEfiVerifyDevice(
     DEV_INFO    *DevInfo;
     UINT8       DevAddr;
     UINT16      Result;
-    UINT32      Data = 0;
+    UINT32		Data = 0;
     UINT8       OpCode;
 
     DevAddr = Urp->ApiData.EfiMassVerify.DevAddr;
 
     if (((DevAddr == USB_HOTPLUG_FDD_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_FDD_ENABLED) == FALSE)) ||
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_FDD_ENABLED) == FALSE)) ||
         ((DevAddr == USB_HOTPLUG_HDD_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_HDD_ENABLED) == FALSE)) ||
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_HDD_ENABLED) == FALSE)) ||
         ((DevAddr == USB_HOTPLUG_CDROM_ADDRESS) &&
-            ((gUsbData->UsbStateFlag & USB_HOTPLUG_CDROM_ENABLED) == FALSE))) {
+            ((gUsbData->dUSBStateFlag & USB_HOTPLUG_CDROM_ENABLED) == FALSE))) {
         Urp->bRetValue = USB_ATA_DRIVE_NOT_READY_ERR;
         return;
     }
@@ -1190,21 +1625,22 @@ USBMassAPIEfiVerifyDevice(
     //
     DevInfo = USB_GetDeviceInfoStruc(USB_SRCH_DEV_INDX, 0, DevAddr, 0);
     if ((DevInfo == NULL)|| (!(DevInfo->Flag & DEV_INFO_DEV_PRESENT))) {
-        Urp->bRetValue = USB_ATA_TIME_OUT_ERR;
+		Urp->bRetValue = USB_ATA_TIME_OUT_ERR;
         return;
     }
-
-    if ((gUsbData->UsbFeature & USB_EXTRA_CHECK_DEVICE_READY) == USB_EXTRA_CHECK_DEVICE_READY) {
-        //
-        // Check device ready
-        //
-        Data = USBMassCheckDeviceReady(DevInfo);
-        if (Data) {
-            Urp->ApiData.EfiMassVerify.SenseData = Data;
-            Urp->bRetValue = USBWrapGetATAErrorCode(Urp->ApiData.EfiMassVerify.SenseData); 
-            return;
-        }
-    }
+											//(EIP15037+)>
+#if EXTRA_CHECK_DEVICE_READY
+    //
+    // Check device ready
+    //
+    Data = USBMassCheckDeviceReady(DevInfo);
+	if (Data) {
+        Urp->ApiData.EfiMassVerify.SenseData = Data;
+        Urp->bRetValue = USBWrapGetATAErrorCode(Urp->ApiData.EfiMassVerify.SenseData);	//(EIP31535)
+		return;
+	}
+#endif
+											//<(EIP15037+)
 
     //
     // Issue write command
@@ -1227,15 +1663,16 @@ USBMassAPIEfiVerifyDevice(
 /**
     This function is part of the USB BIOS MASS API.
 
-    @param Urp          Pointer to the URP structure
-                        bRetValue   Return value
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval bRetValue   Return value
 
 **/
+
 VOID
-USBMassAPIFormatDevice(URP_STRUC *Urp)
+USBMassAPIFormatDevice(URP_STRUC *fpURP)
 {
-    Urp->bRetValue = USB_SUCCESS;
+    fpURP->bRetValue = USB_SUCCESS;
 }
 
 
@@ -1244,38 +1681,38 @@ USBMassAPIFormatDevice(URP_STRUC *Urp)
     function can be used to pass raw command/data sequence to
     the USB mass storage device
 
-    @param Urp      Pointer to the URP structure
-                    bRetValue   Return value
-    @retval None
+    @param fpURPPointer    Pointer to the URP structure
+
+    @retval bRetValue   Return value
 
 **/
 
 VOID
-USBMassAPICommandPassThru (URP_STRUC *Urp)
+USBMassAPICommandPassThru (URP_STRUC *fpURP)
 {
     UINT8                   Result;
     MASS_CMD_PASS_THRU      *MassCmdPassThru;
     EFI_STATUS              Status = EFI_SUCCESS;
 
-    MassCmdPassThru = &Urp->ApiData.MassCmdPassThru;
+    MassCmdPassThru = &fpURP->ApiData.MassCmdPassThru;
 
+#if !USB_RT_DXE_DRIVER
     if (gCheckUsbApiParameter) {
-        Status = AmiUsbValidateMemoryBuffer((VOID*)MassCmdPassThru->CmdBuffer, MassCmdPassThru->CmdLength);
-        if (Status != EFI_ABORTED){
-            if (EFI_ERROR(Status)) {
-                return;
-            }
-            Status = AmiUsbValidateMemoryBuffer((VOID*)MassCmdPassThru->DataBuffer, MassCmdPassThru->DataLength);
-            if (EFI_ERROR(Status)) {
-                return;
-            }
-            gCheckUsbApiParameter = FALSE;
+        Status = AmiValidateMemoryBuffer((VOID*)MassCmdPassThru->fpCmdBuffer, MassCmdPassThru->wCmdLength);
+        if (EFI_ERROR(Status)) {
+            return;
         }
+        Status = AmiValidateMemoryBuffer((VOID*)MassCmdPassThru->fpDataBuffer, MassCmdPassThru->wDataLength);
+        if (EFI_ERROR(Status)) {
+            return;
+        }
+        gCheckUsbApiParameter = FALSE;
     }
+#endif
 
     Result = USBMassCmdPassThru(MassCmdPassThru);
     
-    Urp->bRetValue = Result;
+    fpURP->bRetValue = Result;
 }
 
 
@@ -1284,22 +1721,18 @@ USBMassAPICommandPassThru (URP_STRUC *Urp)
     assigns the logical drive device according to the information of the
     mass storage device
 
-    @param Urp     Pointer to the URP structure
-                   U_API_DATA->DevAddr               USB device address of the device
-                   MASS_ASSIGN_DRIVE_NUM->LogDevNum  Logical Drive Number to assign to the device
+    @param fpURPPointer    Pointer to the URP structure
+        bDevAddr    USB device address of the device
+        bLogDevNum  Logical Drive Number to assign to the device
 
-    @retval USB_ERROR     Failure
-    @retval USB_SUCCESS   Success
+    @retval Return code USB_ERROR - Failure, USB_SUCCESS - Success
 
 **/
 
 VOID
-USBMassAPIAssignDriveNumber (
-    URP_STRUC    *Urp
-)
+USBMassAPIAssignDriveNumber (URP_STRUC *fpURP)
 {
-    // No errors expected after this point
-    Urp->bRetValue = USB_SUCCESS;
+    fpURP->bRetValue = USB_SUCCESS; // No errors expected after this point
 }
 
 
@@ -1308,40 +1741,37 @@ USBMassAPIAssignDriveNumber (
     invokes USB Mass Storage API handler to check whether device
     is ready. If called for the first time, this function retrieves
     the mass storage device geometry and fills the corresponding
-    FpDevInfo fields.
+    fpDevInfo fields.
 
-    @param Urp    Pointer to the URP structure
-                  Urp->ApiData.FpDevInfo  pointer to USB device that is requested to be checked
+    @param fpURPPointer    Pointer to the URP structure
+        fpURP->ApiData.fpDevInfo - pointer to USB device that is
+        requested to be checked
 
-    @retval USB_ERROR     Failure
-    @retval USB_SUCCESS   Success
+    @retval Return code USB_ERROR - Failure, USB_SUCCESS - Success
 
 **/
-VOID
-USBMassAPICheckDevStatus (
-    URP_STRUC    *Urp
-)
-{
 
+VOID
+USBMassAPICheckDevStatus(URP_STRUC *fpURP)
+{
+#if USB_DEV_MASS
     UINT32      Result;
     DEV_INFO    *DevInfo;
     EFI_STATUS  Status;
 
-    if ((gUsbData->UsbDevSupport & USB_MASS_DEV_SUPPORT) == USB_MASS_DEV_SUPPORT) {
-        DevInfo = Urp->ApiData.MassChkDevReady.FpDevInfo;
+    DevInfo = fpURP->ApiData.MassChkDevReady.fpDevInfo;
 
-        Status = UsbDevInfoValidation(DevInfo);
-        
-        if (EFI_ERROR(Status)) {
-            return;
-        }
-        
-        gCheckUsbApiParameter = FALSE;
-        
-        Result = USBMassCheckDeviceReady(Urp->ApiData.MassChkDevReady.FpDevInfo);
-        Urp->bRetValue = (UINT8)Result;
+    Status = UsbDevInfoValidation(DevInfo);
+
+    if (EFI_ERROR(Status)) {
+        return;
     }
+	
+	gCheckUsbApiParameter = FALSE;
 
+    Result = USBMassCheckDeviceReady(fpURP->ApiData.MassChkDevReady.fpDevInfo);
+    fpURP->bRetValue = (UINT8)Result;
+#endif
 }
 
 
@@ -1349,108 +1779,93 @@ USBMassAPICheckDevStatus (
     This function is part of the USB BIOS API. This function
     controls LED state on the connected USB keyboards
 
-    @param Urp    Pointer to the URP structure
+    @param fpURP   Pointer to the URP structure
 
-    @retval USB_ERROR     Failure 
-    @retval USB_SUCCESS   Success
+    @retval Return code USB_ERROR - Failure, USB_SUCCESS - Success
 
 **/
-VOID
-USBAPI_LightenKeyboardLEDs (
-    URP_STRUC    *fpURP
-)
-{
 
+VOID
+USBAPI_LightenKeyboardLEDs(URP_STRUC *fpURP)
+{
+#if USB_DEV_KBD
     EFI_STATUS  Status;
     DEV_INFO    *DevInfo = (DEV_INFO*)fpURP->ApiData.EfiKbLedsData.DevInfoPtr;
 
-    if ((gUsbData->UsbDevSupport & USB_KB_DEV_SUPPORT) == USB_KB_DEV_SUPPORT) {
-        if (DevInfo) {
-            Status = UsbDevInfoValidation(DevInfo);
-            if (EFI_ERROR(Status)) {
-                fpURP->bRetValue = USB_PARAMETER_ERROR;
-                return;
-            }
+    if (DevInfo) {
+        Status = UsbDevInfoValidation(DevInfo);
+        if (EFI_ERROR(Status)) {
+            fpURP->bRetValue = USB_PARAMETER_ERROR;
+            return;
         }
-        
-        gCheckUsbApiParameter = FALSE;
-        
-        if (fpURP->ApiData.EfiKbLedsData.LedMapPtr) {
-            gUsbData->UsbKbShiftKeyStatus = 0;
-            if(((LED_MAP*)fpURP->ApiData.EfiKbLedsData.LedMapPtr)->NumLock) {
-                gUsbData->UsbKbShiftKeyStatus |= KB_NUM_LOCK_BIT_MASK;
-            }
-            if(((LED_MAP*)fpURP->ApiData.EfiKbLedsData.LedMapPtr)->CapsLock) {
-                gUsbData->UsbKbShiftKeyStatus |= KB_CAPS_LOCK_BIT_MASK;
-            }
-            if(((LED_MAP*)fpURP->ApiData.EfiKbLedsData.LedMapPtr)->ScrLock) {
-                gUsbData->UsbKbShiftKeyStatus |= KB_SCROLL_LOCK_BIT_MASK;
-            }
-        }
-        
-        if (DevInfo) {
-            UsbKbdSetLed(DevInfo, ((gUsbData->UsbKbShiftKeyStatus) >> 4) & 0x07);
-        }
-        
-        fpURP->bRetValue = USB_SUCCESS;
-
-    } else {
-        fpURP->bRetValue = USB_NOT_SUPPORTED;
     }
 
+    gCheckUsbApiParameter = FALSE;
+    
+	if (fpURP->ApiData.EfiKbLedsData.LedMapPtr) {
+		gUsbData->bUSBKBShiftKeyStatus = 0;
+		if(((LED_MAP*)fpURP->ApiData.EfiKbLedsData.LedMapPtr)->NumLock) {
+			gUsbData->bUSBKBShiftKeyStatus |= KB_NUM_LOCK_BIT_MASK;
+		}
+		if(((LED_MAP*)fpURP->ApiData.EfiKbLedsData.LedMapPtr)->CapsLock) {
+			gUsbData->bUSBKBShiftKeyStatus |= KB_CAPS_LOCK_BIT_MASK;
+		}
+		if(((LED_MAP*)fpURP->ApiData.EfiKbLedsData.LedMapPtr)->ScrLock) {
+			gUsbData->bUSBKBShiftKeyStatus |= KB_SCROLL_LOCK_BIT_MASK;
+		}
+	}
+
+	if (DevInfo) {
+		UsbKbdSetLed(DevInfo, ((gUsbData->bUSBKBShiftKeyStatus) >> 4) & 0x07);
+	}
+
+	fpURP->bRetValue	= USB_SUCCESS;
+	return;
+#else
+	fpURP->bRetValue	= USB_NOT_SUPPORTED;
+#endif
 }
 
-/**
-    This function is part of the USB BIOS API. This function
-    controls LED state on the connected USB keyboards
-
-    @param Urp    Pointer to the URP structure
-
-    @retval None
-
-**/
 VOID
-USBAPI_LightenKeyboardLEDs_Compatible (
-    URP_STRUC    *Urp
-)
+USBAPI_LightenKeyboardLEDs_Compatible(URP_STRUC *fpURP)
 {
+#if USB_DEV_KBD
+	if (fpURP->ApiData.KbLedsData.LedMapPtr) {
+		gUsbData->bUSBKBShiftKeyStatus = 0;
+		if(((LED_MAP*)fpURP->ApiData.KbLedsData.LedMapPtr)->NumLock) {
+			gUsbData->bUSBKBShiftKeyStatus |= KB_NUM_LOCK_BIT_MASK;
+		}
+		if(((LED_MAP*)fpURP->ApiData.KbLedsData.LedMapPtr)->CapsLock) {
+			gUsbData->bUSBKBShiftKeyStatus |= KB_CAPS_LOCK_BIT_MASK;
+		}
+		if(((LED_MAP*)fpURP->ApiData.KbLedsData.LedMapPtr)->ScrLock) {
+			gUsbData->bUSBKBShiftKeyStatus |= KB_SCROLL_LOCK_BIT_MASK;
+		}
+	}
 
-    if ((gUsbData->UsbDevSupport & USB_KB_DEV_SUPPORT) == USB_KB_DEV_SUPPORT) {
-    if (Urp->ApiData.KbLedsData.LedMapPtr) {
-        gUsbData->UsbKbShiftKeyStatus = 0;
-        if (((LED_MAP*)Urp->ApiData.KbLedsData.LedMapPtr)->NumLock) {
-            gUsbData->UsbKbShiftKeyStatus |= KB_NUM_LOCK_BIT_MASK;
-        }
-        if (((LED_MAP*)Urp->ApiData.KbLedsData.LedMapPtr)->CapsLock) {
-            gUsbData->UsbKbShiftKeyStatus |= KB_CAPS_LOCK_BIT_MASK;
-        }
-        if (((LED_MAP*)Urp->ApiData.KbLedsData.LedMapPtr)->ScrLock) {
-            gUsbData->UsbKbShiftKeyStatus |= KB_SCROLL_LOCK_BIT_MASK;
-        }
-    }
+	//USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3," LEDs: %d\n", gUsbData->bUSBKBShiftKeyStatus);
+	USBKB_LEDOn();
 
-    //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3," LEDs: %d\n", gUsbData->UsbKbShiftKeyStatus);
-    USBKB_LEDOn();
-
-    Urp->bRetValue = USB_SUCCESS;
-
-    } else {
-
-        Urp->bRetValue = USB_NOT_SUPPORTED;
-    }
-
+	fpURP->bRetValue	= USB_SUCCESS;
+	return;
+#else
+	fpURP->bRetValue	= USB_NOT_SUPPORTED;
+#endif
 }
 
-
+					                        //(EIP29733+)>
 /**
     This function is part of the USB BIOS API. This function
     is used to control whether KBC access in USB module 
     should be blocked or not.
 
-    @param ControlSwitch    TRUE: Access block / FALSE: Not block
-    @retval None
+    @param fpURP   Pointer to the URP structure
+
+    @retval Return code USB_ERROR - Failure, USB_SUCCESS - Success
 
 **/
+
+
 VOID
 EFIAPI
 UsbKbcAccessControl(
@@ -1459,313 +1874,301 @@ UsbKbcAccessControl(
 {
     UINT8       Index;
     HC_STRUC    *HcStruc;
-
+#if !USB_RT_DXE_DRIVER
     EFI_STATUS Status;
     
-    Status = AmiUsbGlobalDataValidation(gUsbData);
+    Status = AmiUsbSmmGlobalDataValidation(gUsbData);
 
-    if (Status != EFI_ABORTED){
-        ASSERT_EFI_ERROR(Status);
+    ASSERT_EFI_ERROR(Status);
     
-        if (EFI_ERROR(Status)) {
-            gLockHwSmiHandler = TRUE;
-            gLockSmiHandler = TRUE;
-            return;
-        }
+    if (EFI_ERROR(Status)) {
+        gLockHwSmiHandler = TRUE;
+        gLockSmiHandler = TRUE;
+        return;
     }
-
+#endif
 
     gCheckUsbApiParameter = FALSE;
   
     gUsbData->IsKbcAccessBlocked = (ControlSwitch != 0)? TRUE : FALSE;
 
-    for (Index = 0; Index < gUsbDataList->HcTableCount; Index++) {
-        HcStruc = gHcTable[Index];
+    for (Index = 0; Index < gUsbData->HcTableCount; Index++) {
+        HcStruc = gUsbData->HcTable[Index];
         if (HcStruc == NULL) {
             continue;
         }
-        if (HcStruc->HcFlag & HC_STATE_RUNNING) {
+        if (HcStruc->dHCFlag & HC_STATE_RUNNING) {
             break;
         }
     }
 
-    if (Index == gUsbDataList->HcTableCount) {
+    if (Index == gUsbData->HcTableCount) {
         return;
     }
 
+/*
+    //
+    // Check if the USB access in Legacy mode. If it's legacy mode enable/disable
+    // the Kbcemulation based on the ControlSwitch  
+    //
+    if(!(gUsbData->dUSBStateFlag & USB_FLAG_RUNNING_UNDER_EFI)) {
+
+        if(IsKbcAccessBlocked) {
+            if(gEmulationTrap) { 
+                //
+                // Keyboard access blocked. Disable the Emulation
+                //
+                gEmulationTrap->TrapDisable(gEmulationTrap);
+            }
+        } else {
+            if(gEmulationTrap) { 
+                //
+                // Keyboard access enabled. Enable the KbcEmulation
+                //
+                gEmulationTrap->TrapEnable(gEmulationTrap);
+            }
+        }
+    }
+*/
+					//(EIP48323+)>
     //Reflush USB data buffer if intend to disable usb keyboard data throughput.
     if (gUsbData->IsKbcAccessBlocked) {
         USBKeyRepeat(NULL, 1);  // Disable Key repeat
         gUsbData->RepeatKey = 0;
 
-        // Clear Legacy USB keyboard buffer
-        ZeroMem(gUsbData->KbcCharacterBufferStart, sizeof(gUsbData->KbcCharacterBufferStart));
-        gUsbDataList->KbcCharacterBufferHead = gUsbData->KbcCharacterBufferStart;
-        gUsbDataList->KbcCharacterBufferTail = gUsbData->KbcCharacterBufferStart;
-                
-        ZeroMem(gUsbData->KbcScanCodeBufferStart, sizeof(gUsbData->KbcScanCodeBufferStart));
-        gUsbDataList->KbcScanCodeBufferPtr = gUsbData->KbcScanCodeBufferStart;
-                                                                                        
-        ZeroMem(gUsbData->KbcDeviceIdBufferStart, sizeof(gUsbData->KbcDeviceIdBufferStart));
-        ZeroMem(gUsbData->KbcShiftKeyStatusBufferStart, sizeof(gUsbData->KbcShiftKeyStatusBufferStart));              
-        ZeroMem(gUsbData->UsbKbInputBuffer, sizeof(gUsbData->UsbKbInputBuffer));
+		// Clear Legacy USB keyboard buffer
+        ZeroMem(gUsbData->aKBCCharacterBufferStart, sizeof(gUsbData->aKBCCharacterBufferStart));
+		gUsbData->fpKBCCharacterBufferHead = gUsbData->aKBCCharacterBufferStart;
+		gUsbData->fpKBCCharacterBufferTail = gUsbData->aKBCCharacterBufferStart;
+		
+		ZeroMem(gUsbData->aKBCScanCodeBufferStart, sizeof(gUsbData->aKBCScanCodeBufferStart));
+		gUsbData->fpKBCScanCodeBufferPtr = gUsbData->aKBCScanCodeBufferStart;
+											
+		ZeroMem(gUsbData->aKBCDeviceIDBufferStart, sizeof(gUsbData->aKBCDeviceIDBufferStart));
+		ZeroMem(gUsbData->aKBCShiftKeyStatusBufferStart, sizeof(gUsbData->aKBCShiftKeyStatusBufferStart));		
+		ZeroMem(gUsbData->aKBInputBuffer, sizeof(gUsbData->aKBInputBuffer));
     }
-
+					//<(EIP48323+)
 }
 
-/**
-    This function is part of the USB BIOS API. This function
-    is used to control whether KBC access in USB module 
-    should be blocked or not.
 
-    @param  Urp      Pointer to the URP structure
-    @retval None
-
-**/
 VOID
-USBAPI_KbcAccessControl(URP_STRUC *Urp)
+USBAPI_KbcAccessControl(URP_STRUC *fpURP)
 {
-    UsbKbcAccessControl(Urp->ApiData.KbcControlCode);
+    UsbKbcAccessControl(fpURP->ApiData.KbcControlCode);
 }
-
+					                        //<(EIP29733+)
 /**
-    This function is part of the USB BIOS API. This function initial USB 
+    This function is part of the USB BIOS API. This function init USB 
     legacy support.
 
-    @param  Urp      Pointer to the URP structure
-    @retval None
+    @param fpURP   Pointer to the URP structure
+
+    @retval VOID
 
 **/
 VOID
-USB_StopLegacy(URP_STRUC *Urp)
+USB_StopLegacy(URP_STRUC *fpURP)
 {
     //shutdown device first
     UINT8       bIndex;
-    DEV_INFO    *FpDevInfo;
+    DEV_INFO    *fpDevInfo;
     HC_STRUC    *fpHCStruc;
     
-    for (bIndex = 1; bIndex < gUsbData->MaxDevCount; bIndex ++){
-        FpDevInfo = gUsbDataList->DevInfoTable + bIndex;
-        if ((FpDevInfo->Flag & 
+    for (bIndex = 1; bIndex < MAX_DEVICES; bIndex ++){
+        fpDevInfo = gUsbData->aDevInfoTable +bIndex;
+        if ((fpDevInfo->Flag & 
             (DEV_INFO_VALID_STRUC |DEV_INFO_DEV_PRESENT)    ) ==   
             (DEV_INFO_VALID_STRUC |DEV_INFO_DEV_PRESENT)    ){
             //
-            fpHCStruc = gHcTable[FpDevInfo->HcNumber - 1];
+            fpHCStruc = gUsbData->HcTable[fpDevInfo->bHCNumber - 1];
             //
-            USB_StopDevice (fpHCStruc, FpDevInfo->HubDeviceNumber, FpDevInfo->HubPortNumber);
+            USB_StopDevice (fpHCStruc, fpDevInfo->bHubDeviceNumber, fpDevInfo->bHubPortNumber);
         }
     }
 
-    if ((gUsbData->UsbFeature & USB_HC_XHCI_SUPPORT) == USB_HC_XHCI_SUPPORT)
-        StopControllerType(USB_HC_XHCI);
-
-
-    if ((gUsbData->UsbFeature & USB_HC_EHCI_SUPPORT) == USB_HC_EHCI_SUPPORT)
-        StopControllerType(USB_HC_EHCI);
-
-    if ((gUsbData->UsbFeature & USB_HC_UHCI_SUPPORT) == USB_HC_UHCI_SUPPORT)
-        StopControllerType(USB_HC_UHCI);
-
-    if ((gUsbData->UsbFeature & USB_HC_OHCI_SUPPORT) == USB_HC_OHCI_SUPPORT)
-        StopControllerType(USB_HC_OHCI);
+    StopControllerType(USB_HC_XHCI);    //(EIP57521+)
+    StopControllerType(USB_HC_EHCI);
+    StopControllerType(USB_HC_UHCI);
+    StopControllerType(USB_HC_OHCI);
     
     //return as success
-    Urp->bRetValue = USB_SUCCESS;
+    fpURP->bRetValue    = USB_SUCCESS;
     
 }
 
 /**
-    This function is part of the USB BIOS API. This function initial USB 
+    This function is part of the USB BIOS API. This function init USB 
     legacy support.
-    
-    @param  Urp    Pointer to the URP structure
-    @retval None
+
+    @param fpURP   Pointer to the URP structure
+
+    @retval VOID
 
 **/
 VOID
-USB_StartLegacy(URP_STRUC *Urp)
+USB_StartLegacy(URP_STRUC *fpURP)
 {
-
-    gUsbData->HandOverInProgress = FALSE;
-
+                                        //(EIP57521)>
+    gUsbData->bHandOverInProgress = FALSE;
     //Start XHCI
-    if ((gUsbData->UsbFeature & USB_HC_XHCI_SUPPORT) == USB_HC_XHCI_SUPPORT){
-        StartControllerType(USB_HC_XHCI);
-        USB_EnumerateRootHubPorts(USB_HC_XHCI);
-    }
-
+    StartControllerType(USB_HC_XHCI);
+    USB_EnumerateRootHubPorts(USB_HC_XHCI);
     //Start EHCI
-    if ((gUsbData->UsbFeature & USB_HC_EHCI_SUPPORT) == USB_HC_EHCI_SUPPORT){
-        StartControllerType(USB_HC_EHCI);
-        USB_EnumerateRootHubPorts(USB_HC_EHCI);
-    }
-
+    StartControllerType(USB_HC_EHCI);
+    USB_EnumerateRootHubPorts(USB_HC_EHCI);
     //Start UHCI
-    if ((gUsbData->UsbFeature & USB_HC_UHCI_SUPPORT) == USB_HC_UHCI_SUPPORT){
-        StartControllerType(USB_HC_UHCI);
-        USB_EnumerateRootHubPorts(USB_HC_UHCI);
-    }
-
+    StartControllerType(USB_HC_UHCI);
+    USB_EnumerateRootHubPorts(USB_HC_UHCI);
     //Start OHCI
-    if ((gUsbData->UsbFeature & USB_HC_OHCI_SUPPORT) == USB_HC_OHCI_SUPPORT){
-        StartControllerType(USB_HC_OHCI);
-        USB_EnumerateRootHubPorts(USB_HC_OHCI);
-    }
-
+    StartControllerType(USB_HC_OHCI);
+    USB_EnumerateRootHubPorts(USB_HC_OHCI);
+                                        //<(EIP57521)
     //return as success
-    Urp->bRetValue    = USB_SUCCESS;
+  fpURP->bRetValue    = USB_SUCCESS;
 }
 
 /**
     This function is part of the USB BIOS API. This function
-    is used to shutdown/initial USB legacy support.
+    is used to shutdown/init USB legacy support.
 
-    @param Urp    Pointer to the URP structure
+    @param fpURP   Pointer to the URP structure
 
-    @retval None
+    @retval VOID
 
 **/
-VOID
-USBAPI_LegacyControl (
-    URP_STRUC  *Urp
-)
+VOID USBAPI_LegacyControl (URP_STRUC *fpURP)
 {
-    UINT8 SubLegacyFunc = Urp->bSubFunc, Index;       
-    UINT8 Count = (UINT8)(gUsbDataList->KbcScanCodeBufferPtr - 
-                  (UINT8*)gUsbData->KbcScanCodeBufferStart);   
+    UINT8 bSubLegacyFunc = fpURP->bSubFunc,i;       //(EIP102150+)
+    UINT8 Count = (UINT8)(gUsbData->fpKBCScanCodeBufferPtr - 
+                  (UINT8*)gUsbData->aKBCScanCodeBufferStart);   //(EIP102150+) 
 
     gCheckUsbApiParameter = FALSE;
 
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBAPI_LegacyControl %d\n", Urp->bSubFunc);
-    if (SubLegacyFunc == STOP_USB_CONTROLLER) {
-        USB_StopLegacy (Urp);
-
-        for (Index = Count; Index > 0; Index--)
-            USBKB_DiscardCharacter(&gUsbData->KbcShiftKeyStatusBufferStart[Index - 1]); 
-
-        if (gEmulationTrap)
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBAPI_LegacyControl %d\n", fpURP->bSubFunc);
+    if(bSubLegacyFunc==STOP_USB_CONTROLLER){ 		//(EIP43475+)>  	
+        USB_StopLegacy (fpURP);
+                                        //(EIP102150+)>
+    for(i = Count; i > 0; i--)
+        USBKB_DiscardCharacter(&gUsbData->aKBCShiftKeyStatusBufferStart[i-1]); 
+                                        //<(EIP102150+)
+        if(gEmulationTrap) 
             gEmulationTrap->TrapDisable(gEmulationTrap);
     }
 
-    if (SubLegacyFunc==START_USB_CONTROLLER) {
-        USB_StartLegacy (Urp);
-        if (gEmulationTrap)
+    if(bSubLegacyFunc==START_USB_CONTROLLER){
+        USB_StartLegacy (fpURP);
+        if(gEmulationTrap)
             gEmulationTrap->TrapEnable(gEmulationTrap);
-    }          
-    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "Result %d\n", Urp->bRetValue);
+    }												//<(EIP43475+)
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "Result %d\n", fpURP->bRetValue);
 }
-         
+										//(EIP74876+)>
 /**
     This function is part of the USB BIOS API. This function stops 
     the USB host controller.
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param fpURP   Pointer to the URP structure
+
+    @retval VOID
 
 **/
-VOID
-USBAPI_UsbStopController (
-    URP_STRUC *Urp
-)
+VOID USBAPI_UsbStopController (URP_STRUC *fpURP)
 {
     gCheckUsbApiParameter = FALSE;
-    StopControllerBdf(Urp->ApiData.HcBusDevFuncNum);
+	StopControllerBdf(fpURP->ApiData.HcBusDevFuncNum);
 }
-
-/**
-    This function is used to shutdown/init USB legacy support,
-    it calls USBAPI_LegacyControl().
-    
-    @param  Urp    Pointer to the URP structure
-
-    @retval EFI_SUCCESS    Success
-    @retval Others         Fail
-**/
+										//<(EIP74876+)
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
 EFI_STATUS
 EFIAPI
 USBRT_LegacyControl(
-    VOID *Urp
+    VOID *fpURP
 )
 {
-
+#if !USB_RT_DXE_DRIVER
     EFI_STATUS Status;
     
-    Status = AmiUsbGlobalDataValidation(gUsbData);
-    if (Status != EFI_ABORTED){
-        ASSERT_EFI_ERROR(Status);
+    Status = AmiUsbSmmGlobalDataValidation(gUsbData);
+
+    ASSERT_EFI_ERROR(Status);
     
-        if (EFI_ERROR(Status)) {
-            gLockHwSmiHandler = TRUE;
-            gLockSmiHandler = TRUE;
-            return EFI_SUCCESS;
-        }
+    if (EFI_ERROR(Status)) {
+        gLockHwSmiHandler = TRUE;
+        gLockSmiHandler = TRUE;
+        return EFI_SUCCESS;
     }
-
-    USBAPI_LegacyControl ((URP_STRUC *)Urp);
-
-    return((EFI_STATUS)(((URP_STRUC *)Urp)->bRetValue));
+#endif
+  //
+  USBAPI_LegacyControl ((URP_STRUC *)fpURP);
+  //
+  return((EFI_STATUS)(((URP_STRUC *)fpURP)->bRetValue));
 }
 
 
 /**
-    Get device address
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param 
+
+    @retval 
 
 **/
+
 VOID
 USBAPI_GetDeviceAddress(
     URP_STRUC *Urp
 )
 {
-    UINT8  Index;
-    DEV_INFO *DevInfo = NULL;
+	UINT8		i;
+	DEV_INFO	*DevInfo = NULL;
 
-    for (Index = 1; Index < gUsbData->MaxDevCount; Index++) {
-        if (!(gUsbDataList->DevInfoTable[Index].Flag & DEV_INFO_VALID_STRUC)) {
-            continue;
-        }
-        if ((gUsbDataList->DevInfoTable[Index].VendorId == Urp->ApiData.GetDevAddr.Vid) && 
-            (gUsbDataList->DevInfoTable[Index].DeviceId == Urp->ApiData.GetDevAddr.Did)) {
-            DevInfo = &gUsbDataList->DevInfoTable[Index];
-        }
-    }
-    if (DevInfo == NULL) {
-        Urp->bRetValue = USB_ERROR;
-        return;
-    }
+	for (i = 1; i < MAX_DEVICES; i++) {
+		if (!(gUsbData->aDevInfoTable[i].Flag & DEV_INFO_VALID_STRUC)) {
+			continue;
+		}
+		if ((gUsbData->aDevInfoTable[i].wVendorId == Urp->ApiData.GetDevAddr.Vid) && 
+				(gUsbData->aDevInfoTable[i].wDeviceId == Urp->ApiData.GetDevAddr.Did)) {
+			DevInfo = &gUsbData->aDevInfoTable[i];
+		}
+	}
+	if (DevInfo == NULL) {
+		Urp->bRetValue = USB_ERROR;
+		return;
+	}
 
-    Urp->ApiData.GetDevAddr.DevAddr = DevInfo->DeviceAddress;
-    Urp->bRetValue = USB_SUCCESS;
+	Urp->ApiData.GetDevAddr.DevAddr = DevInfo->bDeviceAddress;
+	Urp->bRetValue = USB_SUCCESS;
 }
 
 /**
-    This is USB APT which calls deriver request.
 
-    @param  Urp    Pointer to the URP structure
-    @retval None
+    @param 
+
+    @retval 
 
 **/
+
 VOID
 USBAPI_ExtDriverRequest (
     URP_STRUC *Urp
 )
 {
-    DEV_INFO *DevInfo;
-    DEV_DRIVER *DevDriver;
+    DEV_INFO	*DevInfo = NULL;
+    DEV_DRIVER	*DevDriver;
 
-    DevInfo = USB_GetDeviceInfoStruc(USB_SRCH_DEV_ADDR, 0, Urp->ApiData.DevAddr, 0);
-    if (DevInfo == NULL) {
-        Urp->bRetValue = USB_ERROR;
-        return;
-    }
+	DevInfo = USB_GetDeviceInfoStruc(USB_SRCH_DEV_ADDR, 0, Urp->ApiData.DevAddr, 0);
+	if (DevInfo == NULL) {
+		Urp->bRetValue = USB_ERROR;
+		return;
+	}
+	
+	DevDriver = UsbFindDeviceDriverEntry(DevInfo->fpDeviceDriver);
 
-    DevDriver = UsbFindDeviceDriverEntry(DevInfo->DevDriverIndex);
-
-    if (DevDriver != NULL) {
-        DevDriver->FnDriverRequest(DevInfo, Urp);
-    }
+	if (DevDriver != NULL) {
+		DevDriver->pfnDriverRequest(DevInfo, Urp);
+	}
 }
 
 /**
@@ -1774,9 +2177,9 @@ USBAPI_ExtDriverRequest (
     the host controllers to the OS.  This routine will stop HC that 
     does not support this functionality.
 
-    @param  None
+    @param VOID
 
-    @retval None
+    @retval VOID
 
 **/
 
@@ -1787,83 +2190,78 @@ USB_StopUnsupportedHc(
 )
 {
 
-
+#if !USB_RT_DXE_DRIVER
     UINT8       Index;
     HC_STRUC*   HcStruc;
     EFI_STATUS Status;
     
-    Status = AmiUsbGlobalDataValidation(gUsbData);
+    Status = AmiUsbSmmGlobalDataValidation(gUsbData);
 
-    if (Status != EFI_ABORTED){
-        ASSERT_EFI_ERROR(Status);
+    ASSERT_EFI_ERROR(Status);
     
-        if (EFI_ERROR(Status)) {
-            gLockHwSmiHandler = TRUE;
-            gLockSmiHandler = TRUE;
-            return;
-        }
+    if (EFI_ERROR(Status)) {
+        gLockHwSmiHandler = TRUE;
+        gLockSmiHandler = TRUE;
+        return;
+    }
     
+	//USBSB_UninstallTimerHandlers();
 
-
-        USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "Stopping all external HCs");
-        for (Index = 0; Index < gUsbDataList->HcTableCount; Index++) {
-            HcStruc = gHcTable[Index];
-            if (HcStruc == NULL) {
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "Stopping all external HCs");
+    for (Index = 0; Index < gUsbData->HcTableCount; Index++) {
+        HcStruc = gUsbData->HcTable[Index];
+        if (HcStruc == NULL) {
+            continue;
+        }
+        if (HcStruc->HwSmiHandle != NULL) {
+            continue;
+        }
+        if (HcStruc->bHCType == USB_HC_XHCI) {
+            if (!(HcStruc->dHCFlag & HC_STATE_EXTERNAL)) {
                 continue;
             }
-            if (HcStruc->HwSmiHandle != NULL) {
-                continue;
-            }
-            if (HcStruc->HcType == USB_HC_XHCI) {
-                if (!(HcStruc->HcFlag & HC_STATE_EXTERNAL)) {
-                    continue;
-                }
-            }
-            if (HcStruc->HcFlag & HC_STATE_RUNNING) {
-
-                AmiUsbControllerStop(HcStruc);
-                USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, ".");
-            }
         }
-        USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "\n");
-    }
-
-
-    if((gUsbDataList->UsbSetupData->UsbXhciHandoff) &&
-      ((gUsbData->UsbFeature & USB_HC_XHCI_SUPPORT) == USB_HC_XHCI_SUPPORT)) {
-        StopControllerType(USB_HC_XHCI);
-    }
-
-    if((gUsbDataList->UsbSetupData->UsbEhciHandoff) &&
-       ((gUsbData->UsbFeature & USB_HC_EHCI_SUPPORT) == USB_HC_EHCI_SUPPORT)) {
-        gUsbData->HandOverInProgress = TRUE;
-        StopControllerType(USB_HC_EHCI);
-    }
-
-    if((gUsbDataList->UsbSetupData->UsbOhciHandoff) &&
-       ((gUsbData->UsbFeature & USB_HC_OHCI_SUPPORT) == USB_HC_OHCI_SUPPORT)) {
-        StopControllerType(USB_HC_OHCI);
-    }
-
-    if (Status != EFI_ABORTED){
-        // Disable kbc emulation trap if we don't own any xhci controller.
-        for (Index = 0; Index < gUsbDataList->HcTableCount; Index++) {
-            HcStruc = gHcTable[Index];
-            if (HcStruc == NULL) {
-                continue;
-            }
-            if ((HcStruc->HcType == USB_HC_XHCI) && (HcStruc->HcFlag & HC_STATE_RUNNING)) {
-                break;
-            }
-        }
-        
-        if (Index == gUsbDataList->HcTableCount) {
-            if (gEmulationTrap) {
-                gEmulationTrap->TrapDisable(gEmulationTrap);
-            }
+        if (HcStruc->dHCFlag & HC_STATE_RUNNING) {
+            (*gUsbData->aHCDriverTable[GET_HCD_INDEX(HcStruc->bHCType)].pfnHCDStop)(HcStruc);
+            USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, ".");
         }
     }
-   
+    
+    USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "\n");
+
+#endif
+
+	if(gUsbData->UsbXhciHandoff) {
+		StopControllerType(USB_HC_XHCI);
+	}
+	if(gUsbData->UsbEhciHandoff) {
+		gUsbData->bHandOverInProgress = TRUE;
+		StopControllerType(USB_HC_EHCI);
+	}
+	if(gUsbData->UsbOhciHandoff) {
+		StopControllerType(USB_HC_OHCI);
+	}
+    
+#if !USB_RT_DXE_DRIVER
+
+    // Disable kbc emulation trap if we don't own any xhci controller.
+    for (Index = 0; Index < gUsbData->HcTableCount; Index++) {
+        HcStruc = gUsbData->HcTable[Index];
+        if (HcStruc == NULL) {
+            continue;
+        }
+        if ((HcStruc->bHCType == USB_HC_XHCI) && (HcStruc->dHCFlag & HC_STATE_RUNNING)) {
+            break;
+        }
+    }
+
+    if (Index == gUsbData->HcTableCount) {
+        if (gEmulationTrap) {
+            gEmulationTrap->TrapDisable(gEmulationTrap);
+        }
+    }
+    
+#endif   
 }
 
 /**
@@ -1880,39 +2278,39 @@ USB_StopUnsupportedHc(
 **/
 
 VOID
-USBAPI_ChangeOwner(URP_STRUC *Urp)
+USBAPI_ChangeOwner(URP_STRUC *fpURP)
 {
     //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USBAPI_ChangeOwner..");
 
-    if(Urp->ApiData.Owner) {  // Changing to Efi driver
-    //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "Urp->ApiData.Owner=%d\n", Urp->ApiData.Owner);
+    if(fpURP->ApiData.Owner) {  // Changing to Efi driver
+    //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "fpURP->ApiData.Owner=%d\n", fpURP->ApiData.Owner);
         if(gEmulationTrap) {
             gEmulationTrap->TrapDisable(gEmulationTrap);
         }
-        gUsbData->UsbStateFlag |= USB_FLAG_RUNNING_UNDER_EFI;
+        gUsbData->dUSBStateFlag |= USB_FLAG_RUNNING_UNDER_EFI;
     } else {    // Acquiring - check the current condition first
-        //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "Urp->ApiData.Owner=%d...", Urp->ApiData.Owner);
+        //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "fpURP->ApiData.Owner=%d...", fpURP->ApiData.Owner);
         if(gEmulationTrap) {
             gEmulationTrap->TrapEnable(gEmulationTrap);
         }
 
-        if (gUsbData->UsbStateFlag & USB_FLAG_RUNNING_UNDER_EFI) {
+        if (gUsbData->dUSBStateFlag & USB_FLAG_RUNNING_UNDER_EFI) {
             //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "USB_FLAG_RUNNING_UNDER_EFI\n");
-            gUsbData->UsbStateFlag &= ~USB_FLAG_RUNNING_UNDER_EFI;
+            gUsbData->dUSBStateFlag &= ~USB_FLAG_RUNNING_UNDER_EFI;
         } else {
             //USB_DEBUG(DEBUG_INFO, DEBUG_LEVEL_3, "not USB_FLAG_RUNNING_UNDER_EFI\n");
         }
     }
-    Urp->bRetValue = USB_SUCCESS;
+    fpURP->bRetValue = USB_SUCCESS;
 }
 
 /**
     This function is part of the USB BIOS API. This function 
     starts/stops the USB host controller.
 
-    @param  Urp     Pointer to the URP structure
+    @param fpURP   Pointer to the URP structure
 
-    @retval None
+    @retval VOID
 
 **/
 
@@ -1920,101 +2318,28 @@ VOID
 USBAPI_HcStartStop(URP_STRUC *Urp)
 {
     HC_STRUC*   HcStruc;
-    UINTN       Index;
+    EFI_STATUS  Status;
 
-
-    if (Urp->ApiData.HcStartStop.Start == REGISTER_USB_SMI){
-      // trigger SMI to register SMI for all Host controllers.
-      gCheckUsbApiParameter = FALSE;
-      Urp->bRetValue = UsbHcRegisterSmi();  
-      return;
-    }
-      
     HcStruc = Urp->ApiData.HcStartStop.HcStruc;
 
-    if (HcStruc == NULL) {
-        return;
-    }
-    
-    for (Index = 0; Index < gUsbDataList->HcTableCount; Index++) {
-        if (HcStruc == gHcTable[Index]) {
-            break;
-        }
-    }
+    Status = UsbHcStrucValidation(HcStruc);
 
-    if (Index == gUsbDataList->HcTableCount) {
+    if (EFI_ERROR(Status)) {
         return;
     }
 
-    if (!(HcStruc->HcFlag & HC_STATE_USED)) {
+    if ((HcStruc->bHCType != USB_HC_UHCI) && (HcStruc->bHCType != USB_HC_OHCI) &&
+        (HcStruc->bHCType != USB_HC_EHCI) && (HcStruc->bHCType != USB_HC_XHCI)) {
         return;
     }
-
-    switch (HcStruc->HcType) {
-        case USB_HC_UHCI:
-            if ((gUsbData->UsbFeature & USB_HC_UHCI_SUPPORT) == 0){
-                return;
-            }
-            break;
-        case USB_HC_OHCI:
-            if ((gUsbData->UsbFeature & USB_HC_OHCI_SUPPORT) == 0){
-                return;
-            }
-            break;
-        case USB_HC_EHCI:
-            if ((gUsbData->UsbFeature & USB_HC_EHCI_SUPPORT) == 0){
-                return;
-            }
-            break;
-        case USB_HC_XHCI:
-            if ((gUsbData->UsbFeature & USB_HC_XHCI_SUPPORT) == 0){
-                return;
-            }
-            break;
-        default:
-            return;
-    } 
 
     gCheckUsbApiParameter = FALSE;
 
-    switch (Urp->ApiData.HcStartStop.Start) {
-        case STOP_HOST_CONTROLLER:
-            Urp->bRetValue = UsbHcStop(HcStruc);
-            return;
-        case START_HOST_CONTROLLER:
-            Urp->bRetValue = UsbHcStart(HcStruc);
-            return; 
-        default:
-            return;
+    if (Urp->ApiData.HcStartStop.Start) {
+        Urp->bRetValue = UsbHcStart(HcStruc);
+    } else {
+        Urp->bRetValue = UsbHcStop(HcStruc);
     }
-}
-
-/**
-    This function is part of the USB BIOS API. This function 
-    locks Usb SW SMI.
-
-    @param  Urp   Pointer to the URP structure
-
-    @retval None
-
-**/
-
-VOID
-UsbApiLockUsbSwSmi(
-    URP_STRUC *Urp
-)
-{
-    // Switch Global data to SMM data.
-    gCheckUsbApiParameter = FALSE;
-    if (Urp->bSubFunc == USB_DATA_DXE_TO_SMM){
-        AmiUsbGlobalDataSwitch( &gUsbData, 
-                                &gUsbDataList, 
-                                (HC_STRUC**)&gHcTable,
-                                &gDataInSmm, 
-                                USB_DATA_DXE_TO_SMM);     
-    }
-    gLockSmiHandler = TRUE;
-    SettingUsbSmi(FALSE);
 }
 
 /**
@@ -2036,11 +2361,11 @@ UINTN
 USBAPI_invoke_in_frame(
     VOID* pProc,
     VOID* buffer,
-    UINT32 ParamSize )
+    UINT32 paramSize )
 {
     STACKWORD* params = (STACKWORD*)buffer;
 
-    switch(ParamSize/sizeof(STACKWORD)){
+    switch(paramSize/sizeof(STACKWORD)){
     case 0: return ((STACKWORD (*)())pProc)();
     case 1: return ((STACKWORD (*)(STACKWORD))pProc)(params[0]);
     case 2: return ((STACKWORD (*)(STACKWORD,STACKWORD))pProc)(params[0],
@@ -2061,7 +2386,7 @@ USBAPI_invoke_in_frame(
                 params[0],params[1],params[2],params[3],params[4],params[5],
                 params[6]);
     default:
-        ASSERT(ParamSize/sizeof(STACKWORD) < 4);
+        ASSERT(paramSize/sizeof(STACKWORD) < 4);
         return 0;
     }
 /*  kept for reference
@@ -2072,7 +2397,7 @@ USBAPI_invoke_in_frame(
                         //Copy stak frame
         std
         mov     esi, buffer
-        mov     ecx, ParamSize
+        mov     ecx, paramSize
         add     esi, ecx
         sub     esi, 4
         shr     ecx, 2
@@ -2085,112 +2410,73 @@ loop1:
         cld
         call    eax
                         //Read return value
-        mov     RetVal, eax
+        mov     retVal, eax
 
                         //Restore stack and registers
-        add     esp, ParamSize
+        add     esp, paramSize
         popf
         pop     esi
         pop     ecx
     }
-    return RetVal;*/
+    return retVal;*/
 }
 
 /**
     Bridge to a number of procedures supplied by HC driver
 
 
-    @param Urp   Pointer to the URP structure
+    @param fpURP   Pointer to the URP structure
 
-    @retval USB_ERROR  Failure
-    @retval USB_SUCCESS  Success
+    @retval Return code USB_ERROR - Failure, USB_SUCCESS - Success)
 
     @note  
       Assumes that buffer has a correct image of the stack that
       corresponding function reads argument from
-      Size of the buffer can be bigger than actually used.
+      Size of the buffer can be biger than actually used.
 
       Following code copies the buffer (some stack frame) into new
       stack frame such that invoked dirver proc can read parametes
       supplied by buffer
 **/
 
-VOID USBAPI_HC_Proc(URP_STRUC *Urp)
+VOID USBAPI_HC_Proc(URP_STRUC *fpURP)
 {
-    VOID* buffer = Urp->ApiData.HcProc.ParamBuffer;
-    UINT32 ParamSize = // align size on DWORD
-        (Urp->ApiData.HcProc.ParamSize + 3) & ~0x3;
+    VOID* buffer = fpURP->ApiData.HcProc.paramBuffer;
+    UINT32 paramSize = // align size on DWORD
+        (fpURP->ApiData.HcProc.paramSize + 3) & ~0x3;
     UN_HCD_HEADER* pHdr;
 
-    ASSERT( GET_HCD_INDEX(Urp->ApiData.HcProc.HcType) <
-        sizeof(gUsbHcdTable)/sizeof(HCD_HEADER));
+    ASSERT( GET_HCD_INDEX(fpURP->ApiData.HcProc.bHCType) <
+        sizeof(gUsbData->aHCDriverTable)/sizeof(HCD_HEADER));
+    ASSERT( fpURP->bSubFunc < sizeof(pHdr->asArray.proc)/sizeof(VOID*));
 
-   
-    ASSERT( Urp->bSubFunc < sizeof(pHdr->asArray.proc)/sizeof(VOID*));
-
-    switch (Urp->ApiData.HcProc.HcType) {
-        case USB_HC_UHCI:
-            if ((gUsbData->UsbFeature & USB_HC_UHCI_SUPPORT) == 0){
-                USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "USBAPI_HC_Proc: Invalid HcType %x\n", Urp->ApiData.HcProc.HcType);
-                return;
-            }
-            break;
-        case USB_HC_OHCI:
-            if ((gUsbData->UsbFeature & USB_HC_OHCI_SUPPORT) == 0){
-                USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "USBAPI_HC_Proc: Invalid HcType %x\n", Urp->ApiData.HcProc.HcType);
-                return;
-            }
-            break;
-        case USB_HC_EHCI:
-            if ((gUsbData->UsbFeature & USB_HC_EHCI_SUPPORT) == 0){
-                USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "USBAPI_HC_Proc: Invalid HcType %x\n", Urp->ApiData.HcProc.HcType);
-                return;
-            }
-            break;
-        case USB_HC_XHCI:
-            if ((gUsbData->UsbFeature & USB_HC_XHCI_SUPPORT) == 0){
-                USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "USBAPI_HC_Proc: Invalid HcType %x\n", Urp->ApiData.HcProc.HcType);
-                return;
-            }
-            break;
-        default:
-            USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "USBAPI_HC_Proc: Invalid HcType %x\n", Urp->ApiData.HcProc.HcType);
-            return;
-    } 
-
-    pHdr = (UN_HCD_HEADER*)(gUsbHcdTable + GET_HCD_INDEX(Urp->ApiData.HcProc.HcType));
-
-    if ((Urp->bSubFunc >= (sizeof(pHdr->asArray.proc)/sizeof(VOID*))) || (pHdr->asArray.proc[Urp->bSubFunc] == NULL)) {
-        USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "USBAPI_HC_Proc: Invalid SubFunc#%x\n", Urp->bSubFunc);
-        return;
-    }
-
-    Urp->ApiData.HcProc.RetVal = USBAPI_invoke_in_frame(
-        pHdr->asArray.proc[Urp->bSubFunc],buffer,ParamSize);
-    Urp->bRetValue = USB_SUCCESS;
+    pHdr = (UN_HCD_HEADER*)(gUsbData->aHCDriverTable +
+                GET_HCD_INDEX(fpURP->ApiData.HcProc.bHCType));
+    fpURP->ApiData.HcProc.retVal = USBAPI_invoke_in_frame(
+        pHdr->asArray.proc[fpURP->bSubFunc],buffer,paramSize);
+    fpURP->bRetValue = USB_SUCCESS;
 }
 
 
 /**
     Bridge to a number of procedures supplied by Core proc table
 
-    @param Urp   Pointer to the URP structure
+    @param fpURP   Pointer to the URP structure
 
-    @retval USB_ERROR  Failure
-    @retval USB_SUCCESS  Success
+    @retval Return code USB_ERROR - Failure, USB_SUCCESS - Success
 
     @note  
       Assumes that buffer has a correct image of the stack that
       corresponding function reads argument from
-      Size of the buffer can be bigger than actually used.
+      Size of the buffer can be biger than actually used.
 
       Following code copies the buffer (some stack frame) into new
-      stack frame such that invoked proc can read parameters
+      stack frame such that invoked proc can read parametes
       supplied by buffer
 **/
 
 
-VOID* CORE_PROC_TABLE[] = {
+VOID* core_proc_table[] = {
         USB_GetDescriptor,
         USB_ReConfigDevice,
         USB_ReConfigDevice2,
@@ -2198,25 +2484,21 @@ VOID* CORE_PROC_TABLE[] = {
         PrepareForLegacyOs,
         USB_ResetAndReconfigDev,
         USB_DevDriverDisconnect,
+//        USB_GetDataPtr,
     };
 
-VOID USBAPI_Core_Proc(URP_STRUC *Urp)
+VOID USBAPI_Core_Proc(URP_STRUC *fpURP)
 {
-    VOID* buffer = Urp->ApiData.CoreProc.ParamBuffer;
-    UINT32 ParamSize = // align size on DWORD
-        (Urp->ApiData.CoreProc.ParamSize + 3) & ~0x3;
+    VOID* buffer = fpURP->ApiData.CoreProc.paramBuffer;
+    UINT32 paramSize = // align size on DWORD
+        (fpURP->ApiData.CoreProc.paramSize + 3) & ~0x3;
 
-    ASSERT( Urp->bSubFunc < COUNTOF(CORE_PROC_TABLE));
+    ASSERT( fpURP->bSubFunc < COUNTOF(core_proc_table));
 
-    if (Urp->bSubFunc >= COUNTOF(CORE_PROC_TABLE)) {
-        USB_DEBUG(DEBUG_ERROR, DEBUG_LEVEL_3, "USBAPI_Core_Proc: Invalid bSubFunc#%x\n", Urp->bSubFunc);
-        return;
-    }
+    fpURP->ApiData.CoreProc.retVal = USBAPI_invoke_in_frame(
+        core_proc_table[fpURP->bSubFunc],buffer,paramSize);
 
-    Urp->ApiData.CoreProc.RetVal = USBAPI_invoke_in_frame(
-        CORE_PROC_TABLE[Urp->bSubFunc],buffer,ParamSize);
-
-    Urp->bRetValue = USB_SUCCESS;
+    fpURP->bRetValue = USB_SUCCESS;
 }
 
 
@@ -2229,17 +2511,17 @@ VOID USBAPI_Core_Proc(URP_STRUC *Urp)
     This routine converts the sense data information into
     ATAPI error code
 
-    @param SenseData  Sense data obtained from the device
+    @param dSenseData  Sense data obtained from the device
 
-    @retval BYTE      ATAPI error code
+    @retval BYTE ATAPI error code
 
 **/
 
-UINT8 USBWrapGetATAErrorCode (UINT32 SenseData)
+UINT8 USBWrapGetATAErrorCode (UINT32 dSenseData)
 {
-    UINT8   sc = (UINT8)SenseData;             // Sense code
-    UINT8   asc = (UINT8)(SenseData >> 16);    // Additional Sense Code (ASC)
-    UINT8   ascq = (UINT8)(SenseData >> 8);    // Additional Sense Code Qualifier (ASCQ)
+    UINT8   sc = (UINT8)dSenseData;             // Sense code
+    UINT8   asc = (UINT8)(dSenseData >> 16);    // Additional Sense Code (ASC)
+    UINT8   ascq = (UINT8)(dSenseData >> 8);    // Additional Sense Code Qualifier (ASCQ)
 
     if (ascq == 0x28) return USB_ATA_DRIVE_NOT_READY_ERR;
     if (sc == 7) return USB_ATA_WRITE_PROTECT_ERR;
@@ -2259,16 +2541,16 @@ UINT8 USBWrapGetATAErrorCode (UINT32 SenseData)
 /**
     This routine finds the 'n'th device's DeviceInfo entry.
 
-    @param DevNumber  Device number (1-based)
+    @param bDevNumber  Device number (1-based)
 
     @retval DeviceInfo structure
 
 **/
 
 DEV_INFO*
-USBWrap_GetnthDeviceInfoStructure(UINT8 DevNumber)
+USBWrap_GetnthDeviceInfoStructure(UINT8 bDevNumber)
 {
-    return &gUsbDataList->DevInfoTable[DevNumber];
+    return &gUsbData->aDevInfoTable[bDevNumber];
 }
 
 
@@ -2277,7 +2559,7 @@ USBWrap_GetnthDeviceInfoStructure(UINT8 DevNumber)
     and returns number of active USB devices configured
     by the BIOS.
 
-    @param Urp    Pointer to the URP
+    @param fpURPPointer    Pointer to the URP
 
     @retval Following fields in the URP are modified
         CkPresence.bNumBootDev      Number of USB boot devices found
@@ -2289,36 +2571,36 @@ USBWrap_GetnthDeviceInfoStructure(UINT8 DevNumber)
 **/
 
 VOID
-USBWrap_GetDeviceCount(URP_STRUC *Urp)
+USBWrap_GetDeviceCount(URP_STRUC *fpURP)
 {
-    DEV_INFO    *FpDevInfo;
-    UINT8       Index;
+    DEV_INFO    *fpDevInfo;
+    UINT8       i;
 
-    for (Index = 1; Index < gUsbData->MaxDevCount; Index++) {
-        FpDevInfo   = &gUsbDataList->DevInfoTable[Index];
+    for (i=1; i<MAX_DEVICES; i++) {
+        fpDevInfo   = &gUsbData->aDevInfoTable[i];
 
-        if ( (FpDevInfo->Flag & DEV_INFO_VALID_STRUC) &&
-            (FpDevInfo->Flag & DEV_INFO_DEV_PRESENT)) {
-            Urp->ApiData.CkPresence.NumBootDev++;
+        if ( (fpDevInfo->Flag & DEV_INFO_VALID_STRUC) &&
+            (fpDevInfo->Flag & DEV_INFO_DEV_PRESENT)) {
+            fpURP->ApiData.CkPresence.bNumBootDev++;
 
-            switch (FpDevInfo->DeviceType) {
-    case BIOS_DEV_TYPE_HID:
-                    if (FpDevInfo->HidDevType & HID_DEV_TYPE_KEYBOARD) {
-                        Urp->ApiData.CkPresence.NumKeyboards++;
+            switch (fpDevInfo->bDeviceType) {
+				case BIOS_DEV_TYPE_HID:
+                    if (fpDevInfo->HidDevType & HID_DEV_TYPE_KEYBOARD) {
+                        fpURP->ApiData.CkPresence.bNumKeyboards++;
                     }
-                    if (FpDevInfo->HidDevType & HID_DEV_TYPE_MOUSE) {
-                        Urp->ApiData.CkPresence.NumMice++;
+                    if (fpDevInfo->HidDevType & HID_DEV_TYPE_MOUSE) {
+                        fpURP->ApiData.CkPresence.bNumMice++;
                     }
-                    if (FpDevInfo->HidDevType & HID_DEV_TYPE_POINT) {
-                        Urp->ApiData.CkPresence.NumPoint++;
+                    if (fpDevInfo->HidDevType & HID_DEV_TYPE_POINT) {
+                        fpURP->ApiData.CkPresence.bNumPoint++;
                     }
-     break;
-
+					break;
+										//<(EIP84455+)
                 case  BIOS_DEV_TYPE_HUB:
-                      Urp->ApiData.CkPresence.NumHubs++;
+                            fpURP->ApiData.CkPresence.bNumHubs++;
                             break;
                 case  BIOS_DEV_TYPE_STORAGE:
-                      Urp->ApiData.CkPresence.NumStorage++;
+                            fpURP->ApiData.CkPresence.bNumStorage++;
                             break;
                 case  BIOS_DEV_TYPE_SECURITY:
                             break;
@@ -2327,11 +2609,34 @@ USBWrap_GetDeviceCount(URP_STRUC *Urp)
     }
 }
 
+UINTN DevicePathSize (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+    EFI_DEVICE_PATH_PROTOCOL     *Start;
+
+    if (DevicePath == NULL) {
+        return 0;
+    }
+
+    //
+    // Search for the end of the device path structure
+    //
+    Start = DevicePath;
+    while (!EfiIsDevicePathEnd (DevicePath)) {
+        DevicePath = EfiNextDevicePathNode (DevicePath);
+    }
+
+    //
+    // Compute the size and add back in the size of the end device path structure
+    //
+    return ((UINTN)DevicePath - (UINTN)Start) + sizeof(EFI_DEVICE_PATH_PROTOCOL);
+}
 
 //**********************************************************************
 //**********************************************************************
 //**                                                                  **
-//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**        (C)Copyright 1985-2016, American Megatrends, Inc.         **
 //**                                                                  **
 //**                       All Rights Reserved.                       **
 //**                                                                  **

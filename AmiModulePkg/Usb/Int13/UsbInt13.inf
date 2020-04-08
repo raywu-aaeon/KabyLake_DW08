@@ -1,7 +1,7 @@
 #*************************************************************************
 #*************************************************************************
 #**                                                                     **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.            **
 #**                                                                     **
 #**                       All Rights Reserved.                          **
 #**                                                                     **
@@ -31,14 +31,13 @@
   IntelFrameworkPkg/IntelFrameworkPkg.dec
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec
   AmiModulePkg/AmiModulePkg.dec
-  AmiModulePkg/Usb/AmiUsbPkg.dec
 
 [LibraryClasses]
+  AmiDxeLib
   UefiDriverEntryPoint
   UefiLib
   UefiBootServicesTableLib
   DebugLib
-  BaseMemoryLib
 
 [Protocols]
   gEfiLegacyBiosProtocolGuid
@@ -54,7 +53,7 @@
 #*************************************************************************
 #*************************************************************************
 #**                                                                     **
-#**        (C)Copyright 1985-2018, American Megatrends, Inc.            **
+#**        (C)Copyright 1985-2016, American Megatrends, Inc.            **
 #**                                                                     **
 #**                       All Rights Reserved.                          **
 #**                                                                     **
