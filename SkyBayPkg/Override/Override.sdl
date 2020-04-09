@@ -1935,7 +1935,6 @@ TOKEN
 	Name  = "AAEON_LAN_UEFI_DRIVER_SUPPORT"
 	Value  = "1"
 	TokenType = Boolean
-	Master = Yes
 	Help  = "Main switch to enable OemLanUefiDriver support in Project"
 End
 ##ray_override / [TAG-SupportUefiPxe] Support uEFI PXE Boot / Added <<
