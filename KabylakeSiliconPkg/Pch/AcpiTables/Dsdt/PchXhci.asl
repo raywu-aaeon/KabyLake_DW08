@@ -2,7 +2,7 @@
 
  @copyright
   INTEL CONFIDENTIAL
-  Copyright 2010 - 2018 Intel Corporation.
+  Copyright 2010 - 2016 Intel Corporation.
 
   The source code contained or described herein and all documents related to the
   source code ("Material") are owned by Intel Corporation or its suppliers or
@@ -55,11 +55,9 @@ Scope(\_SB_.PCI0) {
       Offset(0x50), // XHCLKGTEN - Clock Gating
           ,  2,
       STGE,  1,     // Clock Gating Bit SSLTCGE
-      #ifndef MINTREE_FLAG
       Offset(R_PCH_XHCI_PCE), // 0xA2
           ,  2,
       D3HE,  1,  // D3_hot_en
-      #endif //MINTREE_FLAG
     }
     //
     // Byte access for PMCS field to avoid race condition on device D-state
@@ -94,10 +92,8 @@ Scope(\_SB_.PCI0) {
             ,  4,
         PPLS,  4,       // Port Link Status
         PTPP,  1,       // Port Power
-        #ifndef MINTREE_FLAG
         Offset(R_PCH_XHCI_STRAP2), // 0x8420, USB3 Mode Strap
         PRTM,  2,       // USB3/SSIC Mode
-        #endif //MINTREE_FLAG
       }
 
       If(PCIC(Arg0)) { return(PCID(Arg0,Arg1,Arg2,Arg3)) }
@@ -113,7 +109,7 @@ Scope(\_SB_.PCI0) {
         {
           Store(Arg1,XFLT)
         }
-        #ifndef MINTREE_FLAG
+
         //
         // If either USB3 Port1 or Port2 are configured as SSIC
         //
@@ -129,7 +125,6 @@ Scope(\_SB_.PCI0) {
             Store(One, D3HE)
           }
         }
-        #endif //MINTREE_FLAG
       }
       Return(Buffer() {0})
     }
@@ -242,9 +237,7 @@ Scope(\_SB_.PCI0) {
       Store(^PDBM,Local1)         // Save CMD
 
       And(^PDBM,Not(0x06),^PDBM)  // Clear MSE/BME
-      #ifndef MINTREE_FLAG
       Store(0,D3HE)
-      #endif //MINTREE_FLAG
       Store(0,STGE)
 
       //
@@ -333,166 +326,17 @@ Scope(\_SB_.PCI0) {
       OperationRegion(MC11,SystemMemory,\XWMB,0x9000)
       Field(MC11,DWordAcc,Lock,Preserve)
       {
-        Offset(R_PCH_XHCI_LFPSPM),   // 0x81A0, 
-        LFU3,  6,         // LFPS PM U3 Enable
-                          // 0 = LFPS Receiver shall be kept enabled when the port is in U3
-                          // 1 = LFPS Receiver whall be disabled when the port is in U3
         Offset(R_PCH_XHCI_USB2PMCTRL),   // 0x81C4, USB2PMCTRL - USB2 Power Management Control
             ,  2,
         UPSW,  2,         // U2PSUSPGP
       }
 
-      Name(U3PS, Zero) // USB3 PortSC Port 1 offset
-
-      If(LEqual(PCHV(), SPTL)) {
-        Store(R_PCH_LP_XHCI_PORTSC01USB3, U3PS)
-      } Else {
-        Store(R_PCH_H_XHCI_PORTSC01USB3, U3PS)
-      }
-
-      // USB3 Port Status and Control memory region
-      OperationRegion(UPSC,SystemMemory,\XWMB + U3PS,0x100)
-      Field(UPSC,DwordAcc,Lock,Preserve)
-      {
-        Offset(0x0),
-            ,  5,
-        PLS1,  4,         //Port Link  State (PLS) USB3 Port 1 on KBL PCH  bits [8:5]
-            , 13,
-        PLC1,  1,         // Port Link  State Change (PLC) USB3 Port 1 on KBL PCH bit 22
-            ,  1,
-        CAS1,  1,         // Cold Attach Status (CAS) USB3 Port 1 on KBL PCH bit 24
-        Offset(0x10),
-            ,  5,
-        PLS2,  4,         //Port Link  State (PLS) USB3 Port 2 on KBL PCH  bits [8:5]
-            , 13,
-        PLC2,  1,         // Port Link  State Change (PLC) USB3 Port 2 on KBL PCH bit 22
-            ,  1,
-        CAS2,  1,         // Cold Attach Status (CAS) USB3 Port 2 on KBL PCH bit 24
-        Offset(0x20),
-            ,  5,
-        PLS3,  4,         //Port Link  State (PLS) USB3 Port 3 on KBL PCH  bits [8:5]
-            , 13,
-        PLC3,  1,         // Port Link  State Change (PLC) USB3 Port 3 on KBL PCH bit 22
-            ,  1,
-        CAS3,  1,         // Cold Attach Status (CAS) USB3 Port 3 on KBL PCH bit 24
-        Offset(0x30),
-            ,  5,
-        PLS4,  4,         //Port Link  State (PLS) USB3 Port 4 on KBL PCH  bits [8:5]
-            , 13,
-        PLC4,  1,         // Port Link  State Change (PLC) USB3 Port 4 on KBL PCH bit 22
-            ,  1,
-        CAS4,  1,         // Cold Attach Status (CAS) USB3 Port 4 on KBL PCH bit 24
-        Offset(0x40),
-            ,  5,
-        PLS5,  4,         //Port Link  State (PLS) USB3 Port 5 on KBL PCH  bits [8:5]
-            , 13,
-        PLC5,  1,         // Port Link  State Change (PLC) USB3 Port 5 on KBL PCH bit 22
-            ,  1,
-        CAS5,  1,         // Cold Attach Status (CAS) USB3 Port 5 on KBL PCH bit 24
-        Offset(0x50),
-            ,  5,
-        PLS6,  4,         //Port Link  State (PLS) USB3 Port 6 on KBL PCH  bits [8:5]
-            , 13,
-        PLC6,  1,         // Port Link  State Change (PLC) USB3 Port 6 on KBL PCH bit 22
-            ,  1,
-        CAS6,  1,         // Cold Attach Status (CAS) USB3 Port 6 on KBL PCH bit 24
-        Offset(0x60),
-            , 24,
-        CAS7,  1,         // Cold Attach Status (CAS) USB3 Port 7 on KBL PCH
-        Offset(0x70),
-            , 24,
-        CAS8,  1,         // Cold Attach Status (CAS) USB3 Port 8 on KBL PCH
-        Offset(0x80),
-            , 24,
-        CAS9,  1,         // Cold Attach Status (CAS) USB3 Port 9 on KBL PCH
-        Offset(0x90),
-            , 24,
-        CASA,  1,         // Cold Attach Status (CAS) USB3 Port 10 on KBL PCH
-      }
-
-      // USB3 Port Status and Control memory region
-      Field(UPSC,DwordAcc,Lock,Preserve)
-      {
-        Offset(0x0),
-        PSC1,32,
-        Offset(0x10),
-        PSC2,32,
-        Offset(0x20),
-        PSC3,32,
-        Offset(0x30),
-        PSC4,32,
-        Offset(0x40),
-        PSC5,32,
-        Offset(0x50),
-        PSC6,32,
-      }
-
       Store(0x3,UPSW)
-      Store(1,STGE)
-
-      Store(0x3F,LFU3) // LFPS Receiver whall be disabled when the port is in U3
-      Name(PSCO,0xFFFFFFFF)
-      Sleep(1)
-      
-      if((PLS1==0x3) && (PLC1))
-      {
-        And(0xFFFFFFFD,PSC1,PSCO)
-        Or(0x400000,PSCO,PSCO)
-        Store(PSCO,PSC1)
-      }
-
-      if((PLS2==0x3) && (PLC2))
-      {
-        And(0xFFFFFFFD,PSC2,PSCO)
-        Or(0x400000,PSCO,PSCO)
-        Store(PSCO,PSC2)
-      }
-
-      if((PLS3==0x3) && (PLC3))
-      {
-        And(0xFFFFFFFD,PSC3,PSCO)
-        Or(0x400000,PSCO,PSCO)
-        Store(PSCO,PSC3)
-      }
-
-      if((PLS4==0x3) && (PLC4))
-      {
-        And(0xFFFFFFFD,PSC4,PSCO)
-        Or(0x400000,PSCO,PSCO)
-        Store(PSCO,PSC4)
-      }
-
-      if((PLS5==0x3) && (PLC5))
-      {
-        And(0xFFFFFFFD,PSC5,PSCO)
-        Or(0x400000,PSCO,PSCO)
-        Store(PSCO,PSC5)
-      }
-
-      if((PLS6==0x3) && (PLC6))
-      {
-        And(0xFFFFFFFD,PSC6,PSCO)
-        Or(0x400000,PSCO,PSCO)
-        Store(PSCO,PSC6)
-      }
-
-      Store(1,STGE)
-      #ifndef MINTREE_FLAG
-
-      If ((CAS1 || CAS2 || CAS3 || CAS4 || CAS5 || CAS6) || ((PCHV() == SPTH) && (CAS7 || CAS8 || CAS9 || CASA)))
-      {
-        Store(0,D3HE)   // Clear D3HE
-        Sleep(1)
-      }
-      Else
-      {
-        Store(1,D3HE)   // Set D3HE
-      }
-      #endif //MINTREE_FLAG
-      
-      Store(0,LFU3) // LFPS Receiver whall be kept enabled when the port is in U3
 
       And(^PDBM,Not(0x02),^PDBM)  // Clear MSE
+      
+      Store(1,D3HE)
+      Store(1,STGE)
 
       //
       // Switch back to D3
