@@ -929,6 +929,7 @@
 "AaeonCommonPkg\AaeonDio2Pkg\AaeonDio2Pkg.cif"
 "AaeonCommonPkg\AaeonRtcWakePkg\AaeonRtcWakePkg.cif"
 "AaeonCommonPkg\AaeonUartModePkg\AaeonUartModePkg.cif"
+"AaeonCommonPkg\AaeonUefiLanPkg\AaeonLanUefiDriver.cif"
 "SkyBayPkg\Crb.cif"= Private
 "SkyBayPkg\CrbSetup\CrbSetup.cif"= Private
 "SkyBayPkg\Include\Include.cif"= Private
