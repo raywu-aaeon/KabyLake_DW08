@@ -1365,7 +1365,7 @@ endif ;
       suppressif ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds;
         oneof varid   = SA_SETUP.IgdDvmt50PreAlloc,
 // AMI_OVERRIDE_START >>>
-          questionid = AUTO_ID(AAEON_NB_IGD_DVMT50_PREALLOC_KEY),
+          questionid = AUTO_ID(NB_IGD_DVMT50_PREALLOC_KEY),
 // AMI_OVERRIDE_END <<<
           prompt  = STRING_TOKEN(STR_DVMT50_PRE_ALLOC),
           help    = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_HELP),
@@ -1622,44 +1622,46 @@ suppressif TRUE ;
           option text = STRING_TOKEN(APERTURE_SIZE_1024MB), value = 7, flags = RESET_REQUIRED;
           option text = STRING_TOKEN(APERTURE_SIZE_2048MB), value = 15, flags = RESET_REQUIRED;
         endoneof;
-      //
-      // IgdDvmt50PreAlloc for SKL CPU
-      //
-      suppressif ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds;
-        oneof varid   = SA_SETUP.IgdDvmt50PreAlloc,
-// AMI_OVERRIDE_START >>>
-          questionid = AUTO_ID(NB_IGD_DVMT50_PREALLOC_KEY),
-// AMI_OVERRIDE_END <<<
-          prompt  = STRING_TOKEN(STR_DVMT50_PRE_ALLOC),
-          help    = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_HELP),
-// AMI_OVERRIDE_START
-          flags   = INTERACTIVE,
-//          default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb
-//                       ? 0x1:0x2), defaultstore = MyStandardDefault,
-// AMI_OVERRIDE_END
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_0M), value=0, flags=RESET_REQUIRED;
-// AMI_OVERRIDE_START
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
-//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M), value = 1, flags = RESET_REQUIRED;
-// AMI_OVERRIDE_END	  
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_64M), value=2, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_4M), value=240, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_8M), value=241, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_12M), value=242, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_16M), value=243, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_20M), value=244, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_24M), value=245, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_28M), value=246, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M_F7), value=247, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_36M), value=248, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_40M), value=249, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_44M), value=250, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_48M), value=251, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_52M), value=252, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_56M), value=253, flags=RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_60M), value=254, flags=RESET_REQUIRED;
-        endoneof;
-      endif;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Remove for Build Failed >>
+//      //
+//      // IgdDvmt50PreAlloc for SKL CPU
+//      //
+//      suppressif ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds;
+//        oneof varid   = SA_SETUP.IgdDvmt50PreAlloc,
+//// AMI_OVERRIDE_START >>>
+//          questionid = AUTO_ID(NB_IGD_DVMT50_PREALLOC_KEY),
+//// AMI_OVERRIDE_END <<<
+//          prompt  = STRING_TOKEN(STR_DVMT50_PRE_ALLOC),
+//          help    = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_HELP),
+//// AMI_OVERRIDE_START
+//          flags   = INTERACTIVE,
+////          default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb
+////                       ? 0x1:0x2), defaultstore = MyStandardDefault,
+//// AMI_OVERRIDE_END
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_0M), value=0, flags=RESET_REQUIRED;
+//// AMI_OVERRIDE_START
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+////          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M), value = 1, flags = RESET_REQUIRED;
+//// AMI_OVERRIDE_END	  
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_64M), value=2, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_4M), value=240, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_8M), value=241, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_12M), value=242, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_16M), value=243, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_20M), value=244, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_24M), value=245, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_28M), value=246, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M_F7), value=247, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_36M), value=248, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_40M), value=249, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_44M), value=250, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_48M), value=251, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_52M), value=252, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_56M), value=253, flags=RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_60M), value=254, flags=RESET_REQUIRED;
+//        endoneof;
+//      endif;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Remove for Build Failed <<
 
         oneof   varid   = SA_SETUP.IgdDvmt50TotalAlloc,
           prompt  = STRING_TOKEN(STR_DVMT50_DVMT ),
