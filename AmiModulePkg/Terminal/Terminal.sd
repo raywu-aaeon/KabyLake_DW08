@@ -900,9 +900,13 @@
 
 
     #ifdef FORM_SET_GOTO
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
         goto TERMINAL_FORM_ID, 
             prompt  = STRING_TOKEN(STR_TERMINAL_FORM_TITLE),
             help    = STRING_TOKEN(STR_TERMINAL_FORM_TITLE);
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
     #endif 
 
 

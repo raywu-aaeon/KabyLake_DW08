@@ -50,6 +50,23 @@
     SUBTITLE(STRING_TOKEN(STR_SB_FORM_SUBTITLE))
     SEPARATOR
 
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed >>
+    goto PCIE_DEVICE_OPTIONS_FORM_ID,
+         prompt = STRING_TOKEN(STR_PCIE_OPTIONS_FORM),
+         help = STRING_TOKEN(STR_PCIE_OPTIONS_FORM_HELP);
+
+    goto SATA_DEVICE_OPTIONS_FORM_ID,
+         prompt = STRING_TOKEN(STR_SATA_DEVICE_OPTIONS_FORM),
+         help = STRING_TOKEN(STR_SATA_DEVICE_OPTIONS_FORM_HELP);
+
+    goto USB_OPTIONS_FORM_ID,
+         prompt = STRING_TOKEN(STR_USB_OPTIONS_FORM),
+         help = STRING_TOKEN(STR_USB_OPTIONS_FORM_HELP);
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
+
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
+
     goto PCIE_DEVICE_OPTIONS_FORM_ID,
          prompt = STRING_TOKEN(STR_PCIE_OPTIONS_FORM),
          help = STRING_TOKEN(STR_PCIE_OPTIONS_FORM_HELP);
@@ -531,6 +548,8 @@
       option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
     endoneof;
 
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
     endform;
 
 
