@@ -1365,7 +1365,7 @@ endif ;
       suppressif ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds;
         oneof varid   = SA_SETUP.IgdDvmt50PreAlloc,
 // AMI_OVERRIDE_START >>>
-          questionid = AUTO_ID(NB_IGD_DVMT50_PREALLOC_KEY),
+          questionid = AUTO_ID(AAEON_NB_IGD_DVMT50_PREALLOC_KEY),
 // AMI_OVERRIDE_END <<<
           prompt  = STRING_TOKEN(STR_DVMT50_PRE_ALLOC),
           help    = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_HELP),
