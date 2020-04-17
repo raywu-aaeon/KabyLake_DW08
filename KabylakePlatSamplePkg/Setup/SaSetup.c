@@ -176,9 +176,6 @@ NbSetupCallback (
          break;
 
       case NB_IGD_DVMT50_PREALLOC_KEY:
-//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Added >>
-      case AAEON_NB_IGD_DVMT50_PREALLOC_KEY:
-//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Added <<
         // IgdDvmt50PreAlloc <- Value->u8
         if (Value->u8 < 240) {
           IgdMemSize = 32 * Value->u8;
@@ -217,9 +214,6 @@ InitSaSetupCallback (
   AmiSetupRegisterCallbackHandler (NB_CRID_KEY, NbSetupCallback);
   AmiSetupRegisterCallbackHandler (NB_APERTURE_SIZE_KEY, NbSetupCallback);
   AmiSetupRegisterCallbackHandler (NB_IGD_DVMT50_PREALLOC_KEY, NbSetupCallback);
-//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Added >>
-  AmiSetupRegisterCallbackHandler (AAEON_NB_IGD_DVMT50_PREALLOC_KEY, NbSetupCallback);
-//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Added <<
 }
 // AMI_OVERRIDE_END - Created SA setup callback function for some SA features and mistake-proofing.
 
