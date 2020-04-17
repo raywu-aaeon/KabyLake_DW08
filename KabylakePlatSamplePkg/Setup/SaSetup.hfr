@@ -54,6 +54,105 @@
     form formid = AUTO_ID(MEMORY_FORM_ID),
     title = STRING_TOKEN(STR_MEMORY_FORM_TITLE);
 
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed >>
+      SUBTITLE(STRING_TOKEN(STR_MEMORY_FORM_SUBTITLE))
+      SEPARATOR
+
+      text
+        help   = STRING_TOKEN(STR_MEMORY_FREQ_HELP),
+        text   = STRING_TOKEN(STR_MEMORY_FREQ_NAME),
+        text   = STRING_TOKEN(STR_MEMORY_FREQ_VALUE),
+        flags  = 0,
+        key    = 0;
+
+      SEPARATOR
+      text
+        help   = STRING_TOKEN(STR_DIMM_CH_SLT_SUBTITLE_HELP),
+        text   = STRING_TOKEN(STR_DIMM_CH0_SLT0_FORM_SUBTITLE),
+        text   = STRING_TOKEN(STR_DIMM_CH0_SLT0_STATUS),
+        flags  = 0,
+        key    = 0;
+
+      suppressif ideqval SETUP_VOLATILE_DATA.DimmPresent[OFFSET_0] == 0x0;
+        text
+          help   = STRING_TOKEN(STR_DIMM_SIZE_HELP),
+          text   = STRING_TOKEN(STR_DIMM_SIZE_NAME),
+          text   = STRING_TOKEN(STR_DIMM_SIZE_CH0_SLT0_VALUE),
+          flags  = 0,
+          key    = 0;
+        text
+          help   = STRING_TOKEN(STR_DIMM_NUM_RANKS_HELP),
+          text   = STRING_TOKEN(STR_DIMM_NUM_RANKS_NAME),
+          text   = STRING_TOKEN(STR_DIMM_CH0_SLT0_RANK_VALUE),
+          flags  = 0,
+          key    = 0;
+        text
+          help   = STRING_TOKEN(STR_DIMM_MFG_HELP),
+          text   = STRING_TOKEN(STR_DIMM_MFG_NAME),
+          text   = STRING_TOKEN(STR_DIMM_CH0_SLT0_MFG_VALUE),
+          flags  = 0,
+          key    = 0;
+      endif;
+
+      text
+        help   = STRING_TOKEN(STR_DIMM_CH_SLT_SUBTITLE_HELP),
+        text   = STRING_TOKEN(STR_DIMM_CH1_SLT0_FORM_SUBTITLE),
+        text   = STRING_TOKEN(STR_DIMM_CH1_SLT0_STATUS),
+        flags  = 0,
+        key    = 0;
+
+      suppressif ideqval SETUP_VOLATILE_DATA.DimmPresent[OFFSET_2] == 0x0;
+        text
+          help   = STRING_TOKEN(STR_DIMM_SIZE_HELP),
+          text   = STRING_TOKEN(STR_DIMM_SIZE_NAME),
+          text   = STRING_TOKEN(STR_DIMM_SIZE_CH1_SLT0_VALUE),
+          flags  = 0,
+          key    = 0;
+        text
+          help   = STRING_TOKEN(STR_DIMM_NUM_RANKS_HELP),
+          text   = STRING_TOKEN(STR_DIMM_NUM_RANKS_NAME),
+          text   = STRING_TOKEN(STR_DIMM_CH1_SLT0_RANK_VALUE),
+          flags  = 0,
+          key    = 0;
+        text
+          help   = STRING_TOKEN(STR_DIMM_MFG_HELP),
+          text   = STRING_TOKEN(STR_DIMM_MFG_NAME),
+          text   = STRING_TOKEN(STR_DIMM_CH1_SLT0_MFG_VALUE),
+          flags  = 0,
+          key    = 0;
+      endif;
+
+      //
+      // Max TOLUD setup option
+      //
+      oneof varid    = SA_SETUP.MaxTolud,
+        prompt   = STRING_TOKEN(STR_MAX_TOLUD_PROMPT),
+        help     = STRING_TOKEN(STR_MAX_TOLUD_HELP),
+// AMI_OVERRIDE_START                        
+//        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds
+//                             ? MAX_TOLUD_DYNAMIC:MAX_TOLUD_1G), defaultstore = MyStandardDefault,
+        option text = STRING_TOKEN(STR_MAX_TOLUD_DYNAMIC_STRING), value = MAX_TOLUD_DYNAMIC, flags = RESET_REQUIRED;
+// AMI_OVERRIDE_END	
+        option text = STRING_TOKEN(STR_MAX_TOLUD_1G_STRING),      value = MAX_TOLUD_1G,      flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_1_25G_STRING),   value = MAX_TOLUD_1_25G,   flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_1_5G_STRING),    value = MAX_TOLUD_1_5G,    flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_1_75G_STRING),   value = MAX_TOLUD_1_75G,   flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_2G_STRING),      value = MAX_TOLUD_2G,      flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_2_25G_STRING),   value = MAX_TOLUD_2_25G,   flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_2_5G_STRING),    value = MAX_TOLUD_2_5G,    flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_2_75G_STRING),   value = MAX_TOLUD_2_75G,   flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_3G_STRING),      value = MAX_TOLUD_3G,      flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_3_25G_STRING),   value = MAX_TOLUD_3_25G,   flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_MAX_TOLUD_3_5G_STRING),    value = MAX_TOLUD_3_5G,    flags = RESET_REQUIRED;
+      endoneof;
+//ray_override / [XI-Tuning] Too much Memory Used by PCIe Devices under Windows 7 / Modified >>
+// MAX_TOLUD_DYNAMIC -> MAX_TOLUD_3_25G
+//ray_override / [XI-Tuning] Too much Memory Used by PCIe Devices under Windows 7 / Modified <<
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
+
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
+
       goto MEMORY_THERMAL_CONFIG_FORM_ID,
         prompt = STRING_TOKEN(STR_MEMORY_THERMAL_CONFIG_FORM_TITLE),
         help = STRING_TOKEN(STR_MEMORY_THERMAL_CONFIG_FORM_HELP);
@@ -1017,6 +1116,8 @@
     endoneof;
 
 
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
     endform;
 
     form formid = AUTO_ID(NB_FORM_ID),
@@ -1024,6 +1125,34 @@
 
       SUBTITLE(STRING_TOKEN(STR_NB_FORM_SUBTITLE))
       SEPARATOR
+
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed >>
+      goto MEMORY_FORM_ID, 
+        prompt = STRING_TOKEN(STR_MEMORY_FORM),
+        help = STRING_TOKEN(STR_MEMORY_FORM_HELP);
+
+      goto IGFX_FORM_ID,
+        prompt  = STRING_TOKEN(STR_IGFX),
+        help    = STRING_TOKEN(STR_IGFX_HELP);
+
+      SEPARATOR
+
+      suppressif  ideqval SETUP_VOLATILE_DATA.VTdAvailable == 0;
+        grayoutif ideqval SETUP_VOLATILE_DATA.TbtVtdBaseSecurityGrayOut == 1;
+          oneof varid    = SA_SETUP.EnableVtd,
+            prompt      = STRING_TOKEN(STR_SA_VTD_PROMPT),
+            help        = STRING_TOKEN(STR_SA_VTD_HELP),
+//            default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Rvp3Ppv BoardIdSkylakeULpddr3Rvp5Ppv BoardIdSkylakeURvp7Ppv BoardIdSkylakeAioRvp10CrbPpv BoardIdSkylakeHaloDdr4Rvp11Ppv
+//                                                                         ? 0x1:0x0), defaultstore = MyStandardDefault,
+            option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          endoneof;
+        endif; //TbtVtdBaseSecurityGrayOut
+      endif;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
+
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
 
       text
         help   = STRING_TOKEN(STR_SA_PCIE_CODE_VERSION_HELP),
@@ -1184,6 +1313,8 @@
 #endif
 // AMI_OVERRIDE_SA0023_END <<<
 
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
     endform;
 
 
@@ -1193,6 +1324,96 @@
     SUBTITLE(STRING_TOKEN(STR_IGFX_SUBTITLE))
     SEPARATOR
 
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed >>
+      //
+      // Primary Display setup option
+      //
+      oneof varid = SA_SETUP.PrimaryDisplay,
+        prompt    = STRING_TOKEN(STR_PRIMARY_DISPLAY),
+        help      = STRING_TOKEN(STR_PRIMARY_DISPLAY_HELP),
+        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdKabylakeDdr4Rvp17
+                                                                     ? 3:4), defaultstore = MyStandardDefault,
+        option text = STRING_TOKEN(STR_AUTO_STRING),    value = 3, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_IGFX_STRING),    value = 0, flags = RESET_REQUIRED;
+        suppressif ideqval SETUP_VOLATILE_DATA.PlatformType == TypeUltUlx AND
+                     (ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorMobile OR
+                      ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorEmbedded);
+          option text = STRING_TOKEN(STR_PEG_STRING),   value = 1, flags = RESET_REQUIRED;
+        endif;
+      endoneof;
+
+      suppressif ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds;
+        oneof varid    = SA_SETUP.InternalGraphics,
+          prompt   = STRING_TOKEN(STR_INT_GRAPHICS_PROMPT),
+          help     = STRING_TOKEN(STR_INT_GRAPHICS_HELP),
+// AMI_OVERRIDE_START
+          option text = STRING_TOKEN(STR_AUTO_STRING), value = 2, flags = RESET_REQUIRED;
+//          default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Rvp3Ppv BoardIdSkylakeULpddr3Rvp5Ppv BoardIdSkylakeURvp7Ppv BoardIdSkylakeAioRvp10CrbPpv BoardIdSkylakeHaloDdr4Rvp11Ppv
+//                                                                       ? cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb
+//                                                                       ? 0x2:0x0):0x1), defaultstore = MyStandardDefault,
+//          option text = STRING_TOKEN(STR_AUTO_STRING), value = 2, flags = RESET_REQUIRED;
+// AMI_OVERRIDE_END
+          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+      endif;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Changed : STR_AUTO_STRING -> STR_ENABLED_STRING
+
+      //
+      // IgdDvmt50PreAlloc for SKL CPU
+      //
+      suppressif ideqval SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeSds;
+        oneof varid   = SA_SETUP.IgdDvmt50PreAlloc,
+// AMI_OVERRIDE_START >>>
+          questionid = AUTO_ID(NB_IGD_DVMT50_PREALLOC_KEY),
+// AMI_OVERRIDE_END <<<
+          prompt  = STRING_TOKEN(STR_DVMT50_PRE_ALLOC),
+          help    = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_HELP),
+// AMI_OVERRIDE_START
+          flags   = INTERACTIVE,
+//          default value=cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb
+//                       ? 0x1:0x2), defaultstore = MyStandardDefault,
+// AMI_OVERRIDE_END
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_0M), value=0, flags=RESET_REQUIRED;
+// AMI_OVERRIDE_START
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+//          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M), value = 1, flags = RESET_REQUIRED;
+// AMI_OVERRIDE_END	  
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_64M), value=2, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_4M), value=240, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_8M), value=241, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_12M), value=242, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_16M), value=243, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_20M), value=244, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_24M), value=245, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_28M), value=246, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_32M_F7), value=247, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_36M), value=248, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_40M), value=249, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_44M), value=250, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_48M), value=251, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_52M), value=252, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_56M), value=253, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_PRE_ALLOC_60M), value=254, flags=RESET_REQUIRED;
+        endoneof;
+      endif;
+
+        oneof   varid   = SA_SETUP.IgdDvmt50TotalAlloc,
+          prompt  = STRING_TOKEN(STR_DVMT50_DVMT ),
+          help    = STRING_TOKEN(STR_DVMT50_DVMT_HELP),
+// AMI_OVERRIDE_START
+          option text = STRING_TOKEN(STR_DVMT50_ALLOC_256), value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+//          default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb
+//                        ? 0x2:0x3), defaultstore = MyStandardDefault,
+//          option text = STRING_TOKEN(STR_DVMT50_ALLOC_256), value = 2, flags = RESET_REQUIRED;
+// AMI_OVERRIDE_END
+          option text = STRING_TOKEN(STR_DVMT50_ALLOC_128), value=1, flags=RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DVMT50_ALLOC_MAX), value=3, flags=RESET_REQUIRED;
+        endoneof;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
+
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
     suppressif ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorUpServer;
         //
         // Graphics Turbo IMON Current setup option
@@ -1361,16 +1582,17 @@
           prompt   = STRING_TOKEN(STR_INT_GRAPHICS_PROMPT),
           help     = STRING_TOKEN(STR_INT_GRAPHICS_HELP),
 // AMI_OVERRIDE_START
-          option text = STRING_TOKEN(STR_AUTO_STRING), value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_AUTO_STRING), value = 2, flags = RESET_REQUIRED;
 //          default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdSkylakeA0Rvp3Ppv BoardIdSkylakeULpddr3Rvp5Ppv BoardIdSkylakeURvp7Ppv BoardIdSkylakeAioRvp10CrbPpv BoardIdSkylakeHaloDdr4Rvp11Ppv
 //                                                                       ? cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdZumbaBeachServerEv BoardIdZumbaBeachServerCrb
 //                                                                       ? 0x2:0x0):0x1), defaultstore = MyStandardDefault,
 //          option text = STRING_TOKEN(STR_AUTO_STRING), value = 2, flags = RESET_REQUIRED;
 // AMI_OVERRIDE_END
           option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         endoneof;
       endif;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Changed : STR_AUTO_STRING -> STR_ENABLED_STRING
 
         oneof varid    = SA_SETUP.GTTSize,
           prompt   = STRING_TOKEN(STR_GTT_SIZE),
@@ -1573,6 +1795,8 @@
           help    = STRING_TOKEN(STR_IUER_SUPPORT_HELP);
       endif;  // suppres if NOT ideqval SETUP_VOLATILE_DATA.PlatformFlavor == FlavorMobile
 
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
     endform;
 
     form formid = AUTO_ID(COMMON_NB_OPTIONS_FORM_ID),

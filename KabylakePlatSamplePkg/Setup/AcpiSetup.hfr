@@ -35,9 +35,13 @@
 #ifdef ADVANCED_FORM_SET
 
 #ifdef FORM_SET_GOTO
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
   goto RC_ACPI_FORM_ID, 
     prompt = STRING_TOKEN(STR_RC_ACPI_FORM),
     help = STRING_TOKEN(STR_ACPI_FORM_HELP);
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
 #endif
 
 #ifdef FORM_SET_FORM

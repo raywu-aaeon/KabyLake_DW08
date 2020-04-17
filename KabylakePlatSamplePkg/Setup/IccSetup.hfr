@@ -47,9 +47,13 @@
 
 #ifdef FORM_SET_GOTO
   // Define goto commands for the forms defined in this file
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
   goto ICC_FORM_ID,
     prompt  = STRING_TOKEN(STR_ICC_FORM),
     help    = STRING_TOKEN(STR_ICC_FORM);
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
 #endif
 
 #ifdef FORM_SET_FORM

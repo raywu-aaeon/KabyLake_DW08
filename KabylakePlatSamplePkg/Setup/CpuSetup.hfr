@@ -63,9 +63,13 @@
     prompt = STRING_TOKEN(STR_CPU_FORM),
     help = STRING_TOKEN(STR_CPU_FORM_HELP);
     
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
+suppressif TRUE ;
   goto POWER_CONFIG_FORM_ID, 
     prompt = STRING_TOKEN(STR_POWER_CONFIGURATION),
     help = STRING_TOKEN(STR_POWER_CONFIGURATION_HELP);   
+endif ;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
 #endif
 
 #ifdef FORM_SET_FORM
