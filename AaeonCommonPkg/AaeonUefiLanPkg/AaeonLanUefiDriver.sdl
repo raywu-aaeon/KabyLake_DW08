@@ -1,6 +1,6 @@
 TOKEN
 	Name  = "AAEON_LAN_UEFI_DRIVER_SUPPORT"
-	Value  = "0"
+	Value  = "1"
 	TokenType = Boolean
 	Master = Yes
 	Help  = "Main switch to enable OemLanUefiDriver support in Project"
@@ -8,7 +8,7 @@ End
 
 TOKEN
 	Name  = "Lan_Option"
-	Value  = "2"
+	Value  = "1"
 	Help  = "\0-IntelGigabitLan,\1-RealtekLan \2- Support Intel and RealTekLan"
 	TokenType = Integer
 	TargetMAK = Yes
