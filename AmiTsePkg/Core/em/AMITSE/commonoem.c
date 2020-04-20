@@ -2124,7 +2124,7 @@ BOOLEAN HideDynamicFormsets (EFI_GUID *FormSetGuid )
 	UINTN suppressDynamicFormsetListCount = sizeof(gSuppressDynamicFormsetList) / sizeof (EFI_GUID);
 	UINT16 index = 0;
 //raydebug >>
-TRACE((-1,"//raydebug FormSetGuid = 0x%X\n", FormSetGuid));
+TRACE((-1,"//raydebug FormSetGuid = %g\n", FormSetGuid));
 //raydebug <<
 	if (FormSetGuid)
 	{
