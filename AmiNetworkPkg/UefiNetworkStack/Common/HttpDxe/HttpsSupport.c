@@ -543,7 +543,7 @@ TlsConfigureSession (
   //
   Status = TlsConfigCertificate (HttpInstance);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "TLS Certificate Config Error!\n"));
+    DEBUG_RAYDEBUG ((-1, "TLS Certificate Config Error!\n"));
     return Status;
   }
 
@@ -1727,7 +1727,7 @@ HttpsReceive (
     FreePool (GetSessionDataBuffer);
 
     if(HttpInstance->TlsSessionState == EfiTlsSessionError) {
-      DEBUG ((EFI_D_ERROR, "TLS Session State Error!\n"));
+      DEBUG_RAYDEBUG ((-1, "TLS Session State Error!\n"));
       return EFI_ABORTED;
     }
 

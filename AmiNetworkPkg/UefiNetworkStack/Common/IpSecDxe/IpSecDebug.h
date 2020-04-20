@@ -34,7 +34,7 @@
 /**
   Print the IP address.
 
-  @param[in]  Level     Debug print error level. Pass to DEBUG().
+  @param[in]  Level     Debug print error level. Pass to DEBUG_RAYDEBUG().
   @param[in]  Ip        Point to specified IP address.
   @param[in]  IpVersion The IP Version.
 

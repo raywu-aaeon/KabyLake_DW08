@@ -47,7 +47,7 @@ MnpIsValidTxToken (
     // The token is invalid if the Event is NULL, or the TxData is NULL, or
     // the fragment count is zero.
     //
-    DEBUG ((EFI_D_WARN, "MnpIsValidTxToken: Invalid Token.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpIsValidTxToken: Invalid Token.\n"));
     return FALSE;
   }
 
@@ -56,7 +56,7 @@ MnpIsValidTxToken (
     // The token is invalid if the HeaderLength isn't zero while the DestinationAddress
     // is NULL (The destination address is already put into the packet).
     //
-    DEBUG ((EFI_D_WARN, "MnpIsValidTxToken: DestinationAddress isn't NULL, HeaderLength must be 0.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpIsValidTxToken: DestinationAddress isn't NULL, HeaderLength must be 0.\n"));
     return FALSE;
   }
 
@@ -68,7 +68,7 @@ MnpIsValidTxToken (
       //
       // The token is invalid if any FragmentLength is zero or any FragmentBuffer is NULL.
       //
-      DEBUG ((EFI_D_WARN, "MnpIsValidTxToken: Invalid FragmentLength or FragmentBuffer.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpIsValidTxToken: Invalid FragmentLength or FragmentBuffer.\n"));
       return FALSE;
     }
 
@@ -87,7 +87,7 @@ MnpIsValidTxToken (
     // The length calculated from the fragment information doesn't equal to the
     // sum of the DataLength and the HeaderLength.
     //
-    DEBUG ((EFI_D_WARN, "MnpIsValidTxData: Invalid Datalength compared with the sum of fragment length.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpIsValidTxData: Invalid Datalength compared with the sum of fragment length.\n"));
     return FALSE;
   }
 
@@ -95,7 +95,7 @@ MnpIsValidTxToken (
     //
     // The total length is larger than the MTU.
     //
-    DEBUG ((EFI_D_WARN, "MnpIsValidTxData: TxData->DataLength exceeds Mtu.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpIsValidTxData: TxData->DataLength exceeds Mtu.\n"));
     return FALSE;
   }
 
@@ -223,7 +223,7 @@ MnpSyncSendPacket (
     //
     // Media not present, skip packet transmit and report EFI_NO_MEDIA
     //
-    DEBUG ((EFI_D_WARN, "MnpSyncSendPacket: No network cable detected.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpSyncSendPacket: No network cable detected.\n"));
     Status = EFI_NO_MEDIA;
     goto SIGNAL_TOKEN;
   }
@@ -362,7 +362,7 @@ MnpInstanceDeliverPacket (
     //
     DupNbuf = MnpAllocNbuf (MnpDeviceData);
     if (DupNbuf == NULL) {
-      DEBUG ((EFI_D_WARN, "MnpDeliverPacket: Failed to allocate a free Nbuf.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpDeliverPacket: Failed to allocate a free Nbuf.\n"));
 
       return EFI_OUT_OF_RESOURCES;
     }
@@ -512,7 +512,7 @@ MnpQueueRcvdPacket (
   //
   if (Instance->RcvdPacketQueueSize == MNP_MAX_RCVD_PACKET_QUE_SIZE) {
 
-    DEBUG ((EFI_D_WARN, "MnpQueueRcvdPacket: Drop one packet bcz queue size limit reached.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpQueueRcvdPacket: Drop one packet bcz queue size limit reached.\n"));
 
     //
     // Get the oldest packet.
@@ -748,7 +748,7 @@ MnpWrapRxData (
   //
   RxDataWrap = AllocatePool (sizeof (MNP_RXDATA_WRAP));
   if (RxDataWrap == NULL) {
-    DEBUG ((EFI_D_ERROR, "MnpDispatchPacket: Failed to allocate a MNP_RXDATA_WRAP.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpDispatchPacket: Failed to allocate a MNP_RXDATA_WRAP.\n"));
     return NULL;
   }
 
@@ -770,7 +770,7 @@ MnpWrapRxData (
                   &RxDataWrap->RxData.RecycleEvent
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "MnpDispatchPacket: gBS->CreateEvent failed, %r.\n", Status));
+    DEBUG_RAYDEBUG ((-1, "MnpDispatchPacket: gBS->CreateEvent failed, %r.\n", Status));
 
     FreePool (RxDataWrap);
     return NULL;
@@ -924,7 +924,7 @@ MnpReceivePacket (
   if (EFI_ERROR (Status)) {
     DEBUG_CODE (
       if (Status != EFI_NOT_READY) {
-        DEBUG ((EFI_D_WARN, "MnpReceivePacket: Snp->Receive() = %r.\n", Status));
+        DEBUG_RAYDEBUG ((-1, "MnpReceivePacket: Snp->Receive() = %r.\n", Status));
       }
     );
 
@@ -935,7 +935,7 @@ MnpReceivePacket (
   // Sanity check.
   //
   if ((HeaderSize != Snp->Mode->MediaHeaderSize) || (BufLen < HeaderSize)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_WARN,
       "MnpReceivePacket: Size error, HL:TL = %d:%d.\n",
       HeaderSize,
@@ -994,7 +994,7 @@ MnpReceivePacket (
     Nbuf                       = MnpAllocNbuf (MnpDeviceData);
     MnpDeviceData->RxNbufCache = Nbuf;
     if (Nbuf == NULL) {
-      DEBUG ((EFI_D_ERROR, "MnpReceivePacket: Alloc packet for receiving cache failed.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpReceivePacket: Alloc packet for receiving cache failed.\n"));
       return EFI_DEVICE_ERROR;
     }
 
@@ -1083,7 +1083,7 @@ MnpCheckPacketTimeout (
           //
           // Drop the timeout packet.
           //
-          DEBUG ((EFI_D_WARN, "MnpCheckPacketTimeout: Received packet timeout.\n"));
+          DEBUG_RAYDEBUG ((-1, "MnpCheckPacketTimeout: Received packet timeout.\n"));
           MnpRecycleRxData (NULL, RxDataWrap);
           Instance->RcvdPacketQueueSize--;
         }

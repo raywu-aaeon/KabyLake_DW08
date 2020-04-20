@@ -534,7 +534,7 @@ IpSecDriverEntryPoint (
   Status = gBS->LocateProtocol (&gEfiIpSec2ProtocolGuid, NULL, (VOID **) &IpSec);
 
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "_ModuleEntryPoint: IpSec has been already loaded\n"));
+    DEBUG_RAYDEBUG ((-1, "_ModuleEntryPoint: IpSec has been already loaded\n"));
     Status = EFI_ALREADY_STARTED;
     goto ON_EXIT;
   }
@@ -542,14 +542,14 @@ IpSecDriverEntryPoint (
   Status = gBS->LocateProtocol (&gEfiDpcProtocolGuid, NULL, (VOID **) &mDpc);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "_ModuleEntryPoint: Failed to locate EfiDpcProtocol\n"));
+    DEBUG_RAYDEBUG ((-1, "_ModuleEntryPoint: Failed to locate EfiDpcProtocol\n"));
     goto ON_EXIT;
   }
 
   Private = AllocateZeroPool (sizeof (IPSEC_PRIVATE_DATA));
 
   if (Private == NULL) {
-    DEBUG ((DEBUG_ERROR, "_ModuleEntryPoint: Failed to allocate private data\n"));
+    DEBUG_RAYDEBUG ((-1, "_ModuleEntryPoint: Failed to allocate private data\n"));
     Status = EFI_OUT_OF_RESOURCES;
     goto ON_EXIT;
   }
@@ -564,7 +564,7 @@ IpSecDriverEntryPoint (
                   &mIpSecInstance.DisabledEvent
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "_ModuleEntryPoint: Failed to create disable event\n"));
+    DEBUG_RAYDEBUG ((-1, "_ModuleEntryPoint: Failed to create disable event\n"));
     goto ON_FREE_PRIVATE;
   }
 
@@ -588,7 +588,7 @@ IpSecDriverEntryPoint (
   //
   Status = IpSecConfigInitialize (Private);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "_ModuleEntryPoint: Failed to initialize IpSecConfig\n"));
+    DEBUG_RAYDEBUG ((-1, "_ModuleEntryPoint: Failed to initialize IpSecConfig\n"));
     goto ON_CLOSE_EVENT;
   }
   //

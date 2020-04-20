@@ -58,7 +58,7 @@ PxeShutdown (
   //
   // Issue UNDI command and check result.
   //
-  DEBUG ((EFI_D_NET, "\nsnp->undi.shutdown()  "));
+  DEBUG_RAYDEBUG ((-1, "\nsnp->undi.shutdown()  "));
 
   (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
 
@@ -66,7 +66,7 @@ PxeShutdown (
     //
     // UNDI could not be shutdown. Return UNDI error.
     //
-    DEBUG ((EFI_D_WARN, "\nsnp->undi.shutdown()  %xh:%xh\n", Snp->Cdb.StatFlags, Snp->Cdb.StatCode));
+    DEBUG_RAYDEBUG ((-1, "\nsnp->undi.shutdown()  %xh:%xh\n", Snp->Cdb.StatFlags, Snp->Cdb.StatCode));
 
     return EFI_DEVICE_ERROR;
   }
@@ -109,7 +109,7 @@ TriggerPxeShutdown(IN EFI_EVENT  Event,IN VOID   *Context)
     EFI_TPL     OldTpl;
     
 	// locate and issue shutdown command for all available NIC interfaces
-    DEBUG((DEBUG_INFO,"\n PXERESET: Inside TriggerPxeShutdown\n"));
+    DEBUG_RAYDEBUG((-1,"\n PXERESET: Inside TriggerPxeShutdown\n"));
     OldTpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
     gBS->RestoreTPL (TPL_CALLBACK);
     Status = gBS->LocateHandleBuffer(
@@ -118,24 +118,24 @@ TriggerPxeShutdown(IN EFI_EVENT  Event,IN VOID   *Context)
             NULL,
             &SnpHandleCount,
             &SnpHandlesBuffer);
-    DEBUG((DEBUG_INFO,"\n PXERESET: LocateHandleBuffer Status :: %r\n",Status));
+    DEBUG_RAYDEBUG((-1,"\n PXERESET: LocateHandleBuffer Status :: %r\n",Status));
     if(!EFI_ERROR(Status) && SnpHandleCount > 0)
     {
-        DEBUG((DEBUG_INFO,"\n PXERESET: gEfiSimpleNetworkProtocolGuid SnpHandles :: 0x%X\n",SnpHandleCount));
+        DEBUG_RAYDEBUG((-1,"\n PXERESET: gEfiSimpleNetworkProtocolGuid SnpHandles :: 0x%X\n",SnpHandleCount));
         for(HandleIndex = 0; HandleIndex < SnpHandleCount; HandleIndex++)
         {
             Status = gBS->HandleProtocol(
                     SnpHandlesBuffer[HandleIndex],
                     &gEfiSimpleNetworkProtocolGuid,
                     &SnpProtocol);
-            DEBUG((DEBUG_INFO,"\n PXERESET: HandleProtocol Status :: %r\n",Status));
+            DEBUG_RAYDEBUG((-1,"\n PXERESET: HandleProtocol Status :: %r\n",Status));
             if(!EFI_ERROR(Status) && (SnpProtocol != NULL))
             {
 #if (NET_PKG_AMI_PORTING_ENABLE == 1)			
                 CallTheRegisteredShutdownFunctions (SnpHandlesBuffer [HandleIndex]);
 #endif				
                 Status = SnpProtocol->Shutdown(SnpProtocol);
-                DEBUG((DEBUG_INFO,"\n PXERESET: SnpProtocol->Shutdown Status for index#%d is %r\n",HandleIndex,Status)); 
+                DEBUG_RAYDEBUG((-1,"\n PXERESET: SnpProtocol->Shutdown Status for index#%d is %r\n",HandleIndex,Status)); 
             }
         }
     }

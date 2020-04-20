@@ -2388,7 +2388,7 @@ IpSecSetVariable (
                   &IpSecVariableInfo
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Error set ipsecconfig meta data with %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Error set ipsecconfig meta data with %r\n", Status));
     goto ON_EXIT;
   }
 
@@ -2410,7 +2410,7 @@ IpSecSetVariable (
                     );
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "Error set ipsecconfig variable data with %r\n", Status));
+      DEBUG_RAYDEBUG ((-1, "Error set ipsecconfig variable data with %r\n", Status));
       goto ON_EXIT;
     }
   }

@@ -101,7 +101,7 @@ CHAR8* mIkev2PayloadStr[] = {
 /**
   Print the IP address.
 
-  @param[in]  Level     Debug print error level. Pass to DEBUG().
+  @param[in]  Level     Debug print error level. Pass to DEBUG_RAYDEBUG().
   @param[in]  Ip        Point to a specified IP address.
   @param[in]  IpVersion The IP Version.
 
@@ -114,7 +114,7 @@ IpSecDumpAddress (
   )
 {
   if (IpVersion == IP_VERSION_6) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (Level,
       "%x%x:%x%x:%x%x:%x%x",
       Ip->v6.Addr[0],
@@ -126,7 +126,7 @@ IpSecDumpAddress (
       Ip->v6.Addr[6],
       Ip->v6.Addr[7])
       );
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (Level,
       ":%x%x:%x%x:%x%x:%x%x\n",
       Ip->v6.Addr[8],
@@ -139,7 +139,7 @@ IpSecDumpAddress (
       Ip->v6.Addr[15])
       );
   } else {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (Level,
       "%d.%d.%d.%d\n",
       Ip->v4.Addr[0],
@@ -172,15 +172,15 @@ IkeDumpState (
   
   if (Previous == Current) {
     if (IkeVersion == 1) {
-      DEBUG ((DEBUG_INFO, "\n****Current state is %a\n", mIkev1StateStr[Previous]));
+      DEBUG_RAYDEBUG ((-1, "\n****Current state is %a\n", mIkev1StateStr[Previous]));
     } else if (IkeVersion == 2) {
-      DEBUG ((DEBUG_INFO, "\n****Current state is %a\n", mIkev2StateStr[Previous]));
+      DEBUG_RAYDEBUG ((-1, "\n****Current state is %a\n", mIkev2StateStr[Previous]));
     }    
   } else {
     if (IkeVersion == 1) {
-      DEBUG ((DEBUG_INFO, "\n****Change state from %a to %a\n", mIkev1StateStr[Previous], mIkev1StateStr[Current]));
+      DEBUG_RAYDEBUG ((-1, "\n****Change state from %a to %a\n", mIkev1StateStr[Previous], mIkev1StateStr[Current]));
     } else {
-      DEBUG ((DEBUG_INFO, "\n****Change state from %a to %a\n", mIkev2StateStr[Previous], mIkev2StateStr[Current]));
+      DEBUG_RAYDEBUG ((-1, "\n****Change state from %a to %a\n", mIkev2StateStr[Previous], mIkev2StateStr[Current]));
     }    
   }
 }
@@ -246,22 +246,22 @@ IpSecDumpPacket (
   }
 
   if (Direction == EfiIPsecOutBound) {
-    DEBUG ((DEBUG_INFO, "\n>>>Sending %d bytes %a to ", PacketSize, TypeStr));
+    DEBUG_RAYDEBUG ((-1, "\n>>>Sending %d bytes %a to ", PacketSize, TypeStr));
   } else {
-    DEBUG ((DEBUG_INFO, "\n>>>Receiving %d bytes %a from ", PacketSize, TypeStr));
+    DEBUG_RAYDEBUG ((-1, "\n>>>Receiving %d bytes %a from ", PacketSize, TypeStr));
   }
 
   IpSecDumpAddress (DEBUG_INFO, &Packet->RemotePeerIp, IpVersion);
 
-  DEBUG ((DEBUG_INFO, "   InitiatorCookie:0x%lx ResponderCookie:0x%lx\n", InitCookie, RespCookie));
-  DEBUG (
+  DEBUG_RAYDEBUG ((-1, "   InitiatorCookie:0x%lx ResponderCookie:0x%lx\n", InitCookie, RespCookie));
+  DEBUG_RAYDEBUG (
     (DEBUG_INFO,
     "   Version: 0x%x Flags:0x%x ExchangeType:0x%x\n",
     Packet->Header->Version,
     Packet->Header->Flags,
     Packet->Header->ExchangeType)
     );
-  DEBUG (
+  DEBUG_RAYDEBUG (
     (DEBUG_INFO,
     "   MessageId:0x%x NextPayload:0x%x\n",
     Packet->Header->MessageId,
@@ -284,12 +284,12 @@ IpSecDumpPayload (
   )
 {
   if (IkeVersion == 1) {
-    DEBUG ((DEBUG_INFO, "+%a\n", mIkev1PayloadStr[IkePayload->PayloadType]));
+    DEBUG_RAYDEBUG ((-1, "+%a\n", mIkev1PayloadStr[IkePayload->PayloadType]));
   }  else {
     //
     // For IKEV2 the first Payload type is started from 33.
     //
-    DEBUG ((DEBUG_INFO, "+%a\n", mIkev2PayloadStr[IkePayload->PayloadType - 33]));
+    DEBUG_RAYDEBUG ((-1, "+%a\n", mIkev2PayloadStr[IkePayload->PayloadType - 33]));
   }
   IpSecDumpBuf ("Payload data", IkePayload->PayloadBuf, IkePayload->PayloadSize);
 }
@@ -317,17 +317,17 @@ IpSecDumpBuf (
   DataIndex       = 0;
   BytesRemaining  = DataSize;
 
-  DEBUG ((DEBUG_INFO, "==%a %d bytes==\n", Title, DataSize));
+  DEBUG_RAYDEBUG ((-1, "==%a %d bytes==\n", Title, DataSize));
 
   while (BytesRemaining > 0) {
 
     BytesToPrint = (BytesRemaining > IPSEC_DEBUG_BYTE_PER_LINE) ? IPSEC_DEBUG_BYTE_PER_LINE : BytesRemaining;
 
     for (Index = 0; Index < BytesToPrint; Index++) {
-      DEBUG ((DEBUG_INFO, " 0x%02x,", Data[DataIndex++]));
+      DEBUG_RAYDEBUG ((-1, " 0x%02x,", Data[DataIndex++]));
     }
 
-    DEBUG ((DEBUG_INFO, "\n"));
+    DEBUG_RAYDEBUG ((-1, "\n"));
     BytesRemaining -= BytesToPrint;
   }
 

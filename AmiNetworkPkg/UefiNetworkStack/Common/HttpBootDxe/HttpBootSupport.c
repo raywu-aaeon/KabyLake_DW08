@@ -1093,7 +1093,7 @@ HttpBootCheckUriScheme (
   // Return EFI_INVALID_PARAMETER if the URI is not HTTP or HTTPS.
   //
   if ((AsciiStrnCmp (Uri, "http://", 7) != 0) && (AsciiStrnCmp (Uri, "https://", 8) != 0)) {
-    DEBUG ((EFI_D_ERROR, "HttpBootCheckUriScheme: Invalid Uri.\n"));
+    DEBUG_RAYDEBUG ((-1, "HttpBootCheckUriScheme: Invalid Uri.\n"));
     return EFI_INVALID_PARAMETER;
   }
   
@@ -1101,7 +1101,7 @@ HttpBootCheckUriScheme (
   // HTTP is disabled, return EFI_ACCESS_DENIED if the URI is HTTP.
   //
   if (!PcdGetBool (PcdAllowHttpConnections) && (AsciiStrnCmp (Uri, "http://", 7) == 0)) {
-    DEBUG ((EFI_D_ERROR, "HttpBootCheckUriScheme: HTTP is disabled.\n"));
+    DEBUG_RAYDEBUG ((-1, "HttpBootCheckUriScheme: HTTP is disabled.\n"));
     return EFI_ACCESS_DENIED;
   }
 
@@ -1294,7 +1294,7 @@ HttpBootRegisterRamDisk (
 
   Status = gBS->LocateProtocol (&gEfiRamDiskProtocolGuid, NULL, (VOID**) &RamDisk);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "HTTP Boot: Couldn't find the RAM Disk protocol - %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "HTTP Boot: Couldn't find the RAM Disk protocol - %r\n", Status));
     return Status;
   }
 
@@ -1314,7 +1314,7 @@ HttpBootRegisterRamDisk (
              &DevicePath
              );
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "HTTP Boot: Failed to register RAM Disk - %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "HTTP Boot: Failed to register RAM Disk - %r\n", Status));
   }
 
   return Status;

@@ -432,7 +432,7 @@ TcpCloneTcb (
 
   Clone->Sk = SockClone (Tcb->Sk);
   if (Clone->Sk == NULL) {
-    DEBUG ((EFI_D_ERROR, "TcpCloneTcb: failed to clone a sock\n"));
+    DEBUG_RAYDEBUG ((-1, "TcpCloneTcb: failed to clone a sock\n"));
     FreePool (Clone);
     return NULL;
   }
@@ -504,7 +504,7 @@ TcpSetState (
   ASSERT (Tcb->State < (sizeof (mTcpStateName) / sizeof (CHAR16 *)));
   ASSERT (State < (sizeof (mTcpStateName) / sizeof (CHAR16 *)));
 
-  DEBUG (
+  DEBUG_RAYDEBUG (
     (EFI_D_NET,
     "Tcb (%p) state %s --> %s\n",
     Tcb,
@@ -706,7 +706,7 @@ TcpOnAppClose (
 
   if (!IsListEmpty (&Tcb->RcvQue) || GET_RCV_DATASIZE (Tcb->Sk) != 0) {
 
-    DEBUG ((EFI_D_WARN, "TcpOnAppClose: connection reset "
+    DEBUG_RAYDEBUG ((-1, "TcpOnAppClose: connection reset "
       "because data is lost for TCB %p\n", Tcb));
 
     TcpResetConnection (Tcb);
@@ -816,13 +816,13 @@ TcpOnAppConsume (
 
       if (TcpOld < Tcb->RcvMss) {
 
-        DEBUG ((EFI_D_NET, "TcpOnAppConsume: send a window"
+        DEBUG_RAYDEBUG ((-1, "TcpOnAppConsume: send a window"
           " update for a window closed Tcb %p\n", Tcb));
 
         TcpSendAck (Tcb);
       } else if (Tcb->DelayedAck == 0) {
 
-        DEBUG ((EFI_D_NET, "TcpOnAppConsume: scheduled a delayed"
+        DEBUG_RAYDEBUG ((-1, "TcpOnAppConsume: scheduled a delayed"
           " ACK to update window for Tcb %p\n", Tcb));
 
         Tcb->DelayedAck = 1;
@@ -859,7 +859,7 @@ TcpOnAppAbort (
   IN TCP_CB *Tcb
   )
 {
-  DEBUG ((EFI_D_WARN, "TcpOnAppAbort: connection reset "
+  DEBUG_RAYDEBUG ((-1, "TcpOnAppAbort: connection reset "
     "issued by application for TCB %p\n", Tcb));
 
   switch (Tcb->State) {

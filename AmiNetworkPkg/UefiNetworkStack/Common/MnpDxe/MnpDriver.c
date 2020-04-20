@@ -151,7 +151,7 @@ MnpDriverBindingSupported (
     if (DevicePath != NULL){
       Status = gBS->LocateDevicePath(&gEfiManagedNetworkServiceBindingProtocolGuid, &DevicePath, &Handle);
   	if (!EFI_ERROR (Status)) {
-  		DEBUG((DEBUG_ERROR,"Returning EFI_UNSUPPORTED\n"));
+  		DEBUG_RAYDEBUG((-1,"Returning EFI_UNSUPPORTED\n"));
   		return EFI_UNSUPPORTED;
   	}
     }
@@ -206,14 +206,14 @@ MnpDriverBindingStart (
   //
   MnpDeviceData = AllocateZeroPool (sizeof (MNP_DEVICE_DATA));
   if (MnpDeviceData == NULL) {
-    DEBUG ((EFI_D_ERROR, "MnpDriverBindingStart(): Failed to allocate the Mnp Device Data.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpDriverBindingStart(): Failed to allocate the Mnp Device Data.\n"));
 
     return EFI_OUT_OF_RESOURCES;
   }
 
   Status = MnpInitializeDeviceData (MnpDeviceData, This->DriverBindingHandle, ControllerHandle);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "MnpDriverBindingStart: MnpInitializeDeviceData failed, %r.\n", Status));
+    DEBUG_RAYDEBUG ((-1, "MnpDriverBindingStart: MnpInitializeDeviceData failed, %r.\n", Status));
 
     FreePool (MnpDeviceData);
     return Status;
@@ -384,7 +384,7 @@ MnpDriverBindingStop (
                     EFI_OPEN_PROTOCOL_GET_PROTOCOL
                     );
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "MnpDriverBindingStop: try to stop unknown Controller.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpDriverBindingStop: try to stop unknown Controller.\n"));
       return EFI_DEVICE_ERROR;
     }
 
@@ -492,7 +492,7 @@ MnpServiceBindingCreateChild (
   //
   Instance = AllocateZeroPool (sizeof (MNP_INSTANCE_DATA));
   if (Instance == NULL) {
-    DEBUG ((EFI_D_ERROR, "MnpServiceBindingCreateChild: Faild to allocate memory for the new instance.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpServiceBindingCreateChild: Faild to allocate memory for the new instance.\n"));
 
     return EFI_OUT_OF_RESOURCES;
   }
@@ -509,7 +509,7 @@ MnpServiceBindingCreateChild (
                   NULL
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "MnpServiceBindingCreateChild: Failed to install the MNP protocol, %r.\n",
       Status)
@@ -655,7 +655,7 @@ MnpServiceBindingDestroyChild (
                   NULL
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "MnpServiceBindingDestroyChild: Failed to uninstall the ManagedNetwork protocol, %r.\n",
       Status)

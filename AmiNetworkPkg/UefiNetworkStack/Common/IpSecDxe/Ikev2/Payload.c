@@ -2760,7 +2760,7 @@ Ikev2DecryptPacket (
         CheckSumData,
         CheckSumSize
         ) != 0) {
-    DEBUG ((DEBUG_ERROR, "Error auth verify payload\n"));
+    DEBUG_RAYDEBUG ((-1, "Error auth verify payload\n"));
     Status = EFI_ACCESS_DENIED;
     goto ON_EXIT;
   }
@@ -2806,7 +2806,7 @@ Ikev2DecryptPacket (
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Error decrypt buffer with %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Error decrypt buffer with %r\n", Status));
     goto ON_EXIT;
   }
 
@@ -3173,7 +3173,7 @@ Ikev2OnPacketSent (
  Private    = NULL;
 
  if (EFI_ERROR (IoStatus)) {
-    DEBUG ((DEBUG_ERROR, "Error send the last packet in IkeSessionTypeIkeSa with %r\n", IoStatus));
+    DEBUG_RAYDEBUG ((-1, "Error send the last packet in IkeSessionTypeIkeSa with %r\n", IoStatus));
   }
 
   NetbufFree (Packet);
@@ -3222,7 +3222,7 @@ Ikev2OnPacketSent (
       //
       // Delete the IKE SA
       //
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (DEBUG_INFO,
         "\n------ deleted Packet (cookie_i, cookie_r):(0x%lx, 0x%lx)------\n",
         IkeSaSession->InitiatorCookie,
@@ -3361,7 +3361,7 @@ Ikev2SendIkePacket (
              );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Error send packet with %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Error send packet with %r\n", Status));
   }
 
   return Status;

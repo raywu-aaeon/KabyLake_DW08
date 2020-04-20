@@ -191,7 +191,7 @@ Ikev2SaSessionReg (
     return ;
   }
 
-  DEBUG ((
+  DEBUG_RAYDEBUG ((
     DEBUG_INFO,
     "\n------IkeSa established and start to count down %d seconds lifetime\n",
     Lifetime
@@ -650,7 +650,7 @@ Ikev2ChildSaSessionReg (
     return ;
   }
 
-  DEBUG ((
+  DEBUG_RAYDEBUG ((
     DEBUG_INFO,
     "\n------ChildSa established and start to count down %d seconds lifetime\n",
     Lifetime
@@ -1005,7 +1005,7 @@ Ikev2ChildSaSilentDelete (
 
   }
 
-  DEBUG (
+  DEBUG_RAYDEBUG (
     (DEBUG_INFO,
     "\n------IKEV2 deleted ChildSa(local spi, remote spi):(0x%x, 0x%x)------\n",
     LocalSpi,
@@ -1578,7 +1578,7 @@ Ikev2LifetimeNotify (
 
   if (SessionCommon->IkeSessionType == IkeSessionTypeIkeSa) {
     IkeSaSession = IKEV2_SA_SESSION_FROM_COMMON (SessionCommon);
-    DEBUG ((
+    DEBUG_RAYDEBUG ((
       DEBUG_INFO,
       "\n---IkeSa Lifetime is out(cookie_i, cookie_r):(0x%lx, 0x%lx)---\n",
       IkeSaSession->InitiatorCookie,
@@ -1603,7 +1603,7 @@ Ikev2LifetimeNotify (
     //
     // Change the Child SA Session's State to IKE_STATE_SA_DELETING.
     //    
-    DEBUG ((
+    DEBUG_RAYDEBUG ((
       DEBUG_INFO,
       "\n------ChildSa Lifetime is out(SPI):(0x%x)------\n",
       ChildSaSession->LocalPeerSpi
@@ -1742,7 +1742,7 @@ Ikev2ResendNotify (
   // Increase the retry count.
   //
   SessionCommon->RetryCount++;
-  DEBUG ((DEBUG_INFO, ">>>Resending the last packet ...\n"));
+  DEBUG_RAYDEBUG ((-1, ">>>Resending the last packet ...\n"));
 
   //
   // Resend the last packet.

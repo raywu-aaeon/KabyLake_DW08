@@ -368,7 +368,7 @@ EfiHttpRequest (
     //
     if (!PcdGetBool (PcdAllowHttpConnections) && !(HttpInstance->UseHttps)) {
       
-      DEBUG ((EFI_D_ERROR, "EfiHttpRequest: HTTP is disabled.\n"));
+      DEBUG_RAYDEBUG ((-1, "EfiHttpRequest: HTTP is disabled.\n"));
 
       return EFI_ACCESS_DENIED;
     }
@@ -524,7 +524,7 @@ EfiHttpRequest (
       
       FreePool (HostNameStr);
       if (EFI_ERROR (Status)) {
-        DEBUG ((EFI_D_ERROR, "Error: Could not retrieve the host address from DNS server.\n"));
+        DEBUG_RAYDEBUG ((-1, "Error: Could not retrieve the host address from DNS server.\n"));
         goto Error1;
       }
     }

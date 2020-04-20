@@ -68,10 +68,10 @@ PreserveIP4ConfigurationVar (
     gIp4Config2DataSize= 1;
     i                  = 0;
      
-    DEBUG((DEBUG_INFO, "\nPreserveIP4ConfigurationVar Entry 1"));
+    DEBUG_RAYDEBUG((-1, "\nPreserveIP4ConfigurationVar Entry 1"));
     if(pSmst == NULL)
     {
-        DEBUG((DEBUG_ERROR, "\nPreserveIP4ConfigurationVar: SMM system table not found"));
+        DEBUG_RAYDEBUG((-1, "\nPreserveIP4ConfigurationVar: SMM system table not found"));
         return EFI_NOT_FOUND;
     }
     
@@ -81,7 +81,7 @@ PreserveIP4ConfigurationVar (
             MACListSize, &MACList);
     if(NULL == MACList || EFI_ERROR(Status))
     {
-        DEBUG((DEBUG_ERROR, "\nPreserveIP4ConfigurationVar 1 SmmAllocatePool() failed"));
+        DEBUG_RAYDEBUG((-1, "\nPreserveIP4ConfigurationVar 1 SmmAllocatePool() failed"));
         return EFI_OUT_OF_RESOURCES;
     }
     
@@ -117,7 +117,7 @@ PreserveIP4ConfigurationVar (
                     gIp4Config2DataSize, &gIp4Config2Data);
             if(NULL == gIp4Config2Data )
             {
-                DEBUG((DEBUG_ERROR, "\nPreserveIP4ConfigurationVar 2 SmmAllocatePool() failed"));
+                DEBUG_RAYDEBUG((-1, "\nPreserveIP4ConfigurationVar 2 SmmAllocatePool() failed"));
                 return EFI_OUT_OF_RESOURCES;
             }
         CopyMem(Ip4Config2VarName, (CHAR16*)((UINT8*)MACList + MACStringIndex), MAC_STRING_SIZE);
@@ -142,7 +142,7 @@ PreserveIP4ConfigurationVar (
                                         gIp4Config2DataSize * MACListCount, &gAllMACsIp4Config2Data);
                     if(NULL == gAllMACsIp4Config2Data || EFI_ERROR(Status))
                     {
-                        DEBUG((DEBUG_ERROR, "\nPreserveIP4ConfigurationVar 3 SmmAllocatePool() failed"));
+                        DEBUG_RAYDEBUG((-1, "\nPreserveIP4ConfigurationVar 3 SmmAllocatePool() failed"));
                         return EFI_OUT_OF_RESOURCES;
                     }
                 }
@@ -162,7 +162,7 @@ PreserveIP4ConfigurationVar (
     } // while()
  
     
-    DEBUG((DEBUG_INFO, "\nPreserveIP4ConfigurationVar: Return status = %r\n",Status));
+    DEBUG_RAYDEBUG((-1, "\nPreserveIP4ConfigurationVar: Return status = %r\n",Status));
     return Status;
 }
 
@@ -195,7 +195,7 @@ RestoreIP4ConfigurationVar (
 #else
     Attributes = EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS;
 #endif
-    DEBUG((DEBUG_INFO, "\nRestoreIP4ConfigurationVar Entry"));
+    DEBUG_RAYDEBUG((-1, "\nRestoreIP4ConfigurationVar Entry"));
 
     if( gAllMACsIp4Config2Data != NULL )
     {
@@ -206,7 +206,7 @@ RestoreIP4ConfigurationVar (
                         gIp4Config2DataVarSize, &gIp4Config2Data);
             if(NULL == gIp4Config2Data || EFI_ERROR(Status))
             {
-                DEBUG((DEBUG_ERROR, "\nRestoreIP4ConfigurationVar: SmmAllocatePool() failed"));
+                DEBUG_RAYDEBUG((-1, "\nRestoreIP4ConfigurationVar: SmmAllocatePool() failed"));
                 Status = EFI_OUT_OF_RESOURCES;
                 goto ON_EXIT;
             }

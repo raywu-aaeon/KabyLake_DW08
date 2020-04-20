@@ -112,7 +112,7 @@ SockBufferToken (
   SockToken = AllocateZeroPool (sizeof (SOCK_TOKEN));
   if (NULL == SockToken) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockBufferIOToken: No Memory to allocate SockToken\n")
       );
@@ -197,7 +197,7 @@ SockDestroyChild (
 
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockDestroyChild: Open protocol installed on socket failed with %r\n",
       Status)
@@ -218,7 +218,7 @@ SockDestroyChild (
   Status            = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockDestroyChild: Get the lock to access socket failed with %r\n",
       Status)
@@ -234,7 +234,7 @@ SockDestroyChild (
 
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockDestroyChild: Protocol detach socket failed with %r\n",
       Status)
@@ -285,7 +285,7 @@ SockCreateChild (
   Sock = SockCreate (SockInitData);
   if (NULL == Sock) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCreateChild: No resource to create a new socket\n")
       );
@@ -296,7 +296,7 @@ SockCreateChild (
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCreateChild: Get the lock to access socket failed with %r\n",
       Status)
@@ -311,7 +311,7 @@ SockCreateChild (
   EfiReleaseLock (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCreateChild: Protocol failed to attach a socket with %r\n",
       Status)
@@ -376,7 +376,7 @@ SockConfigure (
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockConfigure: Get the access for socket failed with %r",
       Status)
@@ -430,7 +430,7 @@ SockConnect (
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockConnect: Get the access for socket failed with %r",
       Status)
@@ -509,7 +509,7 @@ SockAccept (
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockAccept: Get the access for socket failed with %r",
       Status)
@@ -562,7 +562,7 @@ SockAccept (
 
       Socket->Parent->ConnCnt--;
 
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_NET,
         "SockAccept: Accept a socket, now conncount is %d",
         Socket->Parent->ConnCnt)
@@ -624,7 +624,7 @@ SockSend (
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockSend: Get the access for socket failed with %r",
       Status)
@@ -691,7 +691,7 @@ SockSend (
                   );
 
     if (NULL == SockToken) {
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_ERROR,
         "SockSend: Failed to buffer IO token into socket processing SndToken List\n",
         Status)
@@ -704,7 +704,7 @@ SockSend (
     Status = SockProcessTcpSndData (Sock, TxData);
 
     if (EFI_ERROR (Status)) {
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_ERROR,
         "SockSend: Failed to process Snd Data\n",
         Status)
@@ -755,7 +755,7 @@ SockRcv (
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockRcv: Get the access for socket failed with %r",
       Status)
@@ -853,7 +853,7 @@ SockFlush (
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockFlush: Get the access for socket failed with %r",
       Status)
@@ -871,7 +871,7 @@ SockFlush (
   Status = Sock->ProtoHandler (Sock, SOCK_FLUSH, NULL);
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockFlush: Protocol failed handling SOCK_FLUSH with %r",
       Status)
@@ -924,7 +924,7 @@ SockClose (
 
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockClose: Get the access for socket failed with %r",
       Status)
@@ -995,7 +995,7 @@ SockCancel (
 
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCancel: Get the access for socket failed with %r",
       Status)
@@ -1104,7 +1104,7 @@ SockGroup (
 
   if (EFI_ERROR (Status)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockGroup: Get the access for socket failed with %r",
       Status)
@@ -1150,7 +1150,7 @@ SockRoute (
 
   Status = EfiAcquireLockOrFail (&(Sock->Lock));
   if (EFI_ERROR (Status)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockRoute: Get the access for socket failed with %r",
       Status)

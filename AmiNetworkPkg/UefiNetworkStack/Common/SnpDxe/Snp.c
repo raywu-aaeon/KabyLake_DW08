@@ -176,7 +176,7 @@ IssueHwUndiCommand (
   UINT64 Cdb
   )
 {
-  DEBUG ((EFI_D_ERROR, "\nIssueHwUndiCommand() - This should not be called!"));
+  DEBUG_RAYDEBUG ((-1, "\nIssueHwUndiCommand() - This should not be called!"));
 
   if (Cdb == 0) {
     return EFI_INVALID_PARAMETER;
@@ -275,12 +275,12 @@ SimpleNetworkDriverSupported (
 
   if (EFI_ERROR (Status)) {
     if (Status == EFI_ALREADY_STARTED) {
-      DEBUG ((EFI_D_INFO, "Support(): Already Started. on handle %p\n", Controller));
+      DEBUG_RAYDEBUG ((-1, "Support(): Already Started. on handle %p\n", Controller));
     }
     return Status;
   }
 
-  DEBUG ((EFI_D_INFO, "Support(): UNDI3.1 found on handle %p\n", Controller));
+  DEBUG_RAYDEBUG ((-1, "Support(): UNDI3.1 found on handle %p\n", Controller));
 
   //
   // check the version, we don't want to connect to the undi16
@@ -293,7 +293,7 @@ SimpleNetworkDriverSupported (
   // Check to see if !PXE structure is valid. Paragraph alignment of !PXE structure is required.
   //
   if ((NiiProtocol->Id & 0x0F) != 0) {
-    DEBUG ((EFI_D_NET, "\n!PXE structure is not paragraph aligned.\n"));
+    DEBUG_RAYDEBUG ((-1, "\n!PXE structure is not paragraph aligned.\n"));
     Status = EFI_UNSUPPORTED;
     goto Done;
   }
@@ -304,25 +304,25 @@ SimpleNetworkDriverSupported (
   //  Verify !PXE revisions.
   //
   if (Pxe->hw.Signature != PXE_ROMID_SIGNATURE) {
-    DEBUG ((EFI_D_NET, "\n!PXE signature is not valid.\n"));
+    DEBUG_RAYDEBUG ((-1, "\n!PXE signature is not valid.\n"));
     Status = EFI_UNSUPPORTED;
     goto Done;
   }
 
   if (Pxe->hw.Rev < PXE_ROMID_REV) {
-    DEBUG ((EFI_D_NET, "\n!PXE.Rev is not supported.\n"));
+    DEBUG_RAYDEBUG ((-1, "\n!PXE.Rev is not supported.\n"));
     Status = EFI_UNSUPPORTED;
     goto Done;
   }
 
   if (Pxe->hw.MajorVer < PXE_ROMID_MAJORVER) {
 
-    DEBUG ((EFI_D_NET, "\n!PXE.MajorVer is not supported.\n"));
+    DEBUG_RAYDEBUG ((-1, "\n!PXE.MajorVer is not supported.\n"));
     Status = EFI_UNSUPPORTED;
     goto Done;
 
   } else if (Pxe->hw.MajorVer == PXE_ROMID_MAJORVER && Pxe->hw.MinorVer < PXE_ROMID_MINORVER) {
-    DEBUG ((EFI_D_NET, "\n!PXE.MinorVer is not supported."));
+    DEBUG_RAYDEBUG ((-1, "\n!PXE.MinorVer is not supported."));
     Status = EFI_UNSUPPORTED;
     goto Done;
   }
@@ -331,20 +331,20 @@ SimpleNetworkDriverSupported (
   //
   if ((Pxe->hw.Implementation & PXE_ROMID_IMP_HW_UNDI) == 0) {
     if (Pxe->sw.EntryPoint < Pxe->sw.Len) {
-      DEBUG ((EFI_D_NET, "\n!PXE S/W entry point is not valid."));
+      DEBUG_RAYDEBUG ((-1, "\n!PXE S/W entry point is not valid."));
       Status = EFI_UNSUPPORTED;
       goto Done;
     }
 
     if (Pxe->sw.BusCnt == 0) {
-      DEBUG ((EFI_D_NET, "\n!PXE.BusCnt is zero."));
+      DEBUG_RAYDEBUG ((-1, "\n!PXE.BusCnt is zero."));
       Status = EFI_UNSUPPORTED;
       goto Done;
     }
   }
 
   Status = EFI_SUCCESS;
-  DEBUG ((EFI_D_INFO, "Support(): supported on %p\n", Controller));
+  DEBUG_RAYDEBUG ((-1, "Support(): supported on %p\n", Controller));
 
 Done:
   gBS->CloseProtocol (
@@ -402,7 +402,7 @@ SimpleNetworkDriverStart (
   EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR   *BarDesc;
 #endif	// NET_PKG_AMI_PORTING_ENABLE
   
-  DEBUG ((EFI_D_NET, "\nSnpNotifyNetworkInterfaceIdentifier()  "));
+  DEBUG_RAYDEBUG ((-1, "\nSnpNotifyNetworkInterfaceIdentifier()  "));
 
   Status = gBS->OpenProtocol (
                   Controller,
@@ -459,12 +459,12 @@ SimpleNetworkDriverStart (
     return Status;
   }
 
-  DEBUG ((EFI_D_INFO, "Start(): UNDI3.1 found\n"));
+  DEBUG_RAYDEBUG ((-1, "Start(): UNDI3.1 found\n"));
 
   Pxe = (PXE_UNDI *) (UINTN) (Nii->Id);
 
   if (Calc8BitCksum (Pxe, Pxe->hw.Len) != 0) {
-    DEBUG ((EFI_D_NET, "\n!PXE checksum is not correct.\n"));
+    DEBUG_RAYDEBUG ((-1, "\n!PXE checksum is not correct.\n"));
     goto NiiError;
   }
 
@@ -479,7 +479,7 @@ SimpleNetworkDriverStart (
     //  broadcast support or we cannot do DHCP!
     //
   } else {
-    DEBUG ((EFI_D_NET, "\nUNDI does not have promiscuous or broadcast support."));
+    DEBUG_RAYDEBUG ((-1, "\nUNDI does not have promiscuous or broadcast support."));
     goto NiiError;
   }
   //
@@ -496,7 +496,7 @@ SimpleNetworkDriverStart (
                     );
 
   if (Status != EFI_SUCCESS) {
-    DEBUG ((EFI_D_NET, "\nCould not allocate SNP_DRIVER structure.\n"));
+    DEBUG_RAYDEBUG ((-1, "\nCould not allocate SNP_DRIVER structure.\n"));
     goto NiiError;
   }
 
@@ -583,7 +583,7 @@ SimpleNetworkDriverStart (
                     );
 
   if (Status != EFI_SUCCESS) {
-    DEBUG ((EFI_D_NET, "\nCould not allocate CPB and DB structures.\n"));
+    DEBUG_RAYDEBUG ((-1, "\nCould not allocate CPB and DB structures.\n"));
     goto Error_DeleteSNP;
   }
 
@@ -660,7 +660,7 @@ SimpleNetworkDriverStart (
   Snp->Cdb.IFnum      = Snp->IfNum;
   Snp->Cdb.Control    = PXE_CONTROL_LAST_CDB_IN_LIST;
 
-  DEBUG ((EFI_D_NET, "\nSnp->undi.get_init_info()  "));
+  DEBUG_RAYDEBUG ((-1, "\nSnp->undi.get_init_info()  "));
 
   (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
 
@@ -670,7 +670,7 @@ SimpleNetworkDriverStart (
   InitStatFlags = Snp->Cdb.StatFlags;
 
   if (Snp->Cdb.StatCode != PXE_STATCODE_SUCCESS) {
-    DEBUG ((EFI_D_NET, "\nSnp->undi.init_info()  %xh:%xh\n", Snp->Cdb.StatFlags, Snp->Cdb.StatCode));
+    DEBUG_RAYDEBUG ((-1, "\nSnp->undi.init_info()  %xh:%xh\n", Snp->Cdb.StatFlags, Snp->Cdb.StatCode));
     PxeStop (Snp);
     goto Error_DeleteSNP;
   }
@@ -768,7 +768,7 @@ SimpleNetworkDriverStart (
   Status = PxeGetStnAddr (Snp);
 
   if (Status != EFI_SUCCESS) {
-    DEBUG ((EFI_D_ERROR, "\nSnp->undi.get_station_addr() failed.\n"));
+    DEBUG_RAYDEBUG ((-1, "\nSnp->undi.get_station_addr() failed.\n"));
     PxeShutdown (Snp);
     PxeStop (Snp);
     goto Error_DeleteSNP;
@@ -821,7 +821,7 @@ SimpleNetworkDriverStart (
           &gAmiResetSystemEventGuid,
           &EventForPxeShutdown);
   }
-  DEBUG((DEBUG_INFO,"\n SNPDEBUG: CreateEventEx for EventForPxeShutdown Status :: %r\n",Status));
+  DEBUG_RAYDEBUG((-1,"\n SNPDEBUG: CreateEventEx for EventForPxeShutdown Status :: %r\n",Status));
   //
   // AMI PORTING ENDS - Register an event for CTRL_ALT_DEL Key Combination.
   //
@@ -878,12 +878,12 @@ SimpleNetworkDriverStart (
   // AMI PORTING STARTS - Print media status fields
   //  
   #if NWS_DEBUG_MESSAGES
-      DEBUG((DEBUG_ERROR, "\n Install SNP Status : %r", Status));
-      DEBUG((DEBUG_ERROR, "\n SNPStart:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
-      DEBUG((DEBUG_ERROR, "\n SNPStart:MediaPresent : %d", Snp->Mode.MediaPresent));
-      DEBUG((DEBUG_ERROR, "\n SNPStart:State : %d", Snp->Mode.State));
-      DEBUG((DEBUG_ERROR, "\n SNPStart:MaxPacketSize : %x", Snp->Mode.MaxPacketSize));
-      DEBUG((DEBUG_ERROR, "\n SNPStart:MACAddress: %02x:%02x:%02x:%02x:%02x:%02x",\
+      DEBUG_RAYDEBUG((-1, "\n Install SNP Status : %r", Status));
+      DEBUG_RAYDEBUG((-1, "\n SNPStart:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
+      DEBUG_RAYDEBUG((-1, "\n SNPStart:MediaPresent : %d", Snp->Mode.MediaPresent));
+      DEBUG_RAYDEBUG((-1, "\n SNPStart:State : %d", Snp->Mode.State));
+      DEBUG_RAYDEBUG((-1, "\n SNPStart:MaxPacketSize : %x", Snp->Mode.MaxPacketSize));
+      DEBUG_RAYDEBUG((-1, "\n SNPStart:MACAddress: %02x:%02x:%02x:%02x:%02x:%02x",\
                                              Snp->Mode.CurrentAddress.Addr[0], Snp->Mode.CurrentAddress.Addr[1],\
                                              Snp->Mode.CurrentAddress.Addr[2], Snp->Mode.CurrentAddress.Addr[3],\
                                              Snp->Mode.CurrentAddress.Addr[4], Snp->Mode.CurrentAddress.Addr[5]));

@@ -52,7 +52,7 @@ PxeInit (
                            );
 
     if (Status != EFI_SUCCESS) {
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_ERROR,
         "\nSnp->PxeInit()  AllocateBuffer  %xh (%r)\n",
         Status,
@@ -98,7 +98,7 @@ PxeInit (
   Snp->Cdb.IFnum      = Snp->IfNum;
   Snp->Cdb.Control    = PXE_CONTROL_LAST_CDB_IN_LIST;
 
-  DEBUG ((EFI_D_NET, "\nSnp->undi.initialize()  "));
+  DEBUG_RAYDEBUG ((-1, "\nSnp->undi.initialize()  "));
 
   (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
 
@@ -127,7 +127,7 @@ PxeInit (
     Snp->Mode.State   = EfiSimpleNetworkInitialized;
     Status            = EFI_SUCCESS;
   } else {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_WARN,
       "\nSnp->undi.initialize()  %xh:%xh\n",
       Snp->Cdb.StatFlags,
@@ -151,12 +151,12 @@ PxeInit (
 // AMI PORTING STARTS - Print media status fields
 //  
 #if NWS_DEBUG_MESSAGES
-    DEBUG((DEBUG_ERROR, "\n PxeInit Status : %r", Status));
-    DEBUG((DEBUG_ERROR, "\n PxeInit:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
-    DEBUG((DEBUG_ERROR, "\n PxeInit:MediaPresent : %d", Snp->Mode.MediaPresent));
-    DEBUG((DEBUG_ERROR, "\n PxeInit:State : %d", Snp->Mode.State));
-    DEBUG((DEBUG_ERROR, "\n PxeInit:MaxPacketSize : %x", Snp->Mode.MaxPacketSize));
-    DEBUG((DEBUG_ERROR, "\n PxeInit:MACAddress: %02x:%02x:%02x:%02x:%02x:%02x",\
+    DEBUG_RAYDEBUG((-1, "\n PxeInit Status : %r", Status));
+    DEBUG_RAYDEBUG((-1, "\n PxeInit:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
+    DEBUG_RAYDEBUG((-1, "\n PxeInit:MediaPresent : %d", Snp->Mode.MediaPresent));
+    DEBUG_RAYDEBUG((-1, "\n PxeInit:State : %d", Snp->Mode.State));
+    DEBUG_RAYDEBUG((-1, "\n PxeInit:MaxPacketSize : %x", Snp->Mode.MaxPacketSize));
+    DEBUG_RAYDEBUG((-1, "\n PxeInit:MACAddress: %02x:%02x:%02x:%02x:%02x:%02x",\
                                              Snp->Mode.CurrentAddress.Addr[0], Snp->Mode.CurrentAddress.Addr[1],\
                                              Snp->Mode.CurrentAddress.Addr[2], Snp->Mode.CurrentAddress.Addr[3],\
                                              Snp->Mode.CurrentAddress.Addr[4], Snp->Mode.CurrentAddress.Addr[5]));

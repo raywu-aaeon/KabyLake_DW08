@@ -83,7 +83,7 @@ TcpSendIpPacket (
     IpSender = IpIoFindSender (&IpIo, IP_VERSION_4, &Source);
 
     if (IpSender == NULL) {
-      DEBUG ((EFI_D_WARN, "TcpSendIpPacket: No appropriate IpSender.\n"));
+      DEBUG_RAYDEBUG ((-1, "TcpSendIpPacket: No appropriate IpSender.\n"));
       return -1;
     }
   } else {
@@ -104,7 +104,7 @@ TcpSendIpPacket (
   Status = IpIoSend (IpIo, Nbuf, IpSender, NULL, NULL, &Destination, &Override);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "TcpSendIpPacket: return %r error\n", Status));
+    DEBUG_RAYDEBUG ((-1, "TcpSendIpPacket: return %r error\n", Status));
     return -1;
   }
 

@@ -333,7 +333,7 @@ Tcp4DriverBindingStart (
   TcpServiceData = AllocateZeroPool (sizeof (TCP4_SERVICE_DATA));
 
   if (NULL == TcpServiceData) {
-    DEBUG ((EFI_D_ERROR, "Tcp4DriverBindingStart: Have no enough"
+    DEBUG_RAYDEBUG ((-1, "Tcp4DriverBindingStart: Have no enough"
       " resource to create a Tcp Servcie Data\n"));
 
     return EFI_OUT_OF_RESOURCES;
@@ -349,7 +349,7 @@ Tcp4DriverBindingStart (
                            );
   if (NULL == TcpServiceData->IpIo) {
 
-    DEBUG ((EFI_D_ERROR, "Tcp4DriverBindingStart: Have no enough"
+    DEBUG_RAYDEBUG ((-1, "Tcp4DriverBindingStart: Have no enough"
       " resource to create an Ip Io\n"));
 
     Status = EFI_OUT_OF_RESOURCES;
@@ -382,7 +382,7 @@ Tcp4DriverBindingStart (
   Status = Tcp4CreateTimer ();
   if (EFI_ERROR (Status)) {
 
-    DEBUG ((EFI_D_ERROR, "Tcp4DriverBindingStart: Create TcpTimer"
+    DEBUG_RAYDEBUG ((-1, "Tcp4DriverBindingStart: Create TcpTimer"
       " Event failed with %r\n", Status));
 
     goto ON_ERROR;
@@ -402,7 +402,7 @@ Tcp4DriverBindingStart (
                   );
   if (EFI_ERROR (Status)) {
 
-    DEBUG ((EFI_D_ERROR, "Tcp4DriverBindingStart: Install Tcp4 Service Binding"
+    DEBUG_RAYDEBUG ((-1, "Tcp4DriverBindingStart: Install Tcp4 Service Binding"
       " Protocol failed for %r\n", Status));
 
     Tcp4DestroyTimer ();
@@ -496,7 +496,7 @@ Tcp4DriverBindingStop (
                   );
   if (EFI_ERROR (Status)) {
 
-    DEBUG ((EFI_D_ERROR, "Tcp4DriverBindingStop: Locate Tcp4 Service "
+    DEBUG_RAYDEBUG ((-1, "Tcp4DriverBindingStop: Locate Tcp4 Service "
       " Binding Protocol failed with %r\n", Status));
 
     return EFI_DEVICE_ERROR;
@@ -705,7 +705,7 @@ Tcp4ServiceBindingCreateChild (
 
   Sock = SockCreateChild (&mTcp4DefaultSockData);
   if (NULL == Sock) {
-    DEBUG ((EFI_D_ERROR, "Tcp4DriverBindingCreateChild: "
+    DEBUG_RAYDEBUG ((-1, "Tcp4DriverBindingCreateChild: "
       "No resource to create a Tcp Child\n"));
 
     Status = EFI_OUT_OF_RESOURCES;

@@ -72,7 +72,7 @@ PxeStart (
   //
   // Issue UNDI command and check result.
   //
-  DEBUG ((EFI_D_NET, "\nsnp->undi.start()  "));
+  DEBUG_RAYDEBUG ((-1, "\nsnp->undi.start()  "));
 
   (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
 
@@ -80,7 +80,7 @@ PxeStart (
     //
     // UNDI could not be started. Return UNDI error.
     //
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "\nsnp->undi.start()  %xh:%xh\n",
       Snp->Cdb.StatCode,
@@ -98,11 +98,11 @@ PxeStart (
   // AMI PORTING STARTS - Print media status fields
   //  
   #if NWS_DEBUG_MESSAGES
-      DEBUG((DEBUG_ERROR, "\n PxeStart:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
-      DEBUG((DEBUG_ERROR, "\n PxeStart:MediaPresent : %d", Snp->Mode.MediaPresent));
-      DEBUG((DEBUG_ERROR, "\n PxeStart:State : %d", Snp->Mode.State));
-      DEBUG((DEBUG_ERROR, "\n PxeStart:MaxPacketSize : %x", Snp->Mode.MaxPacketSize));
-      DEBUG((DEBUG_ERROR, "\n PxeStart:MACAddress: %02x:%02x:%02x:%02x:%02x:%02x",\
+      DEBUG_RAYDEBUG((-1, "\n PxeStart:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
+      DEBUG_RAYDEBUG((-1, "\n PxeStart:MediaPresent : %d", Snp->Mode.MediaPresent));
+      DEBUG_RAYDEBUG((-1, "\n PxeStart:State : %d", Snp->Mode.State));
+      DEBUG_RAYDEBUG((-1, "\n PxeStart:MaxPacketSize : %x", Snp->Mode.MaxPacketSize));
+      DEBUG_RAYDEBUG((-1, "\n PxeStart:MACAddress: %02x:%02x:%02x:%02x:%02x:%02x",\
                                                Snp->Mode.CurrentAddress.Addr[0], Snp->Mode.CurrentAddress.Addr[1],\
                                                Snp->Mode.CurrentAddress.Addr[2], Snp->Mode.CurrentAddress.Addr[3],\
                                                Snp->Mode.CurrentAddress.Addr[4], Snp->Mode.CurrentAddress.Addr[5]));

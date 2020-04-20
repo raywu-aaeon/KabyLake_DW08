@@ -86,7 +86,7 @@ TcpSendIpPacket (
     IpSender = IpIoFindSender (&IpIo, Version, Src);
 
     if (IpSender == NULL) {
-      DEBUG ((EFI_D_WARN, "TcpSendIpPacket: No appropriate IpSender.\n"));
+      DEBUG_RAYDEBUG ((-1, "TcpSendIpPacket: No appropriate IpSender.\n"));
       return -1;
     }
 
@@ -136,7 +136,7 @@ TcpSendIpPacket (
   Status = IpIoSend (IpIo, Nbuf, IpSender, NULL, NULL, Dest, &Override);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "TcpSendIpPacket: return %r error\n", Status));
+    DEBUG_RAYDEBUG ((-1, "TcpSendIpPacket: return %r error\n", Status));
     return -1;
   }
 
@@ -177,7 +177,7 @@ Tcp6RefreshNeighbor (
     IpIoFindSender (&IpIo, IP_VERSION_6, Neighbor);
 
     if (IpIo == NULL) {
-      DEBUG ((EFI_D_WARN, "Tcp6AddNeighbor: No appropriate IpIo.\n"));
+      DEBUG_RAYDEBUG ((-1, "Tcp6AddNeighbor: No appropriate IpIo.\n"));
       return EFI_NOT_STARTED;
     }
 

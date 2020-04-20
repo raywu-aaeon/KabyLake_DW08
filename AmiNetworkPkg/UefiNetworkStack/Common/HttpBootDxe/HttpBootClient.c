@@ -260,7 +260,7 @@ HttpBootDhcp4ExtractUriInfo (
   //
   Status = HttpBootCheckUriScheme (Private->BootFileUri);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "HttpBootDhcp4ExtractUriInfo: %r.\n", Status));
+    DEBUG_RAYDEBUG ((-1, "HttpBootDhcp4ExtractUriInfo: %r.\n", Status));
     if (Status == EFI_INVALID_PARAMETER) {
         AsciiPrint ("\n  Error: Invalid URI address.\n");
     } else if (Status == EFI_ACCESS_DENIED) {
@@ -410,7 +410,7 @@ HttpBootDhcp6ExtractUriInfo (
   //
   Status = HttpBootCheckUriScheme (Private->BootFileUri);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "HttpBootDhcp6ExtractUriInfo: %r.\n", Status));
+    DEBUG_RAYDEBUG ((-1, "HttpBootDhcp6ExtractUriInfo: %r.\n", Status));
     if (Status == EFI_INVALID_PARAMETER) {
         AsciiPrint ("\n  Error: Invalid URI address.\n");
     } else if (Status == EFI_ACCESS_DENIED) {

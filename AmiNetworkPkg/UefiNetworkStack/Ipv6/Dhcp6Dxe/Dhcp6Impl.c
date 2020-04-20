@@ -128,7 +128,7 @@ EfiDhcp6Start (
   NetLibDetectMedia (Service->Controller, &MediaPresent);
   if (!MediaPresent) {
     Status = EFI_NO_MEDIA;
-    DEBUG((DEBUG_ERROR,"\nIn EfiDhcp6Start  MediaPresent Status = %r\n",Status));
+    DEBUG_RAYDEBUG((-1,"\nIn EfiDhcp6Start  MediaPresent Status = %r\n",Status));
     goto ON_ERROR;
   }
   //

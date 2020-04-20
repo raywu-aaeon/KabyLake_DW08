@@ -235,7 +235,7 @@ ArpAdd (
     CacheEntry = ArpAllocCacheEntry (Instance);
 
     if (CacheEntry == NULL) {
-      DEBUG ((EFI_D_ERROR, "ArpAdd: Failed to allocate pool for CacheEntry.\n"));
+      DEBUG_RAYDEBUG ((-1, "ArpAdd: Failed to allocate pool for CacheEntry.\n"));
       Status = EFI_OUT_OF_RESOURCES;
       goto UNLOCK_EXIT;
     }
@@ -596,7 +596,7 @@ ArpRequest (
   //
   RequestContext = AllocatePool (sizeof(USER_REQUEST_CONTEXT));
   if (RequestContext == NULL) {
-    DEBUG ((EFI_D_ERROR, "ArpRequest: Allocate memory for RequestContext failed.\n"));
+    DEBUG_RAYDEBUG ((-1, "ArpRequest: Allocate memory for RequestContext failed.\n"));
 
     Status = EFI_OUT_OF_RESOURCES;
     goto UNLOCK_EXIT;
@@ -627,7 +627,7 @@ ArpRequest (
     //
     CacheEntry = ArpAllocCacheEntry (Instance);
     if (CacheEntry == NULL) {
-      DEBUG ((EFI_D_ERROR, "ArpRequest: Allocate memory for CacheEntry failed.\n"));
+      DEBUG_RAYDEBUG ((-1, "ArpRequest: Allocate memory for CacheEntry failed.\n"));
       FreePool (RequestContext);
 
       Status = EFI_OUT_OF_RESOURCES;

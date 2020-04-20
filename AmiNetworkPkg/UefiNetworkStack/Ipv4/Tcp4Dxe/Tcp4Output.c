@@ -261,7 +261,7 @@ TcpDataToSend (
 SetPersistTimer:
   if (!TCP_TIMER_ON (Tcb->EnabledTimer, TCP_TIMER_REXMIT)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_WARN,
       "TcpDataToSend: enter persistent state for TCB %p\n",
       Tcb)
@@ -571,7 +571,7 @@ TcpGetSegmentSock (
   Nbuf = NetbufAlloc (Len + TCP_MAX_HEAD);
 
   if (Nbuf == NULL) {
-    DEBUG ((EFI_D_ERROR, "TcpGetSegmentSock: failed to allocate "
+    DEBUG_RAYDEBUG ((-1, "TcpGetSegmentSock: failed to allocate "
       "a netbuf for TCB %p\n",Tcb));
 
     return NULL;
@@ -682,7 +682,7 @@ TcpRetransmit (
   if ((Tcb->SndWndScale != 0) &&
       (TCP_SEQ_GT (Seq, Tcb->RetxmitSeqMax) || TCP_SEQ_BETWEEN (Tcb->SndWl2 + Tcb->SndWnd, Seq, Tcb->SndWl2 + Tcb->SndWnd + (1 << Tcb->SndWndScale)))) {
     Len = TCP_SUB_SEQ (Tcb->SndNxt, Seq);
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_WARN,
       "TcpRetransmit: retransmission without regard to the receiver window for TCB %p\n",
       Tcb)
@@ -692,7 +692,7 @@ TcpRetransmit (
     Len = TCP_SUB_SEQ (Tcb->SndWl2 + Tcb->SndWnd, Seq);
     
   } else {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_WARN,
       "TcpRetransmit: retransmission cancelled because send window too small for TCB %p\n",
       Tcb)
@@ -801,7 +801,7 @@ SEND_AGAIN:
   Nbuf = TcpGetSegment (Tcb, Seq, Len);
 
   if (Nbuf == NULL) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "TcpToSendData: failed to get a segment for TCB %p\n",
       Tcb)
@@ -830,7 +830,7 @@ SEND_AGAIN:
         (GET_SND_DATASIZE (Tcb->Sk) == 0) &&
         TCP_SEQ_LT (End + 1, Tcb->SndWnd + Tcb->SndWl2)) {
 
-      DEBUG (
+      DEBUG_RAYDEBUG (
 	  	(EFI_D_NET, 
 	  	"TcpToSendData: send FIN "
         "to peer for TCB %p in state %s\n", 
@@ -855,7 +855,7 @@ SEND_AGAIN:
   // don't send an empty segment here.
   //
   if (Seg->End == Seg->Seq) {
-    DEBUG ((EFI_D_WARN, "TcpToSendData: created a empty"
+    DEBUG_RAYDEBUG ((-1, "TcpToSendData: created a empty"
       " segment for TCB %p, free it now\n", Tcb));
 
     NetbufFree (Nbuf);
@@ -909,7 +909,7 @@ SEND_AGAIN:
   if ((Tcb->CongestState == TCP_CONGEST_OPEN) &&
       !TCP_FLG_ON (Tcb->CtrlFlag, TCP_CTRL_RTT_ON)) {
 
-    DEBUG ((EFI_D_NET, "TcpToSendData: set RTT measure "
+    DEBUG_RAYDEBUG ((-1, "TcpToSendData: set RTT measure "
       "sequence %d for TCB %p\n", Seq, Tcb));
 
     TCP_SET_FLG (Tcb->CtrlFlag, TCP_CTRL_RTT_ON);
@@ -1037,7 +1037,7 @@ TcpToSendAck (
     return;
   }
 
-  DEBUG ((EFI_D_NET, "TcpToSendAck: scheduled a delayed"
+  DEBUG_RAYDEBUG ((-1, "TcpToSendAck: scheduled a delayed"
     " ACK for TCB %p\n", Tcb));
 
   //

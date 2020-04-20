@@ -61,7 +61,7 @@ PxeIp2Mac (
   //
   // Issue UNDI command and check result.
   //
-  DEBUG ((EFI_D_NET, "\nSnp->undi.mcast_ip_to_mac()  "));
+  DEBUG_RAYDEBUG ((-1, "\nSnp->undi.mcast_ip_to_mac()  "));
 
   (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
 
@@ -73,7 +73,7 @@ PxeIp2Mac (
     return EFI_INVALID_PARAMETER;
 
   case PXE_STATCODE_UNSUPPORTED:
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_NET,
       "\nSnp->undi.mcast_ip_to_mac()  %xh:%xh\n",
       Snp->Cdb.StatFlags,
@@ -86,7 +86,7 @@ PxeIp2Mac (
     // UNDI command failed.  Return EFI_DEVICE_ERROR
     // to caller.
     //
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_NET,
       "\nSnp->undi.mcast_ip_to_mac()  %xh:%xh\n",
       Snp->Cdb.StatFlags,

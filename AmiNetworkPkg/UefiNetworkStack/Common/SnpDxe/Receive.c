@@ -212,7 +212,7 @@ RECEIVEAGAIN:
   //
   // Issue UNDI command and check result.
   //
-  DEBUG ((EFI_D_NET, "\nsnp->undi.receive ()  "));
+  DEBUG_RAYDEBUG ((-1, "\nsnp->undi.receive ()  "));
 
   (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
 
@@ -221,7 +221,7 @@ RECEIVEAGAIN:
     break;
 
   case PXE_STATCODE_NO_DATA:
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_NET,
       "\nsnp->undi.receive ()  %xh:%xh\n",
       Snp->Cdb.StatFlags,
@@ -231,7 +231,7 @@ RECEIVEAGAIN:
     return EFI_NOT_READY;
 
   default:
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "\nsnp->undi.receive()  %xh:%xh\n",
       Snp->Cdb.StatFlags,
@@ -274,8 +274,8 @@ RECEIVEAGAIN:
   // AMI PORTING STARTS - Print media status fields
   //  
 #if NWS_DEBUG_MESSAGES
-  DEBUG((DEBUG_ERROR, "\n PxeReceive:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
-  DEBUG((DEBUG_ERROR, "\n PxeReceive:MediaPresent : %d", Snp->Mode.MediaPresent));
+  DEBUG_RAYDEBUG((-1, "\n PxeReceive:MediaPresentSupported : %d", Snp->Mode.MediaPresentSupported));
+  DEBUG_RAYDEBUG((-1, "\n PxeReceive:MediaPresent : %d", Snp->Mode.MediaPresent));
 #endif
   //
   // AMI PORTING ENDS - Print media status fields

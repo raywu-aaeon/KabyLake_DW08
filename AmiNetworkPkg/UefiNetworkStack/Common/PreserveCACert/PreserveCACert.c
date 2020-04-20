@@ -212,7 +212,7 @@ EFI_STATUS PreserveCACertEntry(
      }
     
      Status = gBS->LocateHandleBuffer ( ByProtocol, &gEfiFirmwareVolume2ProtocolGuid, NULL, &NoOfHandles, &Handles );
-     DEBUG((DEBUG_ERROR, "\nLocateHandleBuffer Status = %r, NoOfHandles = %d", Status, NoOfHandles));
+     DEBUG_RAYDEBUG((-1, "\nLocateHandleBuffer Status = %r, NoOfHandles = %d", Status, NoOfHandles));
      if ( EFI_ERROR(Status) )
      {
          return Status;
@@ -221,7 +221,7 @@ EFI_STATUS PreserveCACertEntry(
      for ( Index = 0; Index  < NoOfHandles; Index ++ )
      {
          Status = gBS->HandleProtocol ( Handles[ Index ], & gEfiFirmwareVolume2ProtocolGuid, ( VOID * )&FV2P );
-         DEBUG((DEBUG_ERROR, "\n HandleProtocol Status = %r ", Status));
+         DEBUG_RAYDEBUG((-1, "\n HandleProtocol Status = %r ", Status));
          if ( EFI_ERROR(Status) )
          {
              return Status;
@@ -242,7 +242,7 @@ EFI_STATUS PreserveCACertEntry(
              
              // Read the cerificate from ROM and save to variable
              Status = FV2P->ReadSection ( FV2P, &(CacertGuidList[Count].CertificateFileGuid), EFI_SECTION_RAW, 0, ( VOID ** )&CertBuffer, &CertSize, &Authentication );
-             DEBUG((DEBUG_ERROR, "\n ReadSection Status = %r ", Status));                 
+             DEBUG_RAYDEBUG((-1, "\n ReadSection Status = %r ", Status));                 
              if ( EFI_ERROR(Status) )
              {
                  continue;

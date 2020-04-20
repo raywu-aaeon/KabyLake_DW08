@@ -137,7 +137,7 @@ TlsEncryptPacket (
       //
       // No data was successfully encrypted, continue to encrypt other messages.
       //
-      DEBUG ((EFI_D_WARN, "TlsEncryptPacket: No data read from TLS object.\n"));
+      DEBUG_RAYDEBUG ((-1, "TlsEncryptPacket: No data read from TLS object.\n"));
 
       ThisMessageSize = 0;
     }
@@ -310,7 +310,7 @@ TlsDecryptPacket (
       //
       // No data was successfully decrypted, continue to decrypt other messages.
       //
-      DEBUG ((EFI_D_WARN, "TlsDecryptPacket: No data read from TLS object.\n"));
+      DEBUG_RAYDEBUG ((-1, "TlsDecryptPacket: No data read from TLS object.\n"));
 
       ThisPlainMessageSize = 0;
     }

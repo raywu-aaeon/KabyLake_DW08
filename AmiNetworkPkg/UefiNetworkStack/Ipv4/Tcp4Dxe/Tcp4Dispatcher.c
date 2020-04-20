@@ -198,7 +198,7 @@ Tcp4Bind (
       if (mTcp4RandomPort <= TCP4_PORT_KNOWN) {
 
         if (Cycle) {
-          DEBUG ((EFI_D_ERROR, "Tcp4Bind: no port can be allocated "
+          DEBUG_RAYDEBUG ((-1, "Tcp4Bind: no port can be allocated "
             "for this pcb\n"));
 
           return EFI_OUT_OF_RESOURCES;
@@ -280,7 +280,7 @@ Tcp4AttachPcb (
 
   if (Tcb == NULL) {
 
-    DEBUG ((EFI_D_ERROR, "Tcp4ConfigurePcb: failed to allocate a TCB\n"));
+    DEBUG_RAYDEBUG ((-1, "Tcp4ConfigurePcb: failed to allocate a TCB\n"));
 
     return EFI_OUT_OF_RESOURCES;
   }
@@ -420,7 +420,7 @@ Tcp4ConfigurePcb (
   Status = Tcp4Bind (&(CfgData->AccessPoint));
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "Tcp4ConfigurePcb: Bind endpoint failed "
+    DEBUG_RAYDEBUG ((-1, "Tcp4ConfigurePcb: Bind endpoint failed "
       "with %r\n", Status));
 
     goto OnExit;

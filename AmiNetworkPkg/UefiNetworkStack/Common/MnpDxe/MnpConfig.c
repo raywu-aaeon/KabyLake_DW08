@@ -74,7 +74,7 @@ MnpAddFreeNbuf (
   for (Index = 0; Index < Count; Index++) {
     Nbuf = NetbufAlloc (MnpDeviceData->BufferLength + MnpDeviceData->PaddingSize);
     if (Nbuf == NULL) {
-      DEBUG ((EFI_D_ERROR, "MnpAddFreeNbuf: NetBufAlloc failed.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpAddFreeNbuf: NetBufAlloc failed.\n"));
 
       Status = EFI_OUT_OF_RESOURCES;
       break;
@@ -127,7 +127,7 @@ MnpAllocNbuf (
   //
   if (FreeNbufQue->BufNum == 0) {
     if ((MnpDeviceData->NbufCnt + MNP_NET_BUFFER_INCREASEMENT) > MNP_MAX_NET_BUFFER_NUM) {
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_ERROR,
         "MnpAllocNbuf: The maximum NET_BUF size is reached for MNP driver instance %p.\n",
         MnpDeviceData)
@@ -139,7 +139,7 @@ MnpAllocNbuf (
 
     Status = MnpAddFreeNbuf (MnpDeviceData, MNP_NET_BUFFER_INCREASEMENT);
     if (EFI_ERROR (Status)) {
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_ERROR,
         "MnpAllocNbuf: Failed to add NET_BUFs into the FreeNbufQue, %r.\n",
         Status)
@@ -296,7 +296,7 @@ MnpInitializeDeviceData (
   NetbufQueInit (&MnpDeviceData->FreeNbufQue);
   Status = MnpAddFreeNbuf (MnpDeviceData, MNP_INIT_NET_BUFFER_NUM);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "MnpInitializeDeviceData: MnpAddFreeNbuf failed, %r.\n", Status));
+    DEBUG_RAYDEBUG ((-1, "MnpInitializeDeviceData: MnpAddFreeNbuf failed, %r.\n", Status));
 
     goto ERROR;
   }
@@ -316,7 +316,7 @@ MnpInitializeDeviceData (
   //
   MnpDeviceData->TxBuf = AllocatePool (MnpDeviceData->BufferLength);
   if (MnpDeviceData->TxBuf == NULL) {
-    DEBUG ((EFI_D_ERROR, "MnpInitializeDeviceData: AllocatePool failed.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpInitializeDeviceData: AllocatePool failed.\n"));
 
     Status = EFI_OUT_OF_RESOURCES;
     goto ERROR;
@@ -333,7 +333,7 @@ MnpInitializeDeviceData (
                   &MnpDeviceData->PollTimer
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "MnpInitializeDeviceData: CreateEvent for poll timer failed.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpInitializeDeviceData: CreateEvent for poll timer failed.\n"));
 
     goto ERROR;
   }
@@ -349,7 +349,7 @@ MnpInitializeDeviceData (
                   &MnpDeviceData->TimeoutCheckTimer
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "MnpInitializeDeviceData: CreateEvent for packet timeout check failed.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpInitializeDeviceData: CreateEvent for packet timeout check failed.\n"));
 
     goto ERROR;
   }
@@ -365,7 +365,7 @@ MnpInitializeDeviceData (
                   &MnpDeviceData->MediaDetectTimer
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "MnpInitializeDeviceData: CreateEvent for media detection failed.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpInitializeDeviceData: CreateEvent for media detection failed.\n"));
 
     goto ERROR;
   }
@@ -381,7 +381,7 @@ MnpInitializeDeviceData (
                   &MnpDeviceData->TxTimeoutEvent
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "MnpInitializeDeviceData: CreateEvent for tx timeout event failed.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpInitializeDeviceData: CreateEvent for tx timeout event failed.\n"));
   }
 
 ERROR:
@@ -524,7 +524,7 @@ MnpCreateServiceData (
   //
   MnpServiceData = AllocateZeroPool (sizeof (MNP_SERVICE_DATA));
   if (MnpServiceData == NULL) {
-    DEBUG ((EFI_D_ERROR, "MnpCreateServiceData: Faild to allocate memory for the new Mnp Service Data.\n"));
+    DEBUG_RAYDEBUG ((-1, "MnpCreateServiceData: Faild to allocate memory for the new Mnp Service Data.\n"));
 
     return NULL;
   }
@@ -559,7 +559,7 @@ MnpCreateServiceData (
                          &MnpServiceData->DevicePath
                          );
     if (MnpServiceHandle == NULL) {
-      DEBUG ((EFI_D_ERROR, "MnpCreateServiceData: Faild to create child handle.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpCreateServiceData: Faild to create child handle.\n"));
 
       return NULL;
     }
@@ -1029,7 +1029,7 @@ MnpStart (
       //
       Status = MnpStartSnp (MnpDeviceData->Snp);
       if (EFI_ERROR (Status)) {
-        DEBUG ((EFI_D_ERROR, "MnpStart: MnpStartSnp failed, %r.\n", Status));
+        DEBUG_RAYDEBUG ((-1, "MnpStart: MnpStartSnp failed, %r.\n", Status));
 
         goto ErrorExit;
       }
@@ -1043,7 +1043,7 @@ MnpStart (
                       MNP_TIMEOUT_CHECK_INTERVAL
                       );
       if (EFI_ERROR (Status)) {
-        DEBUG (
+        DEBUG_RAYDEBUG (
           (EFI_D_ERROR,
           "MnpStart, gBS->SetTimer for TimeoutCheckTimer %r.\n",
           Status)
@@ -1061,7 +1061,7 @@ MnpStart (
                       MNP_MEDIA_DETECT_INTERVAL
                       );
       if (EFI_ERROR (Status)) {
-        DEBUG (
+        DEBUG_RAYDEBUG (
           (EFI_D_ERROR,
           "MnpStart, gBS->SetTimer for MediaDetectTimer %r.\n",
           Status)
@@ -1081,7 +1081,7 @@ MnpStart (
 
     Status      = gBS->SetTimer (MnpDeviceData->PollTimer, TimerOpType, MNP_SYS_POLL_INTERVAL);
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "MnpStart: gBS->SetTimer for PollTimer failed, %r.\n", Status));
+      DEBUG_RAYDEBUG ((-1, "MnpStart: gBS->SetTimer for PollTimer failed, %r.\n", Status));
 
       goto ErrorExit;
     }
@@ -1417,7 +1417,7 @@ MnpConfigReceiveFilters (
       MCastFilterCnt  = MnpDeviceData->GroupAddressCount;
       MCastFilter     = AllocatePool (sizeof (EFI_MAC_ADDRESS) * MCastFilterCnt);
       if (MCastFilter == NULL) {
-        DEBUG ((EFI_D_ERROR, "MnpConfigReceiveFilters: Failed to allocate memory resource for MCastFilter.\n"));
+        DEBUG_RAYDEBUG ((-1, "MnpConfigReceiveFilters: Failed to allocate memory resource for MCastFilter.\n"));
 
         return EFI_OUT_OF_RESOURCES;
       }
@@ -1478,7 +1478,7 @@ MnpConfigReceiveFilters (
                   );
   DEBUG_CODE (
     if (EFI_ERROR (Status)) {
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_ERROR,
         "MnpConfigReceiveFilters: Snp->ReceiveFilters failed, %r.\n",
         Status)
@@ -1536,7 +1536,7 @@ MnpGroupOpAddCtrlBlk (
     GroupAddress = AllocatePool (sizeof (MNP_GROUP_ADDRESS));
     if (GroupAddress == NULL) {
 
-      DEBUG ((EFI_D_ERROR, "MnpGroupOpFormCtrlBlk: Failed to allocate memory resource.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpGroupOpFormCtrlBlk: Failed to allocate memory resource.\n"));
 
       return EFI_OUT_OF_RESOURCES;
     }
@@ -1668,7 +1668,7 @@ MnpGroupOp (
     //
     NewCtrlBlk = AllocatePool (sizeof (MNP_GROUP_CONTROL_BLOCK));
     if (NewCtrlBlk == NULL) {
-      DEBUG ((EFI_D_ERROR, "MnpGroupOp: Failed to allocate memory resource.\n"));
+      DEBUG_RAYDEBUG ((-1, "MnpGroupOp: Failed to allocate memory resource.\n"));
 
       return EFI_OUT_OF_RESOURCES;
     }

@@ -151,7 +151,7 @@ HttpTcpReceiveNotifyDpc (
     Wrap->TcpWrap.Rx6Token.CompletionToken.Event = NULL;
     
     if (EFI_ERROR (Wrap->TcpWrap.Rx6Token.CompletionToken.Status)) {
-      DEBUG ((EFI_D_ERROR, "HttpTcpReceiveNotifyDpc: %r!\n", Wrap->TcpWrap.Rx6Token.CompletionToken.Status));
+      DEBUG_RAYDEBUG ((-1, "HttpTcpReceiveNotifyDpc: %r!\n", Wrap->TcpWrap.Rx6Token.CompletionToken.Status));
       Wrap->HttpToken->Status = Wrap->TcpWrap.Rx6Token.CompletionToken.Status;
       gBS->SignalEvent (Wrap->HttpToken->Event);
 
@@ -171,7 +171,7 @@ HttpTcpReceiveNotifyDpc (
     Wrap->TcpWrap.Rx4Token.CompletionToken.Event = NULL;
     
     if (EFI_ERROR (Wrap->TcpWrap.Rx4Token.CompletionToken.Status)) {
-      DEBUG ((EFI_D_ERROR, "HttpTcpReceiveNotifyDpc: %r!\n", Wrap->TcpWrap.Rx4Token.CompletionToken.Status));
+      DEBUG_RAYDEBUG ((-1, "HttpTcpReceiveNotifyDpc: %r!\n", Wrap->TcpWrap.Rx4Token.CompletionToken.Status));
       Wrap->HttpToken->Status = Wrap->TcpWrap.Rx4Token.CompletionToken.Status;
       gBS->SignalEvent (Wrap->HttpToken->Event);
       
@@ -962,7 +962,7 @@ HttpCreateConnection (
     HttpInstance->Tcp4ConnToken.CompletionToken.Status = EFI_NOT_READY;
     Status = HttpInstance->Tcp4->Connect (HttpInstance->Tcp4, &HttpInstance->Tcp4ConnToken);
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "HttpCreateConnection: Tcp4->Connect() = %r\n", Status));
+      DEBUG_RAYDEBUG ((-1, "HttpCreateConnection: Tcp4->Connect() = %r\n", Status));
       return Status;
     }
     
@@ -977,7 +977,7 @@ HttpCreateConnection (
     HttpInstance->Tcp6ConnToken.CompletionToken.Status = EFI_NOT_READY;
     Status = HttpInstance->Tcp6->Connect (HttpInstance->Tcp6, &HttpInstance->Tcp6ConnToken);
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "HttpCreateConnection: Tcp6->Connect() = %r\n", Status));
+      DEBUG_RAYDEBUG ((-1, "HttpCreateConnection: Tcp6->Connect() = %r\n", Status));
       return Status;
     }
 
@@ -1102,7 +1102,7 @@ HttpConfigureTcp4 (
 
   Status = HttpInstance->Tcp4->Configure (HttpInstance->Tcp4, Tcp4CfgData);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "HttpConfigureTcp4 - %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "HttpConfigureTcp4 - %r\n", Status));
     return Status;
   }
 
@@ -1172,7 +1172,7 @@ HttpConfigureTcp6 (
 
   Status = HttpInstance->Tcp6->Configure (HttpInstance->Tcp6, Tcp6CfgData);
   if (EFI_ERROR (Status)) {
-    DEBUG ((EFI_D_ERROR, "HttpConfigureTcp6 - %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "HttpConfigureTcp6 - %r\n", Status));
     return Status;
   }
   
@@ -1225,7 +1225,7 @@ HttpConnectTcp4 (
                                  NULL
                                  );
   if (EFI_ERROR(Status)){
-    DEBUG ((EFI_D_ERROR, "Tcp4 GetModeData fail - %x\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Tcp4 GetModeData fail - %x\n", Status));
     return Status;
   }
 
@@ -1237,7 +1237,7 @@ HttpConnectTcp4 (
 
   Status = HttpCreateConnection (HttpInstance);
   if (EFI_ERROR(Status)){
-    DEBUG ((EFI_D_ERROR, "Tcp4 Connection fail - %x\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Tcp4 Connection fail - %x\n", Status));
     return Status;
   }
   
@@ -1317,7 +1317,7 @@ HttpConnectTcp6 (
                                  );
   
   if (EFI_ERROR(Status)){
-     DEBUG ((EFI_D_ERROR, "Tcp6 GetModeData fail - %x\n", Status));
+     DEBUG_RAYDEBUG ((-1, "Tcp6 GetModeData fail - %x\n", Status));
      return Status;
   }
 
@@ -1329,7 +1329,7 @@ HttpConnectTcp6 (
 
   Status = HttpCreateConnection (HttpInstance);
   if (EFI_ERROR(Status)){
-    DEBUG ((EFI_D_ERROR, "Tcp6 Connection fail - %x\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Tcp6 Connection fail - %x\n", Status));
     return Status;
   }
   
@@ -1577,7 +1577,7 @@ HttpTransmitTcp (
     Wrap->TcpWrap.IsTxDone = FALSE;
     Status  = Tcp4->Transmit (Tcp4, Tx4Token);
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "Transmit failed: %r\n", Status));
+      DEBUG_RAYDEBUG ((-1, "Transmit failed: %r\n", Status));
       goto ON_ERROR;
     }
 
@@ -1600,7 +1600,7 @@ HttpTransmitTcp (
     Wrap->TcpWrap.IsTxDone = FALSE;
     Status = Tcp6->Transmit (Tcp6, Tx6Token);
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "Transmit failed: %r\n", Status));
+      DEBUG_RAYDEBUG ((-1, "Transmit failed: %r\n", Status));
       goto ON_ERROR;
     }
   }
@@ -1864,7 +1864,7 @@ HttpTcpReceiveHeader (
         Rx4Token->Packet.RxData->FragmentTable[0].FragmentLength = DEF_BUF_LEN;
         Status = Tcp4->Receive (Tcp4, Rx4Token);
         if (EFI_ERROR (Status)) {
-          DEBUG ((EFI_D_ERROR, "Tcp4 receive failed: %r\n", Status));
+          DEBUG_RAYDEBUG ((-1, "Tcp4 receive failed: %r\n", Status));
           return Status;
         }
 
@@ -1896,7 +1896,7 @@ HttpTcpReceiveHeader (
         
         Status = HttpsReceive (HttpInstance, &Fragment, Timeout);
         if (EFI_ERROR (Status)) {
-          DEBUG ((EFI_D_ERROR, "Tcp4 receive failed: %r\n", Status));
+          DEBUG_RAYDEBUG ((-1, "Tcp4 receive failed: %r\n", Status));
           return Status;
         }
       }
@@ -1963,7 +1963,7 @@ HttpTcpReceiveHeader (
         Rx6Token->Packet.RxData->FragmentTable[0].FragmentLength = DEF_BUF_LEN;
         Status = Tcp6->Receive (Tcp6, Rx6Token);
         if (EFI_ERROR (Status)) {
-          DEBUG ((EFI_D_ERROR, "Tcp6 receive failed: %r\n", Status));
+          DEBUG_RAYDEBUG ((-1, "Tcp6 receive failed: %r\n", Status));
           return Status;
         }
 
@@ -1995,7 +1995,7 @@ HttpTcpReceiveHeader (
         
         Status = HttpsReceive (HttpInstance, &Fragment, Timeout);
         if (EFI_ERROR (Status)) {
-          DEBUG ((EFI_D_ERROR, "Tcp6 receive failed: %r\n", Status));
+          DEBUG_RAYDEBUG ((-1, "Tcp6 receive failed: %r\n", Status));
           return Status;
         }
       }
@@ -2098,7 +2098,7 @@ HttpTcpReceiveBody (
 
     Status = Tcp6->Receive (Tcp6, Rx6Token);
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "Tcp6 receive failed: %r\n", Status));
+      DEBUG_RAYDEBUG ((-1, "Tcp6 receive failed: %r\n", Status));
       return Status;
     }
   } else {
@@ -2110,7 +2110,7 @@ HttpTcpReceiveBody (
     Rx4Token->CompletionToken.Status = EFI_NOT_READY;
     Status = Tcp4->Receive (Tcp4, Rx4Token);
     if (EFI_ERROR (Status)) {
-      DEBUG ((EFI_D_ERROR, "Tcp4 receive failed: %r\n", Status));
+      DEBUG_RAYDEBUG ((-1, "Tcp4 receive failed: %r\n", Status));
       return Status;
     }
   }

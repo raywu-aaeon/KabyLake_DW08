@@ -1602,7 +1602,7 @@ Ikev2GenerateSaDhPublicKey (
              &IkeKeys->DhBuffer->GxSize
              );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Error CPLKeyManGetKeyParam X public key error Status = %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Error CPLKeyManGetKeyParam X public key error Status = %r\n", Status));
     
     FreePool (IkeKeys->DhBuffer->GxBuffer);
     
@@ -1662,7 +1662,7 @@ Ikev2GenerateSaDhComputeKey (
              &DhBuffer->GxySize
              );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Error CPLKeyManGetKeyParam Y session key error Status = %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Error CPLKeyManGetKeyParam Y session key error Status = %r\n", Status));
 
     FreePool (DhBuffer->GxyBuffer);
     

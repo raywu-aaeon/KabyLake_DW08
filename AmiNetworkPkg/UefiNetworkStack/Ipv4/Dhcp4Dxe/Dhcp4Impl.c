@@ -827,7 +827,7 @@ EfiDhcp4Start (
   NetLibDetectMedia (DhcpSb->Controller, &MediaPresent);
   if (!MediaPresent) {
     Status = EFI_NO_MEDIA;
-    DEBUG((DEBUG_ERROR,"\nIn EfiDhcp4Start  MediaPresent Status = %r\n",Status));
+    DEBUG_RAYDEBUG((-1,"\nIn EfiDhcp4Start  MediaPresent Status = %r\n",Status));
     goto ON_ERROR;
   }
   //

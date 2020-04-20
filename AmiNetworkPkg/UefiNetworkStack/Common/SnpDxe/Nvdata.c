@@ -59,7 +59,7 @@ PxeNvDataRead (
   //
   // Issue UNDI command and check result.
   //
-  DEBUG ((EFI_D_NET, "\nsnp->undi.nvdata ()  "));
+  DEBUG_RAYDEBUG ((-1, "\nsnp->undi.nvdata ()  "));
 
   (*Snp->IssueUndi32Command) ((UINT64)(UINTN) &Snp->Cdb);
 
@@ -68,7 +68,7 @@ PxeNvDataRead (
     break;
 
   case PXE_STATCODE_UNSUPPORTED:
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_NET,
       "\nsnp->undi.nvdata()  %xh:%xh\n",
       Snp->Cdb.StatFlags,
@@ -78,7 +78,7 @@ PxeNvDataRead (
     return EFI_UNSUPPORTED;
 
   default:
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_NET,
       "\nsnp->undi.nvdata()  %xh:%xh\n",
       Snp->Cdb.StatFlags,

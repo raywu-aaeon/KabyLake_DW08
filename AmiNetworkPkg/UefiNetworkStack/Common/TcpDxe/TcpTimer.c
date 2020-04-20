@@ -153,7 +153,7 @@ TcpConnectTimeout (
   )
 {
   if (!TCP_CONNECTED (Tcb->State)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "TcpConnectTimeout: connection closed because conenction timer timeout for TCB %p\n",
       Tcb)
@@ -164,7 +164,7 @@ TcpConnectTimeout (
     }
 
     if (TCP_SYN_RCVD == Tcb->State) {
-      DEBUG (
+      DEBUG_RAYDEBUG (
         (EFI_D_WARN,
         "TcpConnectTimeout: send reset because connection timer timeout for TCB %p\n",
         Tcb)
@@ -192,7 +192,7 @@ TcpRexmitTimeout (
 {
   UINT32  FlightSize;
 
-  DEBUG (
+  DEBUG_RAYDEBUG (
     (EFI_D_WARN,
     "TcpRexmitTimeout: transmission timeout for TCB %p\n",
     Tcb)
@@ -212,7 +212,7 @@ TcpRexmitTimeout (
   Tcb->LossTimes++;
   if ((Tcb->LossTimes > Tcb->MaxRexmit) && !TCP_TIMER_ON (Tcb->EnabledTimer, TCP_TIMER_CONNECT)) {
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "TcpRexmitTimeout: connection closed because too many timeouts for TCB %p\n",
       Tcb)
@@ -304,7 +304,7 @@ TcpFinwait2Timeout (
   IN OUT TCP_CB *Tcb
   )
 {
-  DEBUG (
+  DEBUG_RAYDEBUG (
     (EFI_D_WARN,
     "TcpFinwait2Timeout: connection closed because FIN_WAIT2 timer timeouts for TCB %p\n",
     Tcb)
@@ -324,7 +324,7 @@ Tcp2MSLTimeout (
   IN OUT TCP_CB *Tcb
   )
 {
-  DEBUG (
+  DEBUG_RAYDEBUG (
     (EFI_D_WARN,
     "Tcp2MSLTimeout: connection closed because TIME_WAIT timer timeouts for TCB %p\n",
     Tcb)

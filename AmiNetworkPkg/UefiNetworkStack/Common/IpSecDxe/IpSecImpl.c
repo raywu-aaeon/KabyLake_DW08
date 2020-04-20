@@ -822,7 +822,7 @@ IpSecEspAuthVerifyPayload (
     return EFI_SUCCESS;
   }
 
-  DEBUG ((DEBUG_ERROR, "Error auth verify payload\n"));
+  DEBUG_RAYDEBUG ((-1, "Error auth verify payload\n"));
   return EFI_ACCESS_DENIED;
 }
 

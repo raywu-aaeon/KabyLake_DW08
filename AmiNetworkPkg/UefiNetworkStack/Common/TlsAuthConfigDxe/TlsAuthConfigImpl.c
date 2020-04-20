@@ -433,7 +433,7 @@ DeleteCert (
   ZeroMem (OldData, ItemDataSize);
   while ((ItemDataSize > 0) && (ItemDataSize >= CertList->SignatureListSize)) {
     CertCount  = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
-    DEBUG ((DEBUG_INFO, "       CertCount = %x\n", CertCount));
+    DEBUG_RAYDEBUG ((-1, "       CertCount = %x\n", CertCount));
     if (CertCount != 0) {
       CopyMem (OldData + Offset, (UINT8*)(CertList), CertList->SignatureListSize);
       Offset += CertList->SignatureListSize;
@@ -452,7 +452,7 @@ DeleteCert (
                   OldData
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Failed to set variable, Status = %r\n", Status));
+    DEBUG_RAYDEBUG ((-1, "Failed to set variable, Status = %r\n", Status));
     goto ON_EXIT;
   }
 

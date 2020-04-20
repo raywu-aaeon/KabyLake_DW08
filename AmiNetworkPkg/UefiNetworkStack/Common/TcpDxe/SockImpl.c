@@ -386,7 +386,7 @@ SockProcessTcpSndData (
               );
 
   if (NULL == SndData) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockKProcessSndData: Failed to call NetBufferFromExt\n")
       );
@@ -521,7 +521,7 @@ SockWakeListenToken (
     RemoveEntryList (&Sock->ConnectionList);
 
     Parent->ConnCnt--;
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_NET,
       "SockWakeListenToken: accept a socket, now conncnt is %d",
       Parent->ConnCnt)
@@ -672,7 +672,7 @@ SockCreate (
   Parent = SockInitData->Parent;
 
   if ((Parent != NULL) && (Parent->ConnCnt == Parent->BackLog)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCreate: Socket parent has reached its connection limit with %d ConnCnt and %d BackLog\n",
       Parent->ConnCnt,
@@ -685,7 +685,7 @@ SockCreate (
   Sock = AllocateZeroPool (sizeof (SOCKET));
   if (NULL == Sock) {
 
-    DEBUG ((EFI_D_ERROR, "SockCreate: No resource to create a new socket\n"));
+    DEBUG_RAYDEBUG ((-1, "SockCreate: No resource to create a new socket\n"));
     return NULL;
   }
 
@@ -700,7 +700,7 @@ SockCreate (
 
   Sock->SndBuffer.DataQueue = NetbufQueAlloc ();
   if (NULL == Sock->SndBuffer.DataQueue) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCreate: No resource to allocate SndBuffer for new socket\n")
       );
@@ -710,7 +710,7 @@ SockCreate (
 
   Sock->RcvBuffer.DataQueue = NetbufQueAlloc ();
   if (NULL == Sock->RcvBuffer.DataQueue) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCreate: No resource to allocate RcvBuffer for new socket\n")
       );
@@ -756,7 +756,7 @@ SockCreate (
                   );
 
   if (EFI_ERROR (Status)) {
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_ERROR,
       "SockCreate: Install TCP protocol in socket failed with %r\n",
       Status)
@@ -775,7 +775,7 @@ SockCreate (
     //
     Parent->ConnCnt++;
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_NET,
       "SockCreate: Create a new socket and add to parent, now conncnt is %d\n",
       Parent->ConnCnt)
@@ -855,7 +855,7 @@ SockDestroy (
     RemoveEntryList (&(Sock->ConnectionList));
     (Sock->Parent->ConnCnt)--;
 
-    DEBUG (
+    DEBUG_RAYDEBUG (
       (EFI_D_WARN,
       "SockDestroy: Delete a unaccepted socket from parent now conncnt is %d\n",
       Sock->Parent->ConnCnt)
@@ -981,7 +981,7 @@ SockClone (
   ClonedSock               = SockCreate (&InitData);
 
   if (NULL == ClonedSock) {
-    DEBUG ((EFI_D_ERROR, "SockClone: no resource to create a cloned sock\n"));
+    DEBUG_RAYDEBUG ((-1, "SockClone: no resource to create a cloned sock\n"));
     return NULL;
   }
 
