@@ -1966,6 +1966,12 @@ TOKEN
 	TokenType = Boolean
 	TargetH = Yes
 End
+
+ELINK
+	Name  = "{ 0xf22fc20c, 0x8cf4, 0x45eb, {0x8e, 0x6, 0xad, 0x4e, 0x50, 0xb9, 0x5d, 0xd3 }}"
+	Parent  = "AMITSE_FILTER_CLASSGUID_FORMSETS"
+	InvokeOrder = AfterParent
+End
 ##ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
 
 ##raydebug >>
@@ -2049,7 +2055,7 @@ End
 
 TOKEN
 	Name  = "RAY_DEBUG_MODE"
-	Value  = "1"
+	Value  = "0"
 	Help  = "Main switch to enable/disable debug mode.\When this switch is off, all debugging capabilities are disabled."
 	TokenType = Boolean
 	TargetMAK = Yes
