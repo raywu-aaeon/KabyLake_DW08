@@ -2032,7 +2032,7 @@ End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.UefiDebugLibConOut"
+	Instance  = "MdePkg.BaseDebugLibSerialPort"
 	ModuleTypes  = "SMM_CORE"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
