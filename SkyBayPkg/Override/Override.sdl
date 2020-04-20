@@ -1977,56 +1977,62 @@ TOKEN
 	TargetMAK = Yes
 End
 
-LibraryMapping
-	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+INFComponent
+    Name  = "UefiDebugLibConOut"
+    File  = "..\..\MdePkg\Library\UefiDebugLibConOut\UefiDebugLibConOut.inf"
+    Package  = "MdePkg"
 End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	Instance  = "MdePkg.UefiDebugLibConOut"
+End
+
+LibraryMapping
+	Class  = "DebugLib"
+	Instance  = "MdePkg.UefiDebugLibConOut"
 	ModuleTypes  = "DXE_DRIVER UEFI_APPLICATION UEFI_DRIVER"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	Instance  = "MdePkg.UefiDebugLibConOut"
 	ModuleTypes  = "PEIM"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	Instance  = "MdePkg.UefiDebugLibConOut"
 	ModuleTypes  = "DXE_SMM_DRIVER"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	Instance  = "MdePkg.UefiDebugLibConOut"
 	ModuleTypes  = "DXE_RUNTIME_DRIVER"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	Instance  = "MdePkg.UefiDebugLibConOut"
 	ModuleTypes  = "DXE_CORE"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	Instance  = "MdePkg.UefiDebugLibConOut"
 	ModuleTypes  = "PEI_CORE"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
 
 LibraryMapping
 	Class  = "DebugLib"
-	Instance  = "MdePkg.BaseDebugLibSerialPort"
+	Instance  = "MdePkg.UefiDebugLibConOut"
 	ModuleTypes  = "SMM_CORE"
 	Token = "STATUS_CODE_VERSION" ">" "17"
 End
