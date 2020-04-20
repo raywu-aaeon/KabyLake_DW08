@@ -2089,13 +2089,13 @@ End
 INFComponent
     Name  = "BaseSerialPortLib"
     File  = "..\..\MdeModulePkg\Library\BaseSerialPortLib16550\BaseSerialPortLib16550.inf"
-    Package  = "KabylakePlatSamplePkg"
+    Package  = "MdeModulePkg"
 	Token = "RAY_DEBUG_MODE" "=" "1"
 End
 
 LibraryMapping
     Class  = "SerialPortLib"
-    Instance  = "KabylakePlatSamplePkg.BaseSerialPortLib"
+    Instance  = "MdeModulePkg.BaseSerialPortLib"
 	Token = "RAY_DEBUG_MODE" "=" "1"
 End
 ##raydebug <<
