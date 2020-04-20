@@ -1715,7 +1715,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MAJOR_VERSION"
-    Value  = "0"
+    Value  = "1"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -1724,7 +1724,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "7"
+    Value  = "0"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -2043,7 +2043,7 @@ End
 
 TOKEN
 	Name  = "RAY_DEBUG_MODE"
-	Value  = "0"
+	Value  = "1"
 	Help  = "Main switch to enable/disable debug mode.\When this switch is off, all debugging capabilities are disabled."
 	TokenType = Boolean
 	TargetMAK = Yes
@@ -2073,6 +2073,16 @@ TOKEN
 	TokenType = Boolean
 	TargetH = Yes
 #	Token = "STRING_STATUS_SUPPORT" "=" "1"
+	Token = "RAY_DEBUG_MODE" "=" "1"
+End
+
+TOKEN
+    Name  = "RELEASE_MODE_SYMBOL_SUPPORT"
+    Value  = "1"
+    Help  = "Support source level debug (PDB files) in release mode"
+    TokenType = Boolean
+    TargetMAK = Yes
+    TargetH = Yes
 	Token = "RAY_DEBUG_MODE" "=" "1"
 End
 ##raydebug <<

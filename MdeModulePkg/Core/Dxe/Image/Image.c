@@ -1740,6 +1740,12 @@ CoreStartImage (
         DEBUG((EFI_D_LOAD, "%a.Entry(%p)\n", sName, Image->EntryPoint));
         
     DEBUG_CODE_END();
+//ray_override / Debug Configuration / added >>
+#if defined(RAY_DEBUG_FLAG)
+    	GetImageNameByHandle(ImageHandle,sName,0x100);
+      DEBUG_RAYDEBUG((-1, "%a.Entry(%p)\n", sName, Image->EntryPoint));
+#endif
+//ray_override / Debug Configuration / added <<
     // Report Status Code
     REPORT_STATUS_CODE_EX(
         EFI_PROGRESS_CODE, 
@@ -1760,6 +1766,12 @@ CoreStartImage (
         if (EFI_ERROR(Image->Status) && Image->Status!=EFI_REQUEST_UNLOAD_IMAGE)
             DEBUG((EFI_D_WARN, "ERROR: %a.Entry(%p)=%r\n", sName, Image->EntryPoint, Image->Status));
     DEBUG_CODE_END();
+//ray_override / Debug Configuration / added >>
+#if defined(RAY_DEBUG_FLAG)
+        if (EFI_ERROR(Image->Status) && Image->Status!=EFI_REQUEST_UNLOAD_IMAGE)
+            DEBUG_RAYDEBUG((-1, "ERROR: %a.Entry(%p)=%r\n", sName, Image->EntryPoint, Image->Status));
+#endif
+//ray_override / Debug Configuration / added <<
     }
     //
     // Add some debug information if the image returned with error.
