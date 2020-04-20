@@ -19,7 +19,7 @@ End
 
 TOKEN
 	Name  = "NETWORKSTACK_IPV4_PXE_SUPPORT"
-	Value  = "0"
+	Value  = "1"
 	Help  = "Token to set default value of PXE_Ipv4 Support Enabled or Disabled."
 	TokenType = Boolean
 	TargetH = Yes
