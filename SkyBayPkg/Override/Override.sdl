@@ -1365,7 +1365,7 @@ End
 
 TOKEN
 	Name  = "SETUP_BMP_LOGO_SUPPORT"
-	Value  = "0"
+	Value  = "1"
 	Help  = "BMP Logo support in Setup"
 	TokenType = Boolean
 	TargetMAK = Yes
@@ -1374,7 +1374,7 @@ End
 
 TOKEN
 	Name  = "SETUP_JPEG_LOGO_SUPPORT"
-	Value  = "1"
+	Value  = "0"
 	Help  = "JPEG Logo support in Setup."
 	TokenType = Boolean
 	TargetEQU = Yes
@@ -1384,7 +1384,7 @@ End
 
 TOKEN
 	Name  = "LOGO_FILE_NAME"
-	Value  = "SkyBayPkg\GRG_Logo_800x600.jpg"
+	Value  = "SkyBayPkg\deepwarelogo.bmp"
 	TokenType = Expression
 	TargetMAK = Yes
 	TargetFDF = Yes
@@ -1408,8 +1408,17 @@ TOKEN
 End
 
 TOKEN
+	Name  = "SETUP_ALT_ENTRY_SCAN"
+	Value  = "EFI_SCAN_DEL"
+	Help  = "Set to one of the defined constants from EFI_SIMPLE_TEXT_INPUT protocol. Remember to check STR_DEL_ENTER_SETUP string in AmiTSEStr.uni,and STR_DEL_ENTER_SETUP_SREDIR in Terminal.uni if using Serial Redirection"
+	TokenType = Expression
+	TargetH = Yes
+	Token = "SETUP_ALT_ENTRY_ENABLE" "!=" "0"
+End
+
+TOKEN
 	Name  = "TSE_DEFAULT_SETUP_PASSWORD_SUPPORT"
-	Value  = "1"
+	Value  = "0"
 	Help  = "0 is default.set 1=> to Enable default setup password"
 	TokenType = Expression
 	TargetMAK = Yes
@@ -1706,7 +1715,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW05AR"
+    Value  = "DW05VR"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
@@ -1715,7 +1724,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MAJOR_VERSION"
-    Value  = "0"
+    Value  = "1"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -1724,7 +1733,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "8"
+    Value  = "0"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
