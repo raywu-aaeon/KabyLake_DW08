@@ -54,8 +54,12 @@ FW_VERSION_ACPI  AcpiFwVersionTbl = {
     	sizeof(FW_VERSION_ACPI),
     	1,						//Revision = 1
     	0, 						//Checksum
-    	CONVERT_TO_STRING(T_ACPI_OEM_ID),     		//OemId[6] 
-    	CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID),		//OemTblId[8]
+//ray_override / [TAG-CorrectedFIDT] Corrected OA3 FIDT OemId and OemTblID / Modified >>
+//    	CONVERT_TO_STRING(T_ACPI_OEM_ID),     		//OemId[6] 
+//    	CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID),		//OemTblId[8]
+    	T_ACPI_OEM_ID,     				//OemId[6] 
+    	T_ACPI_OEM_TBL_ID,				//OemTblId[8]
+//ray_override / [TAG-CorrectedFIDT] Corrected OA3 FIDT OemId and OemTblID / Modified <<
     	ACPI_OEM_REV,					//OemRev
     	CREATOR_ID_AMI,					//CreatorId
     	CREATOR_REV_MS,					//CreatorRev						
@@ -76,8 +80,12 @@ FW_VERSION_ACPI  AcpiFwVersionTbl = {
     	TWO_DIGIT_MINUTE_INT,
     	TWO_DIGIT_SECOND_INT,
     	0xffff,
-    	CONVERT_TO_STRING(T_ACPI_OEM_ID),
-    	CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID),
+//ray_override / [TAG-CorrectedFIDT] Corrected OA3 FIDT OemId and OemTblID / Modified >>
+//    	CONVERT_TO_STRING(T_ACPI_OEM_ID),
+//    	CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID),
+    	T_ACPI_OEM_ID,
+    	T_ACPI_OEM_TBL_ID,
+//ray_override / [TAG-CorrectedFIDT] Corrected OA3 FIDT OemId and OemTblID / Modified <<
     	49,
     	{ 
             0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
