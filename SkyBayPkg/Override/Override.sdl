@@ -1276,7 +1276,7 @@ End
 
 TOKEN
 	Name  = "T_ACPI_OEM_ID"
-	Value  = "{'G','R','G','B',0x20,0x20}"
+	Value  = "{'Y','I','H','U','A',0x00}"
 	Help  = "ACPI OEM Id -\a string value to be filled into ACPI table headers"
 	TokenType = Expression
 	TargetMAK = Yes
@@ -1286,7 +1286,7 @@ End
 
 TOKEN
 	Name  = "T_ACPI_OEM_TBL_ID"
-	Value  = "{'G','R','G','B','I','P','C',0x20}"
+	Value  = "{'Y','I','H','U','A','T','I','D'}"
 	Help  = "ACPI OEM Id -\a string value to be filled into ACPI table headers"
 	TokenType = Expression
 	TargetMAK = Yes
@@ -1384,7 +1384,7 @@ End
 
 TOKEN
 	Name  = "LOGO_FILE_NAME"
-	Value  = "SkyBayPkg\deepwarelogo.bmp"
+	Value  = "SkyBayPkg\logo.bmp"
 	TokenType = Expression
 	TargetMAK = Yes
 	TargetFDF = Yes
@@ -1715,7 +1715,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW05VR"
+    Value  = "DW05YH"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
