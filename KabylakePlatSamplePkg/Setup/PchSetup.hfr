@@ -62,6 +62,20 @@
     goto USB_OPTIONS_FORM_ID,
          prompt = STRING_TOKEN(STR_USB_OPTIONS_FORM),
          help = STRING_TOKEN(STR_USB_OPTIONS_FORM_HELP);
+
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Restore AC Power Loss : Change Position / Added >>
+    SEPARATOR
+
+    oneof varid  = PCH_SETUP.StateAfterG3,
+      prompt   = STRING_TOKEN(STR_STATE_AFTER_G3),
+      help     = STRING_TOKEN(STR_STATE_AFTER_G3_HELP),
+      option text = STRING_TOKEN(STR_S0_AFTER_G3_STRING), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_S5_AFTER_G3_STRING), value = 1, flags = RESET_REQUIRED;
+//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added >>
+      option text = STRING_TOKEN(STR_LAST_AFTER_G3_STRING), value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added <<
+    endoneof;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Restore AC Power Loss : Change Position / Added <<
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
 
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
@@ -385,15 +399,17 @@ suppressif TRUE ;
     endif;
 #endif
 
-    oneof varid  = PCH_SETUP.StateAfterG3,
-      prompt   = STRING_TOKEN(STR_STATE_AFTER_G3),
-      help     = STRING_TOKEN(STR_STATE_AFTER_G3_HELP),
-      option text = STRING_TOKEN(STR_S0_AFTER_G3_STRING), value = 0, flags = RESET_REQUIRED;
-      option text = STRING_TOKEN(STR_S5_AFTER_G3_STRING), value = 1, flags = RESET_REQUIRED;
-//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added >>
-      option text = STRING_TOKEN(STR_LAST_AFTER_G3_STRING), value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
-//ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added <<
-    endoneof;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Restore AC Power Loss : Change Position / Removed >>
+//    oneof varid  = PCH_SETUP.StateAfterG3,
+//      prompt   = STRING_TOKEN(STR_STATE_AFTER_G3),
+//      help     = STRING_TOKEN(STR_STATE_AFTER_G3_HELP),
+//      option text = STRING_TOKEN(STR_S0_AFTER_G3_STRING), value = 0, flags = RESET_REQUIRED;
+//      option text = STRING_TOKEN(STR_S5_AFTER_G3_STRING), value = 1, flags = RESET_REQUIRED;
+////ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added >>
+//      option text = STRING_TOKEN(STR_LAST_AFTER_G3_STRING), value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+////ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added <<
+//    endoneof;
+//ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Restore AC Power Loss : Change Position / Removed <<
 
     oneof varid = PCH_SETUP.IchPort80Route,
       prompt   = STRING_TOKEN(PORT_80_REDIRECT),
