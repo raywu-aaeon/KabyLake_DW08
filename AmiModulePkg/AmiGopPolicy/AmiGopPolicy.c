@@ -198,6 +198,7 @@ AmiDefaultGopEdidOverrideGetEdid (
   IN OUT UINTN                      *EdidSize,
   IN OUT UINT8                      **Edid )
 {
+//        return EFI_UNSUPPORTED;
     *Attributes = 0;
     *EdidSize = 128;
     pBS->CopyMem (
@@ -206,7 +207,6 @@ AmiDefaultGopEdidOverrideGetEdid (
            128
            );
     return EFI_SUCCESS;
-        return EFI_UNSUPPORTED;
 }
 #endif
 
