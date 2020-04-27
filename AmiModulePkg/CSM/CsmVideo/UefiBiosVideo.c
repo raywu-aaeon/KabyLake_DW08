@@ -1374,8 +1374,8 @@ ParseEdidData (
   DEBUG_RAYDEBUG((-1, "ParseEdidData() Start .... EDID Data Dump\n"));
   for (i = 0; i < 0x100; i++)
   {
-    DEBUG_RAYDEBUG((-1, "0x%X  ", *(EdidBuffer + i)));
-    if ( i % 0x10 )
+    DEBUG_RAYDEBUG((-1, "0x%X   ", *(EdidBuffer + i)));
+    if ( i % 0x10 && i != 0 )
     {
       /* code */
     }
