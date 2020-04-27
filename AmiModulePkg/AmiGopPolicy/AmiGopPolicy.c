@@ -188,7 +188,6 @@ AmiDefaultGopEdidOverrideGetEdid (
   IN OUT UINTN                      *EdidSize,
   IN OUT UINT8                      **Edid )
 {
-DEBUG_RAYDEBUG((-1, "AmiDefaultGopEdidOverrideGetEdid() Start\n"));
 //    return EFI_UNSUPPORTED;
   UINT8 EdidData[0x80] = \
       // 1_800x480_60Hz
@@ -206,6 +205,7 @@ DEBUG_RAYDEBUG((-1, "AmiDefaultGopEdidOverrideGetEdid() Start\n"));
   *Edid = EdidData;
   *EdidSize = 0x80;
   *Attributes = 0;
+DEBUG_RAYDEBUG((-1, "AmiDefaultGopEdidOverrideGetEdid() End\n"));
 
   return EFI_SUCCESS;
 }
