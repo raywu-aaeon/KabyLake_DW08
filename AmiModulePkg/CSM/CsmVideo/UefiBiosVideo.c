@@ -1757,6 +1757,7 @@ BiosVideoCheckForVbe (
                              &EdidOverrideDataSize,
                              (UINT8 **) &EdidOverrideDataBlock
                              );
+DEBUG_RAYDEBUG((-1, "EdidOverride->GetEdid Status = %r\n", Status));
     if (!EFI_ERROR (Status)  &&
 //*** AMI PORTING BEGIN ***//
 //         EdidAttributes == 0 &&

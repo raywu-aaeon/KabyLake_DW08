@@ -188,6 +188,7 @@ AmiDefaultGopEdidOverrideGetEdid (
   IN OUT UINTN                      *EdidSize,
   IN OUT UINT8                      **Edid )
 {
+DEBUG_RAYDEBUG((-1, "AmiDefaultGopEdidOverrideGetEdid() Start\n"));
     return EFI_UNSUPPORTED;
 }
 #endif
