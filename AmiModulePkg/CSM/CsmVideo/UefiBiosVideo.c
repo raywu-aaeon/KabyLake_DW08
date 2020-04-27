@@ -1367,6 +1367,25 @@ ParseEdidData (
   UINT8  AspectRatio;
   VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK *EdidDataBlock;
 
+//raydebug >>
+{
+  UINT16 i ;
+
+  DEBUG_RAYDEBUG((-1, "ParseEdidData() Start .... EDID Data Dump\n"));
+  for (i = 0; i < 0x100; i++)
+  {
+    DEBUG_RAYDEBUG((-1, "0x%X  ", *(EdidBuffer + i)));
+    if ( i % 0x10 )
+    {
+      /* code */
+    }
+    else
+    {
+      DEBUG_RAYDEBUG((-1, "\n"));
+    }
+  }
+}
+//raydebug <<
   EdidDataBlock = (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK *) EdidBuffer;
 
   //
