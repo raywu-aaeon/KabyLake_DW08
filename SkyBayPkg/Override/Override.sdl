@@ -2085,3 +2085,13 @@ TOKEN
 	Token = "RAY_DEBUG_MODE" "=" "1"
 End
 ##raydebug <<
+
+##raydebug / CI-BIOS1-DEBUG-FixedEDID / added >>
+TOKEN
+	Name  = "OEM_EDID_OVERRIDE_PROTOCOL_SUPPORT"
+	Value  = "1"
+	Help  = "If set, Include EDID Override Protocol support in Project."
+	TokenType = Boolean
+	TargetH = Yes
+End
+##raydebug / CI-BIOS1-DEBUG-FixedEDID / added <<
