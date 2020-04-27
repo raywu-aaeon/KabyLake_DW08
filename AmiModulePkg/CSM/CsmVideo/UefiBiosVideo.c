@@ -1792,9 +1792,12 @@ DEBUG_RAYDEBUG((-1, "EdidOverride->GetEdid Status = %r\n", Status));
   }
 
 
+DEBUG_RAYDEBUG((-1, "EdidOverrideFound = 0x%X\n", EdidOverrideFound));
+DEBUG_RAYDEBUG((-1, "EdidAttributes = 0x%X\n", EdidAttributes));
   // "EdidFound" is forcibly FALSE,
   // because some SSUs(Server Switch Unit) return invalid response.
   if (!EdidOverrideFound || EdidAttributes == EFI_EDID_OVERRIDE_DONT_OVERRIDE) {
+DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call\n"));
     //
     // If EDID Override data doesn't exist or EFI_EDID_OVERRIDE_DONT_OVERRIDE returned,
     // read EDID information through INT10 call and fill in EdidDiscovered structure
@@ -1809,6 +1812,7 @@ DEBUG_RAYDEBUG((-1, "EdidOverride->GetEdid Status = %r\n", Status));
   
     BiosVideoPrivate->LegacyBios->Int86 (BiosVideoPrivate->LegacyBios, 0x10, &Regs);
     if (Regs.X.AX == VESA_BIOS_EXTENSIONS_STATUS_SUCCESS) {
+DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS_EXTENSIONS_STATUS_SUCCESS\n"));
   
       BiosVideoPrivate->EdidDiscovered.SizeOfEdid = VESA_BIOS_EXTENSIONS_EDID_BLOCK_SIZE;
       Status = pBS->AllocatePool (
