@@ -1337,7 +1337,7 @@ $Int_EFP1_Dock_Voltage_swing 02
 PAGE Device 2 (EFP2)
 $Int_EFP2_Type D2 68
 $Int_EFP2_Port 02
-$Int_EFP2_DDC_Pin 04
+$Int_EFP2_DDC_Pin 00
 $Int_EFP2_AUX_Channel 00
 $Int_EFP2_HDMI_LS_Type 08
 $Int_EFP2_IBoost_Enable 00

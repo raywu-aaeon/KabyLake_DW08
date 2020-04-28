@@ -343,8 +343,12 @@ static GPIO_INIT_CONFIG mGpioTableDtRvp8Crb[] =
   {GPIO_SKL_H_GPP_I5,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //DDPB_CTRLCLK
   {GPIO_SKL_H_GPP_I6,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //DDPB_CTRLDATA
 //raydebug <<
-  {GPIO_SKL_H_GPP_I7,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDPC_CTRLCLK
-  {GPIO_SKL_H_GPP_I8,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpd20K  }}, //DDPC_CTRLDATA
+//raydebug >>
+//  {GPIO_SKL_H_GPP_I7,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDPC_CTRLCLK
+//  {GPIO_SKL_H_GPP_I8,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpd20K  }}, //DDPC_CTRLDATA
+  {GPIO_SKL_H_GPP_I7,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //DDPC_CTRLCLK
+  {GPIO_SKL_H_GPP_I8,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //DDPC_CTRLDATA
+//raydebug <<
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
 //  {GPIO_SKL_H_GPP_I9,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDPD_CTRLCLK
 //  {GPIO_SKL_H_GPP_I10, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpd20K  }}, //DDPD_CTRLDATA
