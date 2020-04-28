@@ -1936,7 +1936,16 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
     }
 
     DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "(%dx%d)  ", BiosVideoPrivate->VbeModeInformationBlock->XResolution, BiosVideoPrivate->VbeModeInformationBlock->YResolution));
-
+//raydebug >>
+    if ( BiosVideoPrivate->VbeModeInformationBlock->XResolution == 800 && BiosVideoPrivate->VbeModeInformationBlock->YResolution == 600 )
+    {
+      /* code */
+    }
+    else
+    {
+      continue;
+    }
+//raydebug <<
     //
     // See if the mode supported in hardware.  If it doesn't then try the next mode.
     //
