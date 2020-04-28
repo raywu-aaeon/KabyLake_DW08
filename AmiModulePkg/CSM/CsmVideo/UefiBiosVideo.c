@@ -1847,7 +1847,7 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
         
         for (i = 0; i < 72; i++)
         {
-          BiosVideoPrivate->VbeEdidDataBlock.DetailedTimingDescriptions[i] = OverrideDetailedTimingDescriptions[i] ;
+          BiosVideoPrivate->VbeEdidDataBlock->DetailedTimingDescriptions[i] = OverrideDetailedTimingDescriptions[i] ;
         }
       }
 //raydebug <<
