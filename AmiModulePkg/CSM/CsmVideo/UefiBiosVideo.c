@@ -1508,6 +1508,7 @@ SearchEdidTiming (
   UINT32 Index;
   for (Index = 0; Index < 29; Index ++) {
     if (ResolutionKey == SupportedResolutions[Index]) {
+DEBUG_RAYDEBUG((-1, "SupportedResolutions[%d] = 0x%X\n", Index, SupportedResolutions[Index]));
       return TRUE;
     }
   }
