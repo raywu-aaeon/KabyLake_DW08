@@ -3429,11 +3429,11 @@ endif ;
       oneof varid    = SA_SETUP.IgdBootType,
         prompt   = STRING_TOKEN(STR_VIDEO_BT_PROMPT),
         help     = STRING_TOKEN(STR_VIDEO_BT_HELP),
-        option text = STRING_TOKEN(STR_VIDEO_BT_DEFAULT),      value = 0, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
+        option text = STRING_TOKEN(STR_VIDEO_BT_DEFAULT),      value = 0, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_VIDEO_BT_EFP),          value = 0x04, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_VIDEO_BT_LFP),          value = 0x08, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_VIDEO_BT_EFP3),         value = 0x20, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_VIDEO_BT_EFP2),         value = 0x40, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_VIDEO_BT_EFP2),         value = 0x40, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
         option text = STRING_TOKEN(STR_VIDEO_BT_EFP4),         value = 0x10, flags = RESET_REQUIRED;
       endoneof;
 
