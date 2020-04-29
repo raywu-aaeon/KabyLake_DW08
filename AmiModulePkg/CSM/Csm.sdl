@@ -208,7 +208,7 @@ End
 
 TOKEN
 	Name  = "INT10_VESA_GO_SUPPORT"
-	Value  = "1"
+	Value  = "0"
 	Help  = "Enables/Disables support of the Graphics Output protocol using VESA INT10 extensions"
 	TokenType = Boolean
 	TargetH = Yes
