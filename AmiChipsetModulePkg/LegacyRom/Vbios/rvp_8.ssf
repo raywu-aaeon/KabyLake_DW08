@@ -17,7 +17,7 @@ PAGE General Video BIOS Features
 $bmp_VBIOS_Post_Mode 00
 $Allow_Boot_DVI 01
 $Enable_Panel_Fitting 03
-$Hotplug_Support_Enb 00
+$Hotplug_Support_Enb 01
 $Enable_Panel_Timing 00
 
 PAGE Boot Display Algorithm 
@@ -1347,7 +1347,7 @@ $Int_EFP2_HDMI_LS_Type 08
 $Int_EFP2_IBoost_Enable 00
 $Int_EFP2_Dp_Boost_Magnitude 00
 $Int_EFP2_Hdmi_Boost_Magnitude 02
-$EFP2_EDIDless_en 00
+$EFP2_EDIDless_en 01
 $LSPcon2_Options 00
 $Int_EFP2_Lane_Reversal 00
 $Int_EFP2_Port_Dockable 00
