@@ -4,7 +4,7 @@ PAGE VBT Information
 PAGE General Platform Configuration
 $Embedded_Platform 01
 $bmp_Dynamic_CdClock_Supported 01
-$Kvmr_Session_Enable 00
+$Kvmr_Session_Enable 01
 
 PAGE Legacy VBIOS Configuration
 
