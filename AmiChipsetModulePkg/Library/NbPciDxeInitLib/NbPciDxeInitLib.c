@@ -299,6 +299,7 @@ DEBUG_RAYDEBUG((-1, "TRACE ImageStart\n"));
 DEBUG_RAYDEBUG((-1, "ImageStart = 0x%X\n", ImageStart));
 DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X\n", &ImageStart));
 DEBUG_RAYDEBUG((-1, "(UINT32 *)ImageStart = 0x%X\n", (UINT32 *)ImageStart));
+DEBUG_RAYDEBUG((-1, "(UINT32 *)(ImageStart + 1) = 0x%X\n", (UINT32 *)(ImageStart + 1)));
 
 //{
 //  UINT8 i ;
