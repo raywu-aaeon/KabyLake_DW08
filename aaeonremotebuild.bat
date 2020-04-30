@@ -25,7 +25,7 @@ echo -------------------------------------------
 
 :SetVebParm
 @set VEB=Kabylake
-@set VEB_BUILD_MODULE=AmiChipsetModulePkg\Library\NbPciDxeInitLib\NbPciDxeInitLib.inf
+@set VEB_BUILD_MODULE=
 @set AptioV_DIR=Aptio_5.x_TOOLS_33
 @rem Veb Support List:
 @rem 4.5.5_TOOLS_41
