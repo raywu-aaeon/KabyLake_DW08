@@ -303,8 +303,12 @@ DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X\n", &ImageStart));
 DEBUG_RAYDEBUG((-1, "(UINT32 *)ImageStart = 0x%X\n", (UINT32 *)ImageStart));
 DEBUG_RAYDEBUG((-1, "(UINT32 **)ImageStart = 0x%X\n", (UINT32 **)ImageStart));
 DEBUG_RAYDEBUG((-1, "((UINT32)ImageStart + 1) = 0x%X\n", ((UINT32)ImageStart + 1)));
-DEBUG_RAYDEBUG((-1, "(UINT32)(**ImageStart) = 0x%X\n", (UINT32)(**ImageStart)));
+{
+  UINT32 *ImageStart32 ;
 
+  ImageStart32 = (UINT32)ImageStart ;
+  DEBUG_RAYDEBUG((-1, "*ImageStart32 = 0x%X\n", *ImageStart32));
+}
 /*
 
 */
