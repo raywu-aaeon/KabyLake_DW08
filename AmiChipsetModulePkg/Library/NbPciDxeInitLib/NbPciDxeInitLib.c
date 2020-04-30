@@ -294,13 +294,23 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
 
 //raydebug >>
 {
-DEBUG_RAYDEBUG((-1, "(UINT32)ImageStart = 0x%X\n", (UINT32)ImageStart));
-DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X\n", &ImageStart));
+DEBUG_RAYDEBUG((-1, "(UINT32)ImageStart = 0x%X", (UINT32)ImageStart));
+DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X", &ImageStart));
   {
-    UINT16 i ;
-    for (i = 0; i < 18; i++)
+    UINT32 i ;
+
+    DEBUG_RAYDEBUG((-1, "Image Data Dump = \n")) ;
+    for (i = 0; i < 75; i++)
     {
-      DEBUG_RAYDEBUG(( -1, "*(UINT32 *)(ImageStart + %d) = 0x%X\n", i, *(UINT32 *)(ImageStart + i) ));
+      if ( i % 16 == 0 && i != 0 )
+      {
+        DEBUG_RAYDEBUG((-1, "\n"));
+      }
+      else
+      {
+        /* code */
+      }
+      DEBUG_RAYDEBUG(( -1, "0x%X  ", *((UINT32 *)ImageStart + i) ));
     }
   }
 }
