@@ -295,10 +295,10 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
                    if (!EFI_ERROR (Status)) {
 //raydebug >>
 DEBUG_RAYDEBUG((-1, "ImageStart  0x%X\n", (UINT8 *)((UINT32)ImageStart)));
-DEBUG_RAYDEBUG((-1, "ImageStart  0x%X\n", *((UINT32)ImageStart)));
-DEBUG_RAYDEBUG((-1, "ImageStart  0x%X\n", *((UINT32)ImageStart + 1)));
-DEBUG_RAYDEBUG((-1, "ImageStart  0x%X\n", (UINT32)(*ImageStart)));
-DEBUG_RAYDEBUG((-1, "ImageStart  0x%X\n", (UINT32)(*(ImageStart + 1))));
+DEBUG_RAYDEBUG((-1, "TRACE ImageStart\n"));
+DEBUG_RAYDEBUG((-1, "ImageStart = 0x%X\n", ImageStart));
+DEBUG_RAYDEBUG((-1, "*ImageStart = 0x%X\n", *ImageStart));
+DEBUG_RAYDEBUG((-1, "(UINT32)*ImageStart = 0x%X\n", (UINT32)*ImageStart));
 //{
 //  UINT8 i ;
 //  
@@ -322,16 +322,16 @@ $EFP2_DTD                           18 bytes    ; DTD for Device 2 DP/HDMI/DVI p
 $EFP3_DTD                           18 bytes    ; DTD for Device 3 DP/HDMI/DVI panel
 $EFP4_DTD                           18 bytes    ; DTD for Device 4 DP/HDMI/DVI panel
 */
-//raydebug <<
-                       //raydebug >>
-                       {
-                         UINT8  EFP2_DTD_640_480[18] = {0xD7, 0x09, 0x80, 0xA0, 0x20, 0xE0, 0x2D, 0x10, 0x08, 0x60, 0x22, 0x00, 0x80, 0xE0, 0x21, 0x00, 0x00, 0x18};
-                         UINT8  EFP2_DTD_1280_768[18] = {0x20, 0x1F, 0x00, 0x80, 0x51, 0x00, 0x1E, 0x30, 0x40, 0x80, 0x37, 0x00, 0xF4, 0x2C, 0x11, 0x00, 0x00, 0x1C};
-                         UINT8  EFP2_DTD_1024_768[18] = {0x64, 0x19, 0x00, 0x40, 0x41, 0x00, 0x26, 0x30, 0x18, 0x88, 0x36, 0x00, 0x06, 0x4D, 0x21, 0x00, 0x00, 0x18};
-
-                             pBS->CopyMem ( (VOID *)((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2) + (0x03) + (0x18)), &EFP2_DTD_1024_768, 18 );
-                       }
-//raydebug <<
+////raydebug <<
+//                       //raydebug >>
+//                       {
+//                         UINT8  EFP2_DTD_640_480[18] = {0xD7, 0x09, 0x80, 0xA0, 0x20, 0xE0, 0x2D, 0x10, 0x08, 0x60, 0x22, 0x00, 0x80, 0xE0, 0x21, 0x00, 0x00, 0x18};
+//                         UINT8  EFP2_DTD_1280_768[18] = {0x20, 0x1F, 0x00, 0x80, 0x51, 0x00, 0x1E, 0x30, 0x40, 0x80, 0x37, 0x00, 0xF4, 0x2C, 0x11, 0x00, 0x00, 0x1C};
+//                         UINT8  EFP2_DTD_1024_768[18] = {0x64, 0x19, 0x00, 0x40, 0x41, 0x00, 0x26, 0x30, 0x18, 0x88, 0x36, 0x00, 0x06, 0x4D, 0x21, 0x00, 0x00, 0x18};
+//
+//                             pBS->CopyMem ( (VOID *)((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2) + (0x03) + (0x18)), &EFP2_DTD_1024_768, 18 );
+//                       }
+////raydebug <<
                        dev->PciIo.RomImage = ImageStart;
                        dev->PciIo.RomSize = ImageSize;
                        break;
