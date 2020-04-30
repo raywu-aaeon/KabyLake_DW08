@@ -292,12 +292,16 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
                                    &AuthenticationStatus
                                    );
 
+//raydebug >>
+{
+DEBUG_RAYDEBUG((-1, "(UINT32)ImageStart = 0x%X", (UINT32)ImageStart));
+DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X", &ImageStart));
+}
+//raydebug <<
+
                    if (!EFI_ERROR (Status)) {
                        dev->PciIo.RomImage = ImageStart;
                        dev->PciIo.RomSize = ImageSize;
-//raydebug >>
-DEBUG_RAYDEBUG((-1, "ImageStart  0x%X", (UINT8 *)((UINT32)ImageStart)));
-//raydebug <<
                        break;
                    }
 
