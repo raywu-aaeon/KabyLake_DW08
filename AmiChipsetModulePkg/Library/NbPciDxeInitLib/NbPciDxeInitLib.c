@@ -300,8 +300,9 @@ DEBUG_RAYDEBUG((-1, "ImageStart  0x%X\n", (UINT8 *)((UINT32)ImageStart)));
   
   for (i = 0; i < 18; i++)
   {
-    DEBUG_RAYDEBUG((-1, "Block 28 = 0x%X ", (UINT8 *)((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2) + (0x03) + (0x18) + i)));
+    DEBUG_RAYDEBUG((-1, "Block 28 = 0x%X ", (UINT8)(*((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2) + (0x03) + (0x18) + i))));
   }
+  DEBUG_RAYDEBUG((-1, "\n"));
 }
 /*
 ImageStart + 0xB30 : VBIOS_VBT_STRUCTUR.HeaderSignature[0] = $VBT
