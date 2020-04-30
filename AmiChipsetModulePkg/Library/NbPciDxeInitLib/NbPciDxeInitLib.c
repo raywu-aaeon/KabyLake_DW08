@@ -310,7 +310,7 @@ DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X", &ImageStart));
       {
         /* code */
       }
-      DEBUG_RAYDEBUG(( -1, "0x%X  ", *((UINT32 *)ImageStart + i) ));
+      DEBUG_RAYDEBUG(( -1, "0x%X  ", *((UINT32 *)ImageStart + ((0xB30) + (0x30) + (0x7F2)) + i) ));
     }
   }
 }
