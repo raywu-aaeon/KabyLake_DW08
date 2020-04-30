@@ -313,6 +313,31 @@ DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X", &ImageStart));
       DEBUG_RAYDEBUG(( -1, "0x%X  ", *((UINT8 *)ImageStart + ((0xB30) + (0x30) + (0x7F2)) + i) ));
     }
   }
+
+// Override EFP2_DTD
+  {
+    UINT8  EFP2_DTD_1024_768[18] = {0x64, 0x19, 0x00, 0x40, 0x41, 0x00, 0x26, 0x30, 0x18, 0x88, 0x36, 0x00, 0x06, 0x4D, 0x21, 0x00, 0x00, 0x18};
+
+    pBS->CopyMem ( ((UINT32 *)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (0x03) + (0x18))), &EFP2_DTD_1024_768, 18 );
+  }
+
+  {
+    UINT32 i ;
+
+    DEBUG_RAYDEBUG((-1, "===== After Override Image Data Dump ===== \n")) ;
+    for (i = 0; i < 75; i++)
+    {
+      if ( i % 16 == 0 && i != 0 )
+      {
+        DEBUG_RAYDEBUG((-1, "\n"));
+      }
+      else
+      {
+        /* code */
+      }
+      DEBUG_RAYDEBUG(( -1, "0x%X  ", *((UINT8 *)ImageStart + ((0xB30) + (0x30) + (0x7F2)) + i) ));
+    }
+  }
 }
 //raydebug <<
 
