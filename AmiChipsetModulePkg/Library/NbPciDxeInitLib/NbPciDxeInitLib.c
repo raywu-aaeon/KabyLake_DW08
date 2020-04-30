@@ -307,8 +307,8 @@ DEBUG_RAYDEBUG((-1, "((UINT32)ImageStart + 1) = 0x%X\n", ((UINT32)ImageStart + 1
   UINT32 Data32, *Pointer32 = NULL ;
 
   Data32 = (UINT32)ImageStart ;
-  *Pointer32 = (UINT32)ImageStart ;
-//  DEBUG_RAYDEBUG((-1, "**Pointer32 = 0x%X\n", **Pointer32));
+  Pointer32 = Data32 ;
+  DEBUG_RAYDEBUG((-1, "*Pointer32 = 0x%X\n", *Pointer32));
 }
 /*
 
