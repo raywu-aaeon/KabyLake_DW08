@@ -279,7 +279,7 @@ EFI_STATUS EFIAPI CspNbPciInitPciRoot (
                    ImageSize = 0;
                    ImageStart = NULL;
 //raydebug >>
-DEBUG_RAYDEBUG((-1, "Before Load VBIOS\n"))
+DEBUG_RAYDEBUG((-1, "Before Load VBIOS\n"));
 DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
 //raydebug <<
                    Status = Fv->ReadFile (
@@ -310,7 +310,7 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
     {
       /* code */
     }
-    DEBUG_RAYDEBUG((-1, "0x%X   ", (UINT8 *)(ImageStart + i)));
+    DEBUG_RAYDEBUG((-1, "0x%X   ", (UINT8 *)((UINT32)ImageStart + i)));
   }
   DEBUG_RAYDEBUG((-1, "\n"));
 }
