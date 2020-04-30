@@ -310,7 +310,7 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
     {
       /* code */
     }
-    DEBUG_RAYDEBUG((-1, "0x%X   ", (UINT8 *)((UINT32)ImageStart + i)));
+    DEBUG_RAYDEBUG((-1, "0x%X   ", (UINT8)(*((UINT32)ImageStart + i))));
   }
   DEBUG_RAYDEBUG((-1, "\n"));
 }
