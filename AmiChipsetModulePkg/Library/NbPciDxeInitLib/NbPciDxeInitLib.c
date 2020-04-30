@@ -296,7 +296,7 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
                        dev->PciIo.RomImage = ImageStart;
                        dev->PciIo.RomSize = ImageSize;
 //raydebug >>
-DEBUG_RAYDEBUG((-1, "ImageStart  0x%X", (UINT8 *)((UINT32)ImageStart + i)));
+DEBUG_RAYDEBUG((-1, "ImageStart  0x%X", (UINT8 *)((UINT32)ImageStart)));
 //raydebug <<
                        break;
                    }
