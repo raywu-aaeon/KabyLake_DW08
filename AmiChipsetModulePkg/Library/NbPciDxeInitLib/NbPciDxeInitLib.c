@@ -300,7 +300,7 @@ DEBUG_RAYDEBUG((-1, "ImageStart  0x%X\n", (UINT8 *)((UINT32)ImageStart)));
   
   for (i = 0; i < 18; i++)
   {
-    DEBUG_RAYDEBUG((-1, "Block 28 = 0x%X ", (UINT8 *)((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2) + i)));
+    DEBUG_RAYDEBUG((-1, "Block 28 = 0x%X ", (UINT8 *)((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2) + (0x03) + (0x18) + i)));
   }
 }
 /*
@@ -322,7 +322,7 @@ $EFP4_DTD                           18 bytes    ; DTD for Device 4 DP/HDMI/DVI p
                        {
                          UINT8  EFP2_DTD_640_480[18] = {0xD7, 0x09, 0x80, 0xA0, 0x20, 0xE0, 0x2D, 0x10, 0x08, 0x60, 0x22, 0x00, 0x80, 0xE0, 0x21, 0x00, 0x00, 0x18};
 
-                             pBS->CopyMem ( (VOID *)((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2), &EFP2_DTD_640_480, 18 );
+                             pBS->CopyMem ( (VOID *)((UINT32)ImageStart + (0xB30) + (0x30) + (0x7F2) + (0x03) + (0x18), &EFP2_DTD_640_480, 18 );
                        }
 //raydebug <<
                        dev->PciIo.RomImage = ImageStart;
