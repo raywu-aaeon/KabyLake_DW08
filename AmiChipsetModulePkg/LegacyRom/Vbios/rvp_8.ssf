@@ -1320,7 +1320,7 @@ $Int_EFP1_HDMI_LS_Type 08
 $Int_EFP1_IBoost_Enable 00
 $Int_EFP1_Dp_Boost_Magnitude 00
 $Int_EFP1_Hdmi_Boost_Magnitude 02
-$EFP1_EDIDless_en 00
+$EFP1_EDIDless_en 01
 $LSPcon1_Options 00
 $Int_EFP1_Lane_Reversal 00
 $Int_EFP1_Port_Dockable 00
