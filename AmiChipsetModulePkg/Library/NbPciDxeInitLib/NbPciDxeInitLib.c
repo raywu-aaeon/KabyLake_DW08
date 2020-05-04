@@ -293,9 +293,10 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
                                    );
 
 //raydebug >>
+if ( !ERROR(Status) )
 {
 DEBUG_RAYDEBUG((-1, "(UINT32)ImageStart = 0x%X\n", (UINT32)ImageStart));
-DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X\n", &ImageStart));
+//DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X\n", &ImageStart));
   {
     UINT32 i ;
 
@@ -315,10 +316,12 @@ DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X\n", &ImageStart));
   }
 
 // Override EFP2_DTD
+  DEBUG_RAYDEBUG((-1, "\n"));
+  DEBUG_RAYDEBUG((-1, "Override Address : 0x%X\n", ((UINT32 *)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18)))));
+
   {
     UINT8  EFP2_DTD_1024_768[18] = {0x64, 0x19, 0x00, 0x40, 0x41, 0x00, 0x26, 0x30, 0x18, 0x88, 0x36, 0x00, 0x06, 0x4D, 0x21, 0x00, 0x00, 0x18};
 
-    DEBUG_RAYDEBUG((-1, "Override Address : 0x%X\n", ((UINT32 *)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18)))));
     pBS->CopyMem ( ((UINT32 *)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &EFP2_DTD_1024_768, 18 );
   }
 

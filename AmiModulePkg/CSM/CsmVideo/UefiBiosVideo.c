@@ -1367,26 +1367,6 @@ ParseEdidData (
   UINT8  AspectRatio;
   VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK *EdidDataBlock;
 
-//raydebug >>
-{
-  UINT16 i ;
-
-  DEBUG_RAYDEBUG((-1, "ParseEdidData() Start .... EDID Data Dump\n"));
-  for (i = 0; i < 0x100; i++)
-  {
-    if ( i % 16 == 0 && i != 0 )
-    {
-      DEBUG_RAYDEBUG((-1, "\n"));
-    }
-    else
-    {
-      /* code */
-    }
-    DEBUG_RAYDEBUG((-1, "0x%X   ", *(EdidBuffer + i)));
-  }
-  DEBUG_RAYDEBUG((-1, "\n"));
-}
-//raydebug <<
   EdidDataBlock = (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK *) EdidBuffer;
 
   //
@@ -1397,7 +1377,7 @@ ParseEdidData (
     CheckSum = CheckSum + EdidBuffer[Index];
   }
   if (CheckSum != 0) {
-    DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "EDID checksum is invalid, EDID will be ignored.\n"));
+    TRACE((TRACE_BIOS_VIDEO, "EDID checksum is invalid, EDID will be ignored.\n"));
     return FALSE;
   }
 
@@ -1464,7 +1444,7 @@ ParseEdidData (
                 (EdidDataBlock->DetailedTimingDescriptions[Index*18 + 5] | ((UINT16)(EdidDataBlock->DetailedTimingDescriptions[Index*18 + 7] & 0xF0) << 4))
                 | ((UINT32)(EdidDataBlock->DetailedTimingDescriptions[Index*18 + 2] | ((UINT16)(EdidDataBlock->DetailedTimingDescriptions[Index*18 + 4] & 0xF0) << 4)) << 16);
 
-DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "EDID Detailed timing[%d]: inserted resolution 0x%x (%dx%d)\n", Index, SupportedResolutions[Index + 25],
+TRACE((TRACE_BIOS_VIDEO, "EDID Detailed timing[%d]: inserted resolution 0x%x (%dx%d)\n", Index, SupportedResolutions[Index + 25],
  EdidDataBlock->DetailedTimingDescriptions[Index*18 + 2] | ((EdidDataBlock->DetailedTimingDescriptions[Index*18 + 4] & 0xF0) << 4),
  EdidDataBlock->DetailedTimingDescriptions[Index*18 + 5] | ((EdidDataBlock->DetailedTimingDescriptions[Index*18 + 7] & 0xF0) << 4)
 ));
@@ -1473,8 +1453,7 @@ DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "EDID Detailed timing[%d]: inserted resolution
         }
       }
     }
-DEBUG_RAYDEBUG((-1, "ValidNumber = 0x%X\n"));
-DEBUG_RAYDEBUG((-1, "ParseEdidData End\n"));
+
 //*** AMI PORTING BEGIN ***//
 // Bug fix. The function was returning TRUE even when no valid timings found.
 //  return TRUE;
@@ -1508,7 +1487,6 @@ SearchEdidTiming (
   UINT32 Index;
   for (Index = 0; Index < 29; Index ++) {
     if (ResolutionKey == SupportedResolutions[Index]) {
-DEBUG_RAYDEBUG((-1, "SupportedResolutions[%d] = 0x%X\n", Index, SupportedResolutions[Index]));
       return TRUE;
     }
   }
@@ -1779,7 +1757,6 @@ BiosVideoCheckForVbe (
                              &EdidOverrideDataSize,
                              (UINT8 **) &EdidOverrideDataBlock
                              );
-DEBUG_RAYDEBUG((-1, "EdidOverride->GetEdid Status = %r\n", Status));
     if (!EFI_ERROR (Status)  &&
 //*** AMI PORTING BEGIN ***//
 //         EdidAttributes == 0 &&
@@ -1788,32 +1765,15 @@ DEBUG_RAYDEBUG((-1, "EdidOverride->GetEdid Status = %r\n", Status));
       //
       // Succeeded to get EDID Override Data
       //
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "EDID override protocol found: data size %x, attribute %x\n", EdidOverrideDataSize, EdidAttributes));
+      TRACE((TRACE_BIOS_VIDEO, "EDID override protocol found: data size %x, attribute %x\n", EdidOverrideDataSize, EdidAttributes));
       EdidOverrideFound = TRUE;
     }
   }
 
 
-DEBUG_RAYDEBUG((-1, "EdidOverrideFound = 0x%X\n", EdidOverrideFound));
-DEBUG_RAYDEBUG((-1, "EdidAttributes = 0x%X\n", EdidAttributes));
   // "EdidFound" is forcibly FALSE,
   // because some SSUs(Server Switch Unit) return invalid response.
   if (!EdidOverrideFound || EdidAttributes == EFI_EDID_OVERRIDE_DONT_OVERRIDE) {
-DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call\n"));
-//raydebug >>
-    pBS->SetMem (&Regs, sizeof (Regs), 0);
-    Regs.X.AX = VESA_BIOS_EXTENSIONS_EDID;
-    Regs.X.BX = 0;
-    Regs.X.CX = 0;
-    Regs.X.DX = 0;
-    Regs.X.ES = EFI_SEGMENT ((UINTN) BiosVideoPrivate->VbeEdidDataBlock);
-    Regs.X.DI = EFI_OFFSET ((UINTN) BiosVideoPrivate->VbeEdidDataBlock);
-  
-    BiosVideoPrivate->LegacyBios->Int86 (BiosVideoPrivate->LegacyBios, 0x10, &Regs);
-DEBUG_RAYDEBUG((-1, "Report VBE/DDC Capabilities\n"));
-DEBUG_RAYDEBUG((-1, "Regs.X.AX = 0x%X\n", Regs.X.AX));
-DEBUG_RAYDEBUG((-1, "Regs.X.BX = 0x%X\n", Regs.X.BX));
-//raydebug <<
     //
     // If EDID Override data doesn't exist or EFI_EDID_OVERRIDE_DONT_OVERRIDE returned,
     // read EDID information through INT10 call and fill in EdidDiscovered structure
@@ -1828,7 +1788,6 @@ DEBUG_RAYDEBUG((-1, "Regs.X.BX = 0x%X\n", Regs.X.BX));
   
     BiosVideoPrivate->LegacyBios->Int86 (BiosVideoPrivate->LegacyBios, 0x10, &Regs);
     if (Regs.X.AX == VESA_BIOS_EXTENSIONS_STATUS_SUCCESS) {
-DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS_EXTENSIONS_STATUS_SUCCESS\n"));
   
       BiosVideoPrivate->EdidDiscovered.SizeOfEdid = VESA_BIOS_EXTENSIONS_EDID_BLOCK_SIZE;
       Status = pBS->AllocatePool (
@@ -1902,16 +1861,16 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
   PreferMode = 0;
   ModeNumber = 0;
 
-  DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "VESA: fetching the list of VESA modes supported by the controller from %x\n", ModeNumberPtr));
+  TRACE((TRACE_BIOS_VIDEO, "VESA: fetching the list of VESA modes supported by the controller from %x\n", ModeNumberPtr));
 
   for (; *ModeNumberPtr != VESA_BIOS_EXTENSIONS_END_OF_MODE_LIST; ModeNumberPtr++) {
     //
     // Make sure this is a mode number defined by the VESA VBE specification.  If it isn'tm then skip this mode number.
     //
-    DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"VESA mode %x ", *ModeNumberPtr));
+    TRACE((TRACE_BIOS_VIDEO,"VESA mode %x ", *ModeNumberPtr));
 
     if ((*ModeNumberPtr & VESA_BIOS_EXTENSIONS_MODE_NUMBER_VESA) == 0) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,".. skipping as it is not a proper VESA mode number\n"));
+      TRACE((TRACE_BIOS_VIDEO,".. skipping as it is not a proper VESA mode number\n"));
       continue;
     }
 
@@ -1931,17 +1890,17 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
     // See if the call succeeded.  If it didn't, then try the next mode.
     //
     if (Regs.X.AX != VESA_BIOS_EXTENSIONS_STATUS_SUCCESS) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,".. skipping as we can not retrieve mode details\n"));
+      TRACE((TRACE_BIOS_VIDEO,".. skipping as we can not retrieve mode details\n"));
       continue;
     }
 
-    DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "(%dx%d)  ", BiosVideoPrivate->VbeModeInformationBlock->XResolution, BiosVideoPrivate->VbeModeInformationBlock->YResolution));
+    TRACE((TRACE_BIOS_VIDEO, "(%dx%d)  ", BiosVideoPrivate->VbeModeInformationBlock->XResolution, BiosVideoPrivate->VbeModeInformationBlock->YResolution));
 
     //
     // See if the mode supported in hardware.  If it doesn't then try the next mode.
     //
     if ((BiosVideoPrivate->VbeModeInformationBlock->ModeAttributes & VESA_BIOS_EXTENSIONS_MODE_ATTRIBUTE_HARDWARE) == 0) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"skipping as the mode is not supported in hardware...\n"));
+      TRACE((TRACE_BIOS_VIDEO,"skipping as the mode is not supported in hardware...\n"));
       continue;
     }
 
@@ -1949,21 +1908,21 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
     // See if the mode supports color.  If it doesn't then try the next mode.
     //
     if ((BiosVideoPrivate->VbeModeInformationBlock->ModeAttributes & VESA_BIOS_EXTENSIONS_MODE_ATTRIBUTE_COLOR) == 0) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"is invalid, skipping...\n"));
+      TRACE((TRACE_BIOS_VIDEO,"is invalid, skipping...\n"));
       continue;
     }
     //
     // See if the mode supports graphics.  If it doesn't then try the next mode.
     //
     if ((BiosVideoPrivate->VbeModeInformationBlock->ModeAttributes & VESA_BIOS_EXTENSIONS_MODE_ATTRIBUTE_GRAPHICS) == 0) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"skipping as the mode is not graphical...\n"));
+      TRACE((TRACE_BIOS_VIDEO,"skipping as the mode is not graphical...\n"));
       continue;
     }
     //
     // See if the mode supports a linear frame buffer.  If it doesn't then try the next mode.
     //
     if ((BiosVideoPrivate->VbeModeInformationBlock->ModeAttributes & VESA_BIOS_EXTENSIONS_MODE_ATTRIBUTE_LINEAR_FRAME_BUFFER) == 0) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"skipping as the mode has not linear frame buffer...\n"));
+      TRACE((TRACE_BIOS_VIDEO,"skipping as the mode has not linear frame buffer...\n"));
       continue;
     }
     //
@@ -1972,24 +1931,24 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
     // number of bits per pixel is a multiple of 8 or more than 32 bits per pixel
     //
     if (BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel < 24) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"skipping as BPP (%d) is less than 24...\n", BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel));
+      TRACE((TRACE_BIOS_VIDEO,"skipping as BPP (%d) is less than 24...\n", BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel));
       continue;
     }
 
     if (BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel > 32) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"skipping as BPP (%d) is more than 32...\n", BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel));
+      TRACE((TRACE_BIOS_VIDEO,"skipping as BPP (%d) is more than 32...\n", BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel));
       continue;
     }
 
     if ((BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel % 8) != 0) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"skipping as BPP (%d) modulo 8 is non-zero...\n", BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel));
+      TRACE((TRACE_BIOS_VIDEO,"skipping as BPP (%d) modulo 8 is non-zero...\n", BiosVideoPrivate->VbeModeInformationBlock->BitsPerPixel));
       continue;
     }
     //
     // See if the physical base pointer for the linear mode is valid.  If it isn't then try the next mode.
     //
     if (BiosVideoPrivate->VbeModeInformationBlock->PhysBasePtr == 0) {
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO,"skipping as PhysBasePtr is zero...\n"));
+      TRACE((TRACE_BIOS_VIDEO,"skipping as PhysBasePtr is zero...\n"));
       continue;
     }
     EdidMatch = FALSE;
@@ -2002,7 +1961,7 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
 
       if (SearchEdidTiming (ResolutionKey) == TRUE) {
         EdidMatch = TRUE;
-        DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "EDID match found.\n"));
+        TRACE((TRACE_BIOS_VIDEO, "EDID match found.\n"));
       }
     }
 
@@ -2017,7 +1976,7 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
            TextModeArray[i].VideoRow == BiosVideoPrivate->VbeModeInformationBlock->YResolution)
         {
             ModeFound = TRUE;
-            DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "MODE match found (%d).\n", i));
+            TRACE((TRACE_BIOS_VIDEO, "MODE match found (%d).\n", i));
         }
     }
     if ((!EdidMatch) && (!ModeFound)) {
@@ -2025,13 +1984,13 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
       // When EDID exist and if the timing matches with VESA add it.
       // And also add three possible resolutions, i.e. 1024x768, 800x600, 640x480
       //
-      DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "neither EDID nor MODE match is found.\n"));
+      TRACE((TRACE_BIOS_VIDEO, "neither EDID nor MODE match is found.\n"));
       continue;
     }
 
     if (CheckForDuplicateMode(BiosVideoPrivate, ModeNumber) == EFI_SUCCESS)
     {
-        DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "skipping as the same resolution (%dx%d) is already available\n",
+        TRACE((TRACE_BIOS_VIDEO, "skipping as the same resolution (%dx%d) is already available\n",
             BiosVideoPrivate->VbeModeInformationBlock->XResolution,
             BiosVideoPrivate->VbeModeInformationBlock->YResolution));
         continue;
@@ -2183,7 +2142,7 @@ DEBUG_RAYDEBUG((-1, "read EDID information through INT10 call Status = VESA_BIOS
   // Current mode is still unknown, set it to an invalid mode.
   //
   GraphicsOutputMode->Mode = GRAPHICS_OUTPUT_INVALIDE_MODE_NUMBER;
-  DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "Total number of GOP modes: %d\n", ModeNumber));
+  TRACE((TRACE_BIOS_VIDEO, "Total number of GOP modes: %d\n", ModeNumber));
   //
   // Find the best mode to initialize
   //
@@ -2448,7 +2407,7 @@ EFI_STATUS AllocateTheBuffers(BIOS_VIDEO_DEV *BiosVideoPrivate){
   UINT32 MaxMode = (BiosVideoPrivate->GraphicsOutput).Mode->MaxMode;
   UINT32 Index;
 
-  DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "UefiBiosVideo AllocateTheBuffers()\n"));
+  TRACE((TRACE_BIOS_VIDEO, "UefiBiosVideo AllocateTheBuffers()\n"));
   for(Index = 0; Index < MaxMode; Index++) {
     ModeData = &BiosVideoPrivate->ModeData[Index];
 
@@ -2459,17 +2418,17 @@ EFI_STATUS AllocateTheBuffers(BIOS_VIDEO_DEV *BiosVideoPrivate){
       MaxVerticalResolution = ModeData->VerticalResolution;
     }
 
-    DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "VbeModeNumber: 0x%x\n", ModeData->VbeModeNumber));
-    DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "BytesPerScanLine: 0x%x\n", \
+    TRACE((TRACE_BIOS_VIDEO, "VbeModeNumber: 0x%x\n", ModeData->VbeModeNumber));
+    TRACE((TRACE_BIOS_VIDEO, "BytesPerScanLine: 0x%x\n", \
       ModeData->BytesPerScanLine));
-    DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "HorizontalResolution: 0x%x\n", \
+    TRACE((TRACE_BIOS_VIDEO, "HorizontalResolution: 0x%x\n", \
       ModeData->HorizontalResolution));
-    DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "VerticalResolution: 0x%x\n", \
+    TRACE((TRACE_BIOS_VIDEO, "VerticalResolution: 0x%x\n", \
       ModeData->VerticalResolution));
   }
 
-  DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "MaxBytesPerScanLine: 0x%x\n", MaxBytesPerScanLine));
-  DEBUG_RAYDEBUG((TRACE_BIOS_VIDEO, "MaxVerticalResolution: 0x%x\n", \
+  TRACE((TRACE_BIOS_VIDEO, "MaxBytesPerScanLine: 0x%x\n", MaxBytesPerScanLine));
+  TRACE((TRACE_BIOS_VIDEO, "MaxVerticalResolution: 0x%x\n", \
     MaxVerticalResolution));
 
   ModeData = &BiosVideoPrivate->ModeData[CurrentMode];
