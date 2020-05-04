@@ -293,7 +293,7 @@ DEBUG_RAYDEBUG((-1, "VbiosImageGuid = %g\n", VbiosImageGuid));
                                    );
 
 //raydebug >>
-if ( !ERROR(Status) )
+if ( (UINT32)(Status) == 0 )
 {
 DEBUG_RAYDEBUG((-1, "(UINT32)ImageStart = 0x%X\n", (UINT32)ImageStart));
 //DEBUG_RAYDEBUG((-1, "&ImageStart = 0x%X\n", &ImageStart));
