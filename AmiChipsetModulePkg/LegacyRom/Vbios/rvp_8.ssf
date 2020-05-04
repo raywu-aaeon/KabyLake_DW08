@@ -2,9 +2,9 @@
 PAGE VBT Information
 
 PAGE General Platform Configuration
-$Embedded_Platform 00
+$Embedded_Platform 01
 $bmp_Dynamic_CdClock_Supported 01
-$Kvmr_Session_Enable 00
+$Kvmr_Session_Enable 01
 
 PAGE Legacy VBIOS Configuration
 
@@ -15,9 +15,9 @@ $Cls_After_Signon 00
 
 PAGE General Video BIOS Features
 $bmp_VBIOS_Post_Mode 00
-$Allow_Boot_DVI 00
+$Allow_Boot_DVI 01
 $Enable_Panel_Fitting 03
-$Hotplug_Support_Enb 00
+$Hotplug_Support_Enb 01
 $Enable_Panel_Timing 00
 
 PAGE Boot Display Algorithm 
@@ -1320,6 +1320,7 @@ $Int_EFP1_HDMI_LS_Type 08
 $Int_EFP1_IBoost_Enable 00
 $Int_EFP1_Dp_Boost_Magnitude 00
 $Int_EFP1_Hdmi_Boost_Magnitude 02
+$EFP1_EDIDless_en 01
 $LSPcon1_Options 00
 $Int_EFP1_Lane_Reversal 00
 $Int_EFP1_Port_Dockable 00
@@ -1334,6 +1335,9 @@ $Int_EFP1_Dock_Redriver_Present 00
 $Int_EFP1_Dock_Pre_emphasis 00
 $Int_EFP1_Dock_Voltage_swing 02
 
+PAGE EDID-less EFP Panel DTD Timings
+TABLE $EFP1_DTD 64 19 00 40 41 00 26 30 18 88 36 00 06 4D 21 00 00 18
+
 PAGE Device 2 (EFP2)
 $Int_EFP2_Type D2 68
 $Int_EFP2_Port 02
@@ -1343,6 +1347,7 @@ $Int_EFP2_HDMI_LS_Type 08
 $Int_EFP2_IBoost_Enable 00
 $Int_EFP2_Dp_Boost_Magnitude 00
 $Int_EFP2_Hdmi_Boost_Magnitude 02
+$EFP2_EDIDless_en 01
 $LSPcon2_Options 00
 $Int_EFP2_Lane_Reversal 00
 $Int_EFP2_Port_Dockable 00
@@ -1357,6 +1362,9 @@ $Int_EFP2_Dock_Redriver_Present 00
 $Int_EFP2_Dock_Pre_emphasis 00
 $Int_EFP2_Dock_Voltage_swing 02
 
+PAGE EDID-less EFP Panel DTD Timings
+TABLE $EFP2_DTD 64 19 00 40 41 00 26 30 18 88 36 00 06 4D 21 00 00 18
+
 PAGE Device 3 (EFP3)
 $Int_EFP3_Type 00 00
 $Int_EFP3_Port 09
@@ -1366,6 +1374,7 @@ $Int_EFP3_HDMI_LS_Type 08
 $Int_EFP3_IBoost_Enable 00
 $Int_EFP3_Dp_Boost_Magnitude 00
 $Int_EFP3_Hdmi_Boost_Magnitude 02
+$EFP3_EDIDless_en 00
 $LSPcon3_Options 00
 $Int_EFP3_Lane_Reversal 00
 $Int_EFP3_Port_Dockable 00
@@ -1379,6 +1388,9 @@ $Int_EFP3_OnBoard_Voltage_swing 02
 $Int_EFP3_Dock_Redriver_Present 00
 $Int_EFP3_Dock_Pre_emphasis 00
 $Int_EFP3_Dock_Voltage_swing 02
+
+PAGE EDID-less EFP Panel DTD Timings
+TABLE $EFP3_DTD D6 09 80 90 20 E0 1D 10 08 60 22 00 00 00 00 00 00 1E
 
 PAGE Device 4 (EFP4 for DDI-E only)
 $Int_EFP4_Type 00 00
