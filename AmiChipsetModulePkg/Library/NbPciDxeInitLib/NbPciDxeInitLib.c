@@ -320,46 +320,54 @@ EFI_STATUS EFIAPI CspNbPciInitPciRoot (
 #if defined(RAY_DEBUG_FLAG)
                       DEBUG_RAYDEBUG((-1, "GetVariable Status = %r\n", Status)) ;
 #endif
-                      switch ( SetupData.DviEdidLessTypeSelection[0] )
+                      if ( SetupData.DviEdidLessMode[0] )
                       {
-                      case 0:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_800_480, 18 );
-                        break;
-                      case 1:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_800_600, 18 );
-                        break;
-                      case 2:
-                      default:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1024_768, 18 );
-                        break;
-                      case 3:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1280_800, 18 );
-                        break;
-                      case 4:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1280_1024, 18 );
-                        break;
-                      case 5:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1366_768, 18 );
-                        break;
-                      case 6:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1440_900, 18 );
-                        break;
-                      case 7:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1600_900, 18 );
-                        break;
-                      case 8:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1600_1200, 18 );
-                        break;
-                      case 9:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1680_1050, 18 );
-                        break;
-                      case 10:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1920_1080, 18 );
-                        break;
-                      case 11:
-                        pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1920_1200, 18 );
-                        break;
+                        switch ( SetupData.DviEdidLessTypeSelection[0] )
+                        {
+                        case 0:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_800_480, 18 );
+                          break;
+                        case 1:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_800_600, 18 );
+                          break;
+                        case 2:
+                        default:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1024_768, 18 );
+                          break;
+                        case 3:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1280_800, 18 );
+                          break;
+                        case 4:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1280_1024, 18 );
+                          break;
+                        case 5:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1366_768, 18 );
+                          break;
+                        case 6:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1440_900, 18 );
+                          break;
+                        case 7:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1600_900, 18 );
+                          break;
+                        case 8:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1600_1200, 18 );
+                          break;
+                        case 9:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1680_1050, 18 );
+                          break;
+                        case 10:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1920_1080, 18 );
+                          break;
+                        case 11:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1920_1200, 18 );
+                          break;
+                        }
                       }
+                      else
+                      {
+                        *((UINT8 *)ImageStart + ((0xB30) + (0x30) + (0x19E))) &= ~BIT0 ;
+                      }
+                      
                       switch ( SetupData.DviEdidLessTypeSelection[1] )
                       {
                       case 0:
