@@ -1359,57 +1359,6 @@ endif ;
           option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         endoneof;
       endif;
-
-//[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added >>
-        oneof varid    = SETUP_DATA.DviEdidLessMode[0],
-          prompt   = STRING_TOKEN(STR_DVI0_EDID_LESS_MODE_PROMPT),
-          help     = STRING_TOKEN(STR_DVI0_EDID_LESS_MODE_PROMPT),
-          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
-        endoneof;
-        suppressif ideqval SETUP_DATA.DviEdidLessMode[0] == 0 ;
-          oneof varid    = SETUP_DATA.DviEdidLessTypeSelection[0],
-            prompt   = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
-            help     = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_480), value = 0, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_600),  value = 1, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1024_768),  value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_800),  value = 3, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_1024),  value = 4, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1366_768),  value = 5, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1440_900),  value = 6, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_900),  value = 7, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_1200),  value = 8, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1680_1050),  value = 9, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1080),  value = 10, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1200),  value = 11, flags = RESET_REQUIRED;
-          endoneof;
-        endif ;
-        oneof varid    = SETUP_DATA.DviEdidLessMode[1],
-          prompt   = STRING_TOKEN(STR_DVI1_EDID_LESS_MODE_PROMPT),
-          help     = STRING_TOKEN(STR_DVI1_EDID_LESS_MODE_PROMPT),
-          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
-        endoneof;
-        suppressif ideqval SETUP_DATA.DviEdidLessMode[1] == 0 ;
-          oneof varid    = SETUP_DATA.DviEdidLessTypeSelection[1],
-            prompt   = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
-            help     = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_480), value = 0, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_600),  value = 1, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1024_768),  value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_800),  value = 3, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_1024),  value = 4, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1366_768),  value = 5, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1440_900),  value = 6, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_900),  value = 7, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_1200),  value = 8, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1680_1050),  value = 9, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1080),  value = 10, flags = RESET_REQUIRED;
-            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1200),  value = 11, flags = RESET_REQUIRED;
-          endoneof;
-        endif ;
-//[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added <<
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Changed : STR_AUTO_STRING -> STR_ENABLED_STRING
 
       //
@@ -1463,6 +1412,59 @@ endif ;
           option text = STRING_TOKEN(STR_DVMT50_ALLOC_128), value=1, flags=RESET_REQUIRED;
           option text = STRING_TOKEN(STR_DVMT50_ALLOC_MAX), value=3, flags=RESET_REQUIRED;
         endoneof;
+
+//ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added >>
+        SEPARATOR
+
+        oneof varid    = SETUP_DATA.DviEdidLessMode[0],
+          prompt   = STRING_TOKEN(STR_DVI0_EDID_LESS_MODE_PROMPT),
+          help     = STRING_TOKEN(STR_DVI0_EDID_LESS_MODE_PROMPT),
+          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+        suppressif ideqval SETUP_DATA.DviEdidLessMode[0] == 0 ;
+          oneof varid    = SETUP_DATA.DviEdidLessTypeSelection[0],
+            prompt   = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
+            help     = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_480), value = 0, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_600),  value = 1, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1024_768),  value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_800),  value = 3, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_1024),  value = 4, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1366_768),  value = 5, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1440_900),  value = 6, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_900),  value = 7, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_1200),  value = 8, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1680_1050),  value = 9, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1080),  value = 10, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1200),  value = 11, flags = RESET_REQUIRED;
+          endoneof;
+        endif ;
+        oneof varid    = SETUP_DATA.DviEdidLessMode[1],
+          prompt   = STRING_TOKEN(STR_DVI1_EDID_LESS_MODE_PROMPT),
+          help     = STRING_TOKEN(STR_DVI1_EDID_LESS_MODE_PROMPT),
+          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        endoneof;
+        suppressif ideqval SETUP_DATA.DviEdidLessMode[1] == 0 ;
+          oneof varid    = SETUP_DATA.DviEdidLessTypeSelection[1],
+            prompt   = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
+            help     = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_SELECTION_PROMPT),
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_480), value = 0, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_800_600),  value = 1, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1024_768),  value = 2, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_800),  value = 3, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_1024),  value = 4, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1366_768),  value = 5, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1440_900),  value = 6, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_900),  value = 7, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1600_1200),  value = 8, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1680_1050),  value = 9, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1080),  value = 10, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1200),  value = 11, flags = RESET_REQUIRED;
+          endoneof;
+        endif ;
+//ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added <<
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
 
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
