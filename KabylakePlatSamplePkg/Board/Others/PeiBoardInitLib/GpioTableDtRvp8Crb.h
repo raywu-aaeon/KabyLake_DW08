@@ -331,8 +331,8 @@ static GPIO_INIT_CONFIG mGpioTableDtRvp8Crb[] =
 //raydebug >>
 //  {GPIO_SKL_H_GPP_I0,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_0
 //  {GPIO_SKL_H_GPP_I1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_1
-  {GPIO_SKL_H_GPP_I0,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_0
-  {GPIO_SKL_H_GPP_I1,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_1
+  {GPIO_SKL_H_GPP_I0,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpu20K }}, //DDSP_HPD_0
+  {GPIO_SKL_H_GPP_I1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpu20K }}, //DDSP_HPD_1
 //raydebug <<
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
 //  {GPIO_SKL_H_GPP_I2,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_2
