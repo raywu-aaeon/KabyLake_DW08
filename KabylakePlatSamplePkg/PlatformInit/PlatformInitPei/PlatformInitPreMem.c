@@ -3724,6 +3724,8 @@ PlatformInitPreMem (
   Status = AmiBoardInit ((EFI_PEI_SERVICES **)PeiServices, PlatformInfo.BoardID);
 //ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Hot-plug Internal Pull High / Added >>
 {
+  UINT16                           GpioTableCount ;
+  
   if ( SystemConfiguration.DviEdidLessMode[0] )
   {
     GpioTableCount = sizeof (DVI_1_HotPlug_GpioTermWpu20K) / sizeof (GPIO_INIT_CONFIG) ;
