@@ -85,14 +85,6 @@
 "MdeModulePkg\Universal\TimestampDxe\Timestamp.cif"= "SS: AptioV;$/AptioV/Source/Modules/Timestamp;Timestamp_01"
 "UefiCpuPkg\CpuIo.cif"= "SS: AptioV;$/AptioV/Source/Modules/CpuIo;CpuIo_02"
 "MdeModulePkg\Universal\LockBox\SmmLockBox\SmmLockBox.cif"= "SS: AptioV;$/AptioV/Source/Modules/SmmLockBox;SmmLockBox_04"
-"AaeonIoPkg\SioDynamicSetupLoadDefaults_Mod\SioDynamicSetupLoadDefaults.cif"
-"AaeonIoPkg\F81866\F81866.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
-"AaeonIoPkg\F81866\F81866Asl.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
-"AaeonIoPkg\F81866\F81866Setup.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
-"AaeonIoPkg\F81866\F81866HwMonitor.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
-"AaeonIoPkg\F81216SEC\F81216SEC.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81216SEC;5.004_SIO_F81216SEC_Gen03_A00"
-"AaeonIoPkg\F81216SEC\F81216SECAsl.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81216SEC/F81216SECAsl;5.004_SIO_F81216SEC_Gen03_A00"
-"AaeonIoPkg\F81216SEC\F81216SECSetup.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81216SEC/F81216SECSetup;5.004_SIO_F81216SEC_Gen03_A00"
 "AmiModulePkg\Flash\Flash.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Flash/Flash;Flash_28"
 "AmiModulePkg\Flash\FWH\FwhFlash.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Flash/Flash/FWH;Flash_28"
 "AmiModulePkg\Flash\LPC\LpcFlash.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Flash/Flash/LPC;Flash_28"
@@ -537,9 +529,13 @@
 "UefiCpuPkg\Universal\Acpi\S3Resume2Pei\S3Resume.cif"= "SS: AptioV;$/AptioV/Source/Modules/ACPI/S3Resume;ACPI_14"
 "AmiModulePkg\AmiGopPolicy\AmiGopPolicy.cif"= "SS: AptioV;$/AptioV/Source/Modules/AmiGopPolicy;AmiGopPolicy_07"
 "AmiModulePkg\BcpBootOrder\BcpBootOrder.cif"= "SS: AptioV;$/AptioV/Source/Modules/BootOptionPolicies/BcpBootOrder;BcpBootOrder_07"
-
 "AmiModulePkg\EfiOsBootOptionNames\EfiOsBootOptionNames.cif"= "SS: AptioV;$/AptioV/Source/Modules/BootOptionPolicies/EfiOsBootOptionNames;EfiOsBootOptionNames_10"
 "AmiModulePkg\EfiOsBootOptionNames\EobonPriorityMap\EobonPriorityMap.cif"= "SS: AptioV;$/AptioV/Source/Modules/BootOptionPolicies/EfiOsBootOptionNames/EobonPriorityMap;EfiOsBootOptionNames_10"
+"AmiModulePkg\FastBoot\FastBoot.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot;FastBoot_12"
+"AmiModulePkg\FastBoot\FastBootSmi.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot;FastBoot_12"
+"AmiModulePkg\FastBoot\FastBootOption\FastBootOption.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot;FastBoot_12"
+"AmiCompatibilityPkg\Include\FastBootIncludes.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot/Include;FastBoot_12"
+"AmiCompatibilityPkg\Include\Protocol\FastBootProtocol.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot/Include;FastBoot_12"
 "AmiModulePkg\GenericSio\GenericSio.cif"= "SS: AptioV;$/AptioV/Source/Modules/GenericSio;GenericSio_09"
 "AmiModulePkg\GenericSio\GenericIoAsl.cif"= "SS: AptioV;$/AptioV/Source/Modules/GenericSio;GenericSio_09"
 "AmiModulePkg\GenericSio\SioStaticSetup.cif"= "SS: AptioV;$/AptioV/Source/Modules/GenericSio;GenericSio_09"
@@ -660,7 +656,6 @@
 "CryptoPkg\Library\BaseCryptLib\BaseCryptLib.cif"= "SS: AptioV;$/AptioV/Source/Interfaces/CryptoPkg/BaseCryptLib;CryptoPkg_32.01"
 "CryptoPkg\LibraryBin\LibraryBin.cif"= "SS: AptioV;$/AptioV/Source/Interfaces/CryptoPkg/LibraryBin/CryptoPkg/LibraryBin;CryptoPkg_32.01"
 "CryptoPkg\Library\TlsLib\TlsLib.cif"= "SS: AptioV;$/AptioV/Source/Interfaces/CryptoPkg/TlsLib;CryptoPkg_32.01"
-
 "EdkShellBinPkg\EdkShellBinPkg.cif"= "SS:AptioV;$/AptioV/Binary/Modules/EdkShell;5.004_EdkShell_01"
 "AmiModulePkg\EnhancePeiVariable\EnhancePeiVariable.cif"= "SS: AptioV;$/AptioV/Source/Modules/EnhancePeiVariable;EnhancePeiVariable_03"
 "AmiModulePkg\EnhancePeiVariable\CacheVariablePei\CacheVariablePei.cif"= "SS: AptioV;$/AptioV/Source/Modules/EnhancePeiVariable/CacheVariablePei;EnhancePeiVariable_03"
@@ -672,11 +667,6 @@
 "AmiChipsetModulePkg\FIT\Smm\VerifyFwBootGuard\VerifyFwBootGuard.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/IntelFIT/VerifyFwBootGuard;FIT_22"
 "AmiChipsetModulePkg\FIT\BootGuardKeys\BootGuardKeys.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/IntelFIT/BootGuardKey;FIT_22"
 "AmiChipsetModulePkg\FIT\FitPeiProcessFvBeforePublishing\FitPeiProcessFvBeforePublishing.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/IntelFIT/FitPeiProcessFvBeforePublishing;FIT_22"
-"AmiModulePkg\FastBoot\FastBoot.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot;FastBoot_12"
-"AmiModulePkg\FastBoot\FastBootSmi.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot;FastBoot_12"
-"AmiModulePkg\FastBoot\FastBootOption\FastBootOption.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot;FastBoot_12"
-"AmiCompatibilityPkg\Include\FastBootIncludes.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot/Include;FastBoot_12"
-"AmiCompatibilityPkg\Include\Protocol\FastBootProtocol.cif"= "SS: AptioV;$/AptioV/Source/Modules/FastBoot/Include;FastBoot_12"
 "FatBinPkg\FatBinPkg.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Fat;FatBin_05"
 "AmiModulePkg\FlashSmi\FlashSmi.cif"= "SS: AptioV;$/AptioV/Source/Modules/FlashSmi;FlashSmi_10"
 "AmiModulePkg\FlashSmi\Elinks\FlashSmiElinks.cif"= "SS: AptioV;$/AptioV/Source/Modules/FlashSmi/Elinks;FlashSmi_10"
@@ -720,6 +710,7 @@
 "AmiModulePkg\KbcEmulation\KbcEmulAcpi.cif"= "SS: AptioV;$/AptioV/Source/Modules/KbcEmulation;KbcEmulation_09"
 "MdeModulePkg\Universal\EsrtDxe\Esrt.cif"= "SS: AptioV;$/AptioV/Source/Modules/Esrt;Esrt_00"
 "MdeModulePkg\Universal\Disk\RamDiskDxe\RamDisk.cif"= "SS: AptioV;$/AptioV/Source/Modules/RamDisk;RamDisk_03"
+"AmiModulePkg\NTFS\NTFS.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
 "AmiModulePkg\Nvme\Nvme.cif"= "SS: AptioV;$/AptioV/Source/Modules/NVMe;NVMe_23"
 "AmiModulePkg\Nvme\NvmeInt13\NvmeInt13.cif"= "SS: AptioV;$/AptioV/Source/Modules/NVMe;NVMe_23"
 "AmiModulePkg\Nvme\NvmeInt13\NvmeI13.cif"= "SS: AptioV;$/AptioV/Source/Modules/NVMe;NVMe_23"
@@ -885,6 +876,7 @@
 "AmiModulePkg\Include\NvmeRstPwdInclude.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/NvmeRstPassword;NvmeRstPassword_01"
 "AmiCompatibilityPkg\PCI\PciPort.cif"= "SS: AptioV;$/AptioV/Source/Modules/Compatibility/PCI;PciCompatibility_03"
 "AmiIntelCpuPkg\Microcode\ServWork\SnowridgeServerUc.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Cpu/Intel/AmiIntelCpuPkg/Microcode/ServWork;Microcode_240"
+"RomUtils\AmiSlpWin\32\AmiSlpWin32.cif"= "SS: AptioV;$/AptioV/RomUtils/AmiSlp/32;AMISLP_5_01_0006"
 "AmiTsePkg\AmiTsePkg.cif"= "SS: AptioV;$/AptioV/Source/Interfaces/AmiTsePkg;AmiTsePkg_2_20_1274"
 "AmiTsePkg\Include\Include.cif"= "SS: AptioV;$/AptioV/Source/Interfaces/AmiTsePkg/Include;AmiTsePkg_2_20_1274"
 "AmiTsePkg\Include\Protocol\Protocol.cif"= "SS: AptioV;$/AptioV/Source/Interfaces/AmiTsePkg/Include/Protocol;AmiTsePkg_2_20_1274"
@@ -923,13 +915,6 @@
 "AMIDebuggerPkg\Debugger\UefiTimerLib\UefiTimerLib.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Debugger/UefiTimerLib;Debugger_42"
 "A5Debugger\AptioVDebuggerUSBDbgr.cif"= "SS: AptioV;$/AptioV/Binary/Modules/Debugger/AptioVDebugger;Debugger_42"
 "AmiTsePkg\TseEDKIIPkg\TseEDKIIPkg.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
-"AmiModulePkg\NTFS\NTFS.cif"
-"AaeonIoPkg\AaeonIoPkg.cif"
-"AaeonCommonPkg\AaeonCommonPkg.cif"
-"AaeonCommonPkg\AaeonDio2Pkg\AaeonDio2Pkg.cif"
-"AaeonCommonPkg\AaeonRtcWakePkg\AaeonRtcWakePkg.cif"
-"AaeonCommonPkg\AaeonUartModePkg\AaeonUartModePkg.cif"
-"AaeonCommonPkg\AaeonUefiLanPkg\AaeonLanUefiDriver.cif"
 "SkyBayPkg\Crb.cif"= Private
 "SkyBayPkg\CrbSetup\CrbSetup.cif"= Private
 "SkyBayPkg\Include\Include.cif"= Private
@@ -945,9 +930,9 @@
 "SkyBayPkg\Override\MdeModulePkg\Universal\CapsuleRuntimeDxe\CapsuleRuntimeDxe.cif"= Private
 "SkyBayPkg\Override\AmiModulePkg\Usb\DxeUsbBoardLib.cif"= Private
 "SkyBayPkg\Override\AmiModulePkg\Usb\AmiUsbLib\DxeAmiUsbBdsLib\DxeAmiUsbBdsLib.cif"= Private
+"SkyBayPkg\Override\Raid17_7_0_1006\Raid17_7_0_1006.cif"= Private
 "SkyBayPkg\Override\AmiModulePkg\ACPI\AcpiLib.cif"= Private
 "SkyBayPkg\Override\AmiModulePkg\OemActivation\OA3\OA3_SMM.cif"= Private
-"SkyBayPkg\Override\Raid17_7_0_1006\Raid17_7_0_1006.cif"= Private
 "SkyBayPkg\Override\UefiCpuPkg\PiSmmCpuDxeSmm\PiSmmCpuDxeSmm.cif"= Private
 "KabylakeFspPkg\KabylakeFspPkg.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/KabylakeFspPkg;KabylakeFspPkg_376_051.2"
 "KabylakeFspPkg\KabylakeFspSource.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/KabylakeFspPkg;KabylakeFspPkg_376_051.2"
@@ -958,4 +943,18 @@
 "KabylakeFspPkg\FspPcdInit\FspPcdInit.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/KabylakeFspPkg/FspPcdInit;KabylakeFspPkg_376_051.2"
 "KabylakeFspPkg\Library\Library.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/KabylakeFspPkg/Library;KabylakeFspPkg_376_051.2"
 "KabylakeFspPkg\Include\Include.cif"= "SS: AptioV;$/AptioV/Source/Hardware/Chipset/Intel/Kabylake/KabylakeFspPkg/Include;KabylakeFspPkg_376_051.2"
+"AaeonCommonPkg\AaeonCommonPkg.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
+"AaeonCommonPkg\AaeonDio2Pkg\AaeonDio2Pkg.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
+"AaeonCommonPkg\AaeonUartModePkg\AaeonUartModePkg.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
+"AaeonCommonPkg\AaeonRtcWakePkg\AaeonRtcWakePkg.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
+"AaeonCommonPkg\AaeonUefiLanPkg\AaeonLanUefiDriver.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
+"AaeonIoPkg\AaeonIoPkg.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMITSE/TseEDKIIPkg;TSESources_2_20_1274"
+"AaeonIoPkg\SioDynamicSetupLoadDefaults_Mod\SioDynamicSetupLoadDefaults.cif"= "SS: AptioV;$/AptioV/Source/Modules/SmmLockBox;SmmLockBox_04"
+"AaeonIoPkg\F81866\F81866.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
+"AaeonIoPkg\F81866\F81866Asl.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
+"AaeonIoPkg\F81866\F81866Setup.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
+"AaeonIoPkg\F81866\F81866HwMonitor.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81866;5.004_SIO_F81866_Gen03_A00"
+"AaeonIoPkg\F81216SEC\F81216SEC.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81216SEC;5.004_SIO_F81216SEC_Gen03_A00"
+"AaeonIoPkg\F81216SEC\F81216SECAsl.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81216SEC/F81216SECAsl;5.004_SIO_F81216SEC_Gen03_A00"
+"AaeonIoPkg\F81216SEC\F81216SECSetup.cif"= "SS: AptioV;$/AptioV/Source/Hardware/SuperIo/Fintek/F81216SEC/F81216SECSetup;5.004_SIO_F81216SEC_Gen03_A00"
 "Kabylake.cif"= Private

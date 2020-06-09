@@ -242,10 +242,10 @@ EFI_STATUS EFIAPI OA3_EntryPoint(
     EFI_GUID AmiGlobalVariableGuid = AMI_GLOBAL_VARIABLE_GUID;
     UINTN  i;
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
-//    UINT8    MSDM_OEM_ID[6]     = ACPI_OEM_ID_MAK;     
-//    UINT8    MSDM_OEM_TBL_ID[8] = ACPI_OEM_TBL_ID_MAK; 
-    UINT8    MSDM_OEM_ID[6]     = T_ACPI_OEM_ID;     
-    UINT8    MSDM_OEM_TBL_ID[8] = T_ACPI_OEM_TBL_ID; 
+    UINT8    MSDM_OEM_ID[6]     = ACPI_OEM_ID_MAK;     
+    UINT8    MSDM_OEM_TBL_ID[8] = ACPI_OEM_TBL_ID_MAK; 
+//    UINT8    MSDM_OEM_ID[6]     = T_ACPI_OEM_ID;     
+//    UINT8    MSDM_OEM_TBL_ID[8] = T_ACPI_OEM_TBL_ID; 
 //ray_override / [XI-BringUp] Bring Up Porting / Modified <<
     
     InitAmiLib(ImageHandle, SystemTable);

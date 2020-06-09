@@ -239,6 +239,15 @@ AmiTsePkg\EDK\MiniSetup\uefi2.1\uefi21Bin.sdl AmiTsePkg\Core\em\AMITSE\AMITSE.sd
 AmiTsePkg\EDK\MiniSetup\Ezport\EzportBin.sdl AmiTsePkg\Core\em\AMITSE\AMITSE.sdl\
 AmiTsePkg\EDK\MiniSetup\Legacy\LegacyBin.sdl AmiTsePkg\Core\em\AMITSE\AMITSE.sdl\
 AmiTsePkg\EDK\MiniSetup\EzportPlus\EzportPlusBin.sdl AmiTsePkg\Core\em\AMITSE\AMITSE.sdl\
+AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
+AmiTsePkg\EDK\MiniSetup\TseAdvanced\TseAdvanced.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
+AmiTsePkg\EDK\MiniSetup\BootOnly\MiniSetup.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
+AmiTsePkg\EDK\MiniSetup\TseLite\TseLite.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
+AmiTsePkg\EDK\MiniSetup\TseLite\StyleHook\StyleHook.sdl AmiTsePkg\EDK\MiniSetup\TseLite\TseLite.sdl\
+AmiTsePkg\EDK\MiniSetup\uefi2.1\Uefi21.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
+AmiTsePkg\EDK\MiniSetup\Ezport\Ezport.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
+AmiTsePkg\EDK\MiniSetup\Legacy\Legacy.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
+AmiTsePkg\EDK\MiniSetup\EzportPlus\EzportPlus.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
 AmiModulePkg\HddAcoustic\Acoustic.sdl\
 AmiModulePkg\HddAcoustic\HddAcousticDynamicSetup.sdl AmiModulePkg\HddAcoustic\Acoustic.sdl\
 AmiModulePkg\AhciRecovery\AhciRecovery.sdl\
@@ -304,10 +313,11 @@ IntelFrameworkModulePkg\Universal\Acpi\AcpiS3SaveDxe\S3SaveDxe.sdl AmiModulePkg\
 UefiCpuPkg\Universal\Acpi\S3Resume2Pei\S3Resume.sdl AmiModulePkg\ACPI\ACPI.sdl\
 AmiModulePkg\AmiGopPolicy\AmiGopPolicy.sdl\
 AmiModulePkg\BcpBootOrder\BcpBootOrder.sdl\
-AmiModulePkg\EC\EC.sdl\
-KabylakePlatSamplePkg\EC\EcDxe.sdl AmiModulePkg\EC\EC.sdl\
 AmiModulePkg\EfiOsBootOptionNames\EfiOsBootOptionNames.sdl\
 AmiModulePkg\EfiOsBootOptionNames\EobonPriorityMap\EobonPriorityMap.sdl AmiModulePkg\EfiOsBootOptionNames\EfiOsBootOptionNames.sdl\
+AmiModulePkg\FastBoot\FastBoot.sdl\
+AmiModulePkg\FastBoot\FastBootSmi.sdl AmiModulePkg\FastBoot\FastBoot.sdl\
+AmiModulePkg\FastBoot\FastBootOption\FastBootOption.sdl AmiModulePkg\FastBoot\FastBoot.sdl\
 AmiModulePkg\GenericSio\GenericSio.sdl\
 AmiModulePkg\GenericSio\SioStaticSetup.sdl AmiModulePkg\GenericSio\GenericSio.sdl\
 AmiModulePkg\Library\SioLibraryInstances.sdl AmiModulePkg\GenericSio\GenericSio.sdl\
@@ -373,7 +383,6 @@ CryptoPkg\Library\OpensslLib\OpensslLib.sdl CryptoPkg\CryptoPkg.sdl\
 CryptoPkg\Library\BaseCryptLib\BaseCryptLib.sdl CryptoPkg\CryptoPkg.sdl\
 CryptoPkg\LibraryBin\LibraryBin.sdl CryptoPkg\CryptoPkg.sdl\
 CryptoPkg\Library\TlsLib\TlsLib.sdl CryptoPkg\CryptoPkg.sdl\
-AmiModulePkg\EcPs2Kbd\EcPs2Kbd.sdl\
 EdkShellBinPkg\EdkShellBinPkg.sdl\
 AmiModulePkg\EnhancePeiVariable\EnhancePeiVariable.sdl\
 AmiChipsetModulePkg\FIT\Fit.sdl\
@@ -383,9 +392,6 @@ AmiChipsetModulePkg\FIT\Smm\FitHook.sdl AmiChipsetModulePkg\FIT\Fit.sdl\
 AmiChipsetModulePkg\FIT\Smm\VerifyFwBootGuard\VerifyFwBootGuard.sdl AmiChipsetModulePkg\FIT\Fit.sdl\
 AmiChipsetModulePkg\FIT\BootGuardKeys\BootGuardKeys.sdl AmiChipsetModulePkg\FIT\Fit.sdl\
 AmiChipsetModulePkg\FIT\FitPeiProcessFvBeforePublishing\FitPeiProcessFvBeforePublishing.sdl AmiChipsetModulePkg\FIT\Fit.sdl\
-AmiModulePkg\FastBoot\FastBoot.sdl\
-AmiModulePkg\FastBoot\FastBootSmi.sdl AmiModulePkg\FastBoot\FastBoot.sdl\
-AmiModulePkg\FastBoot\FastBootOption\FastBootOption.sdl AmiModulePkg\FastBoot\FastBoot.sdl\
 FatBinPkg\FatBinPkg.sdl\
 AmiModulePkg\FlashSmi\FlashSmi.sdl\
 AmiModulePkg\FlashSmi\Elinks\FlashSmiElinks.sdl AmiModulePkg\FlashSmi\FlashSmi.sdl\
@@ -423,6 +429,7 @@ AmiModulePkg\KbcEmulation\KbcSbIoTrap.sdl AmiModulePkg\KbcEmulation\KbcIoTrap.sd
 AmiModulePkg\KbcEmulation\KbcEmulAcpi.sdl AmiModulePkg\KbcEmulation\KbcEmul.sdl\
 MdeModulePkg\Universal\EsrtDxe\Esrt.sdl\
 MdeModulePkg\Universal\Disk\RamDiskDxe\RamDisk.sdl\
+AmiModulePkg\NTFS\NTFS.sdl\
 AmiModulePkg\Nvme\Nvme.sdl\
 AmiModulePkg\Nvme\NvmeInt13\NvmeInt13.sdl AmiModulePkg\Nvme\Nvme.sdl\
 AmiModulePkg\Nvme\NvmeDynamicSetup\NvmeDynamicSetup.sdl AmiModulePkg\Nvme\Nvme.sdl\
@@ -493,11 +500,11 @@ AmiCompatibilityPkg\Smbios\SmbiosPeim\SmbiosPeim.sdl AmiCompatibilityPkg\Smbios\
 AmiModulePkg\SmiFlash\SmiFlash.sdl\
 MdeModulePkg\SmmConfidentialMemModule.sdl\
 AmiModulePkg\TCG2\Tcg.sdl\
-AmiModulePkg\TCG2\TisLib.sdl AmiModulePkg\TCG2\Tcg.sdl\
-AmiModulePkg\TCG2\CRB_lib\Tpm20CRBLib.sdl AmiModulePkg\TCG2\TisLib.sdl\
-AmiModulePkg\TCG2\ShaLib\ShaLib.sdl AmiModulePkg\TCG2\TisLib.sdl\
-AmiModulePkg\TCG2\CommonLibraries\TcgAslLib\TcgAslLib.sdl AmiModulePkg\TCG2\TisLib.sdl\
-AmiModulePkg\TCG2\TpmReportStatusCodeWrapperLib\TpmReportStatusCodeWrapperLib.sdl AmiModulePkg\TCG2\TisLib.sdl\
+AmiModulePkg\TCG2\TisLib\TisLib.sdl AmiModulePkg\TCG2\Tcg.sdl\
+AmiModulePkg\TCG2\CRB_lib\Tpm20CRBLib.sdl AmiModulePkg\TCG2\Tcg.sdl\
+AmiModulePkg\TCG2\ShaLib\ShaLib.sdl AmiModulePkg\TCG2\Tcg.sdl\
+AmiModulePkg\TCG2\CommonLibraries\TcgAslLib\TcgAslLib.sdl AmiModulePkg\TCG2\Tcg.sdl\
+AmiModulePkg\TCG2\TpmReportStatusCodeWrapperLib\TpmReportStatusCodeWrapperLib.sdl AmiModulePkg\TCG2\Tcg.sdl\
 AmiModulePkg\TCG2\Common\TcgPei\TcgPei.sdl AmiModulePkg\TCG2\Tcg.sdl\
 AmiModulePkg\TCG2\Common\TcgPlatformSetupPeiPolicy\TcgPlatformSetupPeiPolicy.sdl AmiModulePkg\TCG2\Common\TcgPei\TcgPei.sdl\
 AmiModulePkg\TCG2\Common\TcgDxe\TcgDxe.sdl AmiModulePkg\TCG2\Tcg.sdl\
@@ -517,10 +524,6 @@ AmiModulePkg\TCG2\Common\TpmClearOnRollback\TpmClearOnRollback.sdl AmiModulePkg\
 AmiModulePkg\TCG2\Common\Tpm20PlatformDxe\Tpm20PlatformDxe.sdl AmiModulePkg\TCG2\Tcg.sdl\
 AmiModulePkg\TCG2\Common\Tpm20Acpi\Tpm20Acpi.sdl AmiModulePkg\TCG2\Common\Tpm20PlatformDxe\Tpm20PlatformDxe.sdl\
 AmiModulePkg\TCG2\Common\TcgCoreHook\TcgCoreHook.sdl AmiModulePkg\TCG2\Tcg.sdl\
-AmiModulePkg\TCG2\Common\TpmSmbios\TpmSmbios.sdl AmiModulePkg\TCG2\Tcg.sdl\
-AmiModulePkg\TCG2\Common\TpmNvmeSupport\TpmNvmeSupport.sdl AmiModulePkg\TCG2\Tcg.sdl\
-AmiModulePkg\TCG2\Tcmdxe\TcmDxe.sdl AmiModulePkg\TCG2\Tcg.sdl\
-AmiModulePkg\TCG2\TcmPei\TcmPei.sdl AmiModulePkg\TCG2\Tcg.sdl\
 AmiModulePkg\TcgStorageSecurity\TcgStorageSecurity.sdl\
 AmiModulePkg\TcgStorageSecurity\TcgStorageDynamicSetup\TcgStorageDynamicSetup.sdl AmiModulePkg\TcgStorageSecurity\TcgStorageSecurity.sdl\
 AmiModulePkg\TcgStorageSecurity\AmiTseTcgStorageSecurity\AmiTseTcgStorageSecurity.sdl AmiModulePkg\TcgStorageSecurity\TcgStorageSecurity.sdl\
@@ -539,6 +542,13 @@ AmiChipsetModulePkg\SB\NvmeRstPassword\NvmeRstPassword.sdl\
 AmiCompatibilityPkg\PCI\PciPort.sdl\
 AmiIntelCpuPkg\Microcode\ServWork\SnowridgeServerUc.sdl AmiIntelCpuPkg\Microcode\ServWork\IntelServWorkUc.sdl\
 AmiTsePkg\AmiTsePkg.sdl\
+AmiModulePkg\FixedBootOrder\FixedBootOrder.sdl\
+AmiModulePkg\FixedBootOrder\FixedBootOrderStyle\FixedBootOrderStyle.sdl AmiModulePkg\FixedBootOrder\FixedBootOrder.sdl\
+AmiModulePkg\FixedBootOrder\DefaultFixedBootOrder\DefaultFixedBootOrder.sdl AmiModulePkg\FixedBootOrder\FixedBootOrder.sdl\
+AmiModulePkg\FixedBootOrder\FboSmiFlashLink\FboSmiFlashLink.sdl AmiModulePkg\FixedBootOrder\FixedBootOrder.sdl\
+AmiModulePkg\FixedBootOrder\OemFixedBootOrderIpmi\OemFixedBootOrderIpmi.sdl AmiModulePkg\FixedBootOrder\FixedBootOrder.sdl\
+AmiModulePkg\FixedBootOrder\FboGroupForm\FboGroupForm.sdl AmiModulePkg\FixedBootOrder\FixedBootOrder.sdl\
+AmiModulePkg\FixedBootOrder\FboSce\FboSce.sdl AmiModulePkg\FixedBootOrder\FixedBootOrder.sdl\
 AMIDebuggerPkg\AMIDebuggerPkg.sdl\
 AMIDebuggerPkg\Library\DbgLibraryInstances.sdl AMIDebuggerPkg\AMIDebuggerPkg.sdl\
 AMIDebuggerPkg\Debugger\Debugger.sdl\
@@ -559,6 +569,7 @@ AMIDebuggerPkg\Debugger\DbgXportLib\DbgXportLib.sdl AMIDebuggerPkg\Debugger\Debu
 AMIDebuggerPkg\Debugger\DbgPortLib\DbgPortLib.sdl AMIDebuggerPkg\Debugger\Debugger.sdl\
 AMIDebuggerPkg\Debugger\DbgSerInitLib\DbgSerInitLib.sdl AMIDebuggerPkg\Debugger\Debugger.sdl\
 AMIDebuggerPkg\Debugger\UefiTimerLib\UefiTimerLib.sdl AMIDebuggerPkg\Debugger\Debugger.sdl\
+AmiTsePkg\TseEDKIIPkg\TseEDKII.sdl AmiTsePkg\EDK\MiniSetup\TSESources.Sdl\
 SkyBayPkg\Crb.sdl\
 SkyBayPkg\Csp.sdl\
 SkyBayPkg\CrbSetup\CrbSetup.sdl SkyBayPkg\Crb.sdl\
@@ -573,3 +584,13 @@ KabylakeFspPkg\FspHeader\FspHeader.sdl KabylakeFspPkg\KabylakeFspSource.sdl\
 KabylakeFspPkg\FspInit\FspInit.sdl KabylakeFspPkg\KabylakeFspSource.sdl\
 KabylakeFspPkg\FspPcdInit\FspPcdInit.sdl KabylakeFspPkg\KabylakeFspSource.sdl\
 KabylakeFspPkg\Library\Library.sdl KabylakeFspPkg\KabylakeFspSource.sdl\
+AaeonCommonPkg\AaeonCommonPkg.sdl\
+AaeonCommonPkg\AaeonDio2Pkg\AaeonDio2Pkg.sdl AaeonCommonPkg\AaeonCommonPkg.sdl\
+AaeonCommonPkg\AaeonUartModePkg\AaeonUartModePkg.sdl AaeonCommonPkg\AaeonCommonPkg.sdl\
+AaeonCommonPkg\AaeonRtcWakePkg\AaeonRtcWakePkg.sdl AaeonCommonPkg\AaeonCommonPkg.sdl\
+AaeonCommonPkg\AaeonUefiLanPkg\AaeonLanUefiDriver.sdl AaeonCommonPkg\AaeonCommonPkg.sdl\
+AaeonIoPkg\AaeonIoPkg.sdl\
+AaeonIoPkg\SioDynamicSetupLoadDefaults_Mod\SioDynamicSetupLoadDefaults.sdl AaeonIoPkg\AaeonIoPkg.sdl\
+AaeonIoPkg\F81866\F81866.sdl AaeonIoPkg\AaeonIoPkg.sdl\
+AaeonIoPkg\F81866\F81866HwmSetup.sdl AaeonIoPkg\F81866\F81866.sdl\
+AaeonIoPkg\F81216SEC\F81216SEC.sdl AaeonIoPkg\AaeonIoPkg.sdl\

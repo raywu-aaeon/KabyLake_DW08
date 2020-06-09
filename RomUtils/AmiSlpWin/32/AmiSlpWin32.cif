@@ -1,0 +1,11 @@
+<component>
+	name = "AmiSlpWin32"
+	category = ModulePart
+	LocalRoot = "RomUtils\AmiSlpWin\32"
+	RefName = "AmiSlpWin32"
+
+[files]
+"AMI_Aptio_5.x_AMISLP_User_Guide_NDA.pdf"
+"AMI_Aptio_AMISLP_Release_Notes_NDA.pdf"
+"AMISLP.exe"
+<endComponent>
