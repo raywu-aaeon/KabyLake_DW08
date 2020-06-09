@@ -1288,7 +1288,7 @@ End
 
 TOKEN
 	Name  = "T_ACPI_OEM_ID"
-	Value  = "{'Y','I','H','U','A','\0'}"
+	Value  = "YIHUA"
 	Help  = "ACPI OEM Id -\a string value to be filled into ACPI table headers"
 	TokenType = Expression
 	TargetMAK = Yes
@@ -1298,7 +1298,7 @@ End
 
 TOKEN
 	Name  = "T_ACPI_OEM_TBL_ID"
-	Value  = "{'Y','I','H','U','A','T','I','D'}"
+	Value  = "YIHUATID"
 	Help  = "ACPI OEM Id -\a string value to be filled into ACPI table headers"
 	TokenType = Expression
 	TargetMAK = Yes
