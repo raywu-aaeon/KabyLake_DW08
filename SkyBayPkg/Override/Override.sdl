@@ -1419,6 +1419,17 @@ TOKEN
 	Token = "SETUP_BBS_POPUP_ENABLE" "!=" "0"
 End
 
+//[TAG-SupportPopMenuAltEntry] Spec. Change : Support F7 & F10 Pop Menu Prompt / Added >>
+TOKEN
+	Name  = "POPUP_ALT_MENU_ENTRY_SCAN"
+	Value  = "EFI_SCAN_F7"
+	Help  = "Set to one of the defined constants from EFI_SIMPLE_TEXT_INPUT protocol.Remember to check STR_BBS_POPUP_SREDIR in Terminal.uni if using Serial Redirection. "
+	TokenType = Expression
+	TargetH = Yes
+	Token = "SETUP_BBS_POPUP_ENABLE" "!=" "0"
+End
+//[TAG-SupportPopMenuAltEntry] Spec. Change : Support F7 & F10 Pop Menu Prompt / Added <<
+
 TOKEN
 	Name  = "SETUP_ALT_ENTRY_SCAN"
 	Value  = "EFI_SCAN_DEL"

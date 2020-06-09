@@ -1227,14 +1227,35 @@ VOID CheckForKey (EFI_EVENT Event, VOID *Context)
                 PrintEnterSetupMessage();
 			}
 #if SETUP_BBS_POPUP_ENABLE
-	        else if ( (AmiKey.Key.UnicodeChar == POPUP_MENU_ENTRY_UNICODE) 
+//[TAG-SupportPopMenuAltEntry] Spec. Change : Support F7 & F10 Pop Menu Prompt / Modified >>
+//	        else if ( (AmiKey.Key.UnicodeChar == POPUP_MENU_ENTRY_UNICODE) 
+//             && (AmiKey.Key.ScanCode == POPUP_MENU_ENTRY_SCAN)
+//#if TSE_USE_AMI_EFI_KEYCODE_PROTOCOL
+//#ifdef POPUP_MENU_ENTRY_SHIFT_STATE
+//			 && (TSE_CHECK_SHIFTSTATE (AmiKey.KeyState.KeyShiftState, POPUP_MENU_ENTRY_SHIFT_STATE))
+//#endif
+//#endif
+//			)
+	        else if ( 
+				( (AmiKey.Key.UnicodeChar == POPUP_MENU_ENTRY_UNICODE) 
              && (AmiKey.Key.ScanCode == POPUP_MENU_ENTRY_SCAN)
 #if TSE_USE_AMI_EFI_KEYCODE_PROTOCOL
 #ifdef POPUP_MENU_ENTRY_SHIFT_STATE
 			 && (TSE_CHECK_SHIFTSTATE (AmiKey.KeyState.KeyShiftState, POPUP_MENU_ENTRY_SHIFT_STATE))
 #endif
 #endif
+				)
+				|| (
+					(AmiKey.Key.UnicodeChar == POPUP_MENU_ENTRY_UNICODE) 
+					             && (AmiKey.Key.ScanCode == POPUP_ALT_MENU_ENTRY_SCAN)
+					#if TSE_USE_AMI_EFI_KEYCODE_PROTOCOL
+					#ifdef POPUP_MENU_ENTRY_SHIFT_STATE
+								 && (TSE_CHECK_SHIFTSTATE (AmiKey.KeyState.KeyShiftState, POPUP_MENU_ENTRY_SHIFT_STATE))
+					#endif
+					#endif
+				)
 			)
+//[TAG-SupportPopMenuAltEntry] Spec. Change : Support F7 & F10 Pop Menu Prompt / Modified <<
 			{
 				CheckandDeactivateSoftkbd();
 				PrintEnterBBSPopupMessage ();
