@@ -2000,6 +2000,17 @@ TOKEN
 End
 ##ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided <<
 
+##[TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Added >>
+TOKEN
+	Name  = "FBO_DUAL_MODE"
+	Value  = "1"
+	Help  = "1 = Legacy/Uefi mix display."
+	TokenType = Boolean
+	TargetH = Yes
+	TargetMAK = Yes
+End
+##[TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Added <<
+
 ##raydebug >>
 TOKEN
 	Name  = "DEBUG_MODE"
