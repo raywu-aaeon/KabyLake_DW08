@@ -156,7 +156,7 @@ MAKEFILE_INSERT_DUAL_DEVICE_VALUE_FLAG
 #if !CSM_SUPPORT || EFI_DEVICE_IN_ONE_GROUP
         suppressif TRUE;
 #endif
-//[TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Modified >>
+//ray_override / [TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Modified >>
 //            oneof varid   = SETUP_DATA.BootMode,
 //                questionid = AUTO_ID(FBO_BOOT_MODE_KEY),
 //                prompt    = STRING_TOKEN(STR_BOOT_MODE_SEL),
@@ -203,7 +203,7 @@ MAKEFILE_INSERT_DUAL_DEVICE_VALUE_FLAG
 
 #endif          //#if EFI_DEVICE_IN_ONE_GROUP
             endoneof;
-//[TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Modified <<
+//ray_override / [TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Modified <<
 #if !CSM_SUPPORT || EFI_DEVICE_IN_ONE_GROUP
         endif;
 #endif
