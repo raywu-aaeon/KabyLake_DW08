@@ -2009,6 +2009,15 @@ TOKEN
 	TargetH = Yes
 	TargetMAK = Yes
 End
+
+TOKEN
+    Name  = "FBO_MULTI_HARD_DISK_GROUPS"
+    Value  = "1"
+    Help  = "1:enable the multi hard disk groups in setup/ 0: disable the multi hard disk groups in setup."
+    TokenType = Boolean
+    TargetH = Yes
+    TargetMAK = Yes
+End
 ##[TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Added <<
 
 ##raydebug >>
