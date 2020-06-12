@@ -2018,6 +2018,237 @@ TOKEN
     TargetH = Yes
     TargetMAK = Yes
 End
+
+ELINK
+    Name = "UEFI_HDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
+    Disable = Yes
+End
+
+ELINK
+    Name = "UEFI_HDD1, UEFI_HDD2, UEFI_HDD3, UEFI_HDD4, UEFI_HDD5,"
+    Parent = "FBO_UEFI_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "FBO_MULTI_HARD_DISK_GROUPS" "=" "1"
+    Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
+    Disable = Yes
+End
+
+ELINK
+    Name = "UEFI_NVME,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
+    Token = "NVME_GROUP_SUPPORT" "=" "1"
+    Disable = Yes
+End
+
+ELINK
+    Name = "UEFI_ODD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
+    Disable = Yes
+End
+
+ELINK
+    Name = "UEFI_SD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
+    Disable = Yes
+End
+
+ELINK
+    Name = "UEFI_USBHDD, UEFI_USBODD, UEFI_USBKEY, UEFI_USBFDD, UEFI_USBLAN,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
+    Token = "USB_GROUP" "=" "2"
+    Disable = Yes
+End
+
+ELINK
+    Name = "UEFI_NETWORK,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
+    Disable = Yes
+End
+
+ELINK
+    Name = "HDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name = "HDD1, HDD2, HDD3, HDD4, HDD5,"
+    Parent = "FBO_LEGACY_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "FBO_MULTI_HARD_DISK_GROUPS" "=" "1"
+    Disable = Yes
+End
+
+ELINK
+    Name = "NVME,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "NVME_GROUP_SUPPORT" "=" "1"
+    Disable = Yes
+End
+
+ELINK
+    Name = "ODD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name = "SD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name = "USBHDD, USBODD, USBKEY, USBFDD, USBLAN,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Token = "USB_GROUP" "=" "2"
+    Disable = Yes
+End
+
+ELINK
+    Name = "NETWORK,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name = "ODD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_ODD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "HDD3,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_HDD3,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "HDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_HDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "HDD1,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_HDD1,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "HDD2,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_HDD2,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "USBODD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_USBODD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "USBKEY,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_USBKEY,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "USBHDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_USBHDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "USBFDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_USBFDD,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "NETWORK,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "UEFI_NETWORK,"
+    Parent = "FBO_DUAL_DEVICE"
+    InvokeOrder = AfterParent
+End
 ##[TAG-SupportDualMode] Spec. Changed : Support Dual Mode / Added <<
 
 ##raydebug >>
