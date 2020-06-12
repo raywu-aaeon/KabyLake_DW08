@@ -2029,7 +2029,7 @@ End
 
 ELINK
     Name = "UEFI_HDD1, UEFI_HDD2, UEFI_HDD3, UEFI_HDD4, UEFI_HDD5,"
-    Parent = "FBO_UEFI_DEVICE"
+    Parent = "FBO_DUAL_DEVICE"
     InvokeOrder = AfterParent
     Token = "FBO_MULTI_HARD_DISK_GROUPS" "=" "1"
     Token = "EFI_DEVICE_IN_ONE_GROUP" "=" "0"
@@ -2087,7 +2087,7 @@ End
 
 ELINK
     Name = "HDD1, HDD2, HDD3, HDD4, HDD5,"
-    Parent = "FBO_LEGACY_DEVICE"
+    Parent = "FBO_DUAL_DEVICE"
     InvokeOrder = AfterParent
     Token = "FBO_MULTI_HARD_DISK_GROUPS" "=" "1"
     Disable = Yes
