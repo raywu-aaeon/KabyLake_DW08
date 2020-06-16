@@ -45,11 +45,17 @@
           text  = STRING_TOKEN(STR_BIOS_COMPLIANCY_NAME),
           text  = STRING_TOKEN(STR_BIOS_COMPLIANCY_VALUE);
           
+//ray_override / [TAG-SupportAmiBcp] Spec. Changed : Support AMI BCP to change BIOS version / Modified >>
+//        text
+//          help  = STRING_TOKEN(STR_EMPTY),
+//          text  = STRING_TOKEN(STR_BIOS_VERSION_NAME),
+//          text  = STRING_TOKEN(STR_BIOS_VERSION_VALUE);
         text
           help  = STRING_TOKEN(STR_EMPTY),
           text  = STRING_TOKEN(STR_BIOS_VERSION_NAME),
-          text  = STRING_TOKEN(STR_BIOS_VERSION_VALUE);
-          
+          text  = STRING_TOKEN(STR_BIOS_VERSION_VALUE_AMIBCP);
+//ray_override / [TAG-SupportAmiBcp] Spec. Changed : Support AMI BCP to change BIOS version / Modified <<
+
         text
           help  = STRING_TOKEN(STR_EMPTY),
           text  = STRING_TOKEN(STR_BIOS_DATE_NAME),
