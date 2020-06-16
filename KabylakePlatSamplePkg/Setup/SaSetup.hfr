@@ -1419,8 +1419,8 @@ endif ;
         oneof varid    = SETUP_DATA.DviEdidLessMode[0],
           prompt   = STRING_TOKEN(STR_DVI0_EDID_LESS_MODE_PROMPT),
           help     = STRING_TOKEN(STR_DVI0_EDID_LESS_MODE_PROMPT),
-          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = RESET_REQUIRED;
         endoneof;
         suppressif ideqval SETUP_DATA.DviEdidLessMode[0] == 0 ;
           oneof varid    = SETUP_DATA.DviEdidLessTypeSelection[0],
@@ -1443,8 +1443,8 @@ endif ;
         oneof varid    = SETUP_DATA.DviEdidLessMode[1],
           prompt   = STRING_TOKEN(STR_DVI1_EDID_LESS_MODE_PROMPT),
           help     = STRING_TOKEN(STR_DVI1_EDID_LESS_MODE_PROMPT),
-          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = RESET_REQUIRED;
-          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_DISABLED_STRING), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+          option text = STRING_TOKEN(STR_ENABLED_STRING),  value = 1, flags = RESET_REQUIRED;
         endoneof;
         suppressif ideqval SETUP_DATA.DviEdidLessMode[1] == 0 ;
           oneof varid    = SETUP_DATA.DviEdidLessTypeSelection[1],
