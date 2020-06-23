@@ -76,6 +76,24 @@
 //ray_override / [XI-BringUp] Bring Up Porting / AC Power Loss from PCH : Always ON / Added <<
     endoneof;
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Restore AC Power Loss : Change Position / Added <<
+    suppressif ideqvallist CPU_SETUP.BiosGuard == 1;
+#if 0  // AMI_OVERRIDE_START         
+      oneof varid  = PCH_SETUP.PchBiosLock,
+        prompt   = STRING_TOKEN(STR_PCH_BLE_PROMPT),
+        help     = STRING_TOKEN(STR_PCH_BLE_HELP),
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      endoneof;
+#else
+    oneof varid  = PCH_SETUP.PchBiosLock,
+      prompt   = STRING_TOKEN(STR_PCH_BLE_PROMPT),
+      help     = STRING_TOKEN(STR_PCH_BLE_HELP),
+      default     = BIOS_LOCK_ENABLE,                     
+      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+    endoneof;
+#endif  // AMI_OVERRIDE_END
+    endif;
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
 
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
@@ -12019,24 +12037,24 @@ endoneof;
     endoneof;
 #endif  // AMI_OVERRIDE_END   
 
-    suppressif ideqvallist CPU_SETUP.BiosGuard == 1;
-#if 0  // AMI_OVERRIDE_START         
-      oneof varid  = PCH_SETUP.PchBiosLock,
-        prompt   = STRING_TOKEN(STR_PCH_BLE_PROMPT),
-        help     = STRING_TOKEN(STR_PCH_BLE_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
-      endoneof;
-#else
-    oneof varid  = PCH_SETUP.PchBiosLock,
-      prompt   = STRING_TOKEN(STR_PCH_BLE_PROMPT),
-      help     = STRING_TOKEN(STR_PCH_BLE_HELP),
-      default     = BIOS_LOCK_ENABLE,                     
-      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = MANUFACTURING | RESET_REQUIRED;
-      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
-    endoneof;
-#endif  // AMI_OVERRIDE_END
-    endif;
+//    suppressif ideqvallist CPU_SETUP.BiosGuard == 1;
+//#if 0  // AMI_OVERRIDE_START         
+//      oneof varid  = PCH_SETUP.PchBiosLock,
+//        prompt   = STRING_TOKEN(STR_PCH_BLE_PROMPT),
+//        help     = STRING_TOKEN(STR_PCH_BLE_HELP),
+//        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+//        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+//      endoneof;
+//#else
+//    oneof varid  = PCH_SETUP.PchBiosLock,
+//      prompt   = STRING_TOKEN(STR_PCH_BLE_PROMPT),
+//      help     = STRING_TOKEN(STR_PCH_BLE_HELP),
+//      default     = BIOS_LOCK_ENABLE,                     
+//      option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = MANUFACTURING | RESET_REQUIRED;
+//      option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
+//    endoneof;
+//#endif  // AMI_OVERRIDE_END
+//    endif;
   endform; //End of SECURITY_OPTIONS_FORM_ID
 
 //
