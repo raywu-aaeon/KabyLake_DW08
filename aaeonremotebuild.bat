@@ -21,7 +21,7 @@ echo -------------------------------------------
 @set SHA_FOLDER=%2
 @set OUTPUT_DIR=\\AA-LA11-1140B\_RemoteBuildFiles
 @set USERNAME=raywu@aaeon.com.tw
-@set PASSWORD=Aaeon1629x
+@set PASSWORD=Aaeon1629d
 
 :SetVebParm
 @set VEB=Kabylake
