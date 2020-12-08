@@ -1738,7 +1738,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW05YH"
+    Value  = "DW07YH"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
@@ -1747,7 +1747,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MAJOR_VERSION"
-    Value  = "1"
+    Value  = "0"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -1756,7 +1756,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "3"
+    Value  = "1"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -1773,7 +1773,7 @@ End
 
 TOKEN
 	Name  = "SYSTEM_PRODUCT_NAME"
-	Value  = "DW05"
+	Value  = "DW07"
 	Help  = "Specifies the System Product Name"
 	TokenType = Expression
 	TargetEQU = Yes
@@ -1799,7 +1799,7 @@ End
 
 TOKEN
 	Name  = "BASE_BOARD_PRODUCT_NAME"
-	Value  = "DW05"
+	Value  = "DW07"
 	Help  = "Specifies the Product Name"
 	TokenType = Expression
 	TargetEQU = Yes
