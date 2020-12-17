@@ -1184,13 +1184,14 @@ End
 
 TOKEN
     Name  = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT"
-    Value  = "0"
+    Value  = "1"
     Help  = "[1] - Skylake all VBIOS and VBT include / [0] - By select Token CRB_BOARD"
     TokenType = Boolean
     TargetMAK = Yes
     TargetH = Yes
     TargetFDF = Yes 
     Token = "CSM_SUPPORT" "=" "1"
+##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Modified 0->1
 End
 
 PCIDEVICE
@@ -1215,6 +1216,17 @@ PCIDEVICE
 	Token = "CRB_BOARD" "=" "3" #For RVP8
 	Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "0" 
 End
+
+##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added >>
+TOKEN
+    Name  = "INTEL_VBIOS_RVP8_BINARY"
+    Value  = "AmiChipsetModulePkg/LegacyRom/Vbios/skl_1066.dat"
+    TokenType = Expression
+    TargetMAK = Yes
+    TargetFDF = Yes 
+    Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "1"
+End
+##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added <<
 
 TOKEN
 	Name  = "OEM_INTEL_GOP_VBT_BIN_FILE"
@@ -1706,7 +1718,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW07AR"
+    Value  = "DW07AT"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
@@ -1715,7 +1727,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MAJOR_VERSION"
-    Value  = "0"
+    Value  = "1"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -1724,7 +1736,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "1"
+    Value  = "0"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
