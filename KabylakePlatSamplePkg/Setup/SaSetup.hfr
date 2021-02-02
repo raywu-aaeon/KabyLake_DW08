@@ -1438,6 +1438,7 @@ endif ;
             option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1680_1050),  value = 9, flags = RESET_REQUIRED;
             option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1080),  value = 10, flags = RESET_REQUIRED;
             option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1200),  value = 11, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_720),  value = 12, flags = RESET_REQUIRED;
           endoneof;
         endif ;
         oneof varid    = SETUP_DATA.DviEdidLessMode[1],
@@ -1462,6 +1463,7 @@ endif ;
             option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1680_1050),  value = 9, flags = RESET_REQUIRED;
             option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1080),  value = 10, flags = RESET_REQUIRED;
             option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1920_1200),  value = 11, flags = RESET_REQUIRED;
+            option text = STRING_TOKEN(STR_DVI_EDID_LESS_TYPE_1280_720),  value = 12, flags = RESET_REQUIRED;
           endoneof;
         endif ;
 //ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added <<

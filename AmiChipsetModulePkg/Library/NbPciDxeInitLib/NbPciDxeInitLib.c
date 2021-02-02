@@ -315,6 +315,7 @@ EFI_STATUS EFIAPI CspNbPciInitPciRoot (
                       UINT8 DTD_1680_1050[18] = {0x21, 0x39, 0x90, 0x30, 0x62, 0x1A, 0x27, 0x40, 0x68, 0x80, 0x36, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1C} ;
                       UINT8 DTD_1920_1080[18] = {0x02, 0x3A, 0x80, 0x18, 0x71, 0x38, 0x2D, 0x40, 0x58, 0x2D, 0x36, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
                       UINT8 DTD_1920_1200[18] = {0x28, 0x3C, 0x80, 0xA0, 0x70, 0xB0, 0x23, 0x40, 0x30, 0x20, 0x36, 0x00, 0x07, 0xC8, 0x20, 0x00, 0x00, 0x1A} ;
+                      UINT8 DTD_1280_720[18] = {0x01, 0x1D, 0x00, 0x72, 0x51, 0xD0, 0x1E, 0x20, 0x6E, 0x28, 0x55, 0x00, 0x0F, 0x48, 0x22, 0x00, 0x00, 0x1E} ;
 
                       Status = pRS->GetVariable( L"Setup", &SetupGuid, &Attribute, &VariableSize, &SetupData );
 #if defined(RAY_DEBUG_FLAG)
@@ -360,6 +361,9 @@ EFI_STATUS EFIAPI CspNbPciInitPciRoot (
                           break;
                         case 11:
                           pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1920_1200, 18 );
+                          break;
+                        case 12:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3) + (18))), &DTD_1280_720, 18 );
                           break;
                         }
                         *((UINT8 *)ImageStart + ((0xB30) + (0x30) + (0x19E))) |= ~BIT0 ;
@@ -409,6 +413,9 @@ EFI_STATUS EFIAPI CspNbPciInitPciRoot (
                           break;
                         case 11:
                           pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3))), &DTD_1920_1200, 18 );
+                          break;
+                        case 12:
+                          pBS->CopyMem ( (VOID *)((UINT32)ImageStart + ((0xB30) + (0x30) + (0x7F2) + (3))), &DTD_1280_720, 18 );
                           break;
                         }
                         *((UINT8 *)ImageStart + ((0xB30) + (0x30) + (0x178))) |= ~BIT0 ;
