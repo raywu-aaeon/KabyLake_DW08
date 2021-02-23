@@ -1718,7 +1718,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW07AR"
+    Value  = "DW07AT"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
