@@ -1,0 +1,12 @@
+<component>
+    name = "SCEWIN32"
+    category = eModule
+    LocalRoot = "RomUtils\SceWin\32\"
+    RefName = "SCEWIN32"
+[files]
+"AMI_Aptio_5.x_SCE_User_Guide_NDA.pdf"	
+"AMI_Aptio_SCE_Release_Notes_NDA.pdf"	
+"SCEWIN.exe"	
+"amifldrv32.sys"	
+"amigendrv32.sys"
+<endComponent>
