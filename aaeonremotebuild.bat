@@ -122,7 +122,7 @@ if not exist "%OUTPUT_PATH%\Build" mkdir %OUTPUT_PATH%\Build\
 @copy Build\*.h %OUTPUT_PATH%\Build /y /b
 @copy Build\SignOnMessage.uni %OUTPUT_PATH%\Build /y /b
 @copy build.log %OUTPUT_PATH% /y /b
-echo "C:\Program Files (x86)\DediProg\SF Programmer\dpcmd.exe" --spi-clk 0 -z %FLASH_BIN% > Flash.bat
+echo "C:\Program Files (x86)\DediProg\SF Programmer\dpcmd.exe" --spi-clk 0 -z RVP8_D_Cons_Prod.bin > Flash.bat
 echo pause >> Flash.bat
 @copy Flash.bat %OUTPUT_PATH% /y /b
 
