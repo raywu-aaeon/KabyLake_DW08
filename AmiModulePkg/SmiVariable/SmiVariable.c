@@ -1,16 +1,11 @@
-//****************************************************************************
-//****************************************************************************
-//**                                                                        **
-//**             (C)Copyright 1985-2017, American Megatrends, Inc.          **
-//**                                                                        **
-//**                          All Rights Reserved.                          **
-//**                                                                        **
-//**             5555 Oakbrook Pkwy, Suite 200, Norcross, GA 30093          **
-//**                                                                        **
-//**                          Phone (770)-246-8600                          **
-//**                                                                        **
-//****************************************************************************
-//****************************************************************************
+//***********************************************************************
+//*                                                                     *
+//*   Copyright (c) 1985-2019, American Megatrends International LLC.   *
+//*                                                                     *
+//*      All rights reserved. Subject to AMI licensing agreement.       *
+//*                                                                     *
+//***********************************************************************
+
 
 
 /** @file 
@@ -57,28 +52,47 @@ SMM_AMI_BUFFER_VALIDATION_LIB_ADDRESS_RANGE *gValidationSmramRanges = NULL;
 UINTN gValidationNumberOfSmramRanges = 0;
 
 /**
-    Returns size of string, which can not be bigger than size of NVRAM.
+    Returns size of validated string, which can not be bigger than size of NVRAM.
 
          
     @param String Pointer to the beginning of string.
-
+	@param Size Pointer to where size will be returned.
           
-    @retval String size
+    @retval Status Based on Verification Result
 
 **/
-UINTN GetVarNameSize(IN CHAR16 *String)
+EFI_STATUS GetVarNameSize(IN CHAR16 *String, UINTN *Size)
 {
 	CHAR16 *Str, *EndOfStr;
 	UINTN MaxSize = NVRAM_SIZE;
+	EFI_STATUS Status = EFI_SUCCESS;
 			
-	ASSERT(String!=NULL);
-	if (String==NULL) return 0;
+	ASSERT(String != NULL);
+	if (Size == NULL)
+		return EFI_INVALID_PARAMETER;
 	
+	if (String == NULL) 
+	{	
+		*Size = 0;
+		return Status;
+	}
 	EndOfStr = (CHAR16*)((UINT8*)String + MaxSize);
+	if (EndOfStr < String)
+	{
+		EndOfStr = (CHAR16*)MAX_UINTN;
+	}
 	for(Str = String; Str < EndOfStr; Str++)
-		if (!*Str) return (Str - String + 1)*sizeof(CHAR16);
-
-	return MaxSize+1;
+	{	
+		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)Str, sizeof(CHAR16));
+		if (EFI_ERROR(Status))
+		{
+			*Size = 0;
+		    return Status;
+		}
+		if (!*Str) break;
+	}
+	*Size = (Str - String + 1)*sizeof(CHAR16);
+	return Status;
 }
 
 /**
@@ -209,7 +223,7 @@ EFI_STATUS CheckAddressRangeHiiDb( IN UINT8 *Address, IN UINTN Range )
 
 **/
 
-EFI_STATUS VariableInterface( 
+EFI_STATUS EFIAPI VariableInterface( 
     IN EFI_HANDLE DispatchHandle,
     IN CONST VOID  *Context OPTIONAL,
     IN OUT   VOID  *CommBuffer OPTIONAL,
@@ -228,7 +242,7 @@ EFI_STATUS VariableInterface(
     Status = pSmst->SmmLocateProtocol(
         &EfiSmmCpuProtocolGuid,
         NULL, 
-        &SmmCpuProtocol 
+        (VOID**)&SmmCpuProtocol 
     );
     ASSERT_EFI_ERROR(Status);
     if (EFI_ERROR(Status))
@@ -256,25 +270,23 @@ EFI_STATUS VariableInterface(
 
         	case GET_VARIABLE_SUBFUNCTION: 
         		// Address of the VARIABLE_BLOCK parameter block
-        		VariableBlock = (VARIABLE_BLOCK*)RegBlockPtr->EBX;
+        		VariableBlock = (VARIABLE_BLOCK*)(UINTN)RegBlockPtr->EBX;
         		
         		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
         		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock, sizeof(VARIABLE_BLOCK));
         		if (EFI_ERROR(Status)) break;
         		
-        		//Get the size of VariableName
-        		DataSize = GetVarNameSize((CHAR16*)(UINTN)VariableBlock->VariableName);
-        		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
-        		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock->VariableName, DataSize);
+        		//Get the size of VariableName and check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
+        		Status = GetVarNameSize((CHAR16*)(UINTN)VariableBlock->VariableName, &DataSize);
+        		
         		if (EFI_ERROR(Status)) break;
         		
         		DataSize = VariableBlock->DataSize;
-
-        		// check destination address range if it's cleared by zero
-        		Status = CheckDestinationMemoryRange((UINT8*)(UINTN)VariableBlock->Data, DataSize);
+        		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
+        		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock->Data, DataSize);
         		if (!EFI_ERROR(Status)) {
-        			// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
-        			Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock->Data, DataSize);
+        			// check destination address range if it's cleared by zero
+        			Status = CheckDestinationMemoryRange((UINT8*)(UINTN)VariableBlock->Data, DataSize);
         			if (!EFI_ERROR(Status)) {
         				Status = pRS->GetVariable( 
         						(CHAR16*)(UINTN)VariableBlock->VariableName, 
@@ -290,22 +302,23 @@ EFI_STATUS VariableInterface(
 
         	case GET_NEXT_VARIABLE_SUBFUNCTION:
         		// Address of the GET_NEXT_VARIABLE_BLOCK parameter block
-        		GetNextVariableBlock = (GET_NEXT_VARIABLE_BLOCK*)RegBlockPtr->EBX;
+        		GetNextVariableBlock = (GET_NEXT_VARIABLE_BLOCK*)(UINTN)RegBlockPtr->EBX;
         		
         		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
         		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)GetNextVariableBlock, sizeof(GET_NEXT_VARIABLE_BLOCK));
         		if (EFI_ERROR(Status)) break;
         		
-        		DataSize = GetNextVariableBlock->VariableNameSize;
-        		
-        		if (GetVarNameSize((CHAR16*)(UINTN)GetNextVariableBlock->VariableName) > DataSize) 
-        		{	
-        			Status = EFI_INVALID_PARAMETER;
-        			break;
-        		}
         		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
-        		Status = AmiValidateMemoryBuffer((VOID*)GetNextVariableBlock->VariableName, DataSize);
+        		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)GetNextVariableBlock->VariableName, GetNextVariableBlock->VariableNameSize);
+        		if (EFI_ERROR(Status)) break;
+        		
+        		Status = GetVarNameSize((CHAR16*)(UINTN)GetNextVariableBlock->VariableName, &DataSize);
+        				
+        		if (DataSize > GetNextVariableBlock->VariableNameSize) 
+        			Status = EFI_INVALID_PARAMETER;
+     
         		if (!EFI_ERROR(Status)) {
+        		    DataSize = GetNextVariableBlock->VariableNameSize;
         			Status = pRS->GetNextVariableName( 
         					&DataSize,
         					(CHAR16*)(UINTN)GetNextVariableBlock->VariableName,
@@ -317,35 +330,48 @@ EFI_STATUS VariableInterface(
 
         	case SET_VARIABLE_SUBFUNCTION:
         		// Address of the VARIABLE_BLOCK parameter block
-        		VariableBlock = (VARIABLE_BLOCK*)RegBlockPtr->EBX;
+        		VariableBlock = (VARIABLE_BLOCK*)(UINTN)RegBlockPtr->EBX;
         		
         		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
         		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock, sizeof(VARIABLE_BLOCK));
         		if (EFI_ERROR(Status)) break;
         		
         		//Get the size of VariableName
-        		DataSize = GetVarNameSize((CHAR16*)(UINTN)VariableBlock->VariableName);
+        		Status = GetVarNameSize((CHAR16*)(UINTN)VariableBlock->VariableName, &DataSize);
         		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
-        		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock->VariableName, DataSize);
+
         		if (EFI_ERROR(Status)) break;
         		
         		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
-        		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock->Data, VariableBlock->DataSize);
-        		if (!EFI_ERROR(Status))
-        			Status = pRS->SetVariable( 
-        					(CHAR16*)(UINTN)VariableBlock->VariableName, 
-        					&VariableBlock->VendorGuid, 
-        					VariableBlock->Attributes, 
-        					VariableBlock->DataSize, 
-        					(VOID*)(UINTN)VariableBlock->Data 
-        			);
+                if (VariableBlock->DataSize != 0)//we can't validate zero size buffer
+                {
+                    Status = AmiValidateMemoryBuffer((VOID*)(UINTN)VariableBlock->Data, VariableBlock->DataSize);
+                    if (!EFI_ERROR(Status))
+                        Status = pRS->SetVariable( 
+                                (CHAR16*)(UINTN)VariableBlock->VariableName, 
+                                &VariableBlock->VendorGuid, 
+                                VariableBlock->Attributes, 
+                                VariableBlock->DataSize, 
+                                (VOID*)(UINTN)VariableBlock->Data 
+                        );
+                }
+                else
+                {
+                    Status = pRS->SetVariable( 
+                             (CHAR16*)(UINTN)VariableBlock->VariableName, 
+                              &VariableBlock->VendorGuid, 
+                              VariableBlock->Attributes, 
+                              VariableBlock->DataSize, 
+                              NULL 
+                    );
+                }
         	break;
 
         	// Remove this sub-function after Utility will be able do not use it for Export HII DB!!!
         	case COPY_MEMORY_SUBFUNCTION:
         	{
         		// Address of the COPY_MEMORY_BLOCK parameter block
-        		COPY_MEMORY_BLOCK *CopyMemBlock = (COPY_MEMORY_BLOCK*)RegBlockPtr->EBX;
+        		COPY_MEMORY_BLOCK *CopyMemBlock = (COPY_MEMORY_BLOCK*)(UINTN)RegBlockPtr->EBX;
         		
         		// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
         		Status = AmiValidateMemoryBuffer((VOID*)(UINTN)CopyMemBlock, sizeof(COPY_MEMORY_BLOCK));
@@ -358,13 +384,13 @@ EFI_STATUS VariableInterface(
         			// Check source address range if it's not out of the HiiDb space
         			Status = CheckAddressRangeHiiDb((UINT8*)(UINTN)CopyMemBlock->SrcAddr, CopyMemBlock->Size);
         			if (!EFI_ERROR(Status)) {
-                
-        				// check destination address range if it's cleared by zero
-        				Status = CheckDestinationMemoryRange((UINT8*)(UINTN)CopyMemBlock->DestAddr, CopyMemBlock->Size);
+        				
+        				// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
+        				Status = AmiValidateMemoryBuffer((VOID*)(UINTN)CopyMemBlock->DestAddr, CopyMemBlock->Size);
         				if (!EFI_ERROR(Status)) {
-                    
-        					// check address range to avoid TSEG area (return EFI_ACCESS_DENIED)
-        					Status = AmiValidateMemoryBuffer((VOID*)(UINTN)CopyMemBlock->DestAddr, CopyMemBlock->Size);
+
+        					// check destination address range if it's cleared by zero
+        					Status = CheckDestinationMemoryRange((UINT8*)(UINTN)CopyMemBlock->DestAddr, CopyMemBlock->Size);
         					if (!EFI_ERROR(Status)) {
         						MemCpy( 
         								(UINT8*)(UINTN)CopyMemBlock->DestAddr, 
@@ -429,7 +455,7 @@ EFI_STATUS InSmmFunction(
     Status = pSmst->SmmLocateProtocol(
         &EfiSmmSwDispatchProtocolGuid, 
         NULL, 
-        &SwDispatch 
+        (VOID**)&SwDispatch 
     );
     ASSERT_EFI_ERROR(Status);
     if (EFI_ERROR(Status))
@@ -515,16 +541,3 @@ EFI_STATUS SmiVariableEntryPoint(
     return Status;
 }
 
-//****************************************************************************
-//****************************************************************************
-//**                                                                        **
-//**             (C)Copyright 1985-2017, American Megatrends, Inc.          **
-//**                                                                        **
-//**                          All Rights Reserved.                          **
-//**                                                                        **
-//**             5555 Oakbrook Pkwy, Suite 200, Norcross, GA 30093          **
-//**                                                                        **
-//**                          Phone (770)-246-8600                          **
-//**                                                                        **
-//****************************************************************************
-//****************************************************************************

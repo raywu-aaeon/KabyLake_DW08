@@ -1,7 +1,7 @@
 //****************************************************************************
 //****************************************************************************
 //**                                                                        **
-//**             (C)Copyright 1985-2017, American Megatrends, Inc.          **
+//**             (C)Copyright 1985-2019, American Megatrends, Inc.          **
 //**                                                                        **
 //**                          All Rights Reserved.                          **
 //**                                                                        **
@@ -37,7 +37,7 @@
 
 **/
 
-VOID SaveHiiDBBufferAddress(
+VOID EFIAPI SaveHiiDBBufferAddress(
     IN EFI_EVENT Event,
     IN VOID *Context )
 {
@@ -53,7 +53,7 @@ VOID SaveHiiDBBufferAddress(
     Status = pBS->LocateProtocol(
         &EfiHiiDatabaseProtocolGuid,
         NULL, 
-        &HiiDatabase
+        (VOID**)&HiiDatabase
     );
     if (EFI_ERROR(Status))
         return;
@@ -136,7 +136,7 @@ EFI_STATUS ExportHiiDbEntryPoint(
 //****************************************************************************
 //****************************************************************************
 //**                                                                        **
-//**             (C)Copyright 1985-2017, American Megatrends, Inc.          **
+//**             (C)Copyright 1985-2019, American Megatrends, Inc.          **
 //**                                                                        **
 //**                          All Rights Reserved.                          **
 //**                                                                        **

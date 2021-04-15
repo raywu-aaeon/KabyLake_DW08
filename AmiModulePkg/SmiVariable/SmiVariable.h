@@ -1,7 +1,7 @@
 //****************************************************************************
 //****************************************************************************
 //**                                                                        **
-//**             (C)Copyright 1985-2012, American Megatrends, Inc.          **
+//**             (C)Copyright 1985-2019, American Megatrends, Inc.          **
 //**                                                                        **
 //**                          All Rights Reserved.                          **
 //**                                                                        **
@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 
 #define EFI_HII_EXPORT_DATABASE_GUID \
-    { 0x1b838190, 0x4625, 0x4ead, 0xab, 0xc9, 0xcd, 0x5e, 0x6a, 0xf1, 0x8f, 0xe0 }
+    { 0x1b838190, 0x4625, 0x4ead, {0xab, 0xc9, 0xcd, 0x5e, 0x6a, 0xf1, 0x8f, 0xe0} }
 
 #define FUNCTION_NUMBER                     0xef
 #define GET_VARIABLE_SUBFUNCTION            0x01
@@ -189,7 +189,7 @@ typedef struct _REG_BLOCK {
 //****************************************************************************
 //****************************************************************************
 //**                                                                        **
-//**             (C)Copyright 1985-2012, American Megatrends, Inc.          **
+//**             (C)Copyright 1985-2019, American Megatrends, Inc.          **
 //**                                                                        **
 //**                          All Rights Reserved.                          **
 //**                                                                        **
