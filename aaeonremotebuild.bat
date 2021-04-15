@@ -21,7 +21,7 @@ echo -------------------------------------------
 @set SHA_FOLDER=%2
 @set OUTPUT_DIR=\\AA-LA11-1140B\_RemoteBuildFiles
 @set USERNAME=raywu@aaeon.com.tw
-@set PASSWORD=Aaeon1629e
+@set PASSWORD=Aaeon1629f
 
 :SetVebParm
 @set VEB=Kabylake
@@ -73,7 +73,7 @@ echo -------------------------------------------
 
 :ReBuildAll
 make clean
-call make rebuild
+call make rebuild>>build.log
 if ERRORLEVEL 1 goto BuildFailed
 goto BuildSucess
 
@@ -90,6 +90,11 @@ goto BuildSucess
 @echo Start Time %OLDTIME%
 @echo End   Time %NEWTIME%
 
+FOR /F "usebackq tokens=1-3" %%I IN (Build\Token.h) DO (
+	if "%%J" EQU "AAEON_BIN" (
+		Set FLASH_BIN=%%K
+	)
+)
 
 echo.
 echo Copying Output Files
@@ -116,6 +121,10 @@ if not exist "%OUTPUT_PATH%\Build" mkdir %OUTPUT_PATH%\Build\
 @copy Build\*.mak %OUTPUT_PATH%\Build /y /b
 @copy Build\*.h %OUTPUT_PATH%\Build /y /b
 @copy Build\SignOnMessage.uni %OUTPUT_PATH%\Build /y /b
+@copy build.log %OUTPUT_PATH% /y /b
+echo "C:\Program Files (x86)\DediProg\SF Programmer\dpcmd.exe" --spi-clk 0 -z RVP8_D_Cons_Prod.bin > Flash.bat
+echo pause >> Flash.bat
+@copy Flash.bat %OUTPUT_PATH% /y /b
 
 :DeleteConnection
 @net use %OUTPUT_DIR% /delete
