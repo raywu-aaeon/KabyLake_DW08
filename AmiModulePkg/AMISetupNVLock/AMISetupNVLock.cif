@@ -1,0 +1,20 @@
+<component>
+    name = "AMISetupNVLock"
+    category = eModule
+    LocalRoot = "AmiModulePkg\AMISetupNVLock\"
+    RefName = "AMISetupNVLock"
+[INF]
+"AMISetupNVLock.inf"
+[files]
+"AMISetupNVLock.sdl"	
+"AMISetupNVLock.chm"	
+"AMISetupNVLockSetup.sd"	
+"AMISetupNVLockSetupStrings.uni"	
+"AMISetupNVLock.txt"	
+[parts]
+"AMISetupNVLock.NVLockSMIFlashHook"
+[dependency]
+AMITSE >= "SS: AptioV;$/AptioV/Binary/Modules/AMITSE;5.004_AmiTse_2_17_1245"
+AmiTsePkg >= "SS: AptioV;$/AptioV/Source/Interfaces/AmiTsePkg;5.004_AmiTse_2_17_1245"
+AmiModulePkg >= "SS: AptioV;$/AptioV/Source/Interfaces/AmiModulePkg;AmiModulePkg_46"
+<endComponent>

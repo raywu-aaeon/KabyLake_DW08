@@ -1718,7 +1718,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW07AT"
+    Value  = "DW07AR"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
@@ -1736,7 +1736,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "0"
+    Value  = "2"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -1891,6 +1891,24 @@ TOKEN
 	Value  = "1"
 	Help  = "This token controls loading of the Setup related HII resources \(setup screens and strings). If this token is '0', setup resources are \only published into HII database if the user enters setup. If \this token is '1', setup resources are always published into the HiiDatabase. Keep it off for speed \optimization.  Set it to on if Runtime resources processing support is required."
 	TokenType = Boolean
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "RT_ACCESS_SUPPORT_IN_HPKTOOL"
+	Value  = "1"
+	Help  = "0 is default. 0=> Not to set RT flag for Varstore variables. 1=> enable to add RT attribute for Varstore variables, uefisetup.ini attributes persists"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "RT_ACCESS_FOR_EFIVARSTORE"
+	Value  = "1"
+	Help  = "0 is default. 0=> Not to set RT flag for EfiVarstore variables. 1=> enable to add RT attribute for Efivarstore variables, uefisetup.ini attributes persists. It is User's responsibility to secure the variable to which User providing RT attribute."
+	TokenType = Expression
+	TargetMAK = Yes
 	TargetH = Yes
 End
 

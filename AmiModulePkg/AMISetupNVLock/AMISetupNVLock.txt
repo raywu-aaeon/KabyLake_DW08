@@ -1,0 +1,35 @@
+//**********************************************************************
+//**********************************************************************
+//**                                                                  **
+//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**                                                                  **
+//**                       All Rights Reserved.                       **
+//**                                                                  **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+//**                                                                  **
+//**                       Phone: (770)-246-8600                      **
+//**                                                                  **
+//**********************************************************************
+//**********************************************************************
+
+/** @file AMISetupNVLock.txt
+    This is the Template file to create NvLockElink.h that contain runtime
+    variable need to be blocked
+**/
+
+#define VALIDATE_AND_LOCK_NV_LIST @Elink(ValidateAndLockNvHook,"@Child", " ", "%n")
+#define PROTECTED_VARIABLE_LIST @Elink(ProtectedNvVariableForRuntime,"@Child", " ", "%n")
+
+//**********************************************************************
+//**********************************************************************
+//**                                                                  **
+//**        (C)Copyright 1985-2018, American Megatrends, Inc.         **
+//**                                                                  **
+//**                       All Rights Reserved.                       **
+//**                                                                  **
+//**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093        **
+//**                                                                  **
+//**                       Phone: (770)-246-8600                      **
+//**                                                                  **
+//**********************************************************************
+//**********************************************************************
