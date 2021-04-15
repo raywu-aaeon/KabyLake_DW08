@@ -444,6 +444,8 @@
 "AmiModulePkg\AHCI\SB\AhciCsp.cif"= "SS: AptioV;$/AptioV/Source/Modules/AHCI;AHCI_21"
 "AmiModulePkg\Include\AhciIncludes.cif"= "SS: AptioV;$/AptioV/Source/Modules/AHCI;AHCI_21"
 "AmiModulePkg\Include\Protocol\AmiAhciBus.cif"= "SS: AptioV;$/AptioV/Source/Modules/AHCI;AHCI_21"
+"AmiModulePkg\AMISetupNVLock\AMISetupNVLock.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMISetupNVLock;AMISetupNVLock_9"
+"AmiModulePkg\AMISetupNVLock\NVLockSMIFlashHook\NVLockSMIFlashHook.cif"= "SS: AptioV;$/AptioV/Source/Modules/AMISetupNVLock/NVLockSMIFlashHook;AMISetupNVLock_9"
 "AmiTsePkg\Core\em\AMITSE\AMITSE.cif"= "SS: AptioV;$/AptioV/Binary/Modules/AMITSE;AMITSE_2_20_1274"
 "AmiTsePkg\AmiTsePrivatePkg.cif"= "SS: AptioV;$/AptioV/Binary/Modules/AMITSE;AMITSE_2_20_1274"
 "AmiTsePkg\Board\Em\AMITSEBoard\AMITSEBoard.cif"= "SS: AptioV;$/AptioV/Binary/Modules/AMITSE/AMITSEBoard;AMITSE_2_20_1274"
