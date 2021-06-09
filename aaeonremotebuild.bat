@@ -141,6 +141,7 @@ if exist "%OUTPUT_PATH%\" (
 )
 @mkdir "%OUTPUT_PATH%\Build"
 @mkdir "%OUTPUT_PATH%\%AmiFspBinBuildTempDir%"
+@mkdir "%OUTPUT_PATH%\Build\AmiCrbMeRoms"
 
 :CopyBuildFiles
 @copy *.bin "%OUTPUT_PATH%" /y /b
