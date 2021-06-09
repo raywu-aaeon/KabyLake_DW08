@@ -254,8 +254,6 @@
                         <Register name="DBUF_CFG1_SRC1" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC6" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC8" mask="0xFFFFFFFF" value="0x3F0000" />
-                        <Register name="DBUF_CFG1_SRC9" mask="0xFFFFFFFF" value="0x3F0000" />
-                        <Register name="DBUF_CFG1_SRC10" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC11" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC12" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC13" mask="0xFFFFFFFF" value="0x3F0000" />
