@@ -10,3 +10,5 @@ job_build:
   script:
     - 'AaeonRemoteBuild.bat 1 1'
 
+variables:
+  GIT_DEPTH: "1"
