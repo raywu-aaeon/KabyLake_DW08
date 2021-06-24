@@ -75,10 +75,10 @@ VOID EFIAPI CreateNbAcpiTables (
     EFI_STATUS                  Status = 0;
     MCFG_20                     *Mcfg;
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
-//    UINT8                       OemId[6] = CONVERT_TO_STRING(T_ACPI_OEM_ID);
-//    UINT8                       OemTblId[8] = CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID);
-    UINT8                       OemId[6] = T_ACPI_OEM_ID;
-    UINT8                       OemTblId[8] = T_ACPI_OEM_TBL_ID;
+    UINT8                       OemId[6] = CONVERT_TO_STRING(T_ACPI_OEM_ID);
+    UINT8                       OemTblId[8] = CONVERT_TO_STRING(T_ACPI_OEM_TBL_ID);
+//    UINT8                       OemId[6] = T_ACPI_OEM_ID;
+//    UINT8                       OemTblId[8] = T_ACPI_OEM_TBL_ID;
 //ray_override / [XI-BringUp] Bring Up Porting / Modified <<
 //---------------------------------------------
     // it must be only one instance of such protocol
