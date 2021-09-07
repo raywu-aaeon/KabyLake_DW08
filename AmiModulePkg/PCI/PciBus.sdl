@@ -854,71 +854,71 @@ PcdMapping
     TargetDSC = Yes
 End
 
-PcdMapping
-    Name = "PcdDebugPrintErrorLevel"
-    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
-    PcdType = "PcdsFixedAtBuild"
-    Value = "0xFFFFFFFF"
-    Override = "AmiModulePkg.PciBus"
-    Offset = 00h
-    Length = 00h
-    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
-    TargetDSC = Yes
-    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
-End
-
-PcdMapping
-    Name = "PcdDebugPrintErrorLevel"
-    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
-    PcdType = "PcdsFixedAtBuild"
-    Value = "0xFFFFFFFF"
-    Override = "AmiModulePkg.PciRootBridge"
-    Offset = 00h
-    Length = 00h
-    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
-    TargetDSC = Yes
-    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
-    Token = "AmiPciRootBridgeDxe_SUPPORT" "=" "1"
-End
-
-PcdMapping
-    Name = "PcdDebugPrintErrorLevel"
-    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
-    PcdType = "PcdsFixedAtBuild"
-    Value = "0xFFFFFFFF"
-    Override = "AmiModulePkg.SmmPciRbIo"
-    Offset = 00h
-    Length = 00h
-    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
-    TargetDSC = Yes
-    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
-    Token = "AmiPciRootBridgeDxe_SUPPORT" "=" "1"
-    Token = "AmiSmmPciRootBridgeIo_SUPPORT" "=" "1"
-End
-
-PcdMapping
-    Name = "PcdDebugPrintErrorLevel"
-    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
-    PcdType = "PcdsFixedAtBuild"
-    Value = "0xFFFFFFFF"
-    Override = "AmiModulePkg.PciDxeInit"
-    Offset = 00h
-    Length = 00h
-    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
-    TargetDSC = Yes
-    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
-End
-
-PcdMapping
-    Name = "PcdDebugPrintErrorLevel"
-    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
-    PcdType = "PcdsFixedAtBuild"
-    Value = "0xFFFFFFFF"
-    Override = "AmiModulePkg.PciDynamicSetup"
-    Offset = 00h
-    Length = 00h
-    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
-    TargetDSC = Yes
-    Token = "PCI_SETUP_USE_APTIO_4_STYLE" "=" "0"
-    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
-End
+##PcdMapping
+##    Name = "PcdDebugPrintErrorLevel"
+##    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
+##    PcdType = "PcdsFixedAtBuild"
+##    Value = "0xFFFFFFFF"
+##    Override = "AmiModulePkg.PciBus"
+##    Offset = 00h
+##    Length = 00h
+##    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
+##    TargetDSC = Yes
+##    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
+##End
+##
+##PcdMapping
+##    Name = "PcdDebugPrintErrorLevel"
+##    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
+##    PcdType = "PcdsFixedAtBuild"
+##    Value = "0xFFFFFFFF"
+##    Override = "AmiModulePkg.PciRootBridge"
+##    Offset = 00h
+##    Length = 00h
+##    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
+##    TargetDSC = Yes
+##    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
+##    Token = "AmiPciRootBridgeDxe_SUPPORT" "=" "1"
+##End
+##
+##PcdMapping
+##    Name = "PcdDebugPrintErrorLevel"
+##    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
+##    PcdType = "PcdsFixedAtBuild"
+##    Value = "0xFFFFFFFF"
+##    Override = "AmiModulePkg.SmmPciRbIo"
+##    Offset = 00h
+##    Length = 00h
+##    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
+##    TargetDSC = Yes
+##    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
+##    Token = "AmiPciRootBridgeDxe_SUPPORT" "=" "1"
+##    Token = "AmiSmmPciRootBridgeIo_SUPPORT" "=" "1"
+##End
+##
+##PcdMapping
+##    Name = "PcdDebugPrintErrorLevel"
+##    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
+##    PcdType = "PcdsFixedAtBuild"
+##    Value = "0xFFFFFFFF"
+##    Override = "AmiModulePkg.PciDxeInit"
+##    Offset = 00h
+##    Length = 00h
+##    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
+##    TargetDSC = Yes
+##    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
+##End
+##
+##PcdMapping
+##    Name = "PcdDebugPrintErrorLevel"
+##    GuidSpace = "gEfiMdePkgTokenSpaceGuid"
+##    PcdType = "PcdsFixedAtBuild"
+##    Value = "0xFFFFFFFF"
+##    Override = "AmiModulePkg.PciDynamicSetup"
+##    Offset = 00h
+##    Length = 00h
+##    Help = "The value is a bit mask that is used to enable/disable certain types of debug messages.\Bit values are defined by the DEBUG_XXX macros in DebugLib.h"
+##    TargetDSC = Yes
+##    Token = "PCI_SETUP_USE_APTIO_4_STYLE" "=" "0"
+##    Token = "PCI_BUS_DEBUG_MESSAGES" "=" "1"
+##End
