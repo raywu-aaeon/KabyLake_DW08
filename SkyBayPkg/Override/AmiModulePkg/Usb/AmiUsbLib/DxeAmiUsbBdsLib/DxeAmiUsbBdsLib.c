@@ -511,7 +511,8 @@ CollectUsbXhciControllers (
     Usb3HcMem = (USB3_HOST_CONTROLLER**)gUsbDataList->Usb3HcMem;
     for (ControllerHandleIndex = 0; ControllerHandleIndex < gUsbDataList->Usb3HcCount; ControllerHandleIndex++) {
         //
-        // Re-initialize the declaration here because the 1st USB CTLR may take MMIO H if 4G = enabled (such as PCH USB).
+        // Re-initialize the declaration here because the 1st USB CTLR may take MMIO H if 4G = enabled (such as PCH USB).
+
         // Without initialization to 0, the 2nd USB CTLR will save the incorrect MMIO once the 2nd one isn't supported 4G 
         // (system takes the MMIO-H data that is gotten from the 1st USB CTLR)
         //
@@ -968,6 +969,7 @@ GetPciHandleByClass (
     EFI_PCI_IO_PROTOCOL  *PciIo = NULL;
     UINT8                PciClass[4];
 
+    DEBUG((-1, "raydebug GetPciHandleByClass()\n"));
     if (!NumberOfHandles || !HandleBuffer) return EFI_INVALID_PARAMETER;
     //Get a list of all PCI devices
     Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiPciIoProtocolGuid, NULL, &Number, &Handle);
@@ -1005,8 +1007,10 @@ ConnectUsbControllersEx (
     UINTN       Number;
     UINTN       Index;
 
+    DEBUG((-1, "raydebug ConnectUsbControllersEx (\n"));
     //Get a list of all USB Controllers
     Status = GetPciHandleByClass (PCI_CLASS_SERIAL, PCI_CLASS_SERIAL_USB, &Number, &Handle);
+    DEBUG((-1, "raydebug Status(=%r) = GetPciHandleByClass (PCI_CLASS_SERIAL, PCI_CLASS_SERIAL_USB, %d, &Handle)\n",Status,Number));
     if (EFI_ERROR (Status)) return;
     for (Index = 0 ; Index < Number; Index++) {
         gBS->ConnectController (Handle[Index], NULL, NULL, Recursive);
