@@ -2386,3 +2386,12 @@ TOKEN
 	Token = "RAY_DEBUG_MODE" "=" "1"
 End
 ##raydebug <<
+
+TOKEN
+    Name  = "USB_RUNTIME_DRIVER_IN_SMM"
+    Value  = "1"
+    Help  = "0 - Native UEFI USB driver.\1 - SMM based USB driver.\2 - Hybrid SMM based and Native UEFI USB drivers."
+    TokenType = Integer
+    TargetMAK = Yes
+    TargetH = Yes
+End
