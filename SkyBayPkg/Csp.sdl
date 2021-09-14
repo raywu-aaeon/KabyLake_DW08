@@ -15,7 +15,7 @@ End
 
 TOKEN
     Name  = "EXTERNAL_USB_CONTROLLER_SUPPORT"
-    Value  = "0"
+    Value  = "1"
     Help  = "Support external USB controllers."
     TokenType = Boolean
     TargetH = Yes
