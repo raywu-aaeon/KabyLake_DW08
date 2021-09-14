@@ -14,14 +14,6 @@ TOKEN
 End
 
 TOKEN
-    Name  = "EXTERNAL_USB_CONTROLLER_SUPPORT"
-    Value  = "0"
-    Help  = "Support external USB controllers."
-    TokenType = Boolean
-    TargetH = Yes
-End
-
-TOKEN
     Name  = "USB_REGISTER_PERIODIC_TIMER_IN_DXE"
     Value  = "1"
     Help  = "Smi register denied if the EndOfDxe event has been triggered in PI 1.3 spec, we only can install periodic timer smi handle in DXE phase to support the non hw smi usb controllers."
