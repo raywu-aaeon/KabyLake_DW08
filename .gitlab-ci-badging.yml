@@ -1,0 +1,65 @@
+default:
+  tags: 
+    - BIOS  ## Select server automatically
+
+variables:
+  GIT_CLONE_PATH: $CI_BUILDS_DIR\Deploy\$CI_CONCURRENT_ID\$GITLAB_USER_ID\$CI_PROJECT_ID
+  GIT_STRATEGY: none
+
+stages:
+  - init
+  - badging
+
+## Macro Template. Can be used with "extends" key.
+## Must start with "." to indicate Gitlab not to run them.
+.badge_update_template:
+  stage: badging
+  script:
+    ## Prepare variables
+    - 'set BUILD_JOB_URL=%CI_PROJECT_URL%/-/jobs/%UPSTREAM_BUILD_JOB_ID%'
+    ## Find badge id to update
+    - 'curl -s --header "%API_HEADER%" "%CI_API_V4_URL%/projects/%CI_PROJECT_ID%/badges" > badge.txt'
+    - '%RUNNER_PATH%\jq-win64.exe -c "map(select(.name|contains(\"%BADGE_NAME%\")))[0].id" badge.txt > badge_id.txt'
+    - 'set /p BADGE_ID= < badge_id.txt'
+    ## Update badge
+    - 'curl -s --request PUT --header "%API_HEADER%" --data "link_url=%BUILD_JOB_URL%&image_url=https://shields.io/badge/%BADGE_NAME%-%BADGE_STATE%-%BADGE_COLOR%?style=plastic&name=%BADGE_NAME%" "%CI_API_V4_URL%/projects/%CI_PROJECT_ID%/badges/%BADGE_ID%"'
+  allow_failure: true
+
+## Badging jobs
+badging_init:  ## Add badges to project - master, develop, ci build
+  stage: init
+  variables:
+    BADGE_STATE: unknown
+    BADGE_COLOR: inactive
+  rules:
+    - if: $UPSTREAM_PIPELINE_IID == '1'  ## For first CI pipe
+    - if: $BADGE_INIT == 'true'  ## If BADGE_INIT is manually added into pipeline variable
+  script:
+    - 'set BADGE_NAME=master'
+    - 'curl -s --request POST --header "%API_HEADER%" --data "link_url=%CI_PROJECT_URL%&image_url=https://shields.io/badge/%BADGE_NAME%-%BADGE_STATE%-%BADGE_COLOR%?style=plastic&name=%BADGE_NAME%" "%CI_API_V4_URL%/projects/%CI_PROJECT_ID%/badges/"'
+    - 'set BADGE_NAME=develop'
+    - 'curl -s --request POST --header "%API_HEADER%" --data "link_url=%CI_PROJECT_URL%&image_url=https://shields.io/badge/%BADGE_NAME%-%BADGE_STATE%-%BADGE_COLOR%?style=plastic&name=%BADGE_NAME%" "%CI_API_V4_URL%/projects/%CI_PROJECT_ID%/badges/"'
+    - 'set BADGE_NAME=ci_build'
+    - 'curl -s --request POST --header "%API_HEADER%" --data "link_url=%CI_PROJECT_URL%&image_url=https://shields.io/badge/%BADGE_NAME%-%BADGE_STATE%-%BADGE_COLOR%?style=plastic&name=%BADGE_NAME%" "%CI_API_V4_URL%/projects/%CI_PROJECT_ID%/badges/"'
+  allow_failure: true
+
+badging_master_success:
+  extends: .badge_update_template
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    BADGE_NAME: master
+
+badging_develop_success:
+  extends: .badge_update_template
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^.*[_-]develop(ment)?$/i
+  variables:
+    BADGE_NAME: develop
+
+badging_ci_build_success:
+  extends: .badge_update_template
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^CI?\d?D?\d?-.*$/i
+  variables:
+    BADGE_NAME: ci_build

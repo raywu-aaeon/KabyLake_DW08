@@ -1,14 +1,177 @@
+## Global variable
+variables:
+  GIT_DEPTH: "1"
+  ## Unmask for patching NameTooLong issue
+  ##GIT_CLONE_PATH: $CI_BUILDS_DIR\Build\$CI_CONCURRENT_ID\$GITLAB_USER_ID\$CI_PROJECT_ID
+
+## Stage definitions
 stages:
   - build
+  - deploy
 
-job_build:
+## Macro Template. Can be used with "extends" key.
+## Must start with "." to indicate Gitlab not to run them.
+.build_template:
   stage: build
-  only:
-    - /^CI-.*$/
-  tags:
-    - BIOS1
+  before_script:
+    # Prepare project variables for passing job variables to other jobs.
+    ## for variables bridge jobs do not have, and are required by downstream jobs, put to project variable 
+    ## PROJECT_BUILD_JOB_ID -> CI_JOB_ID for building job
+    - 'curl -s --request POST --header "%API_HEADER%" "%CI_API_V4_URL%/projects/%CI_PROJECT_ID%/variables" --form "key=PROJECT_BUILD_JOB_ID" --form "value=%CI_JOB_ID%"'
+    - 'curl -s --request PUT --header "%API_HEADER%" "%CI_API_V4_URL%/projects/%CI_PROJECT_ID%/variables/PROJECT_BUILD_JOB_ID" --form "value=%CI_JOB_ID%"'
   script:
     - 'AaeonRemoteBuild.bat 1 1'
 
-variables:
-  GIT_DEPTH: "1"
+.deploy_template:
+  stage: deploy
+  variables:
+    GIT_CLONE_PATH: $CI_BUILDS_DIR\Deploy\$CI_CONCURRENT_ID\$GITLAB_USER_ID\$CI_PROJECT_ID
+    GIT_STRATEGY: none
+  script:
+    # Display working directory because it is not displayed when GIT_STRATEGY is none.
+    - 'echo %GIT_CLONE_PATH%'
+    # Perform file copy only
+    - 'AaeonRemoteBuild.bat 2 1'
+  after_script:
+    - del /S /Q *.*  ## remove files since that have been put to NAS.
+
+.build_files:
+  extends:
+    - .build_template  # To obtain "script" key which is required in all job.
+  artifacts:
+    paths:
+      - 'AaeonRemoteBuild.bat'
+      - '*.[Bb][Ii][Nn]'
+      - 'build.log'
+      - '_Aaeon_Release\*.[Bb][Ii][Nn]'
+      - 'Build\Token.*'
+      - 'Build\Platform.*'
+      - 'Build\GSIOSETUPVAR.*'
+      - 'Build\*.inf'
+      - 'Build\PCIBRDSDL.*'
+      - 'Build\SIOBRDSDL.*'
+      - 'Build\*.hfr'
+      - 'Build\*.vfr'
+      - 'Build\*.asl'
+      - 'Build\*.uni'
+      - 'Build\*.sd'
+      - 'Build\*.mak'
+      - 'Build\*.h'
+    expire_in: 5min
+
+.variables_for_downstream:
+  inherit:
+    variables:
+      # Only listed variables will be inherited
+      - API_HEADER
+  variables:
+    # Pass pre-defined variables with prefix "UPSTREAM" to downstream,
+    # because downstream has own defined ones.
+    UPSTREAM_REF: $CI_COMMIT_REF_NAME
+    UPSTREAM_SHA: $CI_COMMIT_SHORT_SHA
+    UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
+    UPSTREAM_PROJECT_NAME: $CI_PROJECT_NAME
+    UPSTREAM_BUILD_JOB_ID: $PROJECT_BUILD_JOB_ID
+    UPSTREAM_PIPELINE_IID: $CI_PIPELINE_IID
+
+## Build Jobs
+build_in_Server1:
+  extends:
+    - .build_template
+    - .build_files
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^CI?1(D\d)?-.*$/i
+  tags:
+    - BIOS1
+
+build_in_Server2:
+  extends:
+    - .build_template
+    - .build_files
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^CI?2(D\d)?-.*$/i
+  tags:
+    - BIOS2
+
+build_no_preferred:
+  extends:
+    - .build_template
+    - .build_files
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^CI?D\d-.*$/i
+  tags:
+    - BIOS
+
+build_no_preferred_no_deploy:
+  extends:
+    - .build_template
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^CI?-.*$/i
+    - if: $CI_COMMIT_REF_NAME =~ /^CI?\d?D?\d?-.*$/i ## skip if it is ci build
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"  ## Build BIOS when merge request issued
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH  ## Build BIOS when committing to project master
+    - if: $CI_PIPELINE_SOURCE == "web" ## Build BIOS when run pipeline manually
+  tags:
+    - BIOS
+
+## Build debug binary and upload to Gitlab. Work only with Tag
+debug_build:
+  extends:
+    - .build_template
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^.*[_-]debug$/i
+  tags:
+    - BIOS
+  artifacts:
+    name: Debug_Binary
+    paths:
+      - '*.[Bb][Ii][Nn]'
+
+## Deploy Jobs
+deploy_to_Taipei:
+  extends:
+    - .deploy_template
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^(CI?\d?)?D1-.*$/i
+  tags:
+    - BIOS1
+
+deploy_to_Taichung:
+  extends:
+    - .deploy_template
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^(CI?\d?)?D2-.*$/i
+  tags:
+    - BIOS2
+
+deploy_to_PC:
+  extends: .variables_for_downstream
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^CI?\d?D0-.*$/i
+  trigger: 
+    project: AAEON/Utility/AaeonPersonalDeploy  # Allow absolute path only.
+    branch: $GITLAB_USER_LOGIN
+    strategy: depend
+
+## Badging jobs
+.badging_template:
+  extends: .variables_for_downstream
+  stage: deploy
+  trigger: 
+    include: .gitlab-ci-badging.yml
+
+badging_success:
+  extends: .badging_template
+  variables:
+    BADGE_STATE: success
+    BADGE_COLOR: success
+  when: on_success
+
+badging_failed:
+  extends: .badging_template
+  variables:
+    BADGE_STATE: failed
+    BADGE_COLOR: red
+  when: on_failure

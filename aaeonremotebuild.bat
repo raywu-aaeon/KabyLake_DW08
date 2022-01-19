@@ -10,6 +10,8 @@
 @rem * (Optional) Set user name for accessing share folder. Ex: [USERNAME=username@aaeon.com.tw]
 @rem * (Optional) Set password for accessing share folder. Ex: [PASSWORD=########]
 @rem * (Optional) Set output folder for copying output file. Ex: [OUTPUT_FOLDER=CoffeeLake_BOXER-6842M]
+@rem * Make sure there is tee.exe in VEB_DIR(gitlab-runner) folder on build server.
+@rem *   The tool can be found on http://sourceforge.net/projects/unxutils/?source=dlp
 
 echo.
 echo *******************************************
@@ -42,7 +44,6 @@ echo -------------------------------------------
 @rem Aptio_5.x_TOOLS_37_1_x64
 @rem Aptio_5.x_TOOLS_JRE_34_1
 @set VEB_DIR=C:\gitlab-runner
-@set OUTPUT_FOLDER=runner-build\%CD:~14%
 
 :SetVebToolsDirectories
 @set TOOLS_DIR=%VEB_DIR%\%AptioV_DIR%\BuildTools
@@ -50,7 +51,7 @@ echo -------------------------------------------
 @set WINDDK_DIR2=%VEB_DIR%\WINDDK\7600.16385.1\bin\x86
 @set EWDK_DIR=%VEB_DIR%\EWDK_1703
 @rem EWDK_DIR=%VEB_DIR%\EWDK_19h1
-@set path=%EWDK_DIR%;%WINDDK_DIR1%;%WINDDK_DIR2%;%TOOLS_DIR%;%path%
+@set path=%VEB_DIR%;%EWDK_DIR%;%WINDDK_DIR1%;%WINDDK_DIR2%;%TOOLS_DIR%;%path%
 
 :SetVebEnvVariables
 @set CCX86DIR=%VEB_DIR%\WINDDK\7600.16385.1\bin\x86\x86
@@ -63,10 +64,24 @@ echo -------------------------------------------
 :SetOutputPath
 @set NET_IP=172.16.1.26
 @set OUTPUT_DIR=\\%NET_IP%\public
-@set OUTPUT_FOLDER=%CD:~14%
+@rem Get path in form of "user_name\project_name"
+if "%CI_PROJECT_PATH%" == "" (
+    @rem Retrieve from current directory. For compatibitliy to Gitlab 8.2.3.
+    @set OUTPUT_FOLDER=%CD:~14%
+) else (
+    @rem Using CI variable to retrieve. Replace / with \.
+    @set OUTPUT_FOLDER=%CI_PROJECT_PATH:/=\%
+)
 @set USERNAME=runner
 @set PASSWORD=12345678
-@ping %NET_IP% -n 1 -w 100
+@ping %NET_IP% -n 1 -w 1000
+if ERRORLEVEL 1 (
+    @set NET_IP=192.168.11.56
+    @set OUTPUT_DIR=\\!NET_IP!\Temp\Share
+    @set USERNAME=aaeon\user1
+    @set PASSWORD=123456
+    @ping !NET_IP! -n 1 -w 1000
+)
 
 :ConnectOuputDir
 if ERRORLEVEL 1 (
@@ -82,46 +97,39 @@ if ERRORLEVEL 1 (
 :SetShaFolder
 @set SHA_FOLDER=%2
 if "%SHA_FOLDER%" == "1" (
-    @for /f %%i in ('git rev-parse HEAD') do set SHA=%%i
-) else (
-    goto StartBuild
+    @set OUTPUT_PATH=%OUTPUT_DIR%\%OUTPUT_FOLDER%\%CI_COMMIT_SHA%
 )
-@set OUTPUT_PATH=%OUTPUT_DIR%\%OUTPUT_FOLDER%\%SHA%
 
 :StartBuild
 echo.
 echo Starting Build Process
 echo -------------------------------------------
 @set OLDTIME=%time%
+@echo success > .success.tmp
 
-@if "%BUILD_ALL%" == "2" goto BuildSucess
+@if "%BUILD_ALL%" == "2" goto Built
 @if "%BUILD_ALL%" == "0" goto Build
 
 :ReBuildAll
 if "%BUILD_WITH_BATCH%" == "1" (
-call Build.bat rebuild
+(call Build.bat rebuild || del .success.tmp) | tee build.log
 @echo off
 ) else (
-make clean
-call make rebuild
+(make clean || del .success.tmp) | tee build.log
+(make rebuild || del .success.tmp) | tee build.log
 )
-if ERRORLEVEL 1 goto BuildFailed
-goto BuildSucess
+goto Built
 
 :Build
 if "%BUILD_WITH_BATCH%" == "1" (
-call Build.bat
+(call Build.bat || del .success.tmp) | tee build.log
 @echo off
 ) else (
-call make
+(make || del .success.tmp) | tee build.log
 )
-if ERRORLEVEL 1 goto BuildFailed
-goto BuildSucess
+goto Built
 
-:BuildFailed
-@set ReportError=1
-
-:BuildSucess
+:Built
 
 FOR /F "usebackq tokens=1-3" %%I IN (Build\Token.mak) DO (
 	if "%%I" EQU "AMI_FSP_BIN_BUILD_TEMP_DIR" (
@@ -141,10 +149,12 @@ if exist "%OUTPUT_PATH%\" (
 )
 @mkdir "%OUTPUT_PATH%\Build"
 @mkdir "%OUTPUT_PATH%\%AmiFspBinBuildTempDir%"
-@mkdir "%OUTPUT_PATH%\Build\AmiCrbMeRoms"
 
 :CopyBuildFiles
 @copy *.bin "%OUTPUT_PATH%" /y /b
+@copy *.cap "%OUTPUT_PATH%" /y /b
+@copy *.rom "%OUTPUT_PATH%" /y /b
+@copy build.log %OUTPUT_PATH% /y /b
 @copy _Aaeon_Release\*.bin "%OUTPUT_PATH%" /y /b
 @copy Build\Token.* "%OUTPUT_PATH%\Build" /y /b
 @copy Build\Platform.* "%OUTPUT_PATH%\Build" /y /b
@@ -159,11 +169,10 @@ if exist "%OUTPUT_PATH%\" (
 @copy Build\*.sd "%OUTPUT_PATH%\Build" /y /b
 @copy Build\*.mak "%OUTPUT_PATH%\Build" /y /b
 @copy Build\*.h %OUTPUT_PATH%\Build /y /b
-@copy Build\AmiCrbMeRoms\*.* %OUTPUT_PATH%\Build\AmiCrbMeRoms /y /b
 @copy %AmiFspBinBuildTempDir%\Token.* %OUTPUT_PATH%\%AmiFspBinBuildTempDir% /y /b
 @copy %AmiFspBinBuildTempDir%\Platform.* %OUTPUT_PATH%\%AmiFspBinBuildTempDir% /y /b
 @copy %AmiFspBinBuildTempDir%\*.mak %OUTPUT_PATH%\%AmiFspBinBuildTempDir% /y /b
-rem @copy build.log %OUTPUT_PATH% /y /b
+@copy Build\AmiCrbMeRoms\*.bin "%OUTPUT_PATH%" /y /b
 
 echo.
 echo Create DediProg batch file
@@ -173,7 +182,13 @@ FOR /F "tokens=2,3" %%i IN (Build\Token.h) DO (
 )
 echo BIOS BIN file = %FLASH_BIN%
 @echo "%DEDIPROG_DIR%\Dpcmd" --spi-clk 0 -z %OUTPUT_PATH%\%FLASH_BIN% > Batch.bat
+@echo if ERRORLEVEL 1 goto ProgramingFailed >> Batch.bat
+@echo goto ProgramingSucess >> Batch.bat
+@echo :ProgramingFailed >> Batch.bat
+@echo msg * "BIOS %FLASH_BIN% programing fail" >> Batch.bat
 @echo pause >> Batch.bat
+@echo :ProgramingSucess >> Batch.bat
+@echo msg * "BIOS %FLASH_BIN% programing sucess" >> Batch.bat
 @copy Batch.bat %OUTPUT_PATH%\Batch.bat /y /b
 
 :DeleteConnection
@@ -185,7 +200,7 @@ echo.
 echo Output files have been put to :
 echo %OUTPUT_PATH%
 
-@if "%ReportError%" == "1" goto FinishedWithFailure
+if not exist .success.tmp goto FinishedWithFailure
 
 :Finished
 echo.
@@ -194,7 +209,8 @@ echo AaeonRemoteBuild.bat Finished
 echo *******************************************
 @echo Start Time %OLDTIME%
 @echo End   Time %time%
-EXIT 0
+echo EXIT /B 0
+EXIT /B 0
 
 :FinishedWithFailure
 echo. 
@@ -203,4 +219,5 @@ echo Build Failed
 echo *******************************************
 @echo Start Time %OLDTIME%
 @echo End   Time %time%
-EXIT 1
+echo EXIT /B 1
+EXIT /B 1
