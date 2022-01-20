@@ -167,7 +167,7 @@ MAKEFILE_INSERT_DUAL_DEVICE_VALUE_FLAG
 //ray_override / [XI-Tuning] Dynamic Show and Hide Fixed Boot Order Menu / Modified >>
 //                option text  = STRING_TOKEN(STR_BOOT_MODE_LEGACY),     value = 0, flags = INTERACTIVE | DEFAULT | MANUFACTURING | RESET_REQUIRED;
 //                option text  = STRING_TOKEN(STR_BOOT_MODE_UEFI),       value = 1, flags = 0;
-                option text  = STRING_TOKEN(STR_BOOT_MODE_LEGACY),     value = 0, flags = INTERACTIVE | DEFAULT | MANUFACTURING | RESET_REQUIRED;
+                option text  = STRING_TOKEN(STR_BOOT_MODE_LEGACY),     value = 0, flags = 0;
                 option text  = STRING_TOKEN(STR_BOOT_MODE_UEFI),       value = 1, flags = 0;
 //ray_override / [XI-Tuning] Dynamic Show and Hide Fixed Boot Order Menu / Modified <<
 #else
@@ -176,7 +176,7 @@ MAKEFILE_INSERT_DUAL_DEVICE_VALUE_FLAG
 #endif //#if CSM_SUPPORT
 
 #if FBO_DUAL_MODE
-                option text  = STRING_TOKEN(STR_BOOT_MODE_DUAL),       value = 2, flags = 0;
+                option text  = STRING_TOKEN(STR_BOOT_MODE_DUAL),       value = 2, flags = INTERACTIVE | DEFAULT | MANUFACTURING | RESET_REQUIRED;
 #endif
 
 #endif          //#if EFI_DEVICE_IN_ONE_GROUP
