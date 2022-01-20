@@ -613,7 +613,7 @@ End
 
 TOKEN
     Name  = "SecureBoot_SUPPORT"
-    Value  = "0"
+    Value  = "1"
     Help  = "Main switch to enable SecureBoot Module support in Project"
     TokenType = Boolean
     TargetH = Yes
