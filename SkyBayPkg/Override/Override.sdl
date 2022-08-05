@@ -1477,7 +1477,7 @@ End
 
 TOKEN
 	Name  = "DEFAULT_CSM_LAUNCH_POLICY"
-	Value  = "1"
+	Value  = "0"
 	Help  = "Controls default value of CSM Launch Policy setup control"
 	TokenType = Integer
 	TargetH = Yes
@@ -1496,7 +1496,7 @@ End
 
 TOKEN
 	Name  = "DEFAULT_MASS_STORAGE_OPROM_POLICY"
-	Value  = "$(CSMSETUP_LEGACY_ONLY_OPROMS)"
+	Value  = "$(CSMSETUP_UEFI_ONLY_OPROMS)"
 	Help  = "Default value of Launch Storage OpROM policy setup control"
 	TokenType = Integer
 	TargetH = Yes
@@ -1506,7 +1506,7 @@ End
 
 TOKEN
 	Name  = "DEFAULT_VIDEO_OPROM_POLICY"
-	Value  = "$(CSMSETUP_LEGACY_ONLY_OPROMS)"
+	Value  = "$(CSMSETUP_UEFI_ONLY_OPROMS)"
 	Help  = "Default value of Launch Video OpROM policy setup control"
 	TokenType = Integer
 	TargetH = Yes
