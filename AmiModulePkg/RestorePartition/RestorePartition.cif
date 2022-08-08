@@ -1,0 +1,15 @@
+<component>
+	name = "RestorePartition"
+	category = eModule
+	LocalRoot = "AmiModulePkg\RestorePartition\"
+	RefName = "AmiModulePkg.RestorePartition"
+[INF]
+"RestorePartitionLib.inf"
+
+[files]
+"RestorePartition.sdl"
+"ResPar.csm16"	
+"RestorePartition.c"
+"RestorePartition.chm"    
+"ResParPopupMenu.c"
+<endComponent>

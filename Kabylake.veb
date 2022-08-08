@@ -571,6 +571,7 @@
 "AmiModulePkg\PerformanceMeasurement\PerformanceMeasurement.cif"= "SS: AptioV;$/AptioV/Source/Modules/PerformanceMeasurement;PerformanceMeasurement_07"
 "AmiModulePkg\PerformanceMeasurement\PerformanceMeasurementPei.cif"= "SS: AptioV;$/AptioV/Source/Modules/PerformanceMeasurement;PerformanceMeasurement_07"
 "AmiModulePkg\Ps2Ctl\Ps2Ctl.cif"= "SS: AptioV;$/AptioV/Source/Modules/PS2CTL;Ps2Ctl_09"
+"AmiModulePkg\RestorePartition\RestorePartition.cif"= "SS: AptioV;$/AptioV/Source/Modules/RestorePartition;RestorePartition_04"
 "AmiModulePkg\RestoreSpecialBootOptions\RestoreSpecialBootOptions.cif"= "SS: AptioV;$/AptioV/Source/Modules/BootOptionPolicies/RestoreSpecialBootOptions;RestoreSpecialBootOptions_03"
 "AmiModulePkg\SmiVariable\SmiVariable.cif"= "SS: AptioV;$/AptioV/Source/Modules/SmiVariable;SmiVariable_04"
 "AmiModulePkg\Terminal\Terminal.cif"= "SS: AptioV;$/AptioV/Source/Modules/Terminal;Terminal_13"
