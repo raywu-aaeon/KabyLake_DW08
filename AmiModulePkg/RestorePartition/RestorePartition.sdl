@@ -1,0 +1,218 @@
+TOKEN
+    Name  = "RestorePartition_SUPPORT"
+    Value  = 1
+    Help  = "Main switch to enable Restore Partition in Project"
+    TokenType = Boolean
+    Master = Yes
+End
+
+PATH
+    Name  = "RES_PAR_DIR"
+    Path  = "AmiModulePkg/RestorePartition"
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_FAT_SUPPORT"
+    Value  = 1
+    Help  = "ON - Turns on FAT partition support./OFF - FAT partition will not be recognized to boot from."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_NTFS_SUPPORT"
+    Value  = 1
+    Help  = "ON - Turns on NTFS partition support./OFF - NTFS partition will not be recognized to boot from."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+ELINK
+    Name  = "RestorePartitionCheckKey,"
+    Parent  = OEM_KEY_CALLBACK_LIST
+    InvokeOrder = AfterParent
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_KEY_UNICODE"
+    Value  = "0"
+    Help  = "Set to one of the defined constants from EFI_SIMPLE_TEXT_INPUT protocol or a character value like L'a'"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_KEY_SCANCODE"
+    Value  = "EFI_SCAN_F9"
+    Help  = "Set to one of the defined constants from EFI_SIMPLE_TEXT_INPUT protocol"
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_VOLUME_NAME"
+    Value  = '"AMI-RESTORE"'
+    Help  = "Volume label name of restore partition\Must be the same as UNICODE_RESTORE_PARTITION_VOLUME_NAME"
+    TokenType = Expression
+    TargetH = Yes
+    Token = "RESTORE_PARTITION_FAT_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "UNICODE_RESTORE_PARTITION_VOLUME_NAME"
+    Value  = 'L"AMI-RESTORE"'
+    Help  = "Volume label name of restore partition in unicode format.\Must be the same as RESTORE_PARTITION_VOLUME_NAME"
+    TokenType = Expression
+    TargetH = Yes
+    Token = "RESTORE_PARTITION_NTFS_SUPPORT" "=" "1"
+End
+
+TOKEN
+    Name  = "BOOTFILEPATH"
+    Value  = 'L"\\EFI\\Boot\\BOOTX64.EFI"'
+    Help  = "The file path of restore tool's efi boot loader.\This is for uEFI restore tools."
+    TokenType = Expression
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "OEM_RESTORE_PARTITION_GUID"
+    Value  = "{0xc12a7328, 0xf81f, 0x11d2, {0xba, 0x4b, 0x00, 0xa0, 0xc9, 0x3e, 0xc9, 0x3b}}"
+    Help  = "This is the GUID of the partition which restore tool's efi boot loader resides in.\Default GUID is the GUID of EFI System partition."
+    TokenType = Expression
+    TargetH = Yes
+    Range  = "GUID"
+End
+
+TOKEN
+    Name  = "GPT_BOOT_LOADER_PARTITON_LABEL_CHECK"
+    Value  = 0
+    Help  = "ON - Check the volume label name of partition of boot loader.\OFF - Do not check volume lable name of partition of boot loader."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_SET_ACTIVE"
+    Value  = 1
+    Help  = "ON - Set boot indicator flag of partition before boot.\OFF - No change." 
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_BOOT_ID"
+    Value  = 0xc
+    Help  = "0 - Do not change boot partition ID.\Any partition that needs to boot, its ID will be changed to this value.\Default is 0x0C = FAT32 LBA."
+    TokenType = Integer
+    TargetEQU = Yes
+End
+
+
+TOKEN
+    Name  = "RestorePartition_PopupMenu_SUPPORT"
+    Value  = 0
+    Help  = "Main switch to display restore partition boot option item in popup menu if restore partition is existed."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RESTORE_PARTITION_POPUP_MENU_NAME"
+    Value  = 'L"RestorePartition"'
+    Help  = "The popup menu item name of restore partition."
+    TokenType = Expression
+    TargetH = Yes
+    Token = "RestorePartition_PopupMenu_SUPPORT" "=" "1"
+End
+
+ELINK
+    Name  = "RestorePartitionCreateBootData,"
+    Parent  = "ProcessEnterSetupHook,"
+    InvokeOrder = AfterParent
+    Token = "RestorePartition_PopupMenu_SUPPORT" "=" "1"
+End
+
+ELINK
+    Name  = "RestorePartitionPopupMenuEsc,"
+    Parent  = "ProcessProceedToBootHook,"
+    InvokeOrder = AfterParent
+    Token = "RestorePartition_PopupMenu_SUPPORT" "=" "1"
+End
+
+ELINK
+    Name  = "RestorePartitionBbsBootHook,"
+    Parent  = "FastBootBbsBootHook,"
+    InvokeOrder = BeforeParent
+    Token = "RestorePartition_PopupMenu_SUPPORT" "=" "1"
+    Token = "POST_TIME_TUNING_SUPPORT" "=" "1"
+End
+
+ELINK
+    Name  = "RestorePartitionBbsBootHook,"
+    Parent  = "BbsBoot,"
+    InvokeOrder = BeforeParent
+    Token = "RestorePartition_PopupMenu_SUPPORT" "=" "1"
+    Token = "POST_TIME_TUNING_SUPPORT" "=" "0"
+End
+
+TOKEN
+    Name  = "EFI_BOOTFILEPATH_CHECK"
+    Value  = 0
+    Help  = "Main switch to check restore partition boot file path."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "RESPAR_EFI_BOOT_FROM_MBR"
+    Value  = 0
+    Help  = "Main switch to allow to load RestorePartition image from Mbr partition."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+ELINK
+    Name  = "RestorePartitionLib"
+    Parent  = "ADDITIONAL_AMITSE_LibraryClasses"
+    InvokeOrder = AfterParent
+End
+
+LibraryMapping
+    Class  = "RestorePartitionLib"
+    Instance  = "AmiModulePkg.RestorePartitionLib"
+End
+
+INFComponent
+    Name  = "RestorePartitionLib"
+    File  = "RestorePartitionLib.inf"
+    Package  = "AmiModulePkg"
+End
+
+ELINK
+    Name  = "$(RES_PAR_DIR)/ResPar.csm16"
+    Parent  = "CSM_OEM16_SRC"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "RestorePartitionModuleStart"
+    Parent  = "CsmOem16Functions"
+    ProcID  = 08h
+    SrcFile  = "ResPar.csm16"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "$(RES_PAR_DIR)/RestorePartition.c"
+    Parent = "TSE_SOURCE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name = "$(RES_PAR_DIR)/ResParPopupMenu.c"
+    Parent = "TSE_SOURCE_FILES"
+    InvokeOrder = AfterParent
+    Token = "RestorePartition_PopupMenu_SUPPORT" "=" "1"
+End
+

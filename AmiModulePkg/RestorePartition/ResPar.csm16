@@ -1,0 +1,408 @@
+
+        TITLE   ResPar.csm16 - booting from Restore Partition related code
+
+;*************************************************************************
+;*************************************************************************
+;**                                                                     **
+;**        (C)Copyright 1985-2014, American Megatrends, Inc.            **
+;**                                                                     **
+;**                       All Rights Reserved.                          **
+;**                                                                     **
+;**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+;**                                                                     **
+;**                       Phone: (770)-246-8600                         **
+;**                                                                     **
+;*************************************************************************
+;*************************************************************************
+
+;*************************************************************************
+; $Header:
+;
+; $Revision:
+;
+; $Date:
+;*************************************************************************
+;<AMI_FHDR_START>
+;
+; Name: ResPar.csm16
+;
+; Description:  File reads PBR by using CSM's OEM function 
+;               CSM16_OEM_BEFORE_CALL_BOOT_VECTOR.
+;
+;<AMI_FHDR_END>
+;*************************************************************************
+
+include Token.equ
+
+;----------------------------------------------------------------------------
+HD_PAR_STRUC    struc
+        bActive                 db      ?
+        bStartHd                db      ?
+        wStartCylSec            dw      ?
+        bType                   db      ?
+        bEndHd                  db      ?
+        wEndCylSec              dw      ?
+        dNumSecMbrToFirst       dd      ?
+        dNumSec                 dd      ?
+HD_PAR_STRUC    ends
+
+FUNC4X_PACKET   struc
+        bSize           db      ?       ; 00h: packet size
+        bReserved1      db      ?       ; 01h: reserved, must be 0
+        bNumBlocks      db      ?       ; 02h: #of blocks to transfer
+        bReserved2      db      ?       ; 03h: reserved, must be 0
+        wOffset         dw      ?       ; 04h: offset of read buffer
+        wSegment        dw      ?       ; 06h: segment of read buffer
+        dLbaLow         dd      ?       ; 08h: start absolute block number
+        dLbaHigh        dd      ?       ; 0Ch: high 32bit of start absolute block number
+FUNC4X_PACKET   ends
+
+; Stack Postition for PUSHAD
+StackPosEDI             equ     0               ; position of EDI on PUSHAD
+StackPosESI             equ     4               ; position of ESI on PUSHAD
+StackPosEBP             equ     8               ; position of EBP on PUSHAD
+StackPosESP             equ     12              ; position of old ESP on PUSHAD
+StackPosEBX             equ     16              ; position of EBX on PUSHAD
+StackPosEDX             equ     20              ; position of EDX on PUSHAD
+StackPosECX             equ     24              ; position of ECX on PUSHAD
+StackPosEAX             equ     28              ; position of EAX on PUSHAD
+
+
+;----------------------------------------------------------------------------
+;       C O D E     S E G M E N T
+;----------------------------------------------------------------------------
+
+.586p
+OEM16_CSEG SEGMENT PARA PUBLIC 'CODE' USE16
+        ASSUME cs:OEM16_CSEG, ds:OEM16_CSEG
+;----------------------------------------------------------------------------
+        PUBLIC  _respar_starts
+_respar_starts        LABEL   BYTE      ; Marks start of module
+;----------------------------------------------------------------------------
+
+
+        PUBLIC RestorePartitionModuleStart
+RestorePartitionModuleStart LABEL BYTE
+        jmp     SHORT RpCsm16Api
+
+        PUBLIC  RpEntryOfs
+                db      '$RPV'          ; restore partition variable signature for CSM32 to search
+RpEntryOfs      dw      0000h
+Int13Sav        dd      0000h
+;----------------------------------------------------------------------------
+; IMPORTANT: Do not put any code above this, the above data is at fixed location.
+;----------------------------------------------------------------------------
+
+;<AMI_PHDR_START>
+;----------------------------------------------------------------------------
+;
+; Procedure:    RpCsm16Api
+;
+; Description:  This routine is implementation of the CSM16 API #8.
+;
+; Input:        RpEntryOfs contains a valid RestorePartition offset; value
+;               of 0 indicates invalid offset.
+;
+;----------------------------------------------------------------------------
+;<AMI_PHDR_END>
+
+RpCsm16Api  PROC FAR PUBLIC
+; Adjust current IP so that the data offsets are valid
+        call    $+3     ; Push curent IP
+        pop     bx		; Get current IP in BX
+        shr     bx, 4
+        mov     ax, cs      ; Always x000h
+        add     ax, bx      ; New CS
+        push    ax
+        mov     ax, OFFSET newOffset
+        sub     ax, OFFSET RestorePartitionModuleStart
+        push    ax
+;        push    newOffset - AhciApiModuleStart
+        retf            ; Execute from new CS:IP
+
+newOffset:                              
+
+        call    GetRestorePBR
+
+        ret
+
+RpCsm16Api  ENDP
+
+
+;<AMI_PHDR_START>
+;----------------------------------------------------------------------------
+;
+; Procedure:    GetRestorePBR
+;
+; Description:  Invoked after BeforeCallingBootVector_FAR to load the PBR
+;               (Partition Boot Record) to buffer pointed by EBP.  So we can
+;               boot from PBR directly without changing the MBR.
+;
+; Input:        EBP - buffer (0000h:7C00h) contains MBR
+;
+; Output:       EBP - buffer (0000h:7C00h) contains boot loader
+;
+; Modified:     None.
+;
+; Refferal(s):  BeforeCallingBootVector_FAR
+;
+;----------------------------------------------------------------------------
+;<AMI_PHDR_END>
+
+GetRestorePBR   proc near public
+
+        push    ds
+        push    es
+        pushad
+
+        ;push    ebp
+        push    7c00h
+        pop     di
+        push    0h
+        pop     es
+; (es:di) = ptr to read MBR
+
+        sub     sp, size FUNC4X_PACKET
+        mov     bp, sp
+; (bp) = ptr to packet
+
+; 40:F6h (docking_station_capabilities)
+; BIT3 = 1: restore partition found in PBR
+; BIT3 = 0: MBR boot by setting active partition
+; BIT4 = 1: Modify MBR buffer read from HDD has restore partition
+; BIT4 = 0: Disable modify MBR buffer
+; BIT5 = 1: INT13 Function 0x2 flag
+; BIT6 = 1: INT13 Function 0x42 flag
+
+        ;mov     bx, cs:RpEntryOfs
+		mov     bx, word ptr cs:[6]			; cs:[6] = RpEntryOfs
+        
+        or      bx, bx
+        jz      exit                        ; restore partition is not found
+        push    040h
+        pop     ds
+        and     byte ptr ds:[0F6h], NOT 10h
+        test    byte ptr ds:[0F6h], 08h     ; boot from PBR is tried or enabled?
+        jnz     boot_PBR
+        or      byte ptr ds:[0F6h], 10h
+        push    0h
+        pop     ds
+        mov     bx, cs	
+        shl 	ebx, 16
+        mov     bx, offset ResParInt13 - RestorePartitionModuleStart
+        mov     dword ptr ds:[4ch], ebx     ; Hook INT13
+
+        ;
+        ; At this point, 0000:7c00 have loaded MBR from the bootable device(drive number: 0x80) by older INT13(Not hook with ResParInt13)
+        ; Hence, have to modify the MBR in 0000:7c00(es:di) loaded from bootable device.
+        ;
+        mov     bx, 1beh		; start with first entry
+        mov     cx, 4			; 4 entries to go
+next_part_table:
+        mov     es:[di+bx].HD_PAR_STRUC.bActive, 0h	; mask all partitions to inactive first
+        add     bx, size HD_PAR_STRUC
+        loop    next_part_table
+        ; Set Boot indicator and ID to restore partition
+        ;mov     bx, cs:RpEntryOfs
+		mov     bx, word ptr cs:[6]			; cs:[6] = RpEntryOfs        
+        mov     es:[di+bx].HD_PAR_STRUC.bActive, 80h 
+if (MKF_RESTORE_PARTITION_BOOT_ID)	; non-zero, change the partition ID
+        mov     es:[di+bx].HD_PAR_STRUC.bType, MKF_RESTORE_PARTITION_BOOT_ID
+endif
+
+        jmp     exit
+	
+boot_PBR:
+        and     byte ptr ds:[0F6h], NOT 08h     ; set to zero indicating it had been tried
+; (bx) = offset to desired partition entry
+
+        mov     [bp].FUNC4X_PACKET.bSize, size FUNC4X_PACKET    ; packet size
+        mov     [bp].FUNC4X_PACKET.bReserved1, 0h
+        mov     [bp].FUNC4X_PACKET.bNumBlocks, 1h               ; 1 block
+        mov     [bp].FUNC4X_PACKET.bReserved2, 0h       
+        mov     [bp].FUNC4X_PACKET.wOffset, 7c00h               ; offset
+        mov     [bp].FUNC4X_PACKET.wSegment, 0h                 ; segment
+        mov     eax, es:[di+bx].HD_PAR_STRUC.dNumSecMbrToFirst
+        mov     [bp].FUNC4X_PACKET.dLbaLow, eax                 ; LBA low
+        mov     [bp].FUNC4X_PACKET.dLbaHigh, 0h                 ; LBA high
+        
+        push    ss
+        pop     ds
+        mov     si, bp
+        mov     ah, 42h
+        mov     dl, 80h                 ; hard drive
+        int     13h
+        jc      exit
+
+        add     sp, size FUNC4X_PACKET
+        mov     bp, sp
+        mov     dword ptr [bp+StackPosEBP], 7C00h
+        jmp     exitNoBuffer
+
+exit:
+
+        add     sp, size FUNC4X_PACKET
+exitNoBuffer:
+        popad
+        pop     es
+        pop     ds
+        ret
+
+GetRestorePBR   endp
+                                        ;<(EIP12743+)
+
+;<AMI_PHDR_START>
+;-----------------------------------------------------------------------------
+;
+; Procedure:		ResParInt13
+;
+; Description:	This modifies the MBR buffer returned by function 02h and 42h
+;		so that the RpEntryOfs entry will be active and filled with
+;		MKF_RESTORE_PARTITION_BOOT_ID.  
+;		The MBR on the HDD itself will not be written by doing this.
+;
+;-----------------------------------------------------------------------------
+;<AMI_PHDR_END>
+
+ResParInt13	PROC	PUBLIC
+        push    es
+        push    040h
+        pop     es                                  
+        test    byte ptr es:[0F6h], 10h             ; 40:F6, bit 4: Modify MBR buffer read from HDD has restore partition or not
+        pop     es
+
+        jz      old_handler		; br if token says not to change the MBR active flag and ID                       
+
+        push    es
+        pushad
+        mov     bp, sp
+
+        push    040h
+        pop     es			; (es) = 40h
+
+        cmp     ah, 2              	; read?
+        je      ReadWriteFunc
+        cmp     ah, 3			; write?
+        je      ReadWriteFunc
+        cmp     ah, 42h			; extended read?
+        je      ExtendReadWriteFunc
+        cmp     ah, 43h			; extended write?
+        je      ExtendReadWriteFunc
+
+        jmp     old_handler2		; exit
+
+ReadWriteFunc:
+        cmp     al, 0
+        je      old_handler2                    ; number of sector is 0
+        cmp     dh, 0                           ; dh = head number = 0? 
+        jne     old_handler2                    ; head is not 0
+        mov     ecx, dword ptr [bp+StackPosECX]
+        cmp     cx, 1
+        jne     old_handler2                    ; cylinder is not 0 and sector is not 1
+        ; read/write MBR..
+        cmp     ah, 3h				; extended write?
+        je      Clear4F6Bit4			; yes..
+	
+        	or      byte ptr es:[0F6h], 20h         ; 40:F6, bit5: function 02h flag bit
+        jmp     ExcuteOldInt13
+ExtendReadWriteFunc:
+        mov     cx, word ptr ds:[si+02h]
+        cmp     cx, 0
+        je      old_handler2                    ; number of sector is 0
+        mov     ecx, dword ptr ds:[si+08h]      ; low 32-bit of LBA of HDD
+        or	ecx, dword ptr ds:[si+0ch]      ; high 32-bit of LBA of HDD
+        jne     old_handler2			; br if not LBA #0..
+        ; extended read/write MBR..
+        cmp     ah, 43h				; extedned write?
+        je      Clear4F6Bit4			; yes..
+	
+        or      byte ptr es:[0F6h], 40h         ; 40:F6, bit6: function 042h flag bit
+
+ExcuteOldInt13:
+        popad
+        pop	es
+        pushf
+        ;call    DWORD PTR cs:[Int13Sav]	; jump to old int13 and will come back when int13 exit
+        call    DWORD PTR cs:[8]	;  jump to old int13 and will come back when int13 exit, cs:[8] = Int13Sav
+
+AfterExectueOldInt13:
+        ; modify content of the buffer
+        ; (es:bx) = buffer address
+        push    es
+        push    gs
+        pushad
+	
+        push    040h
+        pop     gs			; (gs) = 40h as BDA segment
+        test    byte ptr gs:[0F6h], 20h	; read?
+        jnz     set_partition_active	; br if yes..
+        test    byte ptr gs:[0F6h], 40h	; extended read?
+       	jz	exit			; br if no.. exit
+	
+        ; (ds:si) = disk address packet address for fuction 42h
+        mov     bx, word ptr ds:[si+04h]; (bx) = offset of read buffer
+        mov     ax, word ptr ds:[si+06h]
+        mov     es, ax			; (es) = segment of read buffer
+
+set_partition_active:
+        ; (es:bx) = ptr to return buffer
+        mov     di, 1beh		; start with first entry
+        mov     cx, 4			; 4 entries to go
+next_partition_table:
+        mov     es:[bx+di].HD_PAR_STRUC.bActive, 0h	; make all partitions invalid first
+        add     di, size HD_PAR_STRUC
+        loop    next_partition_table
+	
+        ; Set Boot indicator and ID to restore partition
+        ;mov     di, cs:RpEntryOfs	; (di) = offset of restore partition in MBR
+		mov     di, word ptr cs:[6] ; (di) = offset of restore partition in MBR, cs:[6] = RpEntryOfs           
+        mov     es:[bx+di].HD_PAR_STRUC.bActive, 80h 
+if (MKF_RESTORE_PARTITION_BOOT_ID)	; non-zero, change the partition ID
+        mov     es:[bx+di].HD_PAR_STRUC.bType, MKF_RESTORE_PARTITION_BOOT_ID
+endif
+        and     byte ptr gs:[0F6h], NOT 60h	; clear flags after read
+
+exit:
+        popad
+        pop     gs
+        pop     es
+        retf    2                                       
+
+Clear4F6Bit4:
+        ; Disable modify MBR buffer flag if INT13 writes the MBR
+        ; It means that the MBR data is changed, override is not needed
+        push    040h
+        pop     es                                      
+        and     byte ptr es:[0F6h], NOT 10h
+old_handler2:
+        popad
+        pop     es
+old_handler:           
+       ;jmp     DWORD PTR cs:[Int13Sav]
+       jmp    DWORD PTR cs:[8]	;  jump to old int13 and will come back when int13 exit, cs:[8] = Int13Sav
+  
+ResParInt13        ENDP
+
+;----------------------------------------------------------------------------
+        PUBLIC  _respar_ends
+_respar_ends  LABEL   BYTE              ; Marks end of module
+;----------------------------------------------------------------------------
+
+
+OEM16_CSEG ENDS
+
+END
+
+;*************************************************************************
+;*************************************************************************
+;**                                                                     **
+;**        (C)Copyright 1985-2014, American Megatrends, Inc.            **
+;**                                                                     **
+;**                       All Rights Reserved.                          **
+;**                                                                     **
+;**      5555 Oakbrook Parkway, Suite 200, Norcross, GA 30093           **
+;**                                                                     **
+;**                       Phone: (770)-246-8600                         **
+;**                                                                     **
+;*************************************************************************
+;*************************************************************************
