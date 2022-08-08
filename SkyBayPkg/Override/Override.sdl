@@ -2153,3 +2153,11 @@ TOKEN
     TokenType = Boolean
     TargetH = Yes
 End
+
+TOKEN
+    Name  = "DEFAULT_PROVISION_SECURE_VARS"
+    Value  = "1"
+    Help  = "Install factory default Secure Boot variables: PK, KEK, db, dbx, dbt and dbr.\Note: this setting will not override existing Secure Boot variables in NVRAM."
+    TokenType = Boolean
+    TargetH = Yes
+End
