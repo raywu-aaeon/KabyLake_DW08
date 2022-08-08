@@ -2124,3 +2124,32 @@ TOKEN
 	TargetMAK = Yes
 End
 ##raydebug <<
+
+TOKEN
+    Name  = "PKVarFile"
+    Value  = "DeepWareSecureBootKeys$(PATH_SLASH)PK.auth"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "KEKVarFile"
+    Value  = "DeepWareSecureBootKeys$(PATH_SLASH)KEK.auth"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "dbVarFile"
+    Value  = "DeepWareSecureBootKeys$(PATH_SLASH)db.auth"
+    TokenType = Expression
+    TargetMAK = Yes
+End
+
+TOKEN
+    Name  = "DEFAULT_SECURE_BOOT_ENABLE"
+    Value  = "1"
+    Help  = "Default value of Secure Boot Enable Control.\0-Secure Boot control option will be locked Disabled unless platform in User mode with CSM disabled"
+    TokenType = Boolean
+    TargetH = Yes
+End
