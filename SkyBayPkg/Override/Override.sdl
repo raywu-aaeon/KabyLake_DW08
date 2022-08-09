@@ -1806,9 +1806,18 @@ End
 
 TOKEN
 	Name  = "BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE"
-	Value  = "0"
+	Value  = "1"
 	Help  = "Support for UEFI specification v 2.3.1 section 3.4.1.1 and 3.4.1.2 to load the default boot image (efi\boot\boot####.efi) from any of the available file system if no boot option found. 1 = Enabling default image boot and 0 = Disabling default image boot."
 	TokenType = Boolean
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "SECONDARY_BOOT_FROM_ENABLED_DEVICES"
+	Value  = "1"
+	Help  = "0-> Loads \EFI\BOOT\BOOT{machine type short-name}.EFI from any of the devices & 1-> Loads the default image only from enabled devices"
+	TokenType = Boolean
+	TargetMAK = Yes
 	TargetH = Yes
 End
 
