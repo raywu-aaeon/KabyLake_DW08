@@ -1392,7 +1392,10 @@ BootRestorePartition()
     VOID        *pRegistration = NULL;
     EFI_GUID    AmiLegacyBootProtocolGuid = EFI_AMI_LEGACYBOOT_PROTOCOL_GUID;
 
-    //DEBUG((DEBUG_INFO, "[ResPar] F9 PRESSED.....\n"));
+    DEBUG((DEBUG_INFO, "[ResPar] BootRestorePartition Start\n"));
+    DEBUG((DEBUG_INFO, "[ResPar] gGptRpFound = 0x%X\n",gGptRpFound));
+    DEBUG((DEBUG_INFO, "[ResPar] gMbrRpFound = 0x%X\n",gMbrRpFound));
+    DEBUG((DEBUG_INFO, "[ResPar] gRpFound = 0x%X\n",gRpFound));
 
 	//SearchRestorePartition();
     if (gGptRpFound || gMbrRpFound)
