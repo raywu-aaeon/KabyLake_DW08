@@ -999,7 +999,7 @@ End
 
 TOKEN
 	Name  = "TSE_CONTINUE_BOOT_NOW_ON_FAIL"
-	Value  = "1"
+	Value  = "0"
 	Help  = "Turn on to continue boot to other device when selected one fails."
 	TokenType = Boolean
 	TargetH = Yes
