@@ -2124,3 +2124,11 @@ TOKEN
 	TargetMAK = Yes
 End
 ##raydebug <<
+
+TOKEN
+	Name  = "SUPPRESS_PRINT"
+	Value  = "0"
+	Help  = "A switch to supress TSE Debug messages."
+	TokenType = Boolean
+	TargetH = Yes
+End
