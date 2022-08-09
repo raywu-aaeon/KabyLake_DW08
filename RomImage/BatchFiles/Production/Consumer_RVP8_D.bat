@@ -1,6 +1,6 @@
 cd RomImage
 cd Fitc11_8_Consumer
-Fit -o ../../Build/AmiCrbMeRoms/RVP8_D_Cons_Prod.bin -f ../XmlFiles/Production/Consumer_RVP8_D.xml -b
+Fit -o ../../Build/AmiCrbMeRoms/%1.bin -f ../XmlFiles/Production/Consumer_RVP8_D.xml -b
 del fit.log
 cd ..
 cd ..
