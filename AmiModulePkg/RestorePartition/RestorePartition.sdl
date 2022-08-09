@@ -13,7 +13,7 @@ End
 
 TOKEN
     Name  = "RESTORE_PARTITION_FAT_SUPPORT"
-    Value  = 1
+    Value  = "0"
     Help  = "ON - Turns on FAT partition support./OFF - FAT partition will not be recognized to boot from."
     TokenType = Boolean
     TargetH = Yes
@@ -21,7 +21,7 @@ End
 
 TOKEN
     Name  = "RESTORE_PARTITION_NTFS_SUPPORT"
-    Value  = 1
+    Value  = "0"
     Help  = "ON - Turns on NTFS partition support./OFF - NTFS partition will not be recognized to boot from."
     TokenType = Boolean
     TargetH = Yes
