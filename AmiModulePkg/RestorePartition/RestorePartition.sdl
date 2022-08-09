@@ -75,9 +75,11 @@ TOKEN
     TargetH = Yes
 End
 
+#// {d6760505-754c-4f5b-9ecc-a89f33a3ed97}
+#static const struct GUID __NAME__ = {0xd6760505, 0x754c, 0x4f5b, {0x9e, 0xcc, 0xa8, 0x9f, 0x33, 0xa3, 0xed, 0x97}};
 TOKEN
     Name  = "OEM_RESTORE_PARTITION_GUID"
-    Value  = "{0xc12a7328, 0xf81f, 0x11d2, {0xba, 0x4b, 0x00, 0xa0, 0xc9, 0x3e, 0xc9, 0x3b}}"
+    Value  = "{0xd6760505, 0x754c, 0x4f5b, {0x9e, 0xcc, 0xa8, 0x9f, 0x33, 0xa3, 0xed, 0x97}}"
     Help  = "This is the GUID of the partition which restore tool's efi boot loader resides in.\Default GUID is the GUID of EFI System partition."
     TokenType = Expression
     TargetH = Yes
@@ -158,7 +160,7 @@ End
 
 TOKEN
     Name  = "EFI_BOOTFILEPATH_CHECK"
-    Value  = 0
+    Value  = "1"
     Help  = "Main switch to check restore partition boot file path."
     TokenType = Boolean
     TargetH = Yes
