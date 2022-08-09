@@ -421,7 +421,7 @@ ifeq ($(Consumer_RVP8_D), 1)
 #
 # ME 11.8
 #
-	$(CALL) $(ROM_IMAGE_BAT_PROD_DIR)Consumer_RVP8_D.bat
+	$(CALL) $(ROM_IMAGE_BAT_PROD_DIR)Consumer_RVP8_D.bat $(PROJECT_TAG)$(PROJECT_MAJOR_VERSION)$(PROJECT_MINOR_VERSION)
 ifeq ($(BiosGuard_SUPPORT), 1)
 	$(CP) $(BUILD_DIR)$(PATH_SLASH)AmiCrbMeRoms$(PATH_SLASH)RVP8_D_Cons_Prod.map $(FITC_ME_MAP)
 	$(ECHO) $(BUILD_DIR)$(PATH_SLASH)AmiCrbMeRoms$(PATH_SLASH)RVP8_D_Cons_Prod.bin RVP8_D_Cons_Prod.bin > $(BIOS_GUARD_NAME)
