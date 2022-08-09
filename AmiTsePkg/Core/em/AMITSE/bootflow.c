@@ -86,10 +86,10 @@ static BOOT_FLOW _gBootFlowTable[] =
 {
 //	{ Condition,						            PageClass,				PageSubClass,	PageFormID,	ControlNumber,	MessageBoxToken,	MessageBoxTimeout,	GotoPageOnEntry,	ProceedBooting,	InfiniteLoop,	                            LaunchShell,	DoNotEnterSetup,	CallbackFunction },
     { BOOT_FLOW_CONDITION_NORMAL,		            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,	        BOOT_FLOW_NORMAL_INFINITE_LOOP,	            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,  FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_ERROR,		            ERROR_MANAGER_KEY_ID,	0,				1,			0,				0,					0,					TRUE,				FALSE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_RECOVERY,		            0x40,					0,				1,			0,				0,					0,					TRUE,				TRUE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_PCI_OUT_OF_RESOURCE,		0x79,		            0,				1,			0,				0,					0,					TRUE,				TRUE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_FIRST_BOOT,	            MAIN_FORM_SET_CLASS,	0,				MAIN_MAIN,	0,				0,					0,					TRUE,				TRUE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
+	{ BOOT_FLOW_CONDITION_ERROR,		            ERROR_MANAGER_KEY_ID,	0,				1,			0,				0,					0,					TRUE,				FALSE,			FALSE,			                            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,			                            FALSE,				NULL },
+	{ BOOT_FLOW_CONDITION_RECOVERY,		            0x40,					0,				1,			0,				0,					0,					TRUE,				TRUE,			FALSE,			                            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,			                            FALSE,				NULL },
+	{ BOOT_FLOW_CONDITION_PCI_OUT_OF_RESOURCE,		0x79,		            0,				1,			0,				0,					0,					TRUE,				TRUE,			FALSE,			                            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,			                            FALSE,				NULL },
+	{ BOOT_FLOW_CONDITION_FIRST_BOOT,	            MAIN_FORM_SET_CLASS,	0,				MAIN_MAIN,	0,				0,					0,					TRUE,				TRUE,			FALSE,			                            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,			                            FALSE,				NULL },
 	{ BOOT_FLOW_CONDITION_OS_UPD_CAP,	            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				&OsUpdateCapsuleWrap },
     { BOOT_FLOW_HOTKEY_BOOT,                        0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				&LaunchHotKeyBootOption },
 #if SETUP_OEM_KEY1_ENABLE
@@ -113,7 +113,7 @@ static BOOT_FLOW _gBootFlowTable[] =
 	{ BOOT_FLOW_CONDITION_FAST_BOOT,	            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            TRUE,			                            TRUE,				&FBBootFlow },
 #endif
 	// this MUST be the last entry in the boot flow table
-	{ BOOT_FLOW_CONDITION_NULL,			            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            TRUE,			                            FALSE,				NULL }
+	{ BOOT_FLOW_CONDITION_NULL,			            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,			                            FALSE,				NULL }
 };
 
 // Set the initial Bootflow table.
