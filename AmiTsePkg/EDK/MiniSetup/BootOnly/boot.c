@@ -550,7 +550,9 @@ EFI_STATUS BBSSetBootNowPriorityForBootNext(UINT16 u16Option, UINT16 *pOrder, UI
     BOOT_DATA	*pBootData = NULL;
     
     
+    SETUP_DEBUG_TSE("[TSE] DW08 - BBSSetBootNowPriorityForBootNext Start\n");
     pBootData = BootGetBootData(u16Option);
+    SETUP_DEBUG_TSE("[TSE] DW08 - pBootData->Name = %s,pBootData->Option = %d,pBootData->Active = %x,BBSValidDevicePath = %d\n",pBootData->Name,pBootData->Option,pBootData->Active,BBSValidDevicePath(pBootData->DevicePath));
     if (pBootData)
     {  
     	//Set BootCurrent
@@ -578,6 +580,7 @@ EFI_STATUS BBSSetBootNowPriorityForBootNext(UINT16 u16Option, UINT16 *pOrder, UI
                 0);
     }
 
+    SETUP_DEBUG_TSE("[TSE] DW08 - BBSSetBootNowPriorityForBootNext End\n");
     return status;
 }
 
