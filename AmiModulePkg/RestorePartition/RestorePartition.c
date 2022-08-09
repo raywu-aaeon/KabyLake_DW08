@@ -774,6 +774,7 @@ CheckGptRestorePartition(VOID)
 
     PARTITION_ENTRY     *PartEntry = NULL, EfiPartEntry;
 
+    DEBUG((-1, "[ResPar] DW08 - CheckGptRestorePartition Start\n"));
     PbrBuffer = EfiLibAllocatePool(gRpBlkIo->Media->BlockSize);
     if (PbrBuffer == NULL)
     {
@@ -825,6 +826,7 @@ CheckGptRestorePartition(VOID)
 
     //The number of Partition Entries in the GUID Partition Entry array.
     NumGptEntry = *((UINT32*)(GptHeaderBuffer + 0x50));
+    DEBUG((-1, "[ResPar] DW08 - NumGptEntry = 0x%X\n", NumGptEntry));
 
     //Check all partition entries unless it finds recovery partition with proper volume label
     for (j = 0; j < NumGptEntry ; j++)
