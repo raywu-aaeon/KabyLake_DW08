@@ -1407,6 +1407,11 @@ BootRestorePartition()
         }
         return;
     }
+    else
+    {
+        gEnterSetup = TRUE;
+    }
+    
     if (!gRpFound)
         return;
 
