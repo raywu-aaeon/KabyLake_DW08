@@ -90,6 +90,8 @@ extern UINTN        gPostStatus;
 extern UINTN        gBootOptionCount;
 extern UINT32       gBootFlow;
 extern BOOLEAN      gEnterSetup;
+extern BOOLEAN gSpecificPartitionFind;
+extern GLOBAL_GPT_HARDDRIVE_DEVICE_PATH   gGlobalGptHdDP;
 
 typedef struct
 {
@@ -926,6 +928,8 @@ CheckGptRestorePartition(VOID)
             }
 #endif  
             
+            gGlobalGptHdDP = gGptHdDP;
+            
             DEBUG((DEBUG_INFO, "\n[ResPar]PartitionNumber = %d\n", gGptHdDP.PartitionNumber));
             DEBUG((DEBUG_INFO, "[ResPar]PartitionStart = %x\n", gGptHdDP.PartitionStart));
             DEBUG((DEBUG_INFO, "[ResPar]PartitionStart = %x\n", EfiPartEntry.StartingLba));
@@ -1399,6 +1403,7 @@ BootRestorePartition()
 	//SearchRestorePartition();
     if (gGptRpFound || gMbrRpFound)
     {
+        gSpecificPartitionFind = TRUE;
         DEBUG((DEBUG_INFO, "************[ResPar] F9 PRESSED.....*************\n"));
         Status = _BootLaunchDevicePath((gGptRpFound)? (EFI_DEVICE_PATH_PROTOCOL *) & gGptHdDP : (EFI_DEVICE_PATH_PROTOCOL *) gMbrEfiBootDp, NULL, 0, TRUE);
 
@@ -1412,6 +1417,7 @@ BootRestorePartition()
     else
     {
         gEnterSetup = TRUE;
+        gSpecificPartitionFind = FALSE;
     }
     
     if (!gRpFound)

@@ -31,6 +31,7 @@
 **/
 
 #include "minisetup.h"
+#include "Token.h"
 
 PROGRESSBAR_INFO	*gProgress;
 
@@ -91,6 +92,28 @@ UINTN gMaxBufX;
 UINTN gMaxBufY;
 
 UINTN gPostManagerHandshakeCallIndex = 0;
+
+BOOLEAN gSpecificPartitionFind = FALSE;
+
+typedef struct
+{
+    EFI_DEVICE_PATH_PROTOCOL    Header;
+    UINT32          PartitionNumber;
+    UINT64          PartitionStart;
+    UINT64          PartitionSize;
+    UINT8           Signature[16];
+    UINT8           MBRType;
+    UINT8           SignatureType;
+    UINT8           FileType;
+    UINT8           FileSubType;
+    UINT16          FileLength;
+    CHAR16          FileName[sizeof(BOOTFILEPATH)/2];
+    UINT8           EndType;
+    UINT8           EndSubType;
+    UINT16          EndLength;
+} GLOBAL_GPT_HARDDRIVE_DEVICE_PATH;
+
+GLOBAL_GPT_HARDDRIVE_DEVICE_PATH   gGlobalGptHdDP;
 
 #define EFI_DEFAULT_LEGACY_DEV_ORDER_VARIABLE_GUID  \
   { 0x3c4ead08, 0x45ae, 0x4315, {0x8d, 0x15, 0xa6, 0x0e, 0xaa, 0x8c, 0xaf, 0x69 }}

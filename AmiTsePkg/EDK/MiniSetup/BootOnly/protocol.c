@@ -698,6 +698,15 @@ _ShowMainMenu:
 
 //Check for OS Recovery and process normal boot if unavailable
 _ProcessBootOptions:			
+	if (gSpecificPartitionFind)
+	{
+		Status = _BootLaunchDevicePath((EFI_DEVICE_PATH_PROTOCOL *) & gGptHdDP, NULL, 0, TRUE);
+	}
+	else
+	{
+    		gEnterSetup = TRUE;
+    		goto _ShowMainMenu;
+	}
 SETUP_DEBUG_TSE("\n[TSE] _ProcessBootOptions Label Entering:\n DoNormalBootFlag = %d u16BootCount = %d\n",DoNormalBootFlag,u16BootCount);
 	    for ( i = 0; (DoNormalBootFlag) && (i < u16BootCount); i++)
 	    {
