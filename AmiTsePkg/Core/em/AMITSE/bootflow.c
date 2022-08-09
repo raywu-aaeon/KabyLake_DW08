@@ -85,13 +85,13 @@ VOID  EFIAPI SetupDebugPrint(IN CONST CHAR8  *Format, ...) ;
 static BOOT_FLOW _gBootFlowTable[] =
 {
 //	{ Condition,						            PageClass,				PageSubClass,	PageFormID,	ControlNumber,	MessageBoxToken,	MessageBoxTimeout,	GotoPageOnEntry,	ProceedBooting,	InfiniteLoop,	                            LaunchShell,	DoNotEnterSetup,	CallbackFunction },
-    { BOOT_FLOW_CONDITION_NORMAL,		            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,	        BOOT_FLOW_NORMAL_INFINITE_LOOP,	            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,  FALSE,				NULL },
+    { BOOT_FLOW_CONDITION_NORMAL,		            0,						0,				0,			0,				0,					0,					FALSE,				FALSE,	        BOOT_FLOW_NORMAL_INFINITE_LOOP,	            BOOT_FLOW_NORMAL_LAUNCH_DEFAULT_BOOTIMAGE,  FALSE,				NULL },
 	{ BOOT_FLOW_CONDITION_ERROR,		            ERROR_MANAGER_KEY_ID,	0,				1,			0,				0,					0,					TRUE,				FALSE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_RECOVERY,		            0x40,					0,				1,			0,				0,					0,					TRUE,				TRUE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_PCI_OUT_OF_RESOURCE,		0x79,		            0,				1,			0,				0,					0,					TRUE,				TRUE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_FIRST_BOOT,	            MAIN_FORM_SET_CLASS,	0,				MAIN_MAIN,	0,				0,					0,					TRUE,				TRUE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
-	{ BOOT_FLOW_CONDITION_OS_UPD_CAP,	            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				&OsUpdateCapsuleWrap },
-    { BOOT_FLOW_HOTKEY_BOOT,                        0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				&LaunchHotKeyBootOption },
+	{ BOOT_FLOW_CONDITION_RECOVERY,		            0x40,					0,				1,			0,				0,					0,					TRUE,				FALSE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
+	{ BOOT_FLOW_CONDITION_PCI_OUT_OF_RESOURCE,		0x79,		            0,				1,			0,				0,					0,					TRUE,				FALSE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
+	{ BOOT_FLOW_CONDITION_FIRST_BOOT,	            MAIN_FORM_SET_CLASS,	0,				MAIN_MAIN,	0,				0,					0,					TRUE,				FALSE,			FALSE,			                            TRUE,			                            FALSE,				NULL },
+	{ BOOT_FLOW_CONDITION_OS_UPD_CAP,	            0,						0,				0,			0,				0,					0,					FALSE,				FALSE,			FALSE,			                            FALSE,			                            FALSE,				&OsUpdateCapsuleWrap },
+    { BOOT_FLOW_HOTKEY_BOOT,                        0,						0,				0,			0,				0,					0,					FALSE,				FALSE,			FALSE,			                            FALSE,			                            FALSE,				&LaunchHotKeyBootOption },
 #if SETUP_OEM_KEY1_ENABLE
 	{ BOOT_FLOW_CONDITION_OEM_KEY1,		            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				&OemKey1HookHook },
 #endif
@@ -105,10 +105,10 @@ static BOOT_FLOW _gBootFlowTable[] =
 	{ BOOT_FLOW_CONDITION_OEM_KEY4,		            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				&OemKey4HookHook },
 #endif
 #if SETUP_BBS_POPUP_ENABLE
-	{ BOOT_FLOW_CONDITION_BBS_POPUP,	            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				&DoPopup },
+	{ BOOT_FLOW_CONDITION_BBS_POPUP,	            0,						0,				0,			0,				0,					0,					FALSE,				FALSE,			FALSE,			                            FALSE,			                            FALSE,				&DoPopup },
 #endif
 	{ BOOT_FLOW_CONDITION_OEM_KEY_CALLBACK,	        0,					    0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            FALSE,			                            FALSE,				NULL }, // Callback is null and on OEMkey press it will updated.
-	{ BOOT_FLOW_CONDITION_NO_SETUP,		            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			TRUE,			                            FALSE,			                            TRUE,				NULL },
+	{ BOOT_FLOW_CONDITION_NO_SETUP,		            0,						0,				0,			0,				0,					0,					FALSE,				FALSE,			TRUE,			                            FALSE,			                            TRUE,				NULL },
 #if FAST_BOOT_SUPPORT
 	{ BOOT_FLOW_CONDITION_FAST_BOOT,	            0,						0,				0,			0,				0,					0,					FALSE,				TRUE,			FALSE,			                            TRUE,			                            TRUE,				&FBBootFlow },
 #endif
