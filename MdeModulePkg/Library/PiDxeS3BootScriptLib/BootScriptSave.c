@@ -956,7 +956,7 @@ S3BootScriptGetEntryAddAddress (
       // Add DEBUG ERROR, so that we can find it after SmmReadyToLock.
       // Do not use ASSERT, because we may have test to invoke this interface.
       //
-      DEBUG ((EFI_D_ERROR, "FATAL ERROR: Set boot script outside SMM after SmmReadyToLock!!!\n"));
+      //DEBUG ((EFI_D_ERROR, "FATAL ERROR: Set boot script outside SMM after SmmReadyToLock!!!\n"));
       return NULL;
     }
 

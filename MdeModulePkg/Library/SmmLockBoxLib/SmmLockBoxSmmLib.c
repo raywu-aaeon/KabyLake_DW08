@@ -407,13 +407,13 @@ UpdateLockBox (
 {
   SMM_LOCK_BOX_DATA             *LockBox;
 
-  DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Enter\n"));
+  //DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Enter\n"));
 
   //
   // Basic check
   //
   if ((Guid == NULL) || (Buffer == NULL) || (Length == 0)) {
-    DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_INVALID_PARAMETER));
+    //DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_INVALID_PARAMETER));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -422,7 +422,7 @@ UpdateLockBox (
   //
   LockBox = InternalFindLockBoxByGuid (Guid);
   if (LockBox == NULL) {
-    DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_NOT_FOUND));
+    //DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_NOT_FOUND));
     return EFI_NOT_FOUND;
   }
 
@@ -430,7 +430,7 @@ UpdateLockBox (
   // Update data
   //
   if (LockBox->Length < Offset + Length) {
-    DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_BUFFER_TOO_SMALL));
+    //DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_BUFFER_TOO_SMALL));
     return EFI_BUFFER_TOO_SMALL;
   }
   ASSERT ((UINTN)LockBox->SmramBuffer <= (MAX_ADDRESS - Offset));
@@ -439,7 +439,7 @@ UpdateLockBox (
   //
   // Done
   //
-  DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_SUCCESS));
+  //DEBUG ((EFI_D_INFO, "SmmLockBoxSmmLib UpdateLockBox - Exit (%r)\n", EFI_SUCCESS));
   return EFI_SUCCESS;
 }
 
