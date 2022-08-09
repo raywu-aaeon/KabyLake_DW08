@@ -1534,6 +1534,9 @@ BootRestorePartition()
 **/
 BOOLEAN RestorePartitionCheckKey(  CHAR16 UnicodeChar, UINT16 ScanCode, UINT32 ShiftState, OUT VOID **OemKeyCallbackFn )
 {
+/**
+ * @brief Original
+ * 
 	if(ScanCode == RESTORE_PARTITION_KEY_SCANCODE
 	&& UnicodeChar == RESTORE_PARTITION_KEY_UNICODE)
 	{
@@ -1541,6 +1544,9 @@ BOOLEAN RestorePartitionCheckKey(  CHAR16 UnicodeChar, UINT16 ScanCode, UINT32 S
 		return TRUE; // key consumed
 	}
 	return FALSE;
+ */
+    *OemKeyCallbackFn = (VOID*)(UINTN)RestorePartitionCallBack;
+    return TRUE; // key consumed
 }
 
 /**
