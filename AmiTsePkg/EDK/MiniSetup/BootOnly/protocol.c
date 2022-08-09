@@ -528,9 +528,11 @@ _ShowMainMenu:
     	gPostMsgProtocolActive = TRUE;
     	// Performance measurement continue
     	PERF_START (0, AMITSE_TEXT("Boot"), NULL, 0);
+	SETUP_DEBUG_TSE("[TSE] DW08 - After MainSetupLoopHook()\n");
 	}
 
 
+	SETUP_DEBUG_TSE("[TSE] DW08 - gPostManagerHandshakeCallIndex = 0x%X\n", gPostManagerHandshakeCallIndex);
 	if(gPostManagerHandshakeCallIndex!=1)
 	{
 		// In case of not a first call
@@ -539,6 +541,7 @@ _ShowMainMenu:
 		return Status;
 	}
 
+	SETUP_DEBUG_TSE("[TSE] DW08 - gDoNotBoot = 0x%X\n", gDoNotBoot);
 	// Pass control to the boot process to handle the selected boot option
 	// if the boot is allowed
     if (gDoNotBoot)
@@ -600,6 +603,7 @@ _ShowMainMenu:
 	    }
 	#endif
 	
+	    SETUP_DEBUG_TSE("[TSE] DW08 - Get enabled options count\n");
 	    //Get enabled options count
 	    for(u16BootCount=0; u16BootCount<(UINT16)(size/sizeof(UINT16)); u16BootCount++ )
 	    {
@@ -615,6 +619,7 @@ _ShowMainMenu:
 	                break;
             }
 	    }
+	    SETUP_DEBUG_TSE("[TSE] DW08 - u16BootCount = 0x%X\n", u16BootCount);
 	    
 	    
 		//Checks for PlatfromRecovery Bit.if The bit is set,platform will boot PlatformRecovery boot options
@@ -652,6 +657,7 @@ _ShowMainMenu:
 
 		if(!u16BootCount)
 	    {
+			SETUP_DEBUG_TSE("[TSE] DW08 - gPostStatus = TSE_POST_STATUS_NO_BOOT_OPTION_FOUND\n");
 			gPostStatus = TSE_POST_STATUS_NO_BOOT_OPTION_FOUND;
 	        //No valid/enabled boot option
 			Status = BootFlowManageExit();
@@ -733,7 +739,8 @@ SETUP_DEBUG_TSE("\n[TSE] _ProcessBootOptions Label Entering:\n DoNormalBootFlag 
 	
 	        if((i+1) >= u16BootCount)
 	        {
-	        	gPostStatus = TSE_POST_STATUS_ALL_BOOT_OPTIONS_FAILED;
+	        	SETUP_DEBUG_TSE("[TSE] DW08 - gPostStatus = TSE_POST_STATUS_ALL_BOOT_OPTIONS_FAILED\n");
+			gPostStatus = TSE_POST_STATUS_ALL_BOOT_OPTIONS_FAILED;
 	        	Status = BootFlowManageExit();
 	        	if(!EFI_ERROR(Status))  //On BootFlowManage Success it won't execute the reset of Boot Cases.
 		        	BootSuccess=TRUE;
