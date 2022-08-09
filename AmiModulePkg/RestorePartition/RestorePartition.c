@@ -85,7 +85,7 @@ extern EFI_RUNTIME_SERVICES *gRT;
 
 extern BOOLEAN OemCheckRestorePartition();
 
-extern BOOT_DATA    *gBootData;
+//extern BOOT_DATA    *gBootData;
 extern UINTN        gPostStatus;
 extern UINTN        gBootOptionCount;
 extern UINT32       gBootFlow;
