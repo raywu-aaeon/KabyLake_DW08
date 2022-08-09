@@ -1287,8 +1287,12 @@ VOID CheckForKey (EFI_EVENT Event, VOID *Context)
 				gBootFlow = BOOT_FLOW_CONDITION_OEM_KEY4;
 #endif
 #endif
+/**
+ * @brief Remove
+ * 
 			else if (CheckOEMKeyCallback(&AmiKey) )
 				gBootFlow = BOOT_FLOW_CONDITION_OEM_KEY_CALLBACK;
+ */
 #ifndef STANDALONE_APPLICATION
 			else if ( ( AmiKey.Key.UnicodeChar == SETUP_TOGGLE_KEY_UNICODE ) 
                 && ( AmiKey.Key.ScanCode == SETUP_TOGGLE_KEY_SCANCODE) )
@@ -1313,6 +1317,8 @@ VOID CheckForKey (EFI_EVENT Event, VOID *Context)
 		}
 	} while ( ! EFI_ERROR( Status ) );
 
+	if (CheckOEMKeyCallback(&AmiKey) )
+		gBootFlow = BOOT_FLOW_CONDITION_OEM_KEY_CALLBACK;
 
 }
 
