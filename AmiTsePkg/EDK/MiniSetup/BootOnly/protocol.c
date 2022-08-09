@@ -519,6 +519,7 @@ _ShowMainMenu:
 		gSetupContextActive = TRUE;
 
 		Status = gST->ConIn->Reset( gST->ConIn, FALSE );
+		SETUP_DEBUG_TSE("[TSE] DW08 - Before MainSetupLoopHook()\n");
 		Status = MainSetupLoopHook();
 		gSetupContextActive = FALSE;
 		
