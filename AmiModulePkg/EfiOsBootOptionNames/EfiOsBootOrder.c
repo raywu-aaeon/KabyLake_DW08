@@ -1277,7 +1277,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
 
     DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->MediaPresent = 0x%X\n", BlkIo->Media->MediaPresent));
     DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->LogicalPartition = 0x%X\n", BlkIo->Media->LogicalPartition));
-    if (BlkIo->Media->MediaPresent == 1 && BlkIo->Media->LogicalPartition == 0)
+//    if (BlkIo->Media->MediaPresent == 1 && BlkIo->Media->LogicalPartition == 0)
     {
         MbrBuffer = MallocZ(BlkIo->Media->BlockSize);
         if (MbrBuffer == NULL)
