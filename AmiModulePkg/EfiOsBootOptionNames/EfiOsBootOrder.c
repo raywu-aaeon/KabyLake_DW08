@@ -85,6 +85,16 @@ typedef struct _HD_PAR_STRUC
     UINT32  dNumSec;
 } HD_PAR_STRUC;
 
+typedef struct
+{
+    EFI_GUID    PartitionTypeGuid;
+    EFI_GUID    UniquePartitionGuid;
+    EFI_LBA     StartingLba;
+    EFI_LBA     EndingLba;
+    UINT64      Attributes;
+    CHAR16      PartitionName[36];
+} SPECIFIC_PARTITION_ENTRY;
+
 /**
     Locates HD node in DevicePath associated with Handle.
 
@@ -1244,7 +1254,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     BOOLEAN     SpecificGuidPartitionFound;
     UINT32      j = 0;
     UINT32      NumGptEntry = 0, EfiSystemPartNum = 0;
-    PARTITION_ENTRY     *PartEntry = NULL, EfiPartEntry;
+    SPECIFIC_PARTITION_ENTRY     *PartEntry = NULL, EfiPartEntry;
     UINT64      PartitionEntryLBA = 0;
 
     SpecificGuidPartitionFound = FALSE;
