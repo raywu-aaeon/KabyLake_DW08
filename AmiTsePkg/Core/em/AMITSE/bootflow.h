@@ -58,6 +58,7 @@
 #define	BOOT_FLOW_HOTKEY_BOOT                   0xA
 #define	BOOT_FLOW_CONDITION_OS_UPD_CAP 			0xB			
 #define	BOOT_FLOW_CONDITION_NULL	0xFFFFFFFF
+#define	BOOT_FLOW_CONDITION_SPECIFIC_PARTITION	0x00001006
 
 typedef struct _BOOT_FLOW	BOOT_FLOW;
 
@@ -97,6 +98,7 @@ EFI_STATUS	FBBootFlow (BOOT_FLOW *);
 EFI_STATUS	LaunchHotKeyBootOption (BOOT_FLOW *);
 EFI_STATUS  OsUpdateCapsuleWrap (BOOT_FLOW *BootFlow);
 BOOLEAN IsBootFlowInfinite();
+EFI_STATUS	BootSpecificPartitionBootFlow ( BOOT_FLOW * Bflow);
 
 #endif /* _BOOTFLOW_H_ */
 
