@@ -1244,6 +1244,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     SETUP_DATA SetupData;
     UINTN Size = sizeof(SETUP_DATA);
     EFI_GUID SetupGuid = SETUP_GUID;
+    BOOLEAN     NotHddFound;
     UINT8       *MbrBuffer = NULL;
     UINT8       *GptHeaderBuffer = NULL;
     UINT8       *GptEntryBuffer = NULL;
@@ -1255,6 +1256,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     SPECIFIC_PARTITION_ENTRY     *PartEntry = NULL, EfiPartEntry;
     UINT64      PartitionEntryLBA = 0;
 
+    NotHddFound = FALSE;
     SpecificGuidPartitionFound = FALSE;
 
     Status=pBS->HandleProtocol(
@@ -1265,13 +1267,29 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
 
     if ( SetupData.OnlyBootHDD == 1 ) {
         if ( Device->BbsEntry == NULL ) {
-            if ( BlkIo->Media->RemovableMedia == FALSE )
-                return FALSE ;
+            //if ( BlkIo->Media->RemovableMedia == FALSE )
+            //    return FALSE ;
+            //else
+            //    return TRUE ;
+            if (BlkIo->Media->RemovableMedia)
+            {
+                NotHddFound = TRUE;
+            }
             else
-                return TRUE ;
+            {
+                /* code */
+            }
         } else {
-            if( Device->BbsEntry->Class != PCI_CL_MASS_STOR ) return TRUE;
-            return FALSE;
+            //if( Device->BbsEntry->Class != PCI_CL_MASS_STOR ) return TRUE;
+            //return FALSE;
+            if (Device->BbsEntry->Class != PCI_CL_MASS_STOR)
+            {
+                NotHddFound = TRUE;
+            }
+            else
+            {
+                /* code */
+            }
         }
     }
 
@@ -1279,6 +1297,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->RemovableMedia = 0x%X\n", BlkIo->Media->RemovableMedia));
     DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->MediaPresent = 0x%X\n", BlkIo->Media->MediaPresent));
     DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->LogicalPartition = 0x%X\n", BlkIo->Media->LogicalPartition));
+    DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->ReadOnly = 0x%X\n", BlkIo->Media->ReadOnly));
 //    if (BlkIo->Media->MediaPresent == 1 && BlkIo->Media->LogicalPartition == 0)
     {
         MbrBuffer = MallocZ(BlkIo->Media->BlockSize);
@@ -1419,6 +1438,15 @@ _FindSpecificGuidPartitionEnd:
         pBS->FreePool(PbrBuffer);
     }
 
+    if (NotHddFound)
+    {
+        return TRUE;
+    }
+    else
+    {
+        /* code */
+    }
+    
     if (SpecificGuidPartitionFound)
     {
         /* code */
