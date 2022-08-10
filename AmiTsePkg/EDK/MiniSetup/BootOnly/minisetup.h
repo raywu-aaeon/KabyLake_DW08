@@ -783,6 +783,7 @@ extern BOOLEAN gDoNotBoot;
 
 extern UINTN   gCurrIDESecPage;
 
+extern BOOLEAN gSpecificPartitionFind;
 
 #if TSE_USE_AMI_EFI_KEYCODE_PROTOCOL
 extern EFI_GUID gAmiEfiKeycodeProtocolGuid;

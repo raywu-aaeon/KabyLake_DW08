@@ -67,6 +67,9 @@ extern BOOLEAN IsTSEGopNotificationSupport();
 extern UINTN GetAMITSESETUPSize();
 BOOLEAN IsSetupPrintEvalMessage();
 VOID InvalidateStatusInBgrtWrapper (VOID);
+
+extern EFI_STATUS _BootLaunchDevicePath( EFI_DEVICE_PATH_PROTOCOL *DevicePath, VOID *Options, UINTN OptionSize, BOOLEAN ValidBootOption );
+
 static AMI_POST_MANAGER_PROTOCOL	gPostManagerProtocol =
 {
 	PostManagerHandshake,
@@ -700,7 +703,7 @@ _ShowMainMenu:
 _ProcessBootOptions:			
 	if (gSpecificPartitionFind)
 	{
-		Status = _BootLaunchDevicePath((EFI_DEVICE_PATH_PROTOCOL *) & gGptHdDP, NULL, 0, TRUE);
+		Status = _BootLaunchDevicePath((EFI_DEVICE_PATH_PROTOCOL *) & gGlobalGptHdDP, NULL, 0, TRUE);
 	}
 	else
 	{
