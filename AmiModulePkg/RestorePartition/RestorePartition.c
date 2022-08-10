@@ -971,6 +971,7 @@ BlockIOSearchRestorePartition(VOID)
         return;
     }
 
+    DEBUG((-1, "RAYDEBUG - HandleCount = 0x%X\n", HandleCount));
     for (i=0; i<HandleCount; i++ )
     {
 
@@ -995,6 +996,9 @@ BlockIOSearchRestorePartition(VOID)
             continue;
         }
        
+        DEBUG((-1, "RAYDEBUG - gRpBlkIo->Media->MediaPresent = 0x%X\n", gRpBlkIo->Media->MediaPresent));
+        DEBUG((-1, "RAYDEBUG - gRpBlkIo->Media->LogicalPartition = 0x%X\n", gRpBlkIo->Media->LogicalPartition));
+        DEBUG((-1, "RAYDEBUG - gRpBlkIo->Media->ReadOnly = 0x%X\n", gRpBlkIo->Media->ReadOnly));
         //Only need a BlockIo which is presented for whole HDD
         if (    gRpBlkIo->Media->MediaPresent == 1 &&
                 gRpBlkIo->Media->LogicalPartition == 0 &&
@@ -1026,6 +1030,10 @@ BlockIOSearchRestorePartition(VOID)
 
             DEBUG((DEBUG_INFO, "[ResPar] found MBR signature = %X\n", *((UINT16*)(MbrBuffer + 0x1fe))));
 
+            DEBUG((-1, "RAYDEBUG - ((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType));
+            DEBUG((-1, "RAYDEBUG - ((HD_PAR_STRUC*)(MbrBuffer + 0x1ce))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1ce))->bType));
+            DEBUG((-1, "RAYDEBUG - ((HD_PAR_STRUC*)(MbrBuffer + 0x1de))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1de))->bType));
+            DEBUG((-1, "RAYDEBUG - ((HD_PAR_STRUC*)(MbrBuffer + 0x1ee))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1ee))->bType));
             //It is GPT partition so it has PMBR
             if (((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType == 0XEE)
             {
