@@ -1371,7 +1371,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
                         (VOID *)GptEntryBuffer  );
                 }
 
-                PartEntry = (PARTITION_ENTRY*)(GptEntryBuffer+((j%4)*0x80));
+                PartEntry = (SPECIFIC_PARTITION_ENTRY*)(GptEntryBuffer+((j%4)*0x80));
 
                 //Use GUID to decide if the partition which restore tool's efi boot loader resides in exists or not
                 if (!EfiCompareMem(&(PartEntry->PartitionTypeGuid),&OemRestorePartitionGuid,sizeof(EFI_GUID)))
