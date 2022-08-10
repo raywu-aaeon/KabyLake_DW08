@@ -164,7 +164,7 @@ EFI_STATUS BootFlowManageEntry( VOID )
 	for ( bootFlowPtr = gBootFlowTable;
 			bootFlowPtr->Condition != BOOT_FLOW_CONDITION_NULL; bootFlowPtr++ )
 	{
-		if ( condition != bootFlowPtr->Condition )
+		if ( condition != bootFlowPtr->Condition && bootFlowPtr->Condition != BOOT_FLOW_CONDITION_SPECIFIC_PARTITION )
 			continue;
 		SETUP_DEBUG_TSE ("\n[TSE] BootFlow condition is %d", condition);
 		if ( bootFlowPtr->CallbackFunction != NULL )
