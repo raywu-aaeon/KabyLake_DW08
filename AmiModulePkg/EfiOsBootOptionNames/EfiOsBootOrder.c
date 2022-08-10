@@ -70,9 +70,6 @@ extern UINT16 gSATA[3][2] ;
 EFI_DEVICE_PATH_PROTOCOL **NewEfiOsOptionDpList = NULL ;
 UINTN NewEfiOsOptionDpListCount = 0 ;
 
-extern VOID * EfiLibAllocatePool(IN  UINTN   AllocationSize);
-extern INTN EfiCompareMem(IN VOID     *MemOne,  IN VOID     *MemTwo,  IN UINTN    Length);
-extern VOID MemFreePointer(VOID **ptr);
 
 typedef struct _HD_PAR_STRUC
 {
@@ -1280,14 +1277,14 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
 
     if (BlkIo->Media->MediaPresent == 1 && BlkIo->Media->LogicalPartition == 0)
     {
-        MbrBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+        MbrBuffer = MallocZ(BlkIo->Media->BlockSize);
         if (MbrBuffer == NULL)
         {
             DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate MbrBuffer Failed!!!\n"));
             goto _FindSpecificGuidPartitionEnd;
         }
         
-        GptHeaderBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+        GptHeaderBuffer = MallocZ(BlkIo->Media->BlockSize);
         if (GptHeaderBuffer == NULL)
         {
             DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate GptHeaderBuffer Failed!!!\n"));
@@ -1328,10 +1325,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
                 (VOID *)GptHeaderBuffer );
 
             //To see if it is EFI-compatible partition table header
-            if (EfiCompareMem(
-                        GptHeaderBuffer,
-                        "EFI PART",
-                        8))
+            if (MemCmp(GptHeaderBuffer, "EFI PART", 8))
             {
                 DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is NOT EFI-compatible partition table header\n"));
                 goto _FindSpecificGuidPartitionEnd;
@@ -1344,14 +1338,14 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
             //The number of Partition Entries in the GUID Partition Entry array.
             NumGptEntry = *((UINT32*)(GptHeaderBuffer + 0x50));
 
-            GptEntryBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+            GptEntryBuffer = MallocZ(BlkIo->Media->BlockSize);
             if (GptEntryBuffer == NULL)
             {
                 DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate GptEntryBuffer Failed!!!\n"));
                 goto _FindSpecificGuidPartitionEnd;
             }
 
-            PbrBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+            PbrBuffer = MallocZ(BlkIo->Media->BlockSize);
             if (PbrBuffer == NULL)
             {
                 DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate PbrBuffer Failed!!!\n"));
@@ -1375,7 +1369,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
                 PartEntry = (SPECIFIC_PARTITION_ENTRY*)(GptEntryBuffer+((j%4)*0x80));
 
                 //Use GUID to decide if the partition which restore tool's efi boot loader resides in exists or not
-                if (!EfiCompareMem(&(PartEntry->PartitionTypeGuid),&OemRestorePartitionGuid,sizeof(EFI_GUID)))
+                if (!MemCmp(&(PartEntry->PartitionTypeGuid),&OemRestorePartitionGuid,sizeof(EFI_GUID)))
                 {
                     EfiPartEntry = *PartEntry; //Partition which restore tool's efi boot loader resides in
                     //Partition Number of partition which restore tool's efi boot loader resides in
@@ -1411,10 +1405,10 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         }
 
 _FindSpecificGuidPartitionEnd:
-        MemFreePointer((VOID **)&MbrBuffer);
-        MemFreePointer((VOID **)&GptHeaderBuffer);
-        MemFreePointer((VOID **)&GptEntryBuffer);
-        MemFreePointer((VOID **)&PbrBuffer);
+        pBS->FreePool(MbrBuffer);
+        pBS->FreePool(GptHeaderBuffer);
+        pBS->FreePool(GptEntryBuffer);
+        pBS->FreePool(PbrBuffer);
     }
 
     if (SpecificGuidPartitionFound)
