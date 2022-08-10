@@ -72,6 +72,7 @@ UINTN NewEfiOsOptionDpListCount = 0 ;
 
 extern VOID * EfiLibAllocatePool(IN  UINTN   AllocationSize);
 extern INTN EfiCompareMem(IN VOID     *MemOne,  IN VOID     *MemTwo,  IN UINTN    Length);
+extern VOID MemFreePointer(VOID **ptr);
 
 typedef struct _HD_PAR_STRUC
 {
