@@ -1275,6 +1275,8 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         }
     }
 
+    DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->MediaId = 0x%X\n", BlkIo->Media->MediaId));
+    DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->RemovableMedia = 0x%X\n", BlkIo->Media->RemovableMedia));
     DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->MediaPresent = 0x%X\n", BlkIo->Media->MediaPresent));
     DEBUG((-1, "[BootSpecificGuidPartition] BlkIo->Media->LogicalPartition = 0x%X\n", BlkIo->Media->LogicalPartition));
 //    if (BlkIo->Media->MediaPresent == 1 && BlkIo->Media->LogicalPartition == 0)
