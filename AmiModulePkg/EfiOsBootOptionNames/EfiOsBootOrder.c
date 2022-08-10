@@ -1273,14 +1273,14 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         if (MbrBuffer == NULL)
         {
             DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate MbrBuffer Failed!!!\n"));
-            break;
+            goto _FindSpecificGuidPartitionEnd;
         }
         
         GptHeaderBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
         if (GptHeaderBuffer == NULL)
         {
             DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate GptHeaderBuffer Failed!!!\n"));
-            break;
+            goto _FindSpecificGuidPartitionEnd;
         }
 
         // Read MBR
@@ -1295,8 +1295,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         if (!CheckValidMbr(MbrBuffer) || EFI_ERROR(Status))
         {
             DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is not valid MBR or read blocks failed!!!\n"));
-            MemFreePointer((VOID **)&MbrBuffer);
-            break;
+            goto _FindSpecificGuidPartitionEnd;
         }
 
         DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] found MBR signature = %X\n", *((UINT16*)(MbrBuffer + 0x1fe))));
@@ -1324,7 +1323,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
                         8))
             {
                 DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is NOT EFI-compatible partition table header\n"));
-                break;
+                goto _FindSpecificGuidPartitionEnd;
             }
             DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is EFI-compatible partition table header\n"));
 
@@ -1338,14 +1337,14 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
             if (GptEntryBuffer == NULL)
             {
                 DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate GptEntryBuffer Failed!!!\n"));
-                break;
+                goto _FindSpecificGuidPartitionEnd;
             }
 
             PbrBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
             if (PbrBuffer == NULL)
             {
                 DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate PbrBuffer Failed!!!\n"));
-                break;
+                goto _FindSpecificGuidPartitionEnd;
             }
             
             //Check all partition entries unless it finds recovery partition with proper volume label
@@ -1400,6 +1399,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
             } // for (j = 0; j < NumGptEntry ; j++)
         }
 
+_FindSpecificGuidPartitionEnd:
         MemFreePointer((VOID **)&MbrBuffer);
         MemFreePointer((VOID **)&GptHeaderBuffer);
         MemFreePointer((VOID **)&GptEntryBuffer);
