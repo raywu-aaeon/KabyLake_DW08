@@ -1310,6 +1310,10 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
 
         DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] found MBR signature = %X\n", *((UINT16*)(MbrBuffer + 0x1fe))));
 
+        DEBUG((-1, "[BootSpecificGuidPartition] ((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType));
+        DEBUG((-1, "[BootSpecificGuidPartition] ((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1ce))->bType));
+        DEBUG((-1, "[BootSpecificGuidPartition] ((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1de))->bType));
+        DEBUG((-1, "[BootSpecificGuidPartition] ((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType = 0x%X\n", ((HD_PAR_STRUC*)(MbrBuffer + 0x1ee))->bType));
         //It is GPT partition so it has PMBR
         if (((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType == 0XEE)
         {
