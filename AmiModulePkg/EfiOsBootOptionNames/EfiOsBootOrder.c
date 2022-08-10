@@ -70,6 +70,21 @@ extern UINT16 gSATA[3][2] ;
 EFI_DEVICE_PATH_PROTOCOL **NewEfiOsOptionDpList = NULL ;
 UINTN NewEfiOsOptionDpListCount = 0 ;
 
+extern VOID * EfiLibAllocatePool(IN  UINTN   AllocationSize);
+extern INTN EfiCompareMem(IN VOID     *MemOne,  IN VOID     *MemTwo,  IN UINTN    Length);
+
+typedef struct _HD_PAR_STRUC
+{
+    UINT8   bActive;
+    UINT8   bStartHd;
+    UINT16  wStartCylSec;
+    UINT8   bType;
+    UINT8   bEndHd;
+    UINT16  wEndCylSec;
+    UINT32  dNumSecMbrToFirst;
+    UINT32  dNumSec;
+} HD_PAR_STRUC;
+
 /**
     Locates HD node in DevicePath associated with Handle.
 
@@ -1151,6 +1166,12 @@ VOID AdjustEfiOsBootOrder(VOID)
     pBS->FreePool(Options);
 }
 
+BOOLEAN
+CheckValidMbr(IN UINT8 *MbrBuffer)
+{
+    return (*((UINT16*)(MbrBuffer + 0x1fe)) == 0xaa55); // signature
+}
+
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
 //#if (CSM_SUPPORT == 1) && (RemoveLegacyGptHddDevice == 1)
 ///**
@@ -1215,6 +1236,18 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     SETUP_DATA SetupData;
     UINTN Size = sizeof(SETUP_DATA);
     EFI_GUID SetupGuid = SETUP_GUID;
+    UINT8       *MbrBuffer = NULL;
+    UINT8       *GptHeaderBuffer = NULL;
+    UINT8       *GptEntryBuffer = NULL;
+    UINT8       *PbrBuffer = NULL;
+    EFI_GUID OemRestorePartitionGuid = {0xd6760505, 0x754c, 0x4f5b, {0x9e, 0xcc, 0xa8, 0x9f, 0x33, 0xa3, 0xed, 0x97}};
+    BOOLEAN     SpecificGuidPartitionFound;
+    UINT32      j = 0;
+    UINT32      NumGptEntry = 0, EfiSystemPartNum = 0;
+    PARTITION_ENTRY     *PartEntry = NULL, EfiPartEntry;
+    UINT64      PartitionEntryLBA = 0;
+
+    SpecificGuidPartitionFound = FALSE;
 
     Status=pBS->HandleProtocol(
                Device->DeviceHandle, &gEfiBlockIoProtocolGuid, &BlkIo
@@ -1232,6 +1265,158 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
             if( Device->BbsEntry->Class != PCI_CL_MASS_STOR ) return TRUE;
             return FALSE;
         }
+    }
+
+    if (BlkIo->Media->MediaPresent == 1 && BlkIo->Media->LogicalPartition == 0)
+    {
+        MbrBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+        if (MbrBuffer == NULL)
+        {
+            DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate MbrBuffer Failed!!!\n"));
+            break;
+        }
+        
+        GptHeaderBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+        if (GptHeaderBuffer == NULL)
+        {
+            DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate GptHeaderBuffer Failed!!!\n"));
+            break;
+        }
+
+        // Read MBR
+        Status = BlkIo->ReadBlocks(
+                     BlkIo,
+                     BlkIo->Media->MediaId,
+                     0,                          // LBA#0 = MBR
+                     BlkIo->Media->BlockSize,
+                     (VOID *)MbrBuffer  );
+
+        //Check if it is a valid MBR
+        if (!CheckValidMbr(MbrBuffer) || EFI_ERROR(Status))
+        {
+            DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is not valid MBR or read blocks failed!!!\n"));
+            MemFreePointer((VOID **)&MbrBuffer);
+            break;
+        }
+
+        DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] found MBR signature = %X\n", *((UINT16*)(MbrBuffer + 0x1fe))));
+
+        //It is GPT partition so it has PMBR
+        if (((HD_PAR_STRUC*)(MbrBuffer + 0x1be))->bType == 0XEE)
+        {
+            DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is a PMBR!!!!\n"));
+            
+            /**
+             * @brief CheckGptRestorePartition()
+             * 
+             */
+            BlkIo->ReadBlocks(
+                BlkIo,
+                BlkIo->Media->MediaId,
+                1,                          // LBA#1 = GPT Header Table
+                BlkIo->Media->BlockSize,
+                (VOID *)GptHeaderBuffer );
+
+            //To see if it is EFI-compatible partition table header
+            if (EfiCompareMem(
+                        GptHeaderBuffer,
+                        "EFI PART",
+                        8))
+            {
+                DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is NOT EFI-compatible partition table header\n"));
+                break;
+            }
+            DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition] It is EFI-compatible partition table header\n"));
+
+            //The starting LBA of the GUID Partition Entry array.
+            PartitionEntryLBA = *((UINT64 *)(GptHeaderBuffer + 0x48));
+
+            //The number of Partition Entries in the GUID Partition Entry array.
+            NumGptEntry = *((UINT32*)(GptHeaderBuffer + 0x50));
+
+            GptEntryBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+            if (GptEntryBuffer == NULL)
+            {
+                DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate GptEntryBuffer Failed!!!\n"));
+                break;
+            }
+
+            PbrBuffer = EfiLibAllocatePool(BlkIo->Media->BlockSize);
+            if (PbrBuffer == NULL)
+            {
+                DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Allocate PbrBuffer Failed!!!\n"));
+                break;
+            }
+            
+            //Check all partition entries unless it finds recovery partition with proper volume label
+            for (j = 0; j < NumGptEntry ; j++)
+            {
+                //There are four entries in one LBA. Read the next LBA if all 4 entries have been read
+                if ( j%4 == 0)
+                {
+                    BlkIo->ReadBlocks(
+                        BlkIo,
+                        BlkIo->Media->MediaId,
+                        (PartitionEntryLBA+j/4),
+                        BlkIo->Media->BlockSize,
+                        (VOID *)GptEntryBuffer  );
+                }
+
+                PartEntry = (PARTITION_ENTRY*)(GptEntryBuffer+((j%4)*0x80));
+
+                //Use GUID to decide if the partition which restore tool's efi boot loader resides in exists or not
+                if (!EfiCompareMem(&(PartEntry->PartitionTypeGuid),&OemRestorePartitionGuid,sizeof(EFI_GUID)))
+                {
+                    EfiPartEntry = *PartEntry; //Partition which restore tool's efi boot loader resides in
+                    //Partition Number of partition which restore tool's efi boot loader resides in
+                    EfiSystemPartNum = j+1;
+
+                    DEBUG((DEBUG_INFO, "\n[BootSpecificGuidPartition]Partition which restore tool's efi boot loader resides in found!!!\n"));
+                    DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition]EfiSystemPartNum = %d\n", EfiSystemPartNum));
+                    DEBUG((DEBUG_INFO, "[BootSpecificGuidPartition]PartitionStart = %x\n", EfiPartEntry.StartingLba));
+                    SpecificGuidPartitionFound = TRUE;
+                }
+                else
+                {
+                    continue;
+                }
+
+//                //Starting LBA of the partition defined by this entry.
+//                GptPbrLba = PartEntry->StartingLba;
+//
+//                //Read Partition Boot Record (PBR)
+//                Status = BlkIo->ReadBlocks(
+//                             BlkIo,
+//                             BlkIo->Media->MediaId,
+//                             (UINTN)GptPbrLba,          // PBR: Partition LBA start number
+//                             BlkIo->Media->BlockSize,
+//                             (VOID *)PbrBuffer  );
+//
+//                if (EFI_ERROR(Status))
+//                {
+//                    DEBUG((DEBUG_ERROR, "[BootSpecificGuidPartition] Read Pbr failed!!!\n"));
+//                    continue;
+//                }
+            } // for (j = 0; j < NumGptEntry ; j++)
+        }
+
+        MemFreePointer((VOID **)&MbrBuffer);
+        MemFreePointer((VOID **)&GptHeaderBuffer);
+        MemFreePointer((VOID **)&GptEntryBuffer);
+        MemFreePointer((VOID **)&PbrBuffer);
+    }
+
+    if (SpecificGuidPartitionFound)
+    {
+        /* code */
+    }
+    else
+    {
+        /**
+         * @brief No specific GUID partition, remove device
+         * 
+         */
+        return TRUE;
     }
 
     return FALSE;
