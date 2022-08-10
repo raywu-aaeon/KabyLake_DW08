@@ -454,6 +454,11 @@ EFI_STATUS EFIAPI PostManagerHandshake( VOID )
     {
 	// Reinit Before Boottimeout So any action can set the boot flow again.
 	gBootFlow = BOOT_FLOW_CONDITION_NORMAL;
+	/**
+	 * @brief if setup variable == TRUE
+	 * 
+	 */
+	gBootFlow = BOOT_FLOW_CONDITION_SPECIFIC_PARTITION;
     }
 
 	if ( Value != 0xFFFF )
