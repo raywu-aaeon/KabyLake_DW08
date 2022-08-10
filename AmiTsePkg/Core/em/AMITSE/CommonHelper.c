@@ -331,6 +331,9 @@ extern BOOT_DATA	*gBootData;
 extern UINTN		gBootOptionCount;
 extern EFI_GUID _gBootFlowGuid;
 
+extern VOID SearchRestorePartition(VOID);
+extern VOID BootRestorePartition(VOID);
+
 VOID EFIAPI SetupDebugPrint(IN CONST CHAR8  *Format, ...) ;
 #if SUPPRESS_PRINT
     #define SETUP_DEBUG_TSE(format,...)
@@ -2963,6 +2966,14 @@ UINT32 GetUefiSpecVersion (VOID)
 EFI_STATUS	FBBootFlow ( BOOT_FLOW * Bflow)
 {
 	gBootFlow = BOOT_FLOW_CONDITION_FAST_BOOT;
+	return EFI_SUCCESS;
+}
+
+EFI_STATUS	BootSpecificPartitionBootFlow ( BOOT_FLOW * Bflow)
+{
+    	SearchRestorePartition();
+    	BootRestorePartition();
+
 	return EFI_SUCCESS;
 }
 

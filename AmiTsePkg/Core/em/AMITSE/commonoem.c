@@ -1317,8 +1317,12 @@ VOID CheckForKey (EFI_EVENT Event, VOID *Context)
 		}
 	} while ( ! EFI_ERROR( Status ) );
 
+/**
+ * @brief Remove
+ * 
 	if (CheckOEMKeyCallback(&AmiKey) )
 		gBootFlow = BOOT_FLOW_CONDITION_OEM_KEY_CALLBACK;
+ */
 
 }
 
