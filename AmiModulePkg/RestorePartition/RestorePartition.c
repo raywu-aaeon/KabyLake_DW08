@@ -90,6 +90,7 @@ extern UINTN        gPostStatus;
 extern UINTN        gBootOptionCount;
 extern UINT32       gBootFlow;
 extern BOOLEAN      gEnterSetup;
+extern BOOLEAN      gDoNotBoot;
 
 typedef struct
 {
@@ -1399,6 +1400,8 @@ BootRestorePartition()
 	//SearchRestorePartition();
     if (gGptRpFound || gMbrRpFound)
     {
+        gDoNotBoot = FALSE;
+
         DEBUG((DEBUG_INFO, "************[ResPar] F9 PRESSED.....*************\n"));
         Status = _BootLaunchDevicePath((gGptRpFound)? (EFI_DEVICE_PATH_PROTOCOL *) & gGptHdDP : (EFI_DEVICE_PATH_PROTOCOL *) gMbrEfiBootDp, NULL, 0, TRUE);
 
@@ -1412,6 +1415,7 @@ BootRestorePartition()
     else
     {
         gEnterSetup = TRUE;
+        gDoNotBoot = TRUE;
     }
     
     if (!gRpFound)
