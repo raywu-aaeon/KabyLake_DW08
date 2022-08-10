@@ -784,6 +784,7 @@ extern BOOLEAN gDoNotBoot;
 extern UINTN   gCurrIDESecPage;
 
 extern BOOLEAN gSpecificPartitionFind;
+extern GLOBAL_GPT_HARDDRIVE_DEVICE_PATH   gGlobalGptHdDP;
 
 #if TSE_USE_AMI_EFI_KEYCODE_PROTOCOL
 extern EFI_GUID gAmiEfiKeycodeProtocolGuid;
