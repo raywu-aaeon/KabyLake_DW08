@@ -990,6 +990,8 @@ BlockIOSearchRestorePartition(VOID)
             continue;
         }
 
+        DEBUG((-1, "RAYDEBUG - HandleBuffer[i] = 0x%X\n", HandleBuffer[i]));
+        DEBUG((-1, "RAYDEBUG - gRpBlkIo = 0x%X\n", gRpBlkIo));
         gBlkIoHandle = HandleBuffer[i];
 
         if(!OemCheckRestorePartition()){
