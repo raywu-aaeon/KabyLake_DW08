@@ -36,6 +36,9 @@
 #include <Library/DevicePathLib.h>
 #include <IndustryStandard\Mbr.h>
 #include <Protocol\DiskIo.h>
+#include <Uefi.h>
+
+#define EFI_GPT_HEADER_ID  "EFI PART"
 
 typedef EFI_STATUS (CREATE_EFI_OS_BOOT_OPTIONS) (EFI_HANDLE Handle);
 extern CREATE_EFI_OS_BOOT_OPTIONS CREATE_EFI_OS_BOOT_OPTIONS_FUNC_PTR;
@@ -1163,16 +1166,17 @@ TcgMeasureGptTable (
     EFI_STATUS                        Status;
     EFI_BLOCK_IO_PROTOCOL             *BlockIo=NULL;
     EFI_DISK_IO_PROTOCOL              *DiskIo=NULL;
-    //EFI_PARTITION_TABLE_HEADER        *PrimaryHeader=NULL;
-    //EFI_PARTITION_ENTRY               *PartitionEntry=NULL;
-    //UINT8                             *EntryPtr=NULL;
-    //UINTN                             NumberOfPartition;
+    EFI_PARTITION_TABLE_HEADER        *PrimaryHeader=NULL;
+    EFI_PARTITION_ENTRY               *PartitionEntry=NULL;
+    UINT8                             *EntryPtr=NULL;
+    UINTN                             NumberOfPartition;
     //UINT32                            Index;
     //UINT64                            Flags;
     //EFI_GPT_DATA                      *GptData=NULL;
     //UINT32                            EventSize;
     MASTER_BOOT_RECORD                *Mbr=NULL;
     UINT8                             Count;
+    UINT32                            LBAofGptHeader = 0;
 
     DEBUG((-1, "[RAY] TcgMeasureGptTable Start\n"));
 
@@ -1211,15 +1215,95 @@ TcgMeasureGptTable (
             DEBUG((-1, "[RAY] Mbr->Partition[%d].OSIndicator = 0x%X\n", Count, Mbr->Partition[Count].OSIndicator));
             if(Mbr->Partition[Count].OSIndicator == 0xEE) //(i.e., GPT Protective)
             {
-                //LBAofGptHeader = *(Mbr->Partition[Count].StartingLBA);
+                LBAofGptHeader = *(Mbr->Partition[Count].StartingLBA);
                 break;
             }
         }
 
+        DEBUG((-1, "[RAY] LBAofGptHeader = 0x%X\n", LBAofGptHeader));
+        
+        if(LBAofGptHeader == 0x00){//Did not find the correct GPTHeader so return EFI_NOT_FOUND
+            pBS->FreePool(Mbr);
+            return EFI_NOT_FOUND;
+        }
+
+        //
+        // Read the EFI Partition Table Header
+        //
+        Status = pBS->AllocatePool (EfiBootServicesData, BlockIo->Media->BlockSize, &PrimaryHeader);
+        if (EFI_ERROR(Status) || PrimaryHeader == NULL)
+        {
+            pBS->FreePool(Mbr);
+            return EFI_OUT_OF_RESOURCES;
+        }
+
+        Status = DiskIo->ReadDisk (
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     LBAofGptHeader * BlockIo->Media->BlockSize,
+                     BlockIo->Media->BlockSize,
+                     (UINT8 *)PrimaryHeader);
+
+        //if(PrimaryHeader->Header.Signature != EFI_GPT_HEADER_ID)//Check for "EFI PART" signature
+        if (CompareMem(EFI_GPT_HEADER_ID, &PrimaryHeader->Header.Signature, sizeof(UINT64))) return EFI_NOT_FOUND;
+
+        if (EFI_ERROR (Status))
+        {
+            DEBUG ((-1, "[RAY] Failed to Read Partition Table Header!\n"));
+            pBS->FreePool(PrimaryHeader);
+            pBS->FreePool(Mbr);
+            return EFI_DEVICE_ERROR;
+        }
+
+        //
+        // Read the partition entry.
+        //
+        Status = pBS->AllocatePool (EfiBootServicesData, PrimaryHeader->NumberOfPartitionEntries * PrimaryHeader->SizeOfPartitionEntry, &EntryPtr);
+        if (EFI_ERROR(Status) || EntryPtr == NULL)
+        {
+            pBS->FreePool(PrimaryHeader);
+            pBS->FreePool(Mbr);
+            return EFI_OUT_OF_RESOURCES;
+        }
+        Status = DiskIo->ReadDisk (
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     MultU64x32( PrimaryHeader->PartitionEntryLBA, BlockIo->Media->BlockSize ),
+                     PrimaryHeader->NumberOfPartitionEntries * PrimaryHeader->SizeOfPartitionEntry,
+                     EntryPtr
+                 );
+        if (EFI_ERROR (Status))
+        {
+            pBS->FreePool(PrimaryHeader);
+            pBS->FreePool(EntryPtr);
+            pBS->FreePool(Mbr);
+            return EFI_DEVICE_ERROR;
+        }
+
+        //
+        // Count the valid partition
+        //
+        PartitionEntry    = (EFI_PARTITION_ENTRY *)EntryPtr;
+        NumberOfPartition = 0;
+        for (Index = 0; Index < PrimaryHeader->NumberOfPartitionEntries; Index++)
+        {
+            DEBUG((-1, "[RAY] PartitionEntry->PartitionTypeGUID = %g\n", PartitionEntry->PartitionTypeGUID));
+            DEBUG((-1, "[RAY] PartitionEntry->UniquePartitionGUID = %g\n", PartitionEntry->UniquePartitionGUID));
+            DEBUG((-1, "[RAY] PartitionEntry->PartitionName = %a\n", PartitionEntry->PartitionName));
+            if (CompareMem (&PartitionEntry->PartitionTypeGUID, &ZeroGuid, sizeof(EFI_GUID)))
+            {
+                NumberOfPartition++;
+            }
+            PartitionEntry++;
+        }
+
+        pBS->FreePool(PrimaryHeader);
+        pBS->FreePool(EntryPtr);
         pBS->FreePool(Mbr);
     }
 
     DEBUG((-1, "[RAY] TcgMeasureGptTable End, Status = %r\n", Status));
+    
     return Status;
 }
 
