@@ -33,6 +33,9 @@
 #include "FixedBootOrder/FixedBootOrder.h"
 #endif
 
+#include <Library/DevicePathLib.h>
+#include <IndustryStandard\Mbr.h>
+
 typedef EFI_STATUS (CREATE_EFI_OS_BOOT_OPTIONS) (EFI_HANDLE Handle);
 extern CREATE_EFI_OS_BOOT_OPTIONS CREATE_EFI_OS_BOOT_OPTIONS_FUNC_PTR;
 CREATE_EFI_OS_BOOT_OPTIONS* CreateEfiOsBootOptionsFuncPtr = CREATE_EFI_OS_BOOT_OPTIONS_FUNC_PTR;
@@ -1151,6 +1154,67 @@ VOID AdjustEfiOsBootOrder(VOID)
     pBS->FreePool(Options);
 }
 
+EFI_STATUS
+EFIAPI
+TcgMeasureGptTable (
+    IN  EFI_HANDLE         GptHandle
+)
+{
+    EFI_STATUS                        Status;
+    EFI_BLOCK_IO_PROTOCOL             *BlockIo=NULL;
+    EFI_DISK_IO_PROTOCOL              *DiskIo=NULL;
+    //EFI_PARTITION_TABLE_HEADER        *PrimaryHeader=NULL;
+    //EFI_PARTITION_ENTRY               *PartitionEntry=NULL;
+    //UINT8                             *EntryPtr=NULL;
+    //UINTN                             NumberOfPartition;
+    //UINT32                            Index;
+    //UINT64                            Flags;
+    //EFI_GPT_DATA                      *GptData=NULL;
+    //UINT32                            EventSize;
+    MASTER_BOOT_RECORD                *Mbr=NULL;
+    UINT8                             Count;
+
+    DEBUG((-1, "[RAY] TcgMeasureGptTable Start\n"));
+
+    Status = pBS->HandleProtocol (GptHandle, &gEfiBlockIoProtocolGuid, (VOID**)&BlockIo);
+    if (EFI_ERROR (Status))
+    {
+        return EFI_UNSUPPORTED;
+    }
+    Status = pBS->HandleProtocol (GptHandle, &gEfiDiskIoProtocolGuid, (VOID**)&DiskIo);
+    if (EFI_ERROR (Status))
+    {   
+        return EFI_UNSUPPORTED;
+    }
+
+    //Read the protective MBR
+    Status = pBS->AllocatePool (EfiBootServicesData, BlockIo->Media->BlockSize, &Mbr);
+    if (EFI_ERROR(Status) || Mbr == NULL)
+    {
+        return EFI_OUT_OF_RESOURCES;
+    }
+
+    Status = DiskIo->ReadDisk (
+                 DiskIo,
+                 BlockIo->Media->MediaId,
+                 0 * BlockIo->Media->BlockSize,
+                 BlockIo->Media->BlockSize,
+                 (UINT8 *)Mbr
+             );
+
+    for(Count=0; Count<MAX_MBR_PARTITIONS; Count++)
+    {
+        DEBUG((-1, "[RAY] Mbr->Partition[Count].OSIndicator = 0x%X\n", Mbr->Partition[Count].OSIndicator));
+        if(Mbr->Partition[Count].OSIndicator == 0xEE) //(i.e., GPT Protective)
+        {
+            //LBAofGptHeader = *(Mbr->Partition[Count].StartingLBA);
+            break;
+        }
+    }
+
+    return Status;
+}
+
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
 //#if (CSM_SUPPORT == 1) && (RemoveLegacyGptHddDevice == 1)
 ///**
@@ -1235,55 +1299,41 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
 //    }
 //
 //    return FALSE;
-
-    EFI_BLOCK_IO_PROTOCOL *BlkIo;
-    EFI_STATUS Status;
-    UINT8 *Buffer = NULL;
-    UINTN index;
-    PARTITION_ENTRY *pEntries;
-
-    DEBUG((-1, "[RAY] RemoveLegacyGptHdd Start\n"));
-    //if (   Device->DeviceHandle == INVALID_HANDLE
-    //        || Device->BbsEntry == NULL
-    //   ) return FALSE;
-
-    //if ( Device->BbsEntry->DeviceType != BBS_HARDDISK ) return FALSE;
-
-    Status=pBS->HandleProtocol(
-               Device->DeviceHandle, &gEfiBlockIoProtocolGuid, &BlkIo
-           );
-
-    //if (EFI_ERROR(Status) || BlkIo->Media->RemovableMedia) return FALSE;	//USB device?
-
-    Status = pBS->AllocatePool( EfiBootServicesData, BlkIo->Media->BlockSize, &Buffer );
-    //if ( Buffer == NULL ) return FALSE;
-
-    // read the first sector
-    BlkIo->ReadBlocks ( BlkIo,
-                        BlkIo->Media->MediaId,
-                        0,
-                        BlkIo->Media->BlockSize,
-                        (VOID*)Buffer);
-
-    DEBUG((-1, "[RAY] Buffer[0x1fe] = 0x%X\n", Buffer[0x1fe]));
-    DEBUG((-1, "[RAY] Buffer[0x1ff] = 0x%X\n", Buffer[0x1ff]));
-    if(Buffer[0x1fe]==(UINT8)0x55 && Buffer[0x1ff]==(UINT8)0xaa)	//MBR Signature
+    EFI_STATUS                  Status;
+    EFI_HANDLE                  Handle;
+    EFI_HANDLE                  *HandleArray;
+    UINTN                       HandleArrayCount;
+    UINTN                       Index;
+    EFI_DEVICE_PATH_PROTOCOL   *BlockIoDevicePath;
+    EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+    
+    Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
+    if (EFI_ERROR (Status))
     {
-        pEntries=(PARTITION_ENTRY *)(Buffer+0x1be);
-
-        for (index=0; index<4; index++)
+        return Status;
+    }
+    DEBUG((-1, "[RAY] HandleArrayCount = 0x%X\n", HandleArrayCount));
+    for (Index=0; Index < HandleArrayCount; Index++)
+    {
+        Status = pBS->HandleProtocol (HandleArray[Index], &gEfiDevicePathProtocolGuid, (VOID *) &BlockIoDevicePath);
+        if (EFI_ERROR (Status) || BlockIoDevicePath == NULL)
         {
-            DEBUG((-1, "[RAY] index = 0x%X\n", index));
-            DEBUG((-1, "[RAY] pEntries[%d].PartitionType = 0x%X\n", index, pEntries[index].PartitionType));
-            if ( pEntries[index].PartitionType == 0xee) 	//Check GPT Partition?
+            continue;
+        }
+        for (DevicePath = BlockIoDevicePath; !IsDevicePathEnd (DevicePath); DevicePath = NextDevicePathNode (DevicePath))
+        {
+            if ((DevicePathType (DevicePath) == ACPI_DEVICE_PATH) && (DevicePathSubType (DevicePath) == ACPI_DP))
             {
-                pBS->FreePool( Buffer );
-                //return TRUE;			//Set Can't Boot.
+                Status = pBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &DevicePath, &Handle);
+                if (!EFI_ERROR (Status))
+                {
+                    Status = TcgMeasureGptTable (Handle);
+                }
             }
-        } //for(index=0;index<4;index++)
-    }//if(Buffer[0x1fe] == 0x55 && Buffer[0x1ff] == 0xaa)
+        }
+    }
 
-    pBS->FreePool( Buffer );
+
     return FALSE;
 
 }
