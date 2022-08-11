@@ -37,6 +37,7 @@
 #include <IndustryStandard\Mbr.h>
 #include <Protocol\DiskIo.h>
 #include <Uefi.h>
+#include <Library\BaseMemoryLib.h>
 
 #define EFI_GPT_HEADER_ID  "EFI PART"
 
@@ -1297,6 +1298,7 @@ TcgMeasureGptTable (
             PartitionEntry++;
         }
 
+        DEBUG((-1, "[RAY] Function End\n"));
         pBS->FreePool(PrimaryHeader);
         pBS->FreePool(EntryPtr);
         pBS->FreePool(Mbr);
