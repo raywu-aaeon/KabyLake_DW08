@@ -1156,7 +1156,6 @@ VOID AdjustEfiOsBootOrder(VOID)
 }
 
 EFI_STATUS
-EFIAPI
 TcgMeasureGptTable (
     IN  EFI_HANDLE         GptHandle
 )
