@@ -35,6 +35,7 @@
 
 #include <Library/DevicePathLib.h>
 #include <IndustryStandard\Mbr.h>
+#include <Protocol\DiskIo.h>
 
 typedef EFI_STATUS (CREATE_EFI_OS_BOOT_OPTIONS) (EFI_HANDLE Handle);
 extern CREATE_EFI_OS_BOOT_OPTIONS CREATE_EFI_OS_BOOT_OPTIONS_FUNC_PTR;
