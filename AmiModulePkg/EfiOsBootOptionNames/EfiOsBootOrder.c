@@ -1311,7 +1311,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
     if (EFI_ERROR (Status))
     {
-        return Status;
+        //return Status;
     }
     DEBUG((-1, "[RAY] HandleArrayCount = 0x%X\n", HandleArrayCount));
     for (Index=0; Index < HandleArrayCount; Index++)
