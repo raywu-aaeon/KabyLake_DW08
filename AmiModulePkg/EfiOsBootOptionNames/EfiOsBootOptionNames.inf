@@ -21,6 +21,8 @@
   AmiDxeLib
   UefiDriverEntryPoint
 
-#[Protocols] 
+[Protocols]
+  gEfiDiskIoProtocolGuid
+
 #[Guids]
 #[Depex]
