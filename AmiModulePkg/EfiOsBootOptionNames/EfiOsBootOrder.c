@@ -1427,6 +1427,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
                 {
                     Status = TcgMeasureGptTable (Handle);
                 }
+                break;
             }
         }
     }
