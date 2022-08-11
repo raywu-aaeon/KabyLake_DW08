@@ -1195,24 +1195,32 @@ TcgMeasureGptTable (
         return EFI_OUT_OF_RESOURCES;
     }
 
-    Status = DiskIo->ReadDisk (
-                 DiskIo,
-                 BlockIo->Media->MediaId,
-                 0 * BlockIo->Media->BlockSize,
-                 BlockIo->Media->BlockSize,
-                 (UINT8 *)Mbr
-             );
-
-    for(Count=0; Count<MAX_MBR_PARTITIONS; Count++)
+    DEBUG((-1, "[RAY] BlockIo->Media->MediaPresent = 0x%X\n", BlockIo->Media->MediaPresent));
+    DEBUG((-1, "[RAY] BlockIo->Media->LogicalPartition = 0x%X\n", BlockIo->Media->LogicalPartition));
+    if ( BlockIo->Media->MediaPresent == 1 && BlockIo->Media->LogicalPartition == 0)
     {
-        DEBUG((-1, "[RAY] Mbr->Partition[Count].OSIndicator = 0x%X\n", Mbr->Partition[Count].OSIndicator));
-        if(Mbr->Partition[Count].OSIndicator == 0xEE) //(i.e., GPT Protective)
+        Status = DiskIo->ReadDisk (
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     0 * BlockIo->Media->BlockSize,
+                     BlockIo->Media->BlockSize,
+                     (UINT8 *)Mbr
+                 );
+
+        for(Count=0; Count<MAX_MBR_PARTITIONS; Count++)
         {
-            //LBAofGptHeader = *(Mbr->Partition[Count].StartingLBA);
-            break;
+            DEBUG((-1, "[RAY] Mbr->Partition[%d].OSIndicator = 0x%X\n", Count, Mbr->Partition[Count].OSIndicator));
+            if(Mbr->Partition[Count].OSIndicator == 0xEE) //(i.e., GPT Protective)
+            {
+                //LBAofGptHeader = *(Mbr->Partition[Count].StartingLBA);
+                break;
+            }
         }
+
+        pBS->FreePool(Mbr);
     }
 
+    DEBUG((-1, "[RAY] TcgMeasureGptTable End, Status = %r\n", Status));
     return Status;
 }
 
@@ -1309,13 +1317,15 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
     
     Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
+    
     if (EFI_ERROR (Status))
     {
         //return Status;
     }
-    DEBUG((-1, "[RAY] HandleArrayCount = 0x%X\n", HandleArrayCount));
+    
     for (Index=0; Index < HandleArrayCount; Index++)
     {
+        DEBUG((-1, "[RAY] HandleArrayCount = 0x%X\n", HandleArrayCount));
         Status = pBS->HandleProtocol (HandleArray[Index], &gEfiDevicePathProtocolGuid, (VOID *) &BlockIoDevicePath);
         if (EFI_ERROR (Status) || BlockIoDevicePath == NULL)
         {
@@ -1326,6 +1336,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
             if ((DevicePathType (DevicePath) == ACPI_DEVICE_PATH) && (DevicePathSubType (DevicePath) == ACPI_DP))
             {
                 Status = pBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &DevicePath, &Handle);
+                DEBUG((-1, "[RAY] Status(%r) = pBS->LocateDevicePath\n", Status));
                 if (!EFI_ERROR (Status))
                 {
                     Status = TcgMeasureGptTable (Handle);
