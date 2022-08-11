@@ -1171,13 +1171,14 @@ TcgMeasureGptTable (
     EFI_PARTITION_ENTRY               *PartitionEntry=NULL;
     UINT8                             *EntryPtr=NULL;
     UINTN                             NumberOfPartition;
-    //UINT32                            Index;
+    UINT32                            Index;
     //UINT64                            Flags;
     //EFI_GPT_DATA                      *GptData=NULL;
     //UINT32                            EventSize;
     MASTER_BOOT_RECORD                *Mbr=NULL;
     UINT8                             Count;
     UINT32                            LBAofGptHeader = 0;
+    EFI_GUID ZeroGuid = {0,0,0,0,0,0,0,0,0,0,0};
 
     DEBUG((-1, "[RAY] TcgMeasureGptTable Start\n"));
 
