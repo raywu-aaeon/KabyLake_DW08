@@ -1431,6 +1431,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         }
     }
 
+    pBS->FreePool(HandleArray);
 
     return FALSE;
 
