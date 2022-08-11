@@ -1291,7 +1291,7 @@ TcgMeasureGptTable (
         {
             DEBUG((-1, "[RAY] PartitionEntry->PartitionTypeGUID = %g\n", PartitionEntry->PartitionTypeGUID));
             DEBUG((-1, "[RAY] PartitionEntry->UniquePartitionGUID = %g\n", PartitionEntry->UniquePartitionGUID));
-            DEBUG((-1, "[RAY] PartitionEntry->PartitionName = %a\n", PartitionEntry->PartitionName));
+            DEBUG((-1, "[RAY] PartitionEntry->PartitionName = %s\n", PartitionEntry->PartitionName));
             if (CompareMem (&PartitionEntry->PartitionTypeGUID, &ZeroGuid, sizeof(EFI_GUID)))
             {
                 NumberOfPartition++;
