@@ -1409,6 +1409,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     FOR_EACH_BOOT_OPTION(BootOptionList,Link,Option) {
         // Option->FilePathList
         DEBUG((-1, "[RAY] Option->FilePathList = 0x%X\n", Option->FilePathList));
+        DEBUG((-1, "[RAY] Option->DeviceHandle = 0x%X\n", Option->DeviceHandle));
     }
 
     DEBUG((-1, "[RAY] BOOT_DEVICE Device->DeviceHandle = 0x%X\n", Device->DeviceHandle));
