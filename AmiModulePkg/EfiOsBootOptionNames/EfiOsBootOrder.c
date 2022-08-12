@@ -1402,6 +1402,8 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     EFI_DEVICE_PATH_PROTOCOL   *BlockIoDevicePath;
     EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
     
+    DEBUG((-1, "[RAY] Device->DeviceHandle = 0x%X\n", Device->DeviceHandle));
+    
     Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
     
     if (EFI_ERROR (Status))
@@ -1412,6 +1414,11 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     for (Index=0; Index < HandleArrayCount; Index++)
     {
         DEBUG((-1, "[RAY] HandleArrayCount = 0x%X\n", HandleArrayCount));
+        DEBUG((-1, "[RAY] HandleArray[%d] = 0x%X\n", Index, HandleArray[Index]));
+        if (HandleArray[Index] == Device->DeviceHandle)
+        {
+            DEBUG((-1, "[RAY] Device->DeviceHandle = HandleArray[%d]\n", Index));
+        }
         Status = pBS->HandleProtocol (HandleArray[Index], &gEfiDevicePathProtocolGuid, (VOID *) &BlockIoDevicePath);
         if (EFI_ERROR (Status) || BlockIoDevicePath == NULL)
         {
@@ -1423,6 +1430,11 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
             {
                 Status = pBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &DevicePath, &Handle);
                 DEBUG((-1, "[RAY] Status(%r) = pBS->LocateDevicePath\n", Status));
+                DEBUG((-1, "[RAY] Handle = 0x%X\n", Handle));
+                if (Handle == Device->DeviceHandle)
+                {
+                    DEBUG((-1, "[RAY] Device->DeviceHandle = Handle\n"));
+                }
                 if (!EFI_ERROR (Status))
                 {
                     Status = TcgMeasureGptTable (Handle);
