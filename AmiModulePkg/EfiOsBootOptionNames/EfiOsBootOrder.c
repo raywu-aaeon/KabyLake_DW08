@@ -1404,13 +1404,18 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     DLINK *Link;
     BOOT_OPTION *Option;
     EFI_DEVICE_PATH_PROTOCOL   *BlkIoDevicePath;
+    BOOLEAN PartitionTest;
 
     DEBUG((-1, "[RAY] RemoveLegacyGptHdd Start\n"));
     
     FOR_EACH_BOOT_OPTION(BootOptionList,Link,Option) {
         // Option->FilePathList
         DEBUG((-1, "[RAY] Option->FilePathList = 0x%X\n", Option->FilePathList));
+        DEBUG((-1, "[RAY] *Option->FilePathList = 0x%X\n", *Option->FilePathList));
         DEBUG((-1, "[RAY] Option->DeviceHandle = 0x%X\n", Option->DeviceHandle));
+    
+        PartitionTest = PartitionDevicePathTest(Option->FilePathList, Device);
+        DEBUG((-1, "[RAY] PartitionTest(0x%X) = PartitionDevicePathTest\n", PartitionTest));
     }
 
     DEBUG((-1, "[RAY] BOOT_DEVICE Device->DeviceHandle = 0x%X\n", Device->DeviceHandle));
@@ -1438,6 +1443,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         }
         Status = pBS->HandleProtocol (HandleArray[Index], &gEfiDevicePathProtocolGuid, (VOID *) &BlockIoDevicePath);
         DEBUG((-1, "[RAY] BlockIoDevicePath = 0x%X\n", BlockIoDevicePath));
+        DEBUG((-1, "[RAY] *BlockIoDevicePath = 0x%X\n", *BlockIoDevicePath));
         if (EFI_ERROR (Status) || BlockIoDevicePath == NULL)
         {
             continue;
@@ -1447,6 +1453,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
             if ((DevicePathType (DevicePath) == ACPI_DEVICE_PATH) && (DevicePathSubType (DevicePath) == ACPI_DP))
             {
                 DEBUG((-1, "[RAY] DevicePath = 0x%X\n", DevicePath));
+                DEBUG((-1, "[RAY] *DevicePath = 0x%X\n", *DevicePath));
                 Status = pBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &DevicePath, &Handle);
                 DEBUG((-1, "[RAY] Status(%r) = pBS->LocateDevicePath\n", Status));
                 DEBUG((-1, "[RAY] Handle = 0x%X\n", Handle));
