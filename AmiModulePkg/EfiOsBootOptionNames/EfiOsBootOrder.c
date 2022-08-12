@@ -1403,6 +1403,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
     DLINK *Link;
     BOOT_OPTION *Option;
+    EFI_DEVICE_PATH_PROTOCOL   *BlkIoDevicePath;
 
     DEBUG((-1, "[RAY] RemoveLegacyGptHdd Start\n"));
     
@@ -1413,10 +1414,12 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     }
 
     DEBUG((-1, "[RAY] BOOT_DEVICE Device->DeviceHandle = 0x%X\n", Device->DeviceHandle));
-    Status=pBS->HandleProtocol(
+    Status = pBS->HandleProtocol(
                Device->DeviceHandle, &gEfiBlockIoProtocolGuid, &BlkIo
            );
     DEBUG((-1, "[RAY] BOOT_DEVICE BlkIo = 0x%X\n", BlkIo));
+    Status = pBS->HandleProtocol (Device->DeviceHandle, &gEfiDevicePathProtocolGuid, (VOID *) &BlkIoDevicePath);
+    DEBUG((-1, "[RAY] BOOT_DEVICE BlkIoDevicePath = 0x%X\n", BlkIoDevicePath));
     
     Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
     
