@@ -1368,7 +1368,7 @@ TcgMeasureGptTable (
 //}
 //#endif
 BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
-//    EFI_BLOCK_IO_PROTOCOL *BlkIo;
+    EFI_BLOCK_IO_PROTOCOL *BlkIo;
 //    EFI_STATUS Status;
 //    UINT8 *Buffer = NULL;
 //    SETUP_DATA SetupData;
