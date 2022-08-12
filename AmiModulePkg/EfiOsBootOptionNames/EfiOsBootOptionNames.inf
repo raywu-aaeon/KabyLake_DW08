@@ -23,6 +23,7 @@
 
 [Protocols]
   gEfiDiskIoProtocolGuid
+  gEfiPartitionInfoProtocolGuid
 
 #[Guids]
 #[Depex]
