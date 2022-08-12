@@ -38,6 +38,7 @@
 #include <Protocol\DiskIo.h>
 #include <Uefi.h>
 #include <Library\BaseMemoryLib.h>
+#include <Protocol\PartitionInfo.h>
 
 #define EFI_GPT_HEADER_ID  "EFI PART"
 
@@ -1405,6 +1406,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     BOOT_OPTION *Option;
     EFI_DEVICE_PATH_PROTOCOL   *BlkIoDevicePath;
     BOOLEAN PartitionTest;
+    EFI_PARTITION_INFO_PROTOCOL  *PartitionInfo;
 
     DEBUG((-1, "[RAY] RemoveLegacyGptHdd Start\n"));
     
@@ -1426,6 +1428,10 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     Status = pBS->HandleProtocol (Device->DeviceHandle, &gEfiDevicePathProtocolGuid, (VOID *) &BlkIoDevicePath);
     DEBUG((-1, "[RAY] BOOT_DEVICE BlkIoDevicePath = 0x%X\n", BlkIoDevicePath));
     
+    Status = pBS->HandleProtocol (Device->DeviceHandle, &gEfiPartitionInfoProtocolGuid, (VOID**)&PartitionInfo); 
+    DEBUG((-1, "[RAY] BOOT_DEVICE PartitionInfo = 0x%X\n", PartitionInfo));
+    DEBUG((-1, "[RAY] BOOT_DEVICE PartitionInfo->Info->Gpt->PartitionTypeGUID = 0x%X\n", PartitionInfo->Info->Gpt->PartitionTypeGUID));
+
     Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
     
     if (EFI_ERROR (Status))
