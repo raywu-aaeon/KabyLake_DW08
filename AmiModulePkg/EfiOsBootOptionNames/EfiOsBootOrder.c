@@ -1439,7 +1439,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     Status = pBS->HandleProtocol (Device->DeviceHandle, &SpecificPartitionGuid, (VOID**)&SpecificPartition); 
     DEBUG((-1, "[RAY] BOOT_DEVICE Status(%r) = HandleProtocol(SpecificPartitionGuid)\n", Status));
     DEBUG((-1, "[RAY] VOID SpecificPartition = %g\n", SpecificPartition));
-    DEBUG((-1, "[RAY] VOID SpecificPartition = 0x%X\n", *SpecificPartition));
+    DEBUG((-1, "[RAY] VOID SpecificPartition = 0x%X\n", SpecificPartition));
 
     Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
     
