@@ -1431,6 +1431,8 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     Status = pBS->HandleProtocol (Device->DeviceHandle, &gEfiPartitionInfoProtocolGuid, (VOID**)&PartitionInfo); 
     DEBUG((-1, "[RAY] BOOT_DEVICE PartitionInfo = 0x%X\n", PartitionInfo));
     DEBUG((-1, "[RAY] BOOT_DEVICE PartitionInfo->Info.Gpt.PartitionTypeGUID = %g\n", PartitionInfo->Info.Gpt.PartitionTypeGUID));
+    DEBUG((-1, "[RAY] BOOT_DEVICE PartitionInfo->Info.Gpt.PartitionName = %s\n", PartitionInfo->Info.Gpt.PartitionName));
+    DEBUG((-1, "[RAY] BOOT_DEVICE PartitionInfo->Info.Mbr.OSIndicator = %s\n", PartitionInfo->Info.Mbr.OSIndicator));
 
     Status = pBS->LocateHandleBuffer (ByProtocol, &gEfiBlockIoProtocolGuid, NULL, &HandleArrayCount, &HandleArray);
     
