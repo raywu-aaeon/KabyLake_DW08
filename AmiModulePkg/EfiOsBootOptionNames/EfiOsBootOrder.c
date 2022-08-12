@@ -1215,6 +1215,12 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     SETUP_DATA SetupData;
     UINTN Size = sizeof(SETUP_DATA);
     EFI_GUID SetupGuid = SETUP_GUID;
+    BOOLEAN FoundNotHdd, NoUniquePartition;
+    EFI_GUID    UniquePartitionGuid = {0xd6760505, 0x754c, 0x4f5b, {0x9e, 0xcc, 0xa8, 0x9f, 0x33, 0xa3, 0xed, 0x97}};
+    VOID    *UniquePartition;
+
+    FoundNotHdd = FALSE;
+    NoUniquePartition = FALSE;
 
     Status=pBS->HandleProtocol(
                Device->DeviceHandle, &gEfiBlockIoProtocolGuid, &BlkIo
@@ -1224,16 +1230,64 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
 
     if ( SetupData.OnlyBootHDD == 1 ) {
         if ( Device->BbsEntry == NULL ) {
-            if ( BlkIo->Media->RemovableMedia == FALSE )
-                return FALSE ;
+            //if ( BlkIo->Media->RemovableMedia == FALSE )
+            //    return FALSE ;
+            //else
+            //    return TRUE ;
+            if (BlkIo->Media->RemovableMedia == TRUE)
+            {
+                FoundNotHdd = TRUE;
+            }
             else
-                return TRUE ;
+            {
+                /* code */
+            }
         } else {
-            if( Device->BbsEntry->Class != PCI_CL_MASS_STOR ) return TRUE;
-            return FALSE;
+            if( Device->BbsEntry->Class != PCI_CL_MASS_STOR )
+            {
+                FoundNotHdd = TRUE;
+            }
+            else
+            {
+
+            }
         }
     }
+    else
+    {
+        FoundNotHdd = FALSE;
+    }
 
+    if ( SetupData.OnlyBootUniquePartition == 1)
+    {
+        if (Device->BbsEntry == NULL)
+        {
+            Status = pBS->HandleProtocol (Device->DeviceHandle, &UniquePartitionGuid, (VOID**)&UniquePartition);
+            if (EFI_ERROR(Status))
+            {
+                NoUniquePartition = TRUE;
+            }
+            else
+            {
+                /* code */
+            }
+        }
+        else
+        {
+            /* code */
+        }
+    }
+    else
+    {
+        NoUniquePartition = FALSE;
+    }
+    
+    
+    if (FoundNotHdd || NoUniquePartition)
+    {
+        return TRUE;
+    }
+    
     return FALSE;
 }
 //ray_override / [XI-BringUp] Bring Up Porting / Modified <<
