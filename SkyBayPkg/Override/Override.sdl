@@ -552,12 +552,30 @@ End
 ##ray_override / [XI-BringUp] Disable Unused Feature / added >>
 TOKEN
 	Name  = "SecureMod_SUPPORT"
-	Value  = "0"
+	Value  = "1"
 	TokenType = Boolean
 	TargetMAK = Yes
 	TargetH = Yes
 #	Master = Yes
 #	Token = "AmiCryptoPkg_SUPPORT" "=" "1"
+End
+
+TOKEN
+     Name  = "FWpub"
+     Value  = "$(CRB_DIR)$(PATH_SLASH)Override$(PATH_SLASH)ami_crb_pub_key.pem"
+     Help  = "Root of trust Key for signed BIOS verification.\Public portion of the Key is inserted as ffs file inside BIOS RTU (FV_BB)\RSA Key formatted as PKCS#1v2.1 ASN.1 or X.509 DER file."
+     TokenType = Expression
+     TargetMAK = Yes
+     Token = "FWCAPSULE_CERT_FORMAT" "=" "0"
+End
+
+TOKEN
+     Name  = "FWpriv"
+     Value  = "$(CRB_DIR)$(PATH_SLASH)Override$(PATH_SLASH)ami_crb_priv_key.pem"
+     Help  = "A Signer Certificate Key in the FwCapsule Hdr.\Used as upgrade(new) key in 2-key signing model\RSA Key formatted as PKCS#1v2.1 ASN.1 or X.509 DER file."
+     TokenType = Expression
+     TargetMAK = Yes
+     Token = "FWCAPSULE_CERT_FORMAT" "=" "0"
 End
 
 TOKEN
