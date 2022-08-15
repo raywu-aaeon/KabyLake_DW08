@@ -1258,7 +1258,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         FoundNotHdd = FALSE;
     }
 
-    if ( OnlyBootUniquePartition == 1)
+    if ( SetupData.OnlyBootUniquePartition == 1)
     {
         if (Device->BbsEntry == NULL)
         {
