@@ -70,6 +70,7 @@ $(BUILD_DIR)/SetupDefinitions.h : $(SETUP_DEFINITIONS) $(BUILD_DIR)/Token.mak Am
 typedef struct{$(EOL)\
   UINT8 Numlock;$(EOL)\
   UINT8 OnlyBootHDD;$(EOL)\
+  UINT8 OnlyBootUniquePartition;$(EOL)\
   UINT8 DviEdidLessMode[2];$(EOL)\
   UINT8 DviEdidLessTypeSelection[2];$(EOL)\
   #define SETUP_DATA_DEFINITION$(EOL)\

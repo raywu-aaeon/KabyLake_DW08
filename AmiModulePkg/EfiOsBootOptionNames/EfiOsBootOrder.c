@@ -1243,22 +1243,47 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
                 /* code */
             }
         } else {
-            if( Device->BbsEntry->Class != PCI_CL_MASS_STOR ) return TRUE;
-            return FALSE;
-        }
-    }
+            if( Device->BbsEntry->Class != PCI_CL_MASS_STOR )
+            {
+                FoundNotHdd = TRUE;
+            }
+            else
+            {
 
-    Status = pBS->HandleProtocol (Device->DeviceHandle, &UniquePartitionGuid, (VOID**)&UniquePartition);
-    if (EFI_ERROR(Status))
-    {
-        NoUniquePartition = TRUE;
+            }
+        }
     }
     else
     {
-        /* code */
+        FoundNotHdd = FALSE;
+    }
+
+    if ( OnlyBootUniquePartition == 1)
+    {
+        if (Device->BbsEntry == NULL)
+        {
+            Status = pBS->HandleProtocol (Device->DeviceHandle, &UniquePartitionGuid, (VOID**)&UniquePartition);
+            if (EFI_ERROR(Status))
+            {
+                NoUniquePartition = TRUE;
+            }
+            else
+            {
+                /* code */
+            }
+        }
+        else
+        {
+            /* code */
+        }
+    }
+    else
+    {
+        NoUniquePartition = FALSE;
     }
     
-    if ( FoundNotHdd || NoUniquePartition)
+    
+    if (FoundNotHdd || NoUniquePartition)
     {
         return TRUE;
     }
