@@ -1754,7 +1754,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "4"
+    Value  = "3"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
