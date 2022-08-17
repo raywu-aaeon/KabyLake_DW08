@@ -60,20 +60,20 @@
             <SpiVoltageSelect value="3.3 Volts" value_list="3.3 Volts,,1.8 Volts" label="SPI Voltage Select" help_text="This strap sets the internal control signal on the pad for either 1.8 or 3.3 V operation.  See Skylake H / LP SPI Programming guide for further details." />
         </FlashComponents>
         <HostCpuBiosMasterAccess label="Host CPU / BIOS Master Access">
-            <HostCpuWriteAccess value="0xFFF" value_list="0xFFF,,0x00A,,0x01A,,0x10A,,0x11A" label="Host CPU / BIOS Write Access" help_text="This setting determines write access control for the BIOS region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
-            <HostCpuReadAccess value="0xFFF" value_list="0xFFF,,0x00B,,0x01B,,0x10B,,0x11B,,0x00F,,0x01F,,0x10F,,0x11F" label="Host CPU / BIOS Read Access" help_text="This setting determines read access control for the BIOS region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <HostCpuWriteAccess value="0x11A" value_list="0xFFF,,0x00A,,0x01A,,0x10A,,0x11A" label="Host CPU / BIOS Write Access" help_text="This setting determines write access control for the BIOS region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <HostCpuReadAccess value="0x11F" value_list="0xFFF,,0x00B,,0x01B,,0x10B,,0x11B,,0x00F,,0x01F,,0x10F,,0x11F" label="Host CPU / BIOS Read Access" help_text="This setting determines read access control for the BIOS region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
         </HostCpuBiosMasterAccess>
         <IntelMeMasterAccess label="Intel(R) ME Master Access">
-            <MeWriteAccess value="0xFFF" value_list="0xFFF,,0x004,,0x00C" label="Intel(R) ME Write Access" help_text="This setting determines write access control for the ME region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
-            <MeReadAccess value="0xFFF" value_list="0xFFF,,0x00D" label="Intel(R) ME Read Access" help_text="This setting determines read access control for the ME region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <MeWriteAccess value="0x004" value_list="0xFFF,,0x004,,0x00C" label="Intel(R) ME Write Access" help_text="This setting determines write access control for the ME region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <MeReadAccess value="0x00D" value_list="0xFFF,,0x00D" label="Intel(R) ME Read Access" help_text="This setting determines read access control for the ME region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
         </IntelMeMasterAccess>
         <GbeMasterAccess label="GbE Master Access">
-            <GbeWriteAccess value="0xFFF" value_list="0xFFF,,0x008" label="GbE Write Access" help_text="This setting determines write access control for the Gigabit Ethernet Region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
-            <GbeReadAccess value="0xFFF" value_list="0xFFF,,0x009" label="GbE Read Access" help_text="This setting determines read access control for the Gigabit Ethernet Region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <GbeWriteAccess value="0x008" value_list="0xFFF,,0x008" label="GbE Write Access" help_text="This setting determines write access control for the Gigabit Ethernet Region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <GbeReadAccess value="0x009" value_list="0xFFF,,0x009" label="GbE Read Access" help_text="This setting determines read access control for the Gigabit Ethernet Region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
         </GbeMasterAccess>
         <EcMasterAccess label="EC Master Access">
-            <EcWriteAccess value="0xFFF" value_list="0xFFF,,0x100" label="Embedded Controller Write Access" help_text="This setting determines write access control for the Embedded Controller region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
-            <EcReadAccess value="0xFFF" value_list="0xFFF,,0x101,,0x103" label="Embedded Controller Read Access" help_text="This setting determines read access control for the Embedded Controller region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <EcWriteAccess value="0x100" value_list="0xFFF,,0x100" label="Embedded Controller Write Access" help_text="This setting determines write access control for the Embedded Controller region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
+            <EcReadAccess value="0x103" value_list="0xFFF,,0x101,,0x103" label="Embedded Controller Read Access" help_text="This setting determines read access control for the Embedded Controller region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
         </EcMasterAccess>
         <FlashConfiguration label="Flash Configuration">
             <SpiDualIoReadEnable value="No" value_list="No,,Yes" label="Dual I/O Read Enabled" help_text="This setting allows customers to enable support for Dual I/O Read capabilities for flash components.  See Skylake H / LP SPI Programming guide for further details." />
@@ -219,11 +219,11 @@
             <GucHash value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00" label="GuC Encryption Key" help_text="This option is for entering the raw hash 256 bit string for the Graphics uController." />
         </GraphicsuController>
         <KeyConfiguration label="Hash Key Configuration for Bootguard / ISH">
-            <OemPublicKeyHash value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00" label="OEM Public Key Hash" help_text="This option is for entering the raw hash string for Boot Guard or ISH.  This 256-bit field represents the SHA-256 hash of the OEM public key corresponding to the private key used to sign the BIOS-SM for Bootguard or ISH firmware." />
+            <OemPublicKeyHash value="7D 34 D1 CD 1D 47 34 55 F7 52 3D 72 EA 3D B6 CE F1 21 5F 1C 4B 3E C1 32 13 73 E8 E5 87 0D 65 32" label="OEM Public Key Hash" help_text="This option is for entering the raw hash string for Boot Guard or ISH.  This 256-bit field represents the SHA-256 hash of the OEM public key corresponding to the private key used to sign the BIOS-SM for Bootguard or ISH firmware." />
         </KeyConfiguration>
         <BootGuardConfiguration label="Boot Guard Configuration">
-            <BtGuardKeyManifestId value="0x0000" label="Key Manifest ID" help_text="This option is for entering the hash of another public key, used by the ACM to verify the Boot Policy Manifest." />
-            <BtGuardProfileConfig value="Boot Guard Profile 0 - No_FVME" value_list="Boot Guard Profile 0 - No_FVME,,Boot Guard Profile 1 - VE,,Boot Guard Profile 2 - VME,,Boot Guard Profile 3 - VM,,Boot Guard Profile 4 - FVE,,Boot Guard Profile 5 - FVME" label="Boot Guard Profile Configuration" help_text="This option configures the which Boot Guard Policy Profile will be used." />
+            <BtGuardKeyManifestId value="0x0001" label="Key Manifest ID" help_text="This option is for entering the hash of another public key, used by the ACM to verify the Boot Policy Manifest." />
+            <BtGuardProfileConfig value="Boot Guard Profile 5 - FVME" value_list="Boot Guard Profile 0 - No_FVME,,Boot Guard Profile 1 - VE,,Boot Guard Profile 2 - VME,,Boot Guard Profile 3 - VM,,Boot Guard Profile 4 - FVE,,Boot Guard Profile 5 - FVME" label="Boot Guard Profile Configuration" help_text="This option configures the which Boot Guard Policy Profile will be used." />
             <BtGuardCpuDebugEnable value="Disabled" value_list="Enabled,,Disabled" label="CPU Debugging" help_text="When set to Enabled the CPU debugging capability probe mode is enabled.  When this field is set to Disabled it indicates CPU debugging capability probe mode is disabled and locked." />
             <BtGuardBspInitEnable value="Enabled" value_list="Enabled,,Disabled" label="BSP Initialization" help_text="This setting determines BSP behavior when it receives an INIT signal.  When set to 'Enabled', when BSP receives an INIT, BSP will signal an error to the BSS register and enter unrecoverable shutdown." />
         </BootGuardConfiguration>

@@ -621,7 +621,7 @@ End
 
 TOKEN
         Name  = "INTEL_BOOT_GUARD_SUPPORT"
-        Value = "0"
+        Value = "1"
         Help  = "Main switch to enable Intel Boot Guard in Project"
         TokenType = Boolean
         TargetEQU = Yes
