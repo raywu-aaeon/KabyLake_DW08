@@ -172,8 +172,8 @@
 			oneof varid = SETUP_DATA.TpmSupport,\
 				prompt = STRING_TOKEN(STR_TPM_SUPPORT_PROMPT ),\
 				help = STRING_TOKEN(STR_TPMSUPPORT_HELP),\
-				option text = STRING_TOKEN(STR_TPM_DISABLE), value = 0, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;\
-				option text = STRING_TOKEN(STR_TPM_ENABLE),  value = 1, flags = RESET_REQUIRED;\
+				option text = STRING_TOKEN(STR_TPM_DISABLE), value = 0, flags = RESET_REQUIRED;\
+				option text = STRING_TOKEN(STR_TPM_ENABLE),  value = 1, flags = RESET_REQUIRED | MANUFACTURING | DEFAULT;\
 			endoneof;
 //ray_override / [TAG-FixedTCG2Windows7] TPM Disabled as Default / TpmSupport : STR_TPM_ENABLE -> STR_TPM_DISABLE
 
