@@ -219,7 +219,7 @@
             <GucHash value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00" label="GuC Encryption Key" help_text="This option is for entering the raw hash 256 bit string for the Graphics uController." />
         </GraphicsuController>
         <KeyConfiguration label="Hash Key Configuration for Bootguard / ISH">
-            <OemPublicKeyHash value="00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00" label="OEM Public Key Hash" help_text="This option is for entering the raw hash string for Boot Guard or ISH.  This 256-bit field represents the SHA-256 hash of the OEM public key corresponding to the private key used to sign the BIOS-SM for Bootguard or ISH firmware." />
+            <OemPublicKeyHash value="86 51 7B B2 66 93 77 39 BD 42 CE BF CE AD 6F 0F AE 0D BD FB 5B 30 BD 05 68 28 E8 73 E9 29 98 BD" label="OEM Public Key Hash" help_text="This option is for entering the raw hash string for Boot Guard or ISH.  This 256-bit field represents the SHA-256 hash of the OEM public key corresponding to the private key used to sign the BIOS-SM for Bootguard or ISH firmware." />
         </KeyConfiguration>
         <BootGuardConfiguration label="Boot Guard Configuration">
             <BtGuardKeyManifestId value="0x0001" label="Key Manifest ID" help_text="This option is for entering the hash of another public key, used by the ACM to verify the Boot Policy Manifest." />
