@@ -417,7 +417,12 @@ PartitionInstallGptChildHandles (
     DEBUG ((EFI_D_INFO, " Partition size: %lx\n", (UINT64) HdDev.PartitionSize));
     DEBUG ((EFI_D_INFO, " Start : %lx", MultU64x32 (Entry->StartingLBA, BlockSize)));
     DEBUG ((EFI_D_INFO, " End : %lx\n", MultU64x32 (Entry->EndingLBA, BlockSize)));
-
+    DEBUG(("PartitionTypeGUID = %g\n", PartitionInfo.Info.Gpt.PartitionTypeGUID));
+    DEBUG(("UniquePartitionGUID = %g\n", PartitionInfo.Info.Gpt.UniquePartitionGUID));
+    //DEBUG(("StartingLBA = \n", PartitionInfo.Info.Gpt.StartingLBA));
+    //DEBUG(("EndingLBA = \n", PartitionInfo.Info.Gpt.EndingLBA));
+    DEBUG(("Attributes = 0x%X\n", PartitionInfo.Info.Gpt.Attributes));
+    DEBUG(("PartitionName = %s\n", PartitionInfo.Info.Gpt.PartitionName));
     Status = PartitionInstallChildHandle (
                This,
                Handle,
