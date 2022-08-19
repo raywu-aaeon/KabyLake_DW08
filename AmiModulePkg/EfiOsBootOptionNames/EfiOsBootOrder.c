@@ -1287,7 +1287,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         NoUniquePartition = FALSE;
     }
     
-    
+    MY_TRACE((-1, "if (FoundNotHdd(%d) || NoUniquePartition(%d))\n", FoundNotHdd, NoUniquePartition));
     if (FoundNotHdd || NoUniquePartition)
     {
         return TRUE;
