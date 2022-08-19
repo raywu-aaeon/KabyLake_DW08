@@ -1219,6 +1219,8 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
     EFI_GUID    UniquePartitionGuid = {0xd6760505, 0x754c, 0x4f5b, {0x9e, 0xcc, 0xa8, 0x9f, 0x33, 0xa3, 0xed, 0x97}};
     VOID    *UniquePartition;
 
+    MY_TRACE((-1, "%a Start\n"));
+
     FoundNotHdd = FALSE;
     NoUniquePartition = FALSE;
 
@@ -1263,6 +1265,7 @@ BOOLEAN RemoveLegacyGptHdd(BOOT_DEVICE *Device) {
         if (Device->BbsEntry == NULL)
         {
             Status = pBS->HandleProtocol (Device->DeviceHandle, &UniquePartitionGuid, (VOID**)&UniquePartition);
+            MY_TRACE((-1, "Status(%r) = HandleProtocol...UniquePartitionGuid\n", Status));
             if (EFI_ERROR(Status))
             {
                 NoUniquePartition = TRUE;
