@@ -867,8 +867,10 @@ VOID CollectProtocolDevices(DLIST *BootDeviceList, EFI_GUID *ProtocolGuid){
  * table
  */
 VOID CollectBootDevices(){
-	CollectProtocolDevices(BootDeviceList,&gEfiLoadFileProtocolGuid);
-	CollectProtocolDevices(BootDeviceList,&gEfiSimpleFileSystemProtocolGuid);
+    EFI_GUID TestGuid = {0xd6760505, 0x754c, 0x4f5b, {0x9e, 0xcc, 0xa8, 0x9f, 0x33, 0xa3, 0xed, 0x97}};
+//	CollectProtocolDevices(BootDeviceList,&gEfiLoadFileProtocolGuid);
+//	CollectProtocolDevices(BootDeviceList,&gEfiSimpleFileSystemProtocolGuid);
+    CollectProtocolDevices(BootDeviceList,&TestGuid);
 #ifdef CSM_SUPPORT
 	CollectBbsDevices(BootDeviceList);
 #endif
