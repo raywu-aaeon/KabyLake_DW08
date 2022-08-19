@@ -38,6 +38,7 @@
   Bds.c
   BdsBoard.c
   Bds.uni
+  MyTrace.c
 
 [Packages]
   AmiCompatibilityPkg/AmiCompatibilityPkg.dec

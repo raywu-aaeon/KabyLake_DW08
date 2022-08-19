@@ -22,6 +22,7 @@
 #include <Protocol/UsbIo.h>
 #include <Protocol/NvmExpressPassthru.h>
 #include <Library/DebugLib.h>
+#include "MyTrace.h"
 
 EFI_HII_HANDLE HiiHandle=0;
 EFI_GUID AmiBbsDevicePathGuid = AMI_BBS_DEVICE_PATH_GUID;
@@ -830,15 +831,29 @@ VOID CollectBbsDevices(DLIST *BootDeviceList){
  * @param ProtocolGuid the protocol to use when getting a list of device handles
  */
 VOID CollectProtocolDevices(DLIST *BootDeviceList, EFI_GUID *ProtocolGuid){
-    EFI_HANDLE *Devices;
-    UINTN NumberOfDevices;
+    EFI_HANDLE *Devices, *TestDevices;
+    UINTN NumberOfDevices, TestNumberOfDevices;
 	EFI_STATUS Status;
 	UINTN i;
+    EFI_GUID TestGuid = {0xd6760505, 0x754c, 0x4f5b, {0x9e, 0xcc, 0xa8, 0x9f, 0x33, 0xa3, 0xed, 0x97}};
+
+    MY_TRACE((-1, "%a Start\n", __FUNCTION__));
 
     Status = pBS->LocateHandleBuffer(
         ByProtocol,ProtocolGuid, NULL,
         &NumberOfDevices, &Devices
     );
+
+    MY_TRACE((-1, "ProtocolGuid = %g\n", ProtocolGuid));
+    MY_TRACE((-1, "NumberOfDevices = 0x%X\n", NumberOfDevices));
+
+    Status = pBS->LocateHandleBuffer(
+        ByProtocol,&TestGuid, NULL,
+        &TestNumberOfDevices, &TestDevices
+    );
+
+    MY_TRACE((-1, "TestNumberOfDevices = 0x%X\n", TestNumberOfDevices));
+
     if (EFI_ERROR(Status)) return;
 	for(i=0; i<NumberOfDevices; i++){
 		CreateBootDevice(BootDeviceList,Devices[i],INVALID_BBS_INDEX,NULL);
