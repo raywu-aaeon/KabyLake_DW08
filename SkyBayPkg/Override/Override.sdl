@@ -681,7 +681,7 @@ End
 
 TOKEN
     Name  = "POST_TIME_TUNING_SUPPORT"
-    Value  = "0"
+    Value  = "1"
     Help  = "Main switch to enable FastBoot (Post Time Tuning) module in Project"
     TokenType = Boolean
     TargetEQU = Yes
