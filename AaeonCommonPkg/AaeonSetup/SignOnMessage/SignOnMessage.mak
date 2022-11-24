@@ -8,7 +8,7 @@ $(BUILD_DIR)/SignOnMessage.uni : $(BUILD_DIR)/Token.mak
 //---------------------------------------------------------------------------$(EOL)\
 #include \"VFR.uni\"$(EOL)\
 $(EOL)\
-#string STR_BIOS_SIGNON_MESSAGE         #language eng \"    $(AAEON_MODEL_NAME) $(BIOS_SIGNON_VERSION)($(BIOS_BUILD_DAY))\"$(EOL)"\
+#string STR_BIOS_VERSION_VALUE_AMIBCP         #language eng \"$(AAEON_MODEL_TAG)$(AAEON_VERSION)\"$(EOL)"\
 > $(BUILD_DIR)\Temp.uni
 	$(GENUNIFILE) $(BUILD_DIR)\Temp.uni $@
 
