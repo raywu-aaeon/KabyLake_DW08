@@ -681,7 +681,7 @@ End
 
 TOKEN
     Name  = "POST_TIME_TUNING_SUPPORT"
-    Value  = "0"
+    Value  = "1"
     Help  = "Main switch to enable FastBoot (Post Time Tuning) module in Project"
     TokenType = Boolean
     TargetEQU = Yes
@@ -2142,3 +2142,27 @@ TOKEN
 	TargetMAK = Yes
 End
 ##raydebug <<
+
+TOKEN
+    Name  = "DEFAULT_SATA_SUPPORT_SETTING"
+    Value  = "0"
+    Help  = "Default value of SATA Support option"
+    TokenType = Integer
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "DEFAULT_NVME_SUPPORT_SETTING"
+    Value  = "0"
+    Help  = "Default value of NVMe Driver Support option"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "DEFAULT_PS2_SUPPORT_SETTING"
+    Value  = "0"
+    Help  = "Default value of the PS2 Devices Support option"
+    TokenType = Boolean
+    TargetH = Yes
+End
