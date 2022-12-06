@@ -9,9 +9,9 @@
             <RegionOrder value="45321" label="Region Order" />
         </BuildResults>
         <PathVars label="Environment Variables">
-            <WorkingDir value=".." label="$WorkingDir" help_text="Path for environment variable $WorkingDir" />
-            <SourceDir value="." label="$SourceDir" help_text="Path for environment variable $SourceDir" />
-            <DestDir value="." label="$DestDir" help_text="Path for environment variable $DestDir" />
+            <WorkingDir value="C:\AAEON\_work\Kabylake_DT_1ATQP080\RomImage\XmlFiles\Production\" label="$WorkingDir" help_text="Path for environment variable $WorkingDir" />
+            <SourceDir value="C:\AAEON\_work\Kabylake_DT_1ATQP080\RomImage\XmlFiles\Production\" label="$SourceDir" help_text="Path for environment variable $SourceDir" />
+            <DestDir value="C:\AAEON\_work\Kabylake_DT_1ATQP080\RomImage\XmlFiles\Production\" label="$DestDir" help_text="Path for environment variable $DestDir" />
             <UserVar1 value="." label="$UserVar1" help_text="Path for environment variable $UserVar1" />
             <UserVar2 value="." label="$UserVar2" help_text="Path for environment variable $UserVar2" />
             <UserVar3 value="." label="$UserVar3" help_text="Path for environment variable $UserVar3" />
@@ -76,7 +76,7 @@
             <EcReadAccess value="0xFFF" value_list="0xFFF,,0x101,,0x103" label="Embedded Controller Read Access" help_text="This setting determines read access control for the Embedded Controller region.  For further details on Region Access Control see Skylake H / LP SPI Programming guide." />
         </EcMasterAccess>
         <FlashConfiguration label="Flash Configuration">
-            <SpiDualIoReadEnable value="No" value_list="No,,Yes" label="Dual I/O Read Enabled" help_text="This setting allows customers to enable support for Dual I/O Read capabilities for flash components.  See Skylake H / LP SPI Programming guide for further details." />
+            <SpiDualIoReadEnable value="Yes" value_list="No,,Yes" label="Dual I/O Read Enabled" help_text="This setting allows customers to enable support for Dual I/O Read capabilities for flash components.  See Skylake H / LP SPI Programming guide for further details." />
             <SpiDualOutReadEnable value="Yes" value_list="No,,Yes" label="Dual Output Read Enabled" help_text="This setting allows customers to enable support for Dual Output Read capabilities for flash components.  See the Skylake H / LP SPI Programming guide." />
             <FastReadClockFreq value="48MHz" value_list="48MHz,,30MHz,,17MHz" label="Fast Read clock frequency" help_text="This setting allows customers to configure the flash component clock frequency setting for Fast Read.  See Skylake H / LP SPI Programming guide for further details." />
             <FastReadSupport value="No" value_list="No,,Yes" label="Fast Read supported" help_text="This setting allows customers to enable support for Fast Read capabilities for flash components.  See Skylake H / LP SPI Programming guide for further details.  Note: This setting needs to be enabled when using Dual / Quad enabled components." />
@@ -90,7 +90,7 @@
             <InvalidInstruction7 value="0xC7" label="Invalid Instruction 7" help_text="This setting allows customers to configure invalid instruction to protect against Chip Erase.  See Skylake H / LP SPI Programming guide for further details.  Note: This setting should be set to '0' if there are no Invalid instructions." />
             <QuadIoReadEnable value="No" value_list="No,,Yes" label="Quad I/O Read Enabled" help_text="This setting allows customers to enable support for Quad I/O Read capabilities for flash components.  See Skylake H / LP SPI Programming guide for further details." />
             <QuadOutReadEnable value="No" value_list="No,,Yes" label="Quad Output Read Enabled" help_text="This setting allows customers to enable support for Quad Output Read capabilities for flash components.  See Skylake H / LP SPI Programming guide for further details." />
-            <ReadIdAndReadStatClkFreq value="17MHz" value_list="48MHz,,30MHz,,17MHz" label="Read ID and Read Status clock frequency" help_text="This setting allows customers to configure the flash component clock frequency setting for Read ID and Read Status.  See Skylake H / LP SPI Programming guide for further details." />
+            <ReadIdAndReadStatClkFreq value="48MHz" value_list="48MHz,,30MHz,,17MHz" label="Read ID and Read Status clock frequency" help_text="This setting allows customers to configure the flash component clock frequency setting for Read ID and Read Status.  See Skylake H / LP SPI Programming guide for further details." />
             <WriteEraseClockFreq value="48MHz" value_list="48MHz,,30MHz,,17MHz" label="Write and Erase clock frequency" help_text="This setting allows customers to configure the flash component clock frequency setting for Write and Erase.  See Skylake H / LP SPI Programming guide for further details." />
         </FlashConfiguration>
         <VsccTable label="VSCC Table">
@@ -205,7 +205,7 @@
             <RedirectionPrivSecLevel value="Default" value_list="Default,,Enhanced,,Extreme" label="Redirection Privacy / Security Level" help_text="This setting allows customers to configure the Privacy and Security level for redirection operations.  Default enables all redirection ports (User consent is configurable).  Enhanced enables all redirection ports (User consent is required and cannot be disabled).  Extreme disables all redirection capabilities." />
         </RedirectionConfiguration>
         <TlsConfiguration label="TLS Configuration">
-            <TlsSupported value="Yes" value_list="No,,Yes" label="Transport Layer Security Supported" help_text="This setting allows customers to enable / disable firmware Transport Layer Security support.  Note: If this is disabled TLS will be permanently disabled in the firmware image." />
+            <TlsSupported value="No" value_list="No,,Yes" label="Transport Layer Security Supported" help_text="This setting allows customers to enable / disable firmware Transport Layer Security support.  Note: If this is disabled TLS will be permanently disabled in the firmware image." />
         </TlsConfiguration>
     </IntelAmt>
     <PlatformProtection label="Platform Protection">
@@ -228,7 +228,7 @@
             <BtGuardBspInitEnable value="Enabled" value_list="Enabled,,Disabled" label="BSP Initialization" help_text="This setting determines BSP behavior when it receives an INIT signal.  When set to 'Enabled', when BSP receives an INIT, BSP will signal an error to the BSS register and enter unrecoverable shutdown." />
         </BootGuardConfiguration>
         <IntelPttConfiguration label="Intel (R) PTT Configuration">
-            <PttPwrUpState value="Enabled" value_list="Disabled,,Enabled" label="Intel(R) PTT initial power-up state" help_text="This setting determines if Intel(R) PTT is enabled on platform power-up." />
+            <PttPwrUpState value="Disabled" value_list="Disabled,,Enabled" label="Intel(R) PTT initial power-up state" help_text="This setting determines if Intel(R) PTT is enabled on platform power-up." />
             <PttSupported value="Yes" value_list="Yes,,No" label="Intel(R) PTT Supported" help_text="This setting permanently disables Intel(R) PTT in the firmware image." />
             <PttSupportedHw value="Yes" value_list="No,,Yes" label="Intel(R) PTT Supported [FPF]" help_text="This setting will permanently disable Intel(R) PTT through platform FPFs.  Caution: Using this option will permanently disable Intel(R) PTT on the platform hardware." />
             <PttRtcClearDetect value="Enabled" value_list="Enabled,,Disabled" label="Intel(R) PTT RTC Clear Detection" help_text="This setting determines how the Intel(R) PTT will behave when RTC (CMOS) clear is triggered on the platform.  When Disabled Intel(R) PTT will bypass normal RTC clear behavior. Note: For designs where there is no Physical Coin Cell Battery, for backing up data stored in the RTC well, this setting should be set to 'Disabled'." />
@@ -251,14 +251,14 @@
                     <Registers>
                         <Register name="DBUF_CFG1_ITPXDP" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC0" mask="0xFFFFFFFF" value="0x3F0000" />
-                        <Register name="DBUF_CFG1_SRC1" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC6" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC8" mask="0xFFFFFFFF" value="0x3F0000" />
-                        <Register name="DBUF_CFG1_SRC11" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC12" mask="0xFFFFFFFF" value="0x3F0000" />
-                        <Register name="DBUF_CFG1_SRC13" mask="0xFFFFFFFF" value="0x3F0000" />
                         <Register name="DBUF_CFG1_SRC15" mask="0xFFFFFFFF" value="0x3F0000" />
-                        <Register name="ENCCKRQ" mask="0xFFFFFFFF" value="0xB1" />
+                        <Register name="DBUF_CFG1_SRC2" mask="0xFFFFFFFF" value="0x3F0000" />
+                        <Register name="DBUF_CFG1_SRC4" mask="0xFFFFFFFF" value="0x3F0000" />
+                        <Register name="DBUF_CFG1_SRC10" mask="0xFFFFFFFF" value="0x3F0000" />
+                        <Register name="DBUF_CFG1_SRC14" mask="0xFFFFFFFF" value="0x3F0000" />
                     </Registers>
                 </Profile>
             </Profiles>
@@ -291,12 +291,12 @@
     </NetworkingConnectivity>
     <FlexIo label="Flex I/O">
         <IntelRstForPcieConfiguration label="Intel(R) RST for PCIe Configuration">
-            <RstPCIe1C1Select value="x4" value_list="x2,,x4" label="Intel(R) RST for PCIe-C1 Select x2 or x4" help_text="This is used to configure NAND Cycle routers for the Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [S / H].  Note: This setting must match port configuration settings of Intel (R) RST for PCIe Controller 1 and PCIe Controller 3 [S / H]." />
+            <RstPCIe1C1Select value="x2" value_list="x2,,x4" label="Intel(R) RST for PCIe-C1 Select x2 or x4" help_text="This is used to configure NAND Cycle routers for the Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [S / H].  Note: This setting must match port configuration settings of Intel (R) RST for PCIe Controller 1 and PCIe Controller 3 [S / H]." />
             <RstPCIe1C2Select value="x2" value_list="x2,,x4" label="Intel(R) RST for PCIe-C2 Select x2 or x4" help_text="This is used to configure NAND Cycle routers for the Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 2 [LP] or PCIe Controller 6 [S / H].  Note: This setting must match port configuration settings of Intel (R) RST for PCIe Controller 2 and PCIe Controller 2 [LP] or PCIe Controller 6 [S / H]." />
-            <RstPCIe1C3Select value="x4" value_list="x2,,x4" label="Intel(R) RST for PCIe-C3 Select x2 or x4" help_text="This is used to configure NAND Cycle routers for the Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [LP] or PCIe Controller 5 [S / H].  Note: This setting must match port configuration settings of Intel (R) RST for PCIe Controller 3 and PCIe Controller 3 [LP] or PCIe Controller 5 [S / H]." />
-            <RstPCIeController1 value="1x4" value_list="2x2,,1x4" label="Intel(R) RST for PCIe Controller 1" help_text="This is used to configure PCIe Controller 1 for Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [S / H].  Note: This setting must match port configuration settings of Intel(R) RST for PCIe-C1 Select x2 or x4 and PCIe Controller 3 [S / H]." />
+            <RstPCIe1C3Select value="x2" value_list="x2,,x4" label="Intel(R) RST for PCIe-C3 Select x2 or x4" help_text="This is used to configure NAND Cycle routers for the Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [LP] or PCIe Controller 5 [S / H].  Note: This setting must match port configuration settings of Intel (R) RST for PCIe Controller 3 and PCIe Controller 3 [LP] or PCIe Controller 5 [S / H]." />
+            <RstPCIeController1 value="2x2" value_list="2x2,,1x4" label="Intel(R) RST for PCIe Controller 1" help_text="This is used to configure PCIe Controller 1 for Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [S / H].  Note: This setting must match port configuration settings of Intel(R) RST for PCIe-C1 Select x2 or x4 and PCIe Controller 3 [S / H]." />
             <RstPCIeController2 value="2x2" value_list="2x2,,1x4" label="Intel(R) RST for PCIe Controller 2" help_text="This is used to configure PCIe Controller 2 for Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 2 [LP] or PCIe Controller 6 [S / H].  Note: This setting must match port configuration settings of Intel(R) RST for PCIe-C2 Select x2 or x4 and PCIe Controller 2 [LP] or PCIe Controller 6 [S / H]." />
-            <RstPCIeController3 value="1x4" value_list="2x2,,1x4" label="Intel(R) RST for PCIe Controller 3" help_text="This is used to configure PCIe Controller 3 for Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [LP] or PCIe Controller 5 [S / H].  Note: This setting must match port configuration settings of Intel(R) RST for PCIe-C3 Select x2 or x4 and PCIe Controller 3 [LP] or PCIe Controller 5 [S / H]." />
+            <RstPCIeController3 value="2x2" value_list="2x2,,1x4" label="Intel(R) RST for PCIe Controller 3" help_text="This is used to configure PCIe Controller 3 for Intel(R) RST for PCIe interface as either x2 or x4 lane operation on PCIe Controller 3 [LP] or PCIe Controller 5 [S / H].  Note: This setting must match port configuration settings of Intel(R) RST for PCIe-C3 Select x2 or x4 and PCIe Controller 3 [LP] or PCIe Controller 5 [S / H]." />
             <PCIeCtrl3Port1SrisEnable value="No" value_list="No,,Yes" label="PCIe Controller 3 Port 1 SRIS Enabled" help_text="This is used to configure SRIS Port 1 for Intel(R) RST for PCIe on PCIe Controller 3.  Note: Configuration of this setting is only required if the NVM device will be connected external SATA Express cable." />
             <PCIeCtrl3Port2SrisEnable value="No" value_list="No,,Yes" label="PCIe Controller 3 Port 2 SRIS Enabled" help_text="This is used to configure SRIS Port 2 for Intel(R) RST for PCIe on PCIe Controller 3.  Note: Configuration of this setting is only required if the NVM device will be connected external SATA Express cable." />
             <PCIeCtrl3Port3SrisEnable value="No" value_list="No,,Yes" label="PCIe Controller 3 Port 3 SRIS Enabled" help_text="This is used to configure SRIS Port 3 for Intel(R) RST for PCIe on PCIe Controller 3.  Note: Configuration of this setting is only required if the NVM device will be connected external SATA Express cable." />
@@ -325,16 +325,16 @@
             <PCIeController5Config value="4x1" value_list="4x1,,1x2, 2x1,,2x2,,1x4" label="PCIe Controller 5 (Port 17-20)" help_text="This setting controls PCIe Port configurations for PCIe Controller 5.  For further details see Skylake H / LP Platform Controller Hub EDS." />
         </PciePortConfiguration>
         <SataPcieComboPortConfiguration label="SATA / PCIe Combo Port Configuration">
-            <SataPCIeComboPort0 value="PCIe (or GbE)" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 0" help_text="This setting configures the PCIe port to operate as either PCIe Port 9 or SATA Port 0.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
-            <SataPCIeComboPort1 value="PCIe (or GbE)" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 1" help_text="This setting configures the PCIe port to operate as either PCIe Port 10 or SATA Port 1.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
+            <SataPCIeComboPort0 value="GPIO" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 0" help_text="This setting configures the PCIe port to operate as either PCIe Port 9 or SATA Port 0.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
+            <SataPCIeComboPort1 value="GPIO" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 1" help_text="This setting configures the PCIe port to operate as either PCIe Port 10 or SATA Port 1.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
             <SataPCIeComboPort2 value="SATA" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 2" help_text="This setting configures the PCIe port to operate as either PCIe Port 13 or SATA Port 0.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
             <SataPCIeComboPort3 value="SATA" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 3" help_text="This setting configures the PCIe port to operate as either PCIe Port 14 or SATA Port 1.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
             <SataPCIeComboPort4 value="SATA" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 4" help_text="This setting configures the PCIe port to operate as either PCIe Port 15 or SATA Port 2.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
             <SataPCIeComboPort5 value="SATA" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 5" help_text="This setting configures the PCIe port to operate as either PCIe Port 16 or SATA Port 3.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
-            <SataPCIeComboPort6 value="PCIe (or GbE)" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 6" help_text="This setting configures the PCIe port to operate as either PCIe Port 17 or SATA Port 4.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
-            <SataPCIeComboPort7 value="PCIe (or GbE)" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 7" help_text="This setting configures the PCIe port to operate as either PCIe Port 18 or SATA Port 5.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
-            <SataPCIeComboPort8 value="PCIe (or GbE)" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 8" help_text="This setting configures the PCIe port to operate as either PCIe Port 19 or SATA Port 6.  For further details on Flex I/O see Skylake H Platform Controller Hub EDS.  Note: Valid only for Workstation / Server." />
-            <SataPCIeComboPort9 value="PCIe (or GbE)" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 9" help_text="This setting configures the PCIe port to operate as either PCIe Port 20 or SATA Port 7.  For further details on Flex I/O see Skylake H Platform Controller Hub EDS.  Note: Valid only for Workstation / Server." />
+            <SataPCIeComboPort6 value="GPIO" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 6" help_text="This setting configures the PCIe port to operate as either PCIe Port 17 or SATA Port 4.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
+            <SataPCIeComboPort7 value="GPIO" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 7" help_text="This setting configures the PCIe port to operate as either PCIe Port 18 or SATA Port 5.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
+            <SataPCIeComboPort8 value="GPIO" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 8" help_text="This setting configures the PCIe port to operate as either PCIe Port 19 or SATA Port 6.  For further details on Flex I/O see Skylake H Platform Controller Hub EDS.  Note: Valid only for Workstation / Server." />
+            <SataPCIeComboPort9 value="GPIO" value_list="SATA,,PCIe (or GbE),,GPIO" label="SATA / PCIe Combo Port 9" help_text="This setting configures the PCIe port to operate as either PCIe Port 20 or SATA Port 7.  For further details on Flex I/O see Skylake H Platform Controller Hub EDS.  Note: Valid only for Workstation / Server." />
         </SataPcieComboPortConfiguration>
         <SataPcieComboPortSelectPolarity label="SATA / PCIe Combo Port Select Polarity">
             <SataPCIePolSelComboPort0 value="0 = PCIe" value_list="0 = PCIe,,0 = SATA" label="Polarity Select SATA / PCIe Combo Port 0" help_text="This setting is used to determine the native mode configuration for SATA / PCIe Combo Port 0.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
@@ -364,7 +364,7 @@
             <XHCIPort7Ownership value="XHCI" value_list="XHCI,,Non-XHCI" label="XHCI Port 7 Ownership" help_text="This setting configures USB3 Port 7 to operate as either XHCI or Non-XHCI.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
             <XHCIPort8Ownership value="XHCI" value_list="XHCI,,Non-XHCI" label="XHCI Port 8 Ownership" help_text="This setting configures USB3 Port 8 to operate as either XHCI or Non-XHCI.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
             <XHCIPort9Ownership value="XHCI" value_list="XHCI,,Non-XHCI" label="XHCI Port 9 Ownership" help_text="This setting configures USB3 Port 9 to operate as either XHCI or Non-XHCI.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
-            <XHCIPort10Ownership value="Non-XHCI" value_list="XHCI,,Non-XHCI" label="XHCI Port 10 Ownership" help_text="This setting configures USB3 Port 10 to operate as either XHCI or Non-XHCI.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
+            <XHCIPort10Ownership value="XHCI" value_list="XHCI,,Non-XHCI" label="XHCI Port 10 Ownership" help_text="This setting configures USB3 Port 10 to operate as either XHCI or Non-XHCI.  For further details on Flex I/O see Skylake H / LP Platform Controller Hub EDS." />
         </XhciPortConfiguration>
     </FlexIo>
     <InternalPchBuses label="Internal PCH Buses">
@@ -419,7 +419,7 @@
             <SMBusMctpAddress value="0x00" label="Intel(R) SMBus MCTP Address" help_text="This setting configures the Intel(R) SMBus MCTP Address.  Note: This setting is only used for testing purposes.  The default setting is '0x00'." />
             <SMBusAsfId value="0x00000000" label="Intel(R) SMBus Subsystem Vendor &amp; Device ID for ASF" help_text="This setting configures the Intel(R) SMBus Subsystem Vendor &amp; Device ID for ASF.  For details see Skylake H / LP SPI Programming guide." />
             <SMBusTcoSlaveSelect value="Intel(R) SMBus" value_list="Intel(R) SMBus,,SMLink 0" label="SMBus / SMLink TCO Slave Connection" help_text="This setting configures the TCO Slave connection to ether the Intel(R) SMBus or SMLink0.  For further details see Skylake H / LP Platform Controller Hub EDS." />
-            <SLink0Enable value="Yes" value_list="No,,Yes" label="SMLink0 Enabled" help_text="This setting enables / disables SMLink0 interface.  For further details see Skylake H / LP Platform Controller Hub EDS.  Note: If using Intel(R) NFC this setting must be set to 'Yes'." />
+            <SLink0Enable value="No" value_list="No,,Yes" label="SMLink0 Enabled" help_text="This setting enables / disables SMLink0 interface.  For further details see Skylake H / LP Platform Controller Hub EDS.  Note: If using Intel(R) NFC this setting must be set to 'Yes'." />
             <SLink0freq value="1 MHz" value_list="100 KHz,,400 KHz,,1 MHz" label="SMLink0 Frequency" help_text="This setting determines the frequency at which the SMLink0 will operate.  Note: The recommended setting is '1 MHz'." />
             <SLink1Enable value="No" value_list="No,,Yes" label="SMLink1 Enabled" help_text="This setting enables / disables SMLink1 interface.  For further details see Skylake H / LP Platform Controller Hub EDS.  Note: This setting must be set to 'Yes' if using PCH / MCP Thermal reporting." />
             <SLink1freq value="100 KHz" value_list="100 KHz,,400 KHz,,1 MHz" label="SMLink1 Frequency" help_text="This setting determines the frequency at which the SMLink1 will operate.  Note: The recommended setting is '100KHz'." />
@@ -443,10 +443,10 @@
             <SlpS3Gpd4Config value="SLP_S3#" value_list="SLP_S3#,,GPD4" label="SLP_S3# / GPD4 Signal Configuration" help_text="This setting allows the user to assign the SLP_S3# Power Control signal as SLP_S3# or as GPD4.  For further details see Skylake H / LP Platform Controller Hub EDS." />
             <SlpS4Gpd5Config value="SLP_S4#" value_list="SLP_S4#,,GPD5" label="SLP_S4# / GPD5 Signal Configuration" help_text="This setting allows the user to assign the SLP_S4# Power Control signal as SLP_S4# or as GPD5.  For further details see Skylake H / LP Platform Controller Hub EDS." />
             <SlpS5Gpd10Config value="SLP_S5#" value_list="SLP_S5#,,GPD10" label="SLP_S5# / GPD10 Signal Configuration" help_text="This setting allows the user to assign the SLP_S5# Power Control signal as SLP_S5# or as GPD10.  For further details see Skylake H / LP Platform Controller Hub EDS." />
-            <SlpS0TunnelDis value="Enabled" value_list="Enabled,,Disabled" label="SLP_S0# Tunnel" help_text=" This setting Enables / Disables the tunneling of the SLP_S0# pin over ESPI to the EC when in ESPI mode." />
+            <SlpS0TunnelDis value="Disabled" value_list="Enabled,,Disabled" label="SLP_S0# Tunnel" help_text=" This setting Enables / Disables the tunneling of the SLP_S0# pin over ESPI to the EC when in ESPI mode." />
         </PlatformPower>
         <DeepSx label="Deep Sx">
-            <DeepSxSupportEnable value="Yes" value_list="No,,Yes" label="Deep Sx Enabled" help_text="This setting enables / disables support for Deep Sx operation.  For further details see Skylake H / LP Platform Controller Hub EDS.  Note: Support for Deep Sx is board design dependent." />
+            <DeepSxSupportEnable value="No" value_list="No,,Yes" label="Deep Sx Enabled" help_text="This setting enables / disables support for Deep Sx operation.  For further details see Skylake H / LP Platform Controller Hub EDS.  Note: Support for Deep Sx is board design dependent." />
         </DeepSx>
     </Power>
     <IntegratedSensorHub label="Integrated Sensor Hub">
