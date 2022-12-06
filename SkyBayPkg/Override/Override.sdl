@@ -1727,7 +1727,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW08AR"
+    Value  = "DW09AR"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
@@ -1736,7 +1736,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MAJOR_VERSION"
-    Value  = "1"
+    Value  = "0"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
@@ -1745,7 +1745,7 @@ End
 
 TOKEN
     Name  = "PROJECT_MINOR_VERSION"
-    Value  = "3"
+    Value  = "2"
     TokenType = Integer
     TargetEQU = Yes
     TargetMAK = Yes
