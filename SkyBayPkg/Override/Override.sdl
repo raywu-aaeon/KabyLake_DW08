@@ -1220,13 +1220,22 @@ End
 ##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added >>
 TOKEN
     Name  = "INTEL_VBIOS_RVP8_BINARY"
-    Value  = "AmiChipsetModulePkg/LegacyRom/Vbios/skl_1066.dat"
+    Value  = "SkyBayPkg\Override\LegacyRom\Vbios\cfl_1023.dat"
     TokenType = Expression
     TargetMAK = Yes
     TargetFDF = Yes 
     Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "1"
 End
 ##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added <<
+
+TOKEN
+	Name  = "OEM_INTEL_GOP_RVP8_VBT_BIN_FILE"
+	Value  = "SkyBayPkg\Override\GOP\CoffeeLake\Vbt.bin"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetFDF = Yes 
+	Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "1"
+End
 
 TOKEN
 	Name  = "OEM_INTEL_GOP_VBT_BIN_FILE"
