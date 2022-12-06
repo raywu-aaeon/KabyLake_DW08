@@ -2142,3 +2142,19 @@ TOKEN
 	TargetMAK = Yes
 End
 ##raydebug <<
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/M22906EA_000000B4.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Coffee Lake-S U-0 Stepping with Kaby Lake PCH"
+    Token = "DESKTOP_M22906EA" "=" "2"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/m_22_906ea_000000f0.pdb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Coffee Lake-S U-0 Stepping with Kaby Lake PCH"
+    InvokeOrder = AfterParent
+End
