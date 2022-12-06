@@ -9,9 +9,9 @@
             <RegionOrder value="45321" label="Region Order" />
         </BuildResults>
         <PathVars label="Environment Variables">
-            <WorkingDir value="C:\AAEON\_work\Kabylake_DT_1ATQP080\RomImage\XmlFiles\Production\" label="$WorkingDir" help_text="Path for environment variable $WorkingDir" />
-            <SourceDir value="C:\AAEON\_work\Kabylake_DT_1ATQP080\RomImage\XmlFiles\Production\" label="$SourceDir" help_text="Path for environment variable $SourceDir" />
-            <DestDir value="C:\AAEON\_work\Kabylake_DT_1ATQP080\RomImage\XmlFiles\Production\" label="$DestDir" help_text="Path for environment variable $DestDir" />
+            <WorkingDir value=".." label="$WorkingDir" help_text="Path for environment variable $WorkingDir" />
+            <SourceDir value="." label="$SourceDir" help_text="Path for environment variable $SourceDir" />
+            <DestDir value="." label="$DestDir" help_text="Path for environment variable $DestDir" />
             <UserVar1 value="." label="$UserVar1" help_text="Path for environment variable $UserVar1" />
             <UserVar2 value="." label="$UserVar2" help_text="Path for environment variable $UserVar2" />
             <UserVar3 value="." label="$UserVar3" help_text="Path for environment variable $UserVar3" />
