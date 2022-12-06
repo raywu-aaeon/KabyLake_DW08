@@ -455,7 +455,7 @@
         <IshSigningPolicy value="Intel" value_list="Intel,,OEM" label="Integrated Sensor Hub Signing Policy" help_text="This setting determines ISH signing will be checked against the Intel provisioned hash included in the base image or OEM public key hash provisioned on the platform." />
         <IshImage label="ISH Image">
             <Length value="0x40000" help_text="Total size (in bytes) of the ISH code partition including reserved space. It is recommended to be at least 256kb." />
-            <InputFile value="$WorkingDir\ISHC\Production_ISHC.bin" help_text="Path to your ISH firmware binary file." />
+            <InputFile value="" help_text="Path to your ISH firmware binary file." />
         </IshImage>
         <IshData label="ISH Data">
             <PdtBinary value="$WorkingDir\PDT\INTC_pdt_KBL_NS_BOM1_SENSORS.bin" label="PDT Binary File" help_text="Path to your PDT binary file" />
