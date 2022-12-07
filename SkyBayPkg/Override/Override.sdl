@@ -2132,3 +2132,41 @@ TOKEN
 	TargetMAK = Yes
 End
 ##raydebug <<
+
+PCIDEVICE
+	Title  = "IT8893FX"
+	Parent  = "PCIE Root Port #11"
+	Attribute  = "0x0"
+	Dev_type  = "Pci2PciBridge"
+	Bus  = 0eh
+	Dev  = 00h
+	Fun  = 00h
+	BridgeBusNum  = 020h
+	IntA = 	LNKA; 16
+	IntB = 	LNKB; 17
+	IntC = 	LNKC; 18
+	IntD = 	LNKD; 19
+	DeviceType = OnBoard
+	PCIBusSize = 32bit
+	ROMMain = No
+	FixedBus = Yes
+	PCIExpress = Yes
+End
+
+PCIDEVICE
+	Title  = "IT8893FX #1 Slot"
+	Parent  = "IT8893FX"
+    	Attribute  = "0x0"
+    	Dev_type  = "PciDevice"
+	Bus  = 020h
+	Dev  = 00h
+	Slot  = 00h
+	IntA = 	LNKA; 16
+	IntB = 	LNKB; 17
+	IntC = 	LNKC; 18
+	IntD = 	LNKD; 19
+    	DeviceType = Slot
+    	PCIBusSize = 32bit
+    	ROMMain = No
+    	PCIExpress = Yes
+End
