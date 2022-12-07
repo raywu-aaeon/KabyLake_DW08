@@ -812,7 +812,7 @@ End
 
 TOKEN
 	Name  = "GPIO65_EN"
-	Value  = "0"
+	Value  = "1"
 	Help  = "0: PME#\1: GPIO65"
 	TokenType = Integer
 	TargetH = Yes
@@ -820,7 +820,7 @@ End
 
 TOKEN
 	Name  = "GPIO66_EN"
-	Value  = "0"
+	Value  = "1"
 	Help  = "0: DPWROK\1: GPIO66"
 	TokenType = Integer
 	TargetH = Yes
@@ -829,7 +829,7 @@ End
 ## ray_todo / Enabled ERP_CTRL0# later
 TOKEN
 	Name  = "GPIO00_EN"
-	Value  = "0"
+	Value  = "1"
 	Help  = "0: ERP_CTRL0#\1: GPIO00"
 	TokenType = Integer
 	TargetH = Yes
@@ -837,7 +837,7 @@ End
 
 TOKEN
 	Name  = "GPIO01_EN"
-	Value  = "0"
+	Value  = "1"
 	Help  = "0: ERP_CTRL1#\1: GPIO01"
 	TokenType = Integer
 	TargetH = Yes
@@ -845,7 +845,7 @@ End
 
 TOKEN
 	Name  = "GPIO02_EN"
-	Value  = "0"
+	Value  = "1"
 	Help  = "0: SUS_WARN#\1: GPIO02"
 	TokenType = Integer
 	TargetH = Yes
@@ -853,7 +853,7 @@ End
 
 TOKEN
 	Name  = "GPIO03_EN"
-	Value  = "0"
+	Value  = "1"
 	Help  = "0: SUS_ACK#\1: GPIO03"
 	TokenType = Integer
 	TargetH = Yes
@@ -861,7 +861,7 @@ End
 
 TOKEN
 	Name  = "GPIO04_EN"
-	Value  = "0"
+	Value  = "1"
 	Help  = "0: SLP_SUS#\1: GPIO04"
 	TokenType = Integer
 	TargetH = Yes
@@ -876,6 +876,20 @@ TOKEN
 End
 
 TOKEN
+	Name  = "VIN1_RA"
+	Value  = "10"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "VIN1_RB"
+	Value  = "47"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
 	Name  = "VIN2_RA"
 	Value  = "200"
 	TokenType = Integer
@@ -884,7 +898,7 @@ End
 
 TOKEN
 	Name  = "VIN2_RB"
-	Value  = "47"
+	Value  = "20"
 	TokenType = Integer
 	TargetH = Yes
 End
@@ -898,7 +912,7 @@ End
 
 TOKEN
 	Name  = "VIN3_RB"
-	Value  = "20"
+	Value  = "47"
 	TokenType = Integer
 	TargetH = Yes
 End
@@ -917,6 +931,61 @@ TOKEN
 	TargetH = Yes
 End
 ##ray_override / [XI-BringUp] Support F81866 / added <<
+
+TOKEN
+    Name  = "F81866_KEYBOARD_PRESENT"
+    Value  = "0"
+    Help  = "Keyboard Present / Not Present."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "F81866_MOUSE_PRESENT"
+    Value  = "0"
+    Help  = "Mouse Present / Not Present."
+    TokenType = Boolean
+    TargetH = Yes
+End
+
+TOKEN
+	Name  = "GPIO14_EN"
+	Value  = "1"
+	Help  = "0: ATX_AT_TRAP\1: GPIO14"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "GPIO17_EN"
+	Value  = "0"
+	Help  = "0: PECI\1: GPIO17"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "F81866_HWM_PECI_SUPPORT"
+	Value  = "1"
+	Help  = "0: No PECI support (default).\1: Enable PECI support."
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "F81866_PECI_SUPPORT"
+	Value  = "1"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name  = "F81866_ERP_SUPPORT"
+	Value  = "0"
+	Help = "F81866_ERP_Miles++"
+	TokenType = Integer
+	TargetH = Yes
+End
 
 ##ray_override / [XI-Fixed] Issue Fixed : Unknown Loading under Windows 7 / Added >>
 TOKEN
@@ -1561,7 +1630,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_0_GPIO_DEFAULT"
-	Value  = "80"
+	Value  = "0"
 	Help = "Default value of the <GPIO Number> option for DIO 1.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1569,7 +1638,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_1_GPIO_DEFAULT"
-	Value  = "81"
+	Value  = "1"
 	Help = "Default value of the <GPIO Number> option for DIO 2.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1577,7 +1646,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_2_GPIO_DEFAULT"
-	Value  = "82"
+	Value  = "2"
 	Help = "Default value of the <GPIO Number> option for DIO 3.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1585,7 +1654,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_3_GPIO_DEFAULT"
-	Value  = "83"
+	Value  = "3"
 	Help = "Default value of the <GPIO Number> option for DIO 4.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1593,7 +1662,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_4_GPIO_DEFAULT"
-	Value  = "84"
+	Value  = "4"
 	Help = "Default value of the <GPIO Number> option for DIO 5.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1601,7 +1670,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_5_GPIO_DEFAULT"
-	Value  = "85"
+	Value  = "11"
 	Help = "Default value of the <GPIO Number> option for DIO 6.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1609,7 +1678,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_6_GPIO_DEFAULT"
-	Value  = "86"
+	Value  = "12"
 	Help = "Default value of the <GPIO Number> option for DIO 7.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1617,7 +1686,7 @@ End
 
 TOKEN
 	Name  = "NUMERIC_AAEON_DIO_7_GPIO_DEFAULT"
-	Value  = "87"
+	Value  = "13"
 	Help = "Default value of the <GPIO Number> option for DIO 8.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
@@ -1625,7 +1694,7 @@ End
 
 TOKEN
     Name  = "KBC_SUPPORT"
-    Value  = "1"
+    Value  = "0"
     Help  = "Enable/Disable KBC support"
     TokenType = Boolean
     TargetEQU = Yes
@@ -1636,7 +1705,7 @@ End
 
 TOKEN
     Name  = "PS2Ctl_SUPPORT"
-    Value  = "1"
+    Value  = "0"
     Help  = "Main switch to enable PS2 Controller support in the project."
     TokenType = Boolean
     TargetEQU = Yes
@@ -1646,7 +1715,7 @@ End
 
 TOKEN
     Name  = "EMUL6064_SUPPORT"
-    Value  = "1"
+    Value  = "0"
     Help  = "Main switch to enable KBC Emulation support in Project"
     TokenType = Boolean
     TargetH = Yes
@@ -1655,10 +1724,19 @@ End
 
 TOKEN
     Name  = "DEFAULT_USB_EMUL6064_OPTION"
-    Value  = "1"
+    Value  = "0"
     Help  = "Default value of the I/O port 60h/64h emulation support option"
     TokenType = Boolean
     TargetH = Yes
+End
+
+TOKEN
+    Name  = "ISA_IRQ_MASK"
+    Value  = "0xE307"
+    Help  = "This is an IRQ mask which may be used by ISA devices\ If BIT == 0 IRQ Available BIT == 1 IRQ Used.\DEFAULT VALUE == 0xE305."
+    TokenType = Integer
+    TargetH = Yes
+    Range  = "0...0FFFFh"
 End
 
 PCIDEVICE
