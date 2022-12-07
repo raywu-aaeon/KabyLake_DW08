@@ -7592,6 +7592,13 @@ VOID EFIAPI ConvertResources(PCI_BRG_INFO    *Brg, PCI_BAR_TYPE ResType, RES_CON
         CheckFixedBridgeResConvertion(Brg, ResType,&ConvType, &cnv);
     }
 
+//EIP637904>>
+    //If PCI_AMI_COMBINE_MEM_PMEM32 is enabled narrow type cannot be tBarMmio32pf
+    if (CombineMemPfMem32 && (nt == tBarMmio32pf)) {
+        nt = tBarMmio32;
+    }
+//EIP637904<<
+
     for(i=0; i<ext->ChildCount; i++) {
         dev=ext->ChildList[i];            
         for(j=0; j<PCI_MAX_BAR_NO; j++){
