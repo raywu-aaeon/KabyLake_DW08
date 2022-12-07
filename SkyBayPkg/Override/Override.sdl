@@ -1778,7 +1778,7 @@ End
 
 TOKEN
 	Name  = "SYSTEM_PRODUCT_NAME"
-	Value  = "DW08"
+	Value  = "DW09"
 	Help  = "Specifies the System Product Name"
 	TokenType = Expression
 	TargetEQU = Yes
@@ -1804,7 +1804,7 @@ End
 
 TOKEN
 	Name  = "BASE_BOARD_PRODUCT_NAME"
-	Value  = "DW08"
+	Value  = "DW09"
 	Help  = "Specifies the Product Name"
 	TokenType = Expression
 	TargetEQU = Yes
