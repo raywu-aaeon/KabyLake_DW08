@@ -32,6 +32,7 @@ extern UINT32 OemHdaVerbTableDisplayAudio[];
 //ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / Support ALC662 / Added >>
 extern UINT32 Deepware_H110_ALC662[];
 //ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / Support ALC662 / Added <<
+extern UINT32 DW09_OemHdaVerbTblSample[];
 
 #ifdef __cplusplus
 }
