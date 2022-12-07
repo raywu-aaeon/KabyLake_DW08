@@ -1202,7 +1202,7 @@ PCIDEVICE
 	Dev  = 02h
 	Fun  = 00h
 	SleepNum  = 01h
-	ROMFile  = "AmiChipsetModulePkg/LegacyRom/Vbios/skl_1066.dat"
+	ROMFile  = "$(INTEL_VBIOS_RVP8_BINARY)"
 	IntA = 	LNKA; 16
 	DeviceType = OnBoard
 	PCIBusSize = 32bit
@@ -1214,7 +1214,6 @@ PCIDEVICE
 	ROMSectionGuid  = "c5a4306e-e247-4ecd-a9d8-5b1985d3dcda"
 	InitRoutine  = "CspNbPciInitPciRoot"
 	Token = "CRB_BOARD" "=" "3" #For RVP8
-	Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "0" 
 End
 
 ##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added >>
@@ -2133,3 +2132,41 @@ TOKEN
 	TargetMAK = Yes
 End
 ##raydebug <<
+
+PCIDEVICE
+	Title  = "IT8893FX"
+	Parent  = "PCIE Root Port #11"
+	Attribute  = "0x0"
+	Dev_type  = "Pci2PciBridge"
+	Bus  = 0eh
+	Dev  = 00h
+	Fun  = 00h
+	BridgeBusNum  = 020h
+	IntA = 	LNKA; 16
+	IntB = 	LNKB; 17
+	IntC = 	LNKC; 18
+	IntD = 	LNKD; 19
+	DeviceType = OnBoard
+	PCIBusSize = 32bit
+	ROMMain = No
+	FixedBus = Yes
+	PCIExpress = Yes
+End
+
+PCIDEVICE
+	Title  = "IT8893FX #1 Slot"
+	Parent  = "IT8893FX"
+    	Attribute  = "0x0"
+    	Dev_type  = "PciDevice"
+	Bus  = 020h
+	Dev  = 00h
+	Slot  = 00h
+	IntA = 	LNKA; 16
+	IntB = 	LNKB; 17
+	IntC = 	LNKC; 18
+	IntD = 	LNKD; 19
+    	DeviceType = Slot
+    	PCIBusSize = 32bit
+    	ROMMain = No
+    	PCIExpress = Yes
+End
