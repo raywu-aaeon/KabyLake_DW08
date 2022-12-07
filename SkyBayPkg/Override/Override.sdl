@@ -1246,6 +1246,14 @@ TOKEN
 	Token = "SKYLAKE_ALL_VBIOS_AND_VBT_SUPPORT" "=" "0"
 End
 
+TOKEN
+	Name  = "OEM_INTEL_GOP_EFI_DRIVER_FILE"
+	Value  = "SkyBayPkg\Override\GOP\CoffeeLake\IntelGopDriver.efi"
+	TokenType = Expression
+	TargetMAK = Yes
+	TargetFDF = Yes
+End
+
 ELINK
 	Name  = "RemoveLegacyGptHdd,"
 	Parent  = "BootOptionBootDeviceFilteringFunctions"
