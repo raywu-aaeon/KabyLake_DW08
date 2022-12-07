@@ -10,7 +10,7 @@ PAGE UEFI GOP Driver Configuration
 $Hotplug_Support_Enb 00
 
 PAGE Child Device List
-$ChildDevice1Primary 08
+$ChildDevice1Primary 40
 $ChildDevice1Secondary 04
 $ChildDevice2Primary 08
 $ChildDevice2Secondary 40
