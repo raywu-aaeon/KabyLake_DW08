@@ -129,8 +129,8 @@ form formid = AUTO_ID(RC_ACPI_FORM_ID),       // AMI_OVERRIDE_START - Independen
     oneof varid   = SETUP_DATA.PciExpNative,
       prompt      = STRING_TOKEN(STR_ACPI_PCIE_NATIVE_PROMPT),
       help        = STRING_TOKEN(STR_ACPI_PCIE_NATIVE_HELP),
-      option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = RESET_REQUIRED;
-      option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = RESET_REQUIRED;
     endoneof;
   endif; // suppressif
 
@@ -142,9 +142,9 @@ form formid = AUTO_ID(RC_ACPI_FORM_ID),       // AMI_OVERRIDE_START - Independen
     oneof varid   = SETUP_DATA.NativeAspmEnable,
       prompt      = STRING_TOKEN(STR_NATIVE_ASPM_PROMPT),
       help        = STRING_TOKEN(STR_NATIVE_ASPM_HELP),
-      option text = STRING_TOKEN(STR_AUTO), value = 2, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
+      option text = STRING_TOKEN(STR_AUTO), value = 2, flags = RESET_REQUIRED;
       option text = STRING_TOKEN(STR_ACPI_ENABLED), value = 1, flags = RESET_REQUIRED;
-      option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = RESET_REQUIRED;
+      option text = STRING_TOKEN(STR_ACPI_DISABLED), value = 0, flags = RESET_REQUIRED | DEFAULT | MANUFACTURING;
     endoneof;
   endif; // suppressif
 

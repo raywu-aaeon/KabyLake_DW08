@@ -614,8 +614,8 @@ endif ;
     oneof varid     = PCH_SETUP.PchDmiAspm,
         prompt      = STRING_TOKEN(STR_PCH_DMI_ASPM_PROMPT),
         help        = STRING_TOKEN(STR_PCH_DMI_ASPM_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 1, flags = RESET_REQUIRED;
     endoneof;
     endif;
 
@@ -2968,8 +2968,7 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[0],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT1),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        default value = cond(ideqvallist SETUP_VOLATILE_DATA.PlatId == BoardIdKabylakeRDdr4 BoardIdKabylakeRLpddr3
-                             ? 0x3:0x0), defaultstore = MyStandardDefault,
+        default value = 0, defaultstore = MyStandardDefault,
         option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
@@ -3334,10 +3333,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[1],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT2),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[1],
@@ -3697,10 +3696,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[2],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT3),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[2],
@@ -4068,10 +4067,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[3],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT4),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[3],
@@ -4441,10 +4440,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[4],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT5),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[4],
@@ -4804,10 +4803,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[5],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT6),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[5],
@@ -5168,10 +5167,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[6],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT7),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[6],
@@ -5532,10 +5531,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[7],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT8),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[7],
@@ -5906,10 +5905,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[8],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT9),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[8],
@@ -6273,10 +6272,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[9],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT10),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[9],
@@ -6637,10 +6636,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[10],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT11),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[10],
@@ -6996,10 +6995,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[11],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT12),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[11],
@@ -7360,10 +7359,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[12],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT13),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[12],
@@ -7719,10 +7718,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[13],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT14),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[13],
@@ -8078,10 +8077,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[14],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT15),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[14],
@@ -8437,10 +8436,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[15],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT16),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[15],
@@ -8801,10 +8800,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[16],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT17),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[16],
@@ -9160,10 +9159,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[17],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT18),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[17],
@@ -9519,10 +9518,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[18],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT19),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[18],
@@ -9876,10 +9875,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[19],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT20),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[19],
@@ -10231,10 +10230,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[20],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT21),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[20],
@@ -10563,10 +10562,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[21],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT22),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[21],
@@ -10895,10 +10894,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[22],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT23),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[22],
@@ -11227,10 +11226,10 @@ endoneof;
       oneof varid   = PCH_SETUP.PcieRootPortL1SubStates[23],
         prompt      = STRING_TOKEN(STR_PCIE_L1SUB_PROMPT24),
         help        = STRING_TOKEN(STR_PCIE_L1SUB_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_1_STRING), value = 1, flags = RESET_REQUIRED;
         option text = STRING_TOKEN(STR_PCIE_L1SUB_2_STRING), value = 2, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_PCIE_L1SUB_1_2_STRING), value = 3, flags = RESET_REQUIRED;
       endoneof;
 
       oneof varid   = PCH_SETUP.PcieRootPortEqPh3Method[23],
