@@ -1383,6 +1383,15 @@ ELINK
     InvokeOrder = AfterParent
 End
 
+ELINK
+    Name  = "{{0x10EC, 0x0897, 0xFF, 0xFF, 64}, DW09_OemHdaVerbTblSample},"
+    Parent  = "OEM_HDA_VERB_TABLE"
+    Help  = "CRB HDA Verb Table"
+    Token = "CRB_HDA_VERB_TABLE_PRESENT" "=" "1"
+#    Token = "CRB_EC_SUPPORT" "=" "0"
+    InvokeOrder = AfterParent
+End
+
 TOKEN
 	Name  = "SETUP_BMP_LOGO_SUPPORT"
 	Value  = "0"
