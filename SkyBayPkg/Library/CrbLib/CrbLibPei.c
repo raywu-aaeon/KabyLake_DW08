@@ -65,7 +65,7 @@
 // Function Definition(s)
 
 //----------------------------------------------------------------------------
-UINT32 DW09_OemHdaVerbTblSample[] = {
+UINT32 DW10_OemHdaVerbTblSample[] = {
 //===== HDA Codec Subsystem ID Verb-table =====
 //HDA Codec Subsystem ID  : 0x10EC0000
 0x00172000,

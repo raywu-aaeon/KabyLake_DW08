@@ -1477,7 +1477,7 @@ ELINK
 End
 
 ELINK
-    Name  = "{{0x10EC, 0x0897, 0xFF, 0xFF, 64}, DW09_OemHdaVerbTblSample},"
+    Name  = "{{0x10EC, 0x0897, 0xFF, 0xFF, 64}, DW10_OemHdaVerbTblSample},"
     Parent  = "OEM_HDA_VERB_TABLE"
     Help  = "CRB HDA Verb Table"
     Token = "CRB_HDA_VERB_TABLE_PRESENT" "=" "1"
@@ -1837,7 +1837,7 @@ End
 
 TOKEN
     Name  = "PROJECT_TAG"
-    Value  = "DW09AR"
+    Value  = "DW10AR"
     Help  = "This value should only be 5 characters max"
     TokenType = Expression
     TargetMAK = Yes
@@ -1872,7 +1872,7 @@ End
 
 TOKEN
 	Name  = "SYSTEM_PRODUCT_NAME"
-	Value  = "DW09"
+	Value  = "DW10"
 	Help  = "Specifies the System Product Name"
 	TokenType = Expression
 	TargetEQU = Yes
@@ -1898,7 +1898,7 @@ End
 
 TOKEN
 	Name  = "BASE_BOARD_PRODUCT_NAME"
-	Value  = "DW09"
+	Value  = "DW10"
 	Help  = "Specifies the Product Name"
 	TokenType = Expression
 	TargetEQU = Yes
