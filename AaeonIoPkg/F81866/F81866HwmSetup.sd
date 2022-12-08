@@ -1030,7 +1030,7 @@
         SUBTITLE(STRING_TOKEN(STR_PC_HEALTH))
      
         SEPARATOR
-suppressif TRUE;
+
 	//
         // System Temperature1
         #if EFI_SPECIFICATION_VERSION>0x20000
@@ -1043,8 +1043,8 @@ suppressif TRUE;
         flags  = INTERACTIVE,
         key    = F81866_INTERACTIVE_KEY;
         #endif
-endif;
-        //
+
+	//
         // System Temperature3
         #if (F81866_PECI_SUPPORT)
         HWM1_TEXT_TEMP3

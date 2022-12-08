@@ -974,7 +974,7 @@ End
 
 TOKEN
 	Name  = "F81866_PECI_SUPPORT"
-	Value  = "1"
+	Value  = "0"
 	TokenType = Integer
 	TargetH = Yes
 End
@@ -983,6 +983,22 @@ TOKEN
 	Name  = "F81866_ERP_SUPPORT"
 	Value  = "0"
 	Help = "F81866_ERP_Miles++"
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name = "AAEON_CPU_CORE_TEMP_DETECTION"
+	Value  = "1"
+	Help = "Main token for show CPU DTS Temperature in Super I/O Hardware Monitor setup page."
+	TokenType = Integer
+	TargetH = Yes
+End
+
+TOKEN
+	Name = "INTEL_DTS_SUPPORT"
+	Value  = "1"
+	Help = "Enable for support Intel CPU DTS Temperature reading by Super I/O Hardware Monitor setup page"
 	TokenType = Integer
 	TargetH = Yes
 End
