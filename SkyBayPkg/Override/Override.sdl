@@ -1304,7 +1304,7 @@ End
 ##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added >>
 TOKEN
     Name  = "INTEL_VBIOS_RVP8_BINARY"
-    Value  = "SkyBayPkg\Override\LegacyRom\Vbios\cfl_1023.dat"
+    Value  = "SkyBayPkg\Override\LegacyRom\Vbios\skl_1066.dat"
     TokenType = Expression
     TargetMAK = Yes
     TargetFDF = Yes 

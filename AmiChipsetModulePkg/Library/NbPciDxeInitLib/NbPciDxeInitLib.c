@@ -370,7 +370,7 @@ EFI_STATUS EFIAPI CspNbPciInitPciRoot (
                       }
                       else
                       {
-                        *((UINT8 *)ImageStart + 0xC98) &= ~BIT0 ;
+//                        *((UINT8 *)ImageStart + 0xC98) &= ~BIT0 ;
                       }
                       
                       if ( SetupData.DviEdidLessMode[1] )
@@ -422,7 +422,7 @@ EFI_STATUS EFIAPI CspNbPciInitPciRoot (
                       }
                       else
                       {
-                        *((UINT8 *)ImageStart + 0xCBE) &= ~BIT0 ;
+//                        *((UINT8 *)ImageStart + 0xCBE) &= ~BIT0 ;
                       }
                     }
 #if defined(RAY_DEBUG_FLAG)
