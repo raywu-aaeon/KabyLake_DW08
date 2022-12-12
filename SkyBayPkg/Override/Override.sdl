@@ -1254,7 +1254,7 @@ End
 
 TOKEN
 	Name  = "NON_PRODUCTION_MICROCODE"
-	Value  = "0"
+	Value  = "1"
 	Help  = "Enable Non-production Microcode"
 	TokenType = Boolean
 End
