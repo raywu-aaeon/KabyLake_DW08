@@ -1314,7 +1314,7 @@ End
 
 TOKEN
 	Name  = "OEM_INTEL_GOP_RVP8_VBT_BIN_FILE"
-	Value  = "SkyBayPkg\Override\GOP\CoffeeLake\Vbt.bin"
+	Value  = "AmiChipsetModulePkg/NB/GOP/Skylake/Vbt.bin"
 	TokenType = Expression
 	TargetMAK = Yes
 	TargetFDF = Yes 
