@@ -115,30 +115,6 @@
 #include <MeChipset.h>
 #endif //MINTREE_FLAG
 
-//ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Hot-plug Internal Pull High / Added >>
-#include <Library/GpioLib.h>
-
-static GPIO_INIT_CONFIG DVI_1_HotPlug_GpioTermWpu20K[] =
-{
-  {GPIO_SKL_H_GPP_I1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpu20K }}, //DDSP_HPD_1
-};
-
-static GPIO_INIT_CONFIG DVI_1_HotPlug_GpioTermNone[] =
-{
-  {GPIO_SKL_H_GPP_I1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_1
-};
-
-static GPIO_INIT_CONFIG DVI_2_HotPlug_GpioTermWpu20K[] =
-{
-  {GPIO_SKL_H_GPP_I0,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpu20K }}, //DDSP_HPD_0
-};
-
-static GPIO_INIT_CONFIG DVI_2_HotPlug_GpioTermNone[] =
-{
-  {GPIO_SKL_H_GPP_I0,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_0
-};
-//ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Hot-plug Internal Pull High / Added <<
-
 extern EFI_GUID   gOsProfileGuid;
 
 typedef struct {
@@ -3722,33 +3698,6 @@ PlatformInitPreMem (
   Status = BoardInitPreMem ();
 #else
   Status = AmiBoardInit ((EFI_PEI_SERVICES **)PeiServices, PlatformInfo.BoardID);
-//ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Hot-plug Internal Pull High / Added >>
-{
-  UINT16                           GpioTableCount ;
-  
-  if ( SystemConfiguration.DviEdidLessMode[0] )
-  {
-    GpioTableCount = sizeof (DVI_1_HotPlug_GpioTermWpu20K) / sizeof (GPIO_INIT_CONFIG) ;
-    GpioConfigurePads (GpioTableCount, DVI_1_HotPlug_GpioTermWpu20K);
-  }
-  else
-  {
-    GpioTableCount = sizeof (DVI_1_HotPlug_GpioTermNone) / sizeof (GPIO_INIT_CONFIG) ;
-    GpioConfigurePads (GpioTableCount, DVI_1_HotPlug_GpioTermNone);
-  }
-
-  if ( SystemConfiguration.DviEdidLessMode[1] )
-  {
-    GpioTableCount = sizeof (DVI_2_HotPlug_GpioTermWpu20K) / sizeof (GPIO_INIT_CONFIG) ;
-    GpioConfigurePads (GpioTableCount, DVI_2_HotPlug_GpioTermWpu20K);
-  }
-  else
-  {
-    GpioTableCount = sizeof (DVI_2_HotPlug_GpioTermNone) / sizeof (GPIO_INIT_CONFIG) ;
-    GpioConfigurePads (GpioTableCount, DVI_2_HotPlug_GpioTermNone);
-  }
-}
-//ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Hot-plug Internal Pull High / Added <<
 #endif // End of AMI_CRB_EC_SUPPORT_FLAG
 //AMI_OVERRIDE_END - Only for CRB EC
   ASSERT_EFI_ERROR (Status);
