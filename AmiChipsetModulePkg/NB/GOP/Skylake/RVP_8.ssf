@@ -10,35 +10,35 @@ PAGE UEFI GOP Driver Configuration
 $Hotplug_Support_Enb 00
 
 PAGE Child Device List
-$ChildDevice1Primary 08
+$ChildDevice1Primary 40
 $ChildDevice1Secondary 04
-$ChildDevice2Primary 08
-$ChildDevice2Secondary 40
-$ChildDevice3Primary 08
-$ChildDevice3Secondary 20
-$ChildDevice4Primary 08
-$ChildDevice4Secondary 10
-$ChildDevice5Primary 04
-$ChildDevice5Secondary 40
-$ChildDevice6Primary 04
-$ChildDevice6Secondary 20
-$ChildDevice7Primary 04
-$ChildDevice7Secondary 10
-$ChildDevice8Primary 40
-$ChildDevice8Secondary 20
-$ChildDevice9Primary 40
-$ChildDevice9Secondary 10
-$ChildDevice10Primary 20
-$ChildDevice10Secondary 10
-$ChildDevice11Primary 08
+$ChildDevice2Primary 40
+$ChildDevice2Secondary 00
+$ChildDevice3Primary 04
+$ChildDevice3Secondary 00
+$ChildDevice4Primary 00
+$ChildDevice4Secondary 00
+$ChildDevice5Primary 00
+$ChildDevice5Secondary 00
+$ChildDevice6Primary 00
+$ChildDevice6Secondary 00
+$ChildDevice7Primary 00
+$ChildDevice7Secondary 00
+$ChildDevice8Primary 00
+$ChildDevice8Secondary 00
+$ChildDevice9Primary 00
+$ChildDevice9Secondary 00
+$ChildDevice10Primary 00
+$ChildDevice10Secondary 00
+$ChildDevice11Primary 00
 $ChildDevice11Secondary 00
-$ChildDevice12Primary 04
+$ChildDevice12Primary 00
 $ChildDevice12Secondary 00
-$ChildDevice13Primary 40
+$ChildDevice13Primary 00
 $ChildDevice13Secondary 00
-$ChildDevice14Primary 20
+$ChildDevice14Primary 00
 $ChildDevice14Secondary 00
-$ChildDevice15Primary 10
+$ChildDevice15Primary 00
 $ChildDevice15Secondary 00
 $ChildDevice16Primary 00
 $ChildDevice16Secondary 00
@@ -1655,10 +1655,10 @@ PAGE EDID-less EFP Panel DTD Timings
 TABLE $EFP1_DTD D6 09 80 90 20 E0 1D 10 08 60 22 00 00 00 00 00 00 1E
 
 PAGE Device 2 (EFP2)
-$Int_EFP2_Type D2 68
-$Int_EFP2_Port 02
-$Int_EFP2_DDC_Pin 04
-$Int_EFP2_AUX_Channel 00
+$Int_EFP2_Type C6 68
+$Int_EFP2_Port 08
+$Int_EFP2_DDC_Pin 00
+$Int_EFP2_AUX_Channel 20
 $Int_EFP2_HDMI_LS_Type 08
 $Int_EFP2_IBoost_Enable 00
 $Int_EFP2_Dp_Boost_Magnitude 00
