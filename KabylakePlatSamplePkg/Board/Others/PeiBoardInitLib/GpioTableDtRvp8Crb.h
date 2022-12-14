@@ -340,10 +340,10 @@ static GPIO_INIT_CONFIG mGpioTableDtRvp8Crb[] =
   {GPIO_SKL_H_GPP_I3, {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
 //ray_override / [XI-BringUp] Bring Up Porting / Modified <<
   {GPIO_SKL_H_GPP_I4,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }}, //NOT USED
-  {GPIO_SKL_H_GPP_I5,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }},
-  {GPIO_SKL_H_GPP_I6,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }},
-  {GPIO_SKL_H_GPP_I7,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDPC_CTRLCLK
-  {GPIO_SKL_H_GPP_I8,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone  }}, //DDPC_CTRLDATA
+  {GPIO_SKL_H_GPP_I5,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDPB_CTRLCLK
+  {GPIO_SKL_H_GPP_I6,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirDefault      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone  }}, //DDPB_CTRLDATA
+  {GPIO_SKL_H_GPP_I7,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }},
+  {GPIO_SKL_H_GPP_I8,  {GpioPadModeGpio   , GpioHostOwnGpio   , GpioDirIn      , GpioOutDefault, GpioIntDis      , GpioPlatformReset , GpioTermNone }},
 //ray_override / [XI-BringUp] Bring Up Porting / Modified >>
 //  {GPIO_SKL_H_GPP_I9,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDPD_CTRLCLK
 //  {GPIO_SKL_H_GPP_I10, {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpd20K  }}, //DDPD_CTRLDATA
