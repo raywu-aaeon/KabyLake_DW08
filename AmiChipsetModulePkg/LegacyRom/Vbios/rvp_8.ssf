@@ -21,7 +21,7 @@ $Hotplug_Support_Enb 01
 $Enable_Panel_Timing 00
 
 PAGE Boot Display Algorithm 
-TABLE $Dev_Boot_Table 0C 08 04 48 08 40 28 08 20 18 08 10 44 04 40 24 04 20 14 04 10 50 40 10 60 40 20 30 20 10 4C 04 40 2C 04 20 1C 08 10 30 20 10 58 40 10 58 10 40
+TABLE $Dev_Boot_Table 0C 08 04 48 08 40 28 08 20 18 08 10 44 40 04 24 04 20 14 04 10 50 40 10 60 40 20 30 20 10 4C 04 40 2C 04 20 1C 08 10 30 20 10 58 40 10 58 10 40
 
 PAGE System BIOS Hooks 
 $H14_Get_Misc_Status 00
@@ -1312,15 +1312,15 @@ $DP_SSC_Enb 00
 $DP_SSC_Dongle_Enb 00
 
 PAGE Device 1 (EFP1)
-$Int_EFP1_Type C6 68
-$Int_EFP1_Port 07
-$Int_EFP1_DDC_Pin 00
-$Int_EFP1_AUX_Channel 10
+$Int_EFP1_Type D2 68
+$Int_EFP1_Port 01
+$Int_EFP1_DDC_Pin 05
+$Int_EFP1_AUX_Channel 00
 $Int_EFP1_HDMI_LS_Type 08
 $Int_EFP1_IBoost_Enable 00
 $Int_EFP1_Dp_Boost_Magnitude 00
 $Int_EFP1_Hdmi_Boost_Magnitude 02
-$EFP1_EDIDless_en 01
+$EFP1_EDIDless_en 00
 $LSPcon1_Options 00
 $Int_EFP1_Lane_Reversal 00
 $Int_EFP1_Port_Dockable 00
@@ -1339,15 +1339,15 @@ PAGE EDID-less EFP Panel DTD Timings
 TABLE $EFP1_DTD 64 19 00 40 41 00 26 30 18 88 36 00 06 4D 21 00 00 18
 
 PAGE Device 2 (EFP2)
-$Int_EFP2_Type D2 68
-$Int_EFP2_Port 02
-$Int_EFP2_DDC_Pin 04
-$Int_EFP2_AUX_Channel 00
+$Int_EFP2_Type C6 68
+$Int_EFP2_Port 08
+$Int_EFP2_DDC_Pin 00
+$Int_EFP2_AUX_Channel 20
 $Int_EFP2_HDMI_LS_Type 08
 $Int_EFP2_IBoost_Enable 00
 $Int_EFP2_Dp_Boost_Magnitude 00
 $Int_EFP2_Hdmi_Boost_Magnitude 02
-$EFP2_EDIDless_en 01
+$EFP2_EDIDless_en 00
 $LSPcon2_Options 00
 $Int_EFP2_Lane_Reversal 00
 $Int_EFP2_Port_Dockable 00
