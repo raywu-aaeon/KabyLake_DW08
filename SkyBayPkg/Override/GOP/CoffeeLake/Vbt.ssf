@@ -1430,7 +1430,7 @@ $DP_SSC_Dongle_Enb 00
 PAGE Device 1 (EFP1)
 $Int_EFP1_Type D2 68
 $Int_EFP1_Port 01
-$Int_EFP1_DDC_Pin 02
+$Int_EFP1_DDC_Pin 01
 $Int_EFP1_AUX_Channel 00
 $Int_EFP1_HDMI_LS_Type 08
 $Int_EFP1_IBoost_Enable 00
