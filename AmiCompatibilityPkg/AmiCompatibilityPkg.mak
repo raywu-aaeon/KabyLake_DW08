@@ -70,8 +70,8 @@ $(BUILD_DIR)/SetupDefinitions.h : $(SETUP_DEFINITIONS) $(BUILD_DIR)/Token.mak Am
 typedef struct{$(EOL)\
   UINT8 Numlock;$(EOL)\
   UINT8 OnlyBootHDD;$(EOL)\
-  UINT8 DviEdidLessMode[2];$(EOL)\
-  UINT8 DviEdidLessTypeSelection[2];$(EOL)\
+  UINT8 EfpEdidLessMode[2];$(EOL)\
+  UINT8 EfpEdidLessTypeSelection[2];$(EOL)\
   #define SETUP_DATA_DEFINITION$(EOL)\
   #include <SetupDefinitions.h>$(EOL)\
   #undef SETUP_DATA_DEFINITION$(EOL)\
@@ -82,8 +82,8 @@ typedef struct{$(EOL)\
 ## UINT8 OnlyBootHDD;
 ##ray_override / [XI-BringUp] Bring Up Porting / Added Above <<
 ##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added Above >>
-##UINT8 DviEdidLessMode[2]
-##UINT8 DviEdidLessTypeSelection[2]
+##UINT8 EfpEdidLessMode[2]
+##UINT8 EfpEdidLessTypeSelection[2]
 ##[TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Added Above <<
 
 	$(ECHO) \
