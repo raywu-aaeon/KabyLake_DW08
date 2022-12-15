@@ -1523,7 +1523,7 @@ End
 
 TOKEN
 	Name  = "TSE_DEFAULT_SETUP_PASSWORD_SUPPORT"
-	Value  = "1"
+	Value  = "0"
 	Help  = "0 is default.set 1=> to Enable default setup password"
 	TokenType = Expression
 	TargetMAK = Yes
