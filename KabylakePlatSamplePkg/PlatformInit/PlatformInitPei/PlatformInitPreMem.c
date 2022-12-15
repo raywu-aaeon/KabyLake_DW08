@@ -118,12 +118,12 @@
 //ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Hot-plug Internal Pull High / Added >>
 #include <Library/GpioLib.h>
 
-static GPIO_INIT_CONFIG DVI_1_HotPlug_GpioTermWpu20K[] =
+static GPIO_INIT_CONFIG EFP1_HotPlug_GpioTermWpu20K[] =
 {
   {GPIO_SKL_H_GPP_I1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpu20K }}, //DDSP_HPD_1
 };
 
-static GPIO_INIT_CONFIG DVI_1_HotPlug_GpioTermNone[] =
+static GPIO_INIT_CONFIG EFP1_HotPlug_GpioTermNone[] =
 {
   {GPIO_SKL_H_GPP_I1,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_1
 };
@@ -133,7 +133,7 @@ static GPIO_INIT_CONFIG DVI_2_HotPlug_GpioTermWpu20K[] =
   {GPIO_SKL_H_GPP_I0,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermWpu20K }}, //DDSP_HPD_0
 };
 
-static GPIO_INIT_CONFIG DVI_2_HotPlug_GpioTermNone[] =
+static GPIO_INIT_CONFIG EFP2_HotPlug_GpioTermNone[] =
 {
   {GPIO_SKL_H_GPP_I0,  {GpioPadModeNative1, GpioHostOwnDefault, GpioDirIn      , GpioOutDefault, GpioIntDefault  , GpioPlatformReset , GpioTermNone }}, //DDSP_HPD_0
 };
@@ -3726,26 +3726,26 @@ PlatformInitPreMem (
 {
   UINT16                           GpioTableCount ;
   
-  if ( SystemConfiguration.DviEdidLessMode[0] )
+  if ( SystemConfiguration.EfpEdidLessMode[0] )
   {
-    GpioTableCount = sizeof (DVI_1_HotPlug_GpioTermWpu20K) / sizeof (GPIO_INIT_CONFIG) ;
-    GpioConfigurePads (GpioTableCount, DVI_1_HotPlug_GpioTermWpu20K);
+    GpioTableCount = sizeof (EFP1_HotPlug_GpioTermWpu20K) / sizeof (GPIO_INIT_CONFIG) ;
+    GpioConfigurePads (GpioTableCount, EFP1_HotPlug_GpioTermWpu20K);
   }
   else
   {
-    GpioTableCount = sizeof (DVI_1_HotPlug_GpioTermNone) / sizeof (GPIO_INIT_CONFIG) ;
-    GpioConfigurePads (GpioTableCount, DVI_1_HotPlug_GpioTermNone);
+    GpioTableCount = sizeof (EFP1_HotPlug_GpioTermNone) / sizeof (GPIO_INIT_CONFIG) ;
+    GpioConfigurePads (GpioTableCount, EFP1_HotPlug_GpioTermNone);
   }
 
-  if ( SystemConfiguration.DviEdidLessMode[1] )
+  if ( SystemConfiguration.EfpEdidLessMode[1] )
   {
     GpioTableCount = sizeof (DVI_2_HotPlug_GpioTermWpu20K) / sizeof (GPIO_INIT_CONFIG) ;
     GpioConfigurePads (GpioTableCount, DVI_2_HotPlug_GpioTermWpu20K);
   }
   else
   {
-    GpioTableCount = sizeof (DVI_2_HotPlug_GpioTermNone) / sizeof (GPIO_INIT_CONFIG) ;
-    GpioConfigurePads (GpioTableCount, DVI_2_HotPlug_GpioTermNone);
+    GpioTableCount = sizeof (EFP2_HotPlug_GpioTermNone) / sizeof (GPIO_INIT_CONFIG) ;
+    GpioConfigurePads (GpioTableCount, EFP2_HotPlug_GpioTermNone);
   }
 }
 //ray_override / [TAG-SupportDVIEdidLess] Spec. Changed : Support DVI EDID Less Feature / Hot-plug Internal Pull High / Added <<
