@@ -293,44 +293,44 @@ GetVbtData (
               switch ( SetupData.EfpEdidLessTypeSelection[0] )
               {
                 case 0:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_800_480, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_800_480, 18 );
                 break;
                 case 1:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_800_600, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_800_600, 18 );
                 break;
                 case 2:
                 default:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1024_768, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1024_768, 18 );
                 break;
                 case 3:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_800, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_800, 18 );
                 break;
                 case 4:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_1024, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_1024, 18 );
                 break;
                 case 5:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1366_768, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1366_768, 18 );
                 break;
                 case 6:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1440_900, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1440_900, 18 );
                 break;
                 case 7:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1600_900, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1600_900, 18 );
                 break;
                 case 8:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1600_1200, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1600_1200, 18 );
                 break;
                 case 9:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1680_1050, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1680_1050, 18 );
                 break;
                 case 10:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1920_1080, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1920_1080, 18 );
                 break;
                 case 11:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1920_1200, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1920_1200, 18 );
                 break;
                 case 12:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_720, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_720, 18 );
                 break;
               }
               *((UINT8 *)Buffer + 0x1A9) |= BIT0 ;
@@ -345,44 +345,44 @@ GetVbtData (
               switch ( SetupData.EfpEdidLessTypeSelection[1] )
               {
                 case 0:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_800_480, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_800_480, 18 );
                 break;
                 case 1:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_800_600, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_800_600, 18 );
                 break;
                 case 2:
                 default:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1024_768, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1024_768, 18 );
                 break;
                 case 3:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_800, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_800, 18 );
                 break;
                 case 4:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_1024, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_1024, 18 );
                 break;
                 case 5:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1366_768, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1366_768, 18 );
                 break;
                 case 6:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1440_900, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1440_900, 18 );
                 break;
                 case 7:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1600_900, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1600_900, 18 );
                 break;
                 case 8:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1600_1200, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1600_1200, 18 );
                 break;
                 case 9:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1680_1050, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1680_1050, 18 );
                 break;
                 case 10:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1920_1080, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1920_1080, 18 );
                 break;
                 case 11:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1920_1200, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1920_1200, 18 );
                 break;
                 case 12:
-                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_720, 18 );
+                gBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_720, 18 );
                 break;
               }
               *((UINT8 *)Buffer + 0x1D0) |= BIT0 ;
