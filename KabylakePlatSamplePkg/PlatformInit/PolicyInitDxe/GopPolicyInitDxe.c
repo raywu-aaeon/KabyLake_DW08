@@ -45,6 +45,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_PHYSICAL_ADDRESS       mVbtAddress = 0;
 #endif
 //AMI_OVERRIDE_END - Support Runtime load VBT bin file of the RVP sku
 
+#include <SetupVariable.h>
+
 //
 // Function implementations
 //
@@ -264,6 +266,134 @@ GetVbtData (
 #endif
 //AMI_OVERRIDE_END - Fixed not read Vbt data bin file 
         if (!EFI_ERROR (Status)) {
+
+// EDID Less >>
+          {
+            SETUP_DATA		SetupData;
+            UINTN			VariableSize = sizeof(SETUP_DATA);
+            UINT32			Attribute = 0;
+            UINT8 DTD_800_480[18] = {0xFE, 0x0C, 0x20, 0x00, 0x31, 0xE0, 0x2D, 0x10, 0x28, 0x80, 0x22, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_800_600[18] = {0x8B, 0x0F, 0x20, 0x00, 0x31, 0x58, 0x1C, 0x20, 0x28, 0x80, 0x14, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_1024_768[18] = {0x64, 0x19, 0x00, 0x40, 0x41, 0x00, 0x26, 0x30, 0x18, 0x88, 0x36, 0x00, 0x06, 0x4D, 0x21, 0x00, 0x00, 0x18} ;
+            UINT8 DTD_1280_800[18] = {0xBC, 0x1B, 0x00, 0xA0, 0x50, 0x20, 0x17, 0x30, 0x30, 0x50, 0x36, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_1280_1024[18] = {0x2C, 0x2A, 0x00, 0x98, 0x51, 0x00, 0x2A, 0x40, 0x30, 0x70, 0x13, 0x00, 0x00, 0x2C, 0x21, 0x00, 0x00, 0x1E} ;
+            UINT8 DTD_1366_768[18] = {0x3D, 0x1B, 0x56, 0x78, 0x50, 0x00, 0x0E, 0x30, 0x20, 0x20, 0x24, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_1440_900[18] = {0x9A, 0x29, 0xA0, 0xD0, 0x51, 0x84, 0x22, 0x30, 0x50, 0x98, 0x36, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_1600_900[18] = {0x44, 0x2F, 0x40, 0x30, 0x62, 0x84, 0x22, 0x30, 0x40, 0xC0, 0x36, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1E} ;
+            UINT8 DTD_1600_1200[18] = {0x48, 0x3F, 0x40, 0x30, 0x62, 0xB0, 0x32, 0x40, 0x40, 0xC0, 0x13, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_1680_1050[18] = {0x21, 0x39, 0x90, 0x30, 0x62, 0x1A, 0x27, 0x40, 0x68, 0x80, 0x36, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1C} ;
+            UINT8 DTD_1920_1080[18] = {0x02, 0x3A, 0x80, 0x18, 0x71, 0x38, 0x2D, 0x40, 0x58, 0x2D, 0x36, 0x00, 0x2C, 0xC8, 0x10, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_1920_1200[18] = {0x28, 0x3C, 0x80, 0xA0, 0x70, 0xB0, 0x23, 0x40, 0x30, 0x20, 0x36, 0x00, 0x07, 0xC8, 0x20, 0x00, 0x00, 0x1A} ;
+            UINT8 DTD_1280_720[18] = {0x01, 0x1D, 0x00, 0x72, 0x51, 0xD0, 0x1E, 0x20, 0x6E, 0x28, 0x55, 0x00, 0x0F, 0x48, 0x22, 0x00, 0x00, 0x1E} ;
+
+            Status = gRT->GetVariable( L"Setup", &gSetupVariableGuid, &Attribute, &VariableSize, &SetupData );
+
+            if ( SetupData.EfpEdidLessMode[0] )
+            {
+              switch ( SetupData.EfpEdidLessTypeSelection[0] )
+              {
+                case 0:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_800_480, 18 );
+                break;
+                case 1:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_800_600, 18 );
+                break;
+                case 2:
+                default:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1024_768, 18 );
+                break;
+                case 3:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_800, 18 );
+                break;
+                case 4:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_1024, 18 );
+                break;
+                case 5:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1366_768, 18 );
+                break;
+                case 6:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1440_900, 18 );
+                break;
+                case 7:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1600_900, 18 );
+                break;
+                case 8:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1600_1200, 18 );
+                break;
+                case 9:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1680_1050, 18 );
+                break;
+                case 10:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1920_1080, 18 );
+                break;
+                case 11:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1920_1200, 18 );
+                break;
+                case 12:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x912), &DTD_1280_720, 18 );
+                break;
+              }
+              *((UINT8 *)Buffer + 0x1A9) |= BIT0 ;
+            }
+            else
+            {
+              *((UINT8 *)Buffer + 0x1A9) &= ~BIT0 ;
+            }
+                                  
+            if ( SetupData.EfpEdidLessMode[1] )
+            {
+              switch ( SetupData.EfpEdidLessTypeSelection[1] )
+              {
+                case 0:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_800_480, 18 );
+                break;
+                case 1:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_800_600, 18 );
+                break;
+                case 2:
+                default:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1024_768, 18 );
+                break;
+                case 3:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_800, 18 );
+                break;
+                case 4:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_1024, 18 );
+                break;
+                case 5:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1366_768, 18 );
+                break;
+                case 6:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1440_900, 18 );
+                break;
+                case 7:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1600_900, 18 );
+                break;
+                case 8:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1600_1200, 18 );
+                break;
+                case 9:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1680_1050, 18 );
+                break;
+                case 10:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1920_1080, 18 );
+                break;
+                case 11:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1920_1200, 18 );
+                break;
+                case 12:
+                pBS->CopyMem ( (VOID *)((UINT32)Buffer + 0x924), &DTD_1280_720, 18 );
+                break;
+              }
+              *((UINT8 *)Buffer + 0x1D0) |= BIT0 ;
+            }
+            else
+            {
+              *((UINT8 *)Buffer + 0x1D0) &= ~BIT0 ;
+            }
+          }
+// EDID Less <<
+
           *VbtAddress = (EFI_PHYSICAL_ADDRESS)Buffer;
           *VbtSize = (UINT32)VbtBufferSize;
           mVbtAddress = *VbtAddress;
