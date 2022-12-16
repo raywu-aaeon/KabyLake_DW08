@@ -75,6 +75,7 @@
   ClientCommonPkg/ClientCommonPkg.dec # AdvancedFeaturesContent
   KabylakePlatSamplePkg/PlatformPkg.dec
   ClientSiliconPkg/ClientSiliconPkg.dec
+  AmiCompatibilityPkg/AmiCompatibilityPkg.dec
 
 [Pcd]
   gClientCommonModuleTokenSpaceGuid.PcdSmbiosOemTypeFirmwareVersionInfo ## CONSUMES # AdvancedFeaturesContent
