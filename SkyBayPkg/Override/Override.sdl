@@ -2273,3 +2273,75 @@ PCIDEVICE
     	ROMMain = No
     	PCIExpress = Yes
 End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/M22906EA_000000B4.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Coffee Lake-S U-0 Stepping with Kaby Lake PCH"
+    Token = "DESKTOP_M22906EA" "=" "2"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/M22906EC_000000AE.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) Coffee Lake-S P-0 Stepping(906EC) with Cannon Lake PCH"
+    Token = "DESKTOP_M02906EC" "=" "1"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/M36506E3_000000CC.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) SkyLake(506E3) R-0, S-0 Stepping"
+    Token = "DESKTOP_M36506E3" "=" "1"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/M2A906E9_000000B4.mcb"
+    Parent  = "MICROCODE_FILES"
+    Help  = "Intel(R) KabyLake-S Processor B-0 Stepping"
+    Token = "DESKTOP_M22906E9" "=" "1"
+    InvokeOrder = AfterParent
+    Disable = Yes
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/m_22_906ea_000000f0.pdb"
+    Parent  = "MICROCODE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/m_02_906eb_000000f0.pdb"
+    Parent  = "MICROCODE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/m_22_906ec_000000f0.pdb"
+    Parent  = "MICROCODE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/m_22_906ed_000000f4.pdb"
+    Parent  = "MICROCODE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/m_36_506e3_000000f0.pdb"
+    Parent  = "MICROCODE_FILES"
+    InvokeOrder = AfterParent
+End
+
+ELINK
+    Name  = "$(MICROCODE_DESKTOP_DIR)/m_2a_906e9_000000f0.pdb"
+    Parent  = "MICROCODE_FILES"
+    InvokeOrder = AfterParent
+End
