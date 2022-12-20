@@ -2317,7 +2317,7 @@ ELINK
 End
 
 ELINK
-    Name  = "$(MICROCODE_DESKTOP_DIR)/m_02_906eb_000000f0.pdb"
+    Name  = "$(MICROCODE_DESKTOP_DIR)/M02906EB_000000B4.mcb"
     Parent  = "MICROCODE_FILES"
     InvokeOrder = AfterParent
 End
