@@ -1469,7 +1469,7 @@ ELINK
 End
 
 ELINK
-    Name  = "{{0x10EC, 0x0897, 0xFF, 0xFF, 64}, DW10_OemHdaVerbTblSample},"
+    Name  = "{{0x10EC, 0x0897, 0xFF, 0xFF, 68}, DW10_OemHdaVerbTblSample},"
     Parent  = "OEM_HDA_VERB_TABLE"
     Help  = "CRB HDA Verb Table"
     Token = "CRB_HDA_VERB_TABLE_PRESENT" "=" "1"
