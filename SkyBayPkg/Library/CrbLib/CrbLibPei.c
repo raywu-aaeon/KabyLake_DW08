@@ -149,7 +149,12 @@ UINT32 DW10_OemHdaVerbTblSample[] = {
 0x01F71CF0,
 0x01F71D11,
 0x01F71E11,
-0x01F71F41
+0x01F71F41,
+//Widget node 0x20 :
+0x02050004,
+0x02040001,
+0x02050004,
+0x02040001
 };
 
 //ray_override / [XI-BringUp] Bring Up Porting / Tuning Board Override / Support ALC662 / Added >>
