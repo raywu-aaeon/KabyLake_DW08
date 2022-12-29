@@ -140,7 +140,7 @@
             <NvarPostManUnLckd value="Yes" value_list="Yes,,No" label="Post Manufacturing NVAR Configuration Enabled" help_text="This setting determines if modifications to Customer configuable NVARs is to be allowed after close of manufacturing." />
         </PostManufacturingLock>
         <Reserved label="Reserved">
-            <Reserved value="No" value_list="No,,Yes" />
+            <Reserved value="Yes" value_list="No,,Yes" />
         </Reserved>
     </IntelMeKernel>
     <IntelAmt label="Intel(R) AMT">
