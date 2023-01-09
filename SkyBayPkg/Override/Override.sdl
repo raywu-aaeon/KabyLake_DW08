@@ -1684,6 +1684,24 @@ TOKEN
 	TargetH = Yes
 End
 
+TOKEN
+    Name  = "KBC_SUPPORT"
+    Value  = "1"
+    Help  = "Enable/Disable KBC support"
+    TokenType = Boolean
+    TargetEQU = Yes
+    TargetMAK = Yes
+    TargetH = Yes
+End
+
+TOKEN
+    Name  = "DEFAULT_USB_EMUL6064_OPTION"
+    Value  = "1"
+    Help  = "Default value of the I/O port 60h/64h emulation support option"
+    TokenType = Boolean
+    TargetH = Yes
+End
+
 PCIDEVICE
 	Title  = "PCIE Port #5 Slot"
 	Parent  = "PCIE Root Port #5"
