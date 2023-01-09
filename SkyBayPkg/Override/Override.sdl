@@ -933,22 +933,6 @@ End
 ##ray_override / [XI-BringUp] Support F81866 / added <<
 
 TOKEN
-    Name  = "F81866_KEYBOARD_PRESENT"
-    Value  = "0"
-    Help  = "Keyboard Present / Not Present."
-    TokenType = Boolean
-    TargetH = Yes
-End
-
-TOKEN
-    Name  = "F81866_MOUSE_PRESENT"
-    Value  = "0"
-    Help  = "Mouse Present / Not Present."
-    TokenType = Boolean
-    TargetH = Yes
-End
-
-TOKEN
 	Name  = "GPIO14_EN"
 	Value  = "1"
 	Help  = "0: ATX_AT_TRAP\1: GPIO14"
@@ -1698,53 +1682,6 @@ TOKEN
 	Help = "Default value of the <GPIO Number> option for DIO 8.\minimum: 0\maximum: 100\step: 1"
 	TokenType = Integer
 	TargetH = Yes
-End
-
-TOKEN
-    Name  = "KBC_SUPPORT"
-    Value  = "0"
-    Help  = "Enable/Disable KBC support"
-    TokenType = Boolean
-    TargetEQU = Yes
-    TargetMAK = Yes
-    TargetH = Yes
-#    Token = "CRB_EC_SUPPORT" "=" "1"    
-End
-
-TOKEN
-    Name  = "PS2Ctl_SUPPORT"
-    Value  = "0"
-    Help  = "Main switch to enable PS2 Controller support in the project."
-    TokenType = Boolean
-    TargetEQU = Yes
-    TargetMAK = Yes
-#    Master = Yes
-End
-
-TOKEN
-    Name  = "EMUL6064_SUPPORT"
-    Value  = "0"
-    Help  = "Main switch to enable KBC Emulation support in Project"
-    TokenType = Boolean
-    TargetH = Yes
-    Token = "USB_RUNTIME_DRIVER_IN_SMM" "!=" "0"     
-End
-
-TOKEN
-    Name  = "DEFAULT_USB_EMUL6064_OPTION"
-    Value  = "0"
-    Help  = "Default value of the I/O port 60h/64h emulation support option"
-    TokenType = Boolean
-    TargetH = Yes
-End
-
-TOKEN
-    Name  = "ISA_IRQ_MASK"
-    Value  = "0xE307"
-    Help  = "This is an IRQ mask which may be used by ISA devices\ If BIT == 0 IRQ Available BIT == 1 IRQ Used.\DEFAULT VALUE == 0xE305."
-    TokenType = Integer
-    TargetH = Yes
-    Range  = "0...0FFFFh"
 End
 
 PCIDEVICE
