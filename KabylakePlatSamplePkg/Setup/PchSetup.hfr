@@ -599,8 +599,8 @@ endif ;
     oneof varid     = PCH_SETUP.PcieClockGatingDisabled,
         prompt      = STRING_TOKEN(STR_PCIE_CKG_PROMPT),
         help        = STRING_TOKEN(STR_PCIE_CKG_HELP),
-        option text = STRING_TOKEN(STR_DISABLED), value = 1, flags = RESET_REQUIRED;
-        option text = STRING_TOKEN(STR_ENABLED), value = 0, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_DISABLED), value = 1, flags = DEFAULT | MANUFACTURING | RESET_REQUIRED;
+        option text = STRING_TOKEN(STR_ENABLED), value = 0, flags = RESET_REQUIRED;
     endoneof;
 
     oneof varid  = PCH_SETUP.PchLegacyIoLowLatency,
