@@ -97,7 +97,7 @@
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Showed <<
 
 //ray_override / [TAG-ArrangeSetupMenu] Arrange Setup Menu / Hided >>
-suppressif TRUE ;
+suppressif FALSE ;
 
     goto PCIE_DEVICE_OPTIONS_FORM_ID,
          prompt = STRING_TOKEN(STR_PCIE_OPTIONS_FORM),
